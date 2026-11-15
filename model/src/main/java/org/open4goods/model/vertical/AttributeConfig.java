@@ -1,13 +1,15 @@
 
 package org.open4goods.model.vertical;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.Localisable;
@@ -18,6 +20,8 @@ import org.open4goods.model.vertical.lifecycle.LifecycleStage;
 import org.open4goods.model.vertical.referential.AttributeReferentials;
 import org.open4goods.model.vertical.referential.EprelFeatureReferential;
 import org.open4goods.model.vertical.referential.IcecatFeatureReferential;
+import org.open4goods.model.vertical.scoring.ScoreDerivationConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +37,11 @@ public class AttributeConfig {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AttributeConfig.class);
 
-	private static final Map<String,AttributeParser> parserInstances = new HashMap<>();
+	/**
+	 * Parser instances shared by every attribute config, by parser class name. Concurrent: the fragment worker and
+	 * the completion threads ask for parsers at the same time.
+	 */
+	private static final Map<String,AttributeParser> parserInstances = new ConcurrentHashMap<>();
 
 
 	/**
@@ -106,6 +114,22 @@ public class AttributeConfig {
         private Set<String> participateInScores = new HashSet<>();
 
         /**
+         * Ordered attribute keys a derived score is read from (GOU-2041). When set, the score of this attribute
+         * is never read from its own value: it takes the raw value of the first source holding a parseable value,
+         * without average, or combines the sources as {@link #scoreDerivation} says, normalised with this
+         * attribute's own {@link #scoring}. It is computed only while this
+         * attribute is weighted by the active ImpactScore matrix.
+         */
+        private List<String> scoreSources = new ArrayList<>();
+
+        /**
+         * How a derived score combines its {@link #scoreSources}; {@code null} for
+         * {@link ScoreDerivationMethod#FIRST_AVAILABLE}. {@link ScoreDerivationMethod#SCREEN_AREA_DENSITY} divides
+         * the first source by the screen area of the second, a diagonal in inches (GOU-1884).
+         */
+        private ScoreDerivationConfig scoreDerivation;
+
+        /**
          * Lifecycle stages (ACV) represented by this attribute when used as a score.
          */
         private Set<LifecycleStage> participateInACV = new HashSet<>();
@@ -160,9 +184,10 @@ public class AttributeConfig {
 
 
 	/**
+	 * Returns the shared instance of the defined parser, instantiated once per parser class.
 	 *
 	 * @return the instance of the defined parser, if set.
-	 * @throws ResourceNotFoundException
+	 * @throws ResourceNotFoundException when no parser class is defined or the class cannot be instantiated
 	 */
 	@JsonIgnore
 	public AttributeParser getParserInstance() throws ResourceNotFoundException{
@@ -173,19 +198,41 @@ public class AttributeConfig {
 			throw new ResourceNotFoundException("No parser class defined for " + getKey());
 		}
 
-		AttributeParser parser = null;
-		// Instanciating / caching the parser
-		if (null == parserInstances.get(clazz)) {
-			try {
-				parser = (AttributeParser) Class.forName(clazz).getDeclaredConstructor().newInstance();
-				LOGGER.info("{} parser has been placed in uidMap");
-				parserInstances.put(clazz, parser);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-				throw new ResourceNotFoundException("Cannot instanciate type : " + clazz,e);
-			}
-        }
+		try {
+			return parserInstances.computeIfAbsent(clazz, AttributeConfig::instantiateParser);
+		} catch (ParserInstantiationException e) {
+			throw new ResourceNotFoundException("Cannot instanciate type : " + clazz, e.getCause());
+		}
+	}
 
-		return parserInstances.get(clazz);
+	/**
+	 * Instantiates a parser through its no-arg constructor. Called by {@link ConcurrentHashMap#computeIfAbsent}, which
+	 * does not accept checked exceptions.
+	 *
+	 * @param clazz the parser class name
+	 * @return the new parser
+	 * @throws ParserInstantiationException wrapping the reflective failure
+	 */
+	private static AttributeParser instantiateParser(final String clazz) {
+		try {
+			AttributeParser instance = (AttributeParser) Class.forName(clazz).getDeclaredConstructor().newInstance();
+			LOGGER.info("{} parser has been placed in uidMap", clazz);
+			return instance;
+		} catch (ReflectiveOperationException e) {
+			throw new ParserInstantiationException(e);
+		}
+	}
+
+	/**
+	 * Carries a reflective failure out of {@link #instantiateParser(String)}.
+	 */
+	private static final class ParserInstantiationException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		private ParserInstantiationException(final ReflectiveOperationException cause) {
+			super(cause);
+		}
 	}
 
 	/**
@@ -448,6 +495,62 @@ public class AttributeConfig {
          */
         public void setParticipateInScores(Set<String> participateInScores) {
                 this.participateInScores = participateInScores;
+        }
+
+        /**
+         * Ordered attribute keys a derived score is read from, first parseable value wins.
+         *
+         * @return the source attribute keys, empty for an attribute scored from its own value
+         */
+        public List<String> getScoreSources() {
+                return scoreSources;
+        }
+
+        /**
+         * Sets the ordered attribute keys a derived score is read from.
+         *
+         * @param scoreSources source attribute keys, {@code null} for none
+         */
+        public void setScoreSources(List<String> scoreSources) {
+                this.scoreSources = scoreSources == null ? new ArrayList<>() : scoreSources;
+        }
+
+        /**
+         * Whether the score of this attribute is derived from other attributes ({@link #getScoreSources()}).
+         *
+         * @return {@code true} when at least one score source is declared
+         */
+        @JsonIgnore
+        public boolean isDerivedScore() {
+                return scoreSources != null && !scoreSources.isEmpty();
+        }
+
+        /**
+         * Gets how a derived score combines its sources.
+         *
+         * @return the derivation block, {@code null} for {@link ScoreDerivationMethod#FIRST_AVAILABLE}
+         */
+        public ScoreDerivationConfig getScoreDerivation() {
+                return scoreDerivation;
+        }
+
+        /**
+         * Sets how a derived score combines its sources.
+         *
+         * @param scoreDerivation the derivation block, {@code null} for {@link ScoreDerivationMethod#FIRST_AVAILABLE}
+         */
+        public void setScoreDerivation(ScoreDerivationConfig scoreDerivation) {
+                this.scoreDerivation = scoreDerivation;
+        }
+
+        /**
+         * The derivation method of a derived score.
+         *
+         * @return the configured method, {@link ScoreDerivationMethod#FIRST_AVAILABLE} without derivation block
+         */
+        @JsonIgnore
+        public ScoreDerivationMethod scoreDerivationMethod() {
+                return scoreDerivation == null ? ScoreDerivationMethod.FIRST_AVAILABLE : scoreDerivation.getMethod();
         }
 
         /**

@@ -15,10 +15,12 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.api.config.yml.ActuatorMonitorCredentials;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
 import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
+import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.VertexBatchConfig;
 import org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties;
@@ -72,6 +74,8 @@ class RenderedSecretsConfigTreeTest {
                     binder -> bind(binder, "spring.ai.openai", OpenAiCommonProperties.class).getApiKey()),
             entry("affiliation-config.awin-access-token",
                     binder -> api(binder).getAffiliationConfig().getAwinAccessToken()),
+            entry("affiliation-config.awin-datafeed-key",
+                    binder -> binder.bind("affiliation-config.awin-datafeed-key", String.class).get()),
             entry("affiliation-config.kwanko-token", binder -> api(binder).getAffiliationConfig().getKwankoToken()),
             entry("affiliation-config.tradetracker-api-key",
                     binder -> api(binder).getAffiliationConfig().getTradetrackerApiKey()),
@@ -90,6 +94,17 @@ class RenderedSecretsConfigTreeTest {
             // The Spring Boot Admin monitor identity on Actuator (GOU-1393).
             entry("o4g.actuator.monitor.password",
                     binder -> bind(binder, "o4g.actuator.monitor", ActuatorMonitorCredentials.class).getPassword()),
+            // ImpactScore methodology version forced per vertical, read by the VerticalsConfigService bean (GOU-1882).
+            entry(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY,
+                    binder -> binder.bind(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY, String.class)
+                            .orElse(null)),
+            // The R2 account and token of the open data publication (GOU-2289).
+            entry("open-data-config.publication.account-id",
+                    binder -> openData(binder).getPublication().getAccountId()),
+            entry("open-data-config.publication.access-key-id",
+                    binder -> openData(binder).getPublication().getAccessKeyId()),
+            entry("open-data-config.publication.secret-access-key",
+                    binder -> openData(binder).getPublication().getSecretAccessKey()),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 
@@ -127,6 +142,31 @@ class RenderedSecretsConfigTreeTest {
         assertThat(treeProperties(SERVICE)).isEqualTo(new TreeSet<>(CONSUMERS.keySet()));
     }
 
+    /** The catalog URL of open4goods-config carries the key as a placeholder (GOU-1958). */
+    private static final String CATALOG_URL_YAML = "https://productdata.awin.com/datafeed/list/apikey/"
+            + "${affiliation-config.awin-datafeed-key:}";
+
+    @Test
+    void renderedDatafeedKeyResolvesTheCatalogUrlPlaceholder() throws IOException {
+        Path tree = writeTree();
+        Files.writeString(tree.resolve("affiliation-config.awin-datafeed-key"), "fake-datafeed-key");
+        try (ConfigurableApplicationContext context = start(Map.of("SPRING_CONFIG_IMPORT", configTreeImport(tree)),
+                "feed.providers.awin.catalog-url: " + CATALOG_URL_YAML + "\n")) {
+            assertThat(context.getEnvironment().getProperty("feed.providers.awin.catalog-url"))
+                    .isEqualTo("https://productdata.awin.com/datafeed/list/apikey/fake-datafeed-key");
+        }
+    }
+
+    @Test
+    void catalogUrlPlaceholderResolvesToAnEmptyKeyWithoutTheSecret() throws IOException {
+        writeTree();
+        try (ConfigurableApplicationContext context = start(Map.of(),
+                "feed.providers.awin.catalog-url: " + CATALOG_URL_YAML + "\n")) {
+            assertThat(context.getEnvironment().getProperty("feed.providers.awin.catalog-url"))
+                    .isEqualTo("https://productdata.awin.com/datafeed/list/apikey/");
+        }
+    }
+
     private void assertYamlValues(Binder binder) {
         CONSUMERS.forEach((property, consumer) ->
                 assertThat(consumer.apply(binder)).as(property).isEqualTo(yamlValue(property)));
@@ -151,6 +191,10 @@ class RenderedSecretsConfigTreeTest {
 
     private static String configTreeImport(Path tree) {
         return "optional:configtree:" + tree + "/";
+    }
+
+    private static OpenDataConfig openData(Binder binder) {
+        return bind(binder, "open-data-config", OpenDataConfig.class);
     }
 
     private static ApiProperties api(Binder binder) {
@@ -184,9 +228,17 @@ class RenderedSecretsConfigTreeTest {
      * {@code publish-jars.sh} does.
      */
     private ConfigurableApplicationContext start(Map<String, Object> osEnvironment) throws IOException {
+        return start(osEnvironment, "");
+    }
+
+    private ConfigurableApplicationContext start(Map<String, Object> osEnvironment, String extraYaml)
+            throws IOException {
         StringBuilder yaml = new StringBuilder();
+        // The key is a secret with no yaml value when a test gives the catalog URL placeholder.
         CONSUMERS.keySet().stream().sorted()
+                .filter(property -> extraYaml.isEmpty() || !property.equals("affiliation-config.awin-datafeed-key"))
                 .forEach(property -> yaml.append(property).append(": ").append(yamlValue(property)).append('\n'));
+        yaml.append(extraYaml);
         Path config = Files.writeString(tempDir.resolve("application-active.yml"), yaml);
         StandardEnvironment environment = new StandardEnvironment() {
             @Override

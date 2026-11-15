@@ -224,6 +224,38 @@
             "index": false,
             "doc_values": false
         },
+        "impactScoreMeta": {
+            "properties": {
+                "methodologyVersion": {
+                    "type": "integer"
+                },
+                "methodologyRevision": {
+                    "type": "keyword"
+                },
+                "scoredAt": {
+                    "type": "date",
+                    "format": "date_optional_time||epoch_millis"
+                },
+                "status": {
+                    "type": "keyword"
+                },
+                "notRatedReason": {
+                    "type": "keyword"
+                },
+                "realWeightCoverage": {
+                    "type": "float"
+                },
+                "realCriteriaCount": {
+                    "type": "integer"
+                },
+                "realCriteria": {
+                    "type": "keyword"
+                },
+                "totalCriteriaCount": {
+                    "type": "integer"
+                }
+            }
+        },
         "lastChange": {
             "type": "date",
             "format": "date_optional_time||epoch_millis"
@@ -383,6 +415,9 @@
             }
         },
         "vertical": {
+            "type": "keyword"
+        },
+        "nature": {
             "type": "keyword"
         },
         "offerNames": {

@@ -5,12 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
@@ -18,6 +23,8 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
 import org.open4goods.icecat.util.IcecatConstants;
 import org.open4goods.model.attribute.Attribute;
+import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
 import org.open4goods.model.attribute.SourcedAttribute;
@@ -26,17 +33,31 @@ import org.open4goods.model.eprel.EprelProduct;
 import org.open4goods.model.exceptions.ValidationException;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.AttributesConfig;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 class AttributeRealtimeAggregationServiceTest {
+
+        /** Verticals and attributes as shipped in the {@code verticals} module. */
+        private static VerticalsConfigService realVerticals;
 
         private AttributeRealtimeAggregationService service;
         private VerticalConfig verticalConfig;
         private IcecatFeatureResolver icecatFeatureResolver;
         private BrandService brandService;
+
+        @BeforeAll
+        static void loadRealVerticals() {
+                realVerticals = new VerticalsConfigService(new SerialisationService(),
+                                Mockito.mock(GoogleTaxonomyService.class), new PathMatchingResourcePatternResolver());
+        }
 
         @BeforeEach
         void setUp() {
@@ -220,6 +241,47 @@ class AttributeRealtimeAggregationServiceTest {
                 assertThat(product.model()).isEqualTo(product.model() == null ? null : product.model().toUpperCase());
         }
 
+        /**
+         * GOU-1881: the batch runs updateExcludeStatus on every product of the vertical, so a product excluded for
+         * missing_eprel is re-evaluated: listed once the vertical goes V2 with eprelRequired=false and its coverage
+         * reaches the threshold (GOU-2165), excluded again on return to V1.
+         */
+        @Test
+        void updateExcludeStatusReevaluatesExcludedProductsWhenEprelRequirementChanges() throws Exception {
+                Product product = buildBaseProduct();
+                addAttribute(product, "required_attr");
+                product.setEprelDatas(null);
+
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel");
+
+                AttributeConfig criterion = new AttributeConfig();
+                criterion.setKey("NOISE");
+                criterion.setAsScore(true);
+                criterion.setFilteringType(AttributeType.NUMERIC);
+                AttributesConfig attributesConfig = new AttributesConfig();
+                attributesConfig.setConfigs(List.of(criterion));
+                verticalConfig.setAttributesConfig(attributesConfig);
+                ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+                v2.setEprelRequired(false);
+                v2.setMinRealWeightCoverage(0.5);
+                v2.setCriteriasPonderation(Map.of("NOISE", 1.0));
+                verticalConfig.getImpactScoreConfig().setV2(v2);
+                verticalConfig.getImpactScoreConfig().setMethodologyVersion(2);
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel_low_coverage");
+
+                product.getAttributes().getIndexed().put("NOISE", new IndexedAttribute("NOISE", "42"));
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.isExcluded()).isFalse();
+                assertThat(product.getExcludedCauses()).isEmpty();
+
+                verticalConfig.getImpactScoreConfig().setMethodologyVersion(1);
+                invokeUpdateExcludeStatus(product);
+                assertThat(product.isExcluded()).isTrue();
+                assertThat(product.getExcludedCauses()).containsExactly("missing_eprel");
+        }
+
         private Product buildBaseProduct() {
                 Product product = new Product(123L);
                 product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, "Brand");
@@ -285,10 +347,10 @@ class AttributeRealtimeAggregationServiceTest {
 		attr.addSourceAttribute(source1);
 		attr.addSourceAttribute(source2);
 		
-		org.open4goods.model.attribute.IndexedAttribute indexedAttr = new org.open4goods.model.attribute.IndexedAttribute("ENERGY_CLASS", "F");
+		IndexedAttribute indexedAttr = new IndexedAttribute("ENERGY_CLASS", "F");
 
 		// Act
-		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue", org.open4goods.model.attribute.IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
+		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue", IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
 		method.setAccessible(true);
 		method.invoke(service, indexedAttr, attr, attrConfig, verticalConfig);
 
@@ -303,6 +365,32 @@ class AttributeRealtimeAggregationServiceTest {
 				assertThat(s.getCleanedValue()).isEqualTo("F");
 			}
 		});
+	}
+
+	@Test
+	void mergeSourcesKeepsATextValueThatOnlyLooksNumeric() throws Exception {
+		// IdHelper.isPureDouble accepts ".", which Double.valueOf rejects: the text value is kept without a
+		// numeric value instead of failing the attribute.
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		ProductAttribute attr = new ProductAttribute();
+		attr.setName("COLOR");
+		SourcedAttribute source = new SourcedAttribute();
+		source.setDataSourcename("source1");
+		source.setValue(".");
+		source.setName("COLOR");
+		attr.addSourceAttribute(source);
+
+		IndexedAttribute indexedAttr = new IndexedAttribute("COLOR", ".");
+
+		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue",
+				IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
+		method.setAccessible(true);
+		method.invoke(service, indexedAttr, attr, attrConfig, verticalConfig);
+
+		assertThat(indexedAttr.getValue()).isEqualTo(".");
+		assertThat(indexedAttr.getNumericValue()).isNull();
 	}
 
 
@@ -372,10 +460,27 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
 	}
 
+	/**
+	 * GOU-1892: merchant formats of the French durability index all read as a plain 0-10 number.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "7,2/10|7.2", "7.2|7.2", "7,2 sur 10|7.2", "7,2 / 10|7.2", "8/10|8", "6,5 SUR 10|6.5" })
+	void durabilityIndexFormatsAreParsed(String raw, String expected) throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("DURABILITY_INDEX");
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
+		attrConfig.getParser().setUpperCase(true);
+		attrConfig.getParser().setNormalize(true);
+		attrConfig.getParser().setTrim(true);
+		attrConfig.getParser().setDeleteTokens(java.util.List.of("/10", "/ 10", "SUR 10"));
+
+		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
+	}
+
 	private static AttributeConfig wattAttribute() {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("OVEN_POWER");
-		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
 		org.open4goods.model.Localisable<String, String> suffix = new org.open4goods.model.Localisable<>();
 		suffix.put("default", "W");
 		attrConfig.setSuffix(suffix);
@@ -447,12 +552,31 @@ class AttributeRealtimeAggregationServiceTest {
 	void parseValueTreatsFalsePlaceholderAsEmpty() throws Exception {
 		AttributeConfig attrConfig = new AttributeConfig();
 		attrConfig.setKey("DIAGONALE_POUCES");
-		attrConfig.setFilteringType(org.open4goods.model.attribute.AttributeType.NUMERIC);
+		attrConfig.setFilteringType(AttributeType.NUMERIC);
 		attrConfig.getParser().setUpperCase(true);
 		attrConfig.getParser().setNormalize(true);
 		attrConfig.getParser().setTrim(true);
 
 		assertThat(service.parseValue("false", attrConfig, verticalConfig)).isEmpty();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "Donnée non spécifiée", "Données non spécifiées", "Non spécifié", "Non spécifiée", "N/A",
+			"NA", "nc", "null", "FALSE" })
+	void parseValueTreatsPlaceholdersAsEmpty(String raw) throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEmpty();
+	}
+
+	@Test
+	void parseValueKeepsTheWarrantyOnlyPlaceholder() throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		// "eur" is a placeholder for WarrantyParser only: sharing the common set must not bring it here.
+		assertThat(service.parseValue("eur", attrConfig, verticalConfig)).isNotEmpty();
 	}
 
 	@Test
@@ -529,6 +653,136 @@ class AttributeRealtimeAggregationServiceTest {
 				.contains("HG32EJ690WE");
 		// Canonical must not have changed
 		assertThat(product.model()).isEqualTo("ModelX");
+	}
+
+	/**
+	 * GOU-2276: the numeric extraction stopped at the first space, so "1 400 tr/min" read 1 for SPIN_SPEED.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "1 400 tr/min|1400", "1\u00a0400 tr/min|1400", "1\u202f400 TR/MIN|1400",
+			"1\u2009400 tr/min|1400", "1400 tr/min|1400", "1 200,5|1200.5", "12 345 678|12345678", "2 088|2088",
+			"7,2|7.2", "12 34|12", "1400 120|1400" })
+	void numericValuesKeepSpaceGroupedThousands(String raw, String expected) throws Exception {
+		AttributeConfig spinSpeed = realAttribute("washing-machine", "SPIN_SPEED");
+
+		assertThat(service.parseValue(raw, spinSpeed, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2276: thousands are only joined across a space of the received value. A space left behind by a removed
+	 * quote mark or unit token never joins two numbers: "55\" 140 cm" must not read 55140.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "tv|DIAGONALE_POUCES|55\" 140 cm|55",
+			"tv|DIAGONALE_POUCES|55\u2019\u2019 139 cm|55", "tv|DIAGONALE_POUCES|6\" 152 mm|6",
+			"washing-machine|ENERGY_CONSUMPTION_100_CYCLES|52 kWh 100 cycles|52",
+			"washing-machine|SPIN_SPEED|1 400 tr/min|1400" })
+	void thousandsAreNotJoinedAcrossRemovedTokens(String vertical, String key, String raw, String expected)
+			throws Exception {
+		AttributeConfig attribute = realAttribute(vertical, key);
+
+		assertThat(service.parseValue(raw, attribute, verticalConfig)).isEqualTo(expected);
+	}
+
+	@Test
+	void onProductIndexesTheSpinSpeedWithItsThousands() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "SPIN_SPEED")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "VITESSE D'ESSORAGE", "1 400 tr/min", "some-merchant.com");
+
+		service.onProduct(product, verticalConfig);
+
+		IndexedAttribute spinSpeed = product.getAttributes().getIndexed().get("SPIN_SPEED");
+		assertThat(spinSpeed.getValue()).isEqualTo("1400");
+		assertThat(spinSpeed.getNumericValue()).isEqualTo(1400.0);
+	}
+
+	/**
+	 * GOU-2276: the empty-placeholder test ran before the mappings and its list holds "false", so the
+	 * {@code "FALSE": "NON"} mapping of BATTERY_USER_REPLACEABLE never applied and only "OUI" was indexed.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "false|NON", "true|OUI" })
+	void onProductMapsTheEprelBooleanOfBatteryUserReplaceable(String eprelValue, String expected) throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("smartphones", "BATTERY_USER_REPLACEABLE")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "BATTERYUSERREPLACEABLE", eprelValue, EprelCompletionService.EPREL_DS_NAME);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("BATTERY_USER_REPLACEABLE").getValue())
+				.isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2276: with a custom parser, the value of a key fed by two raw attributes was the parse of whichever raw
+	 * attribute the HashMap returned last, instead of an election over all the sources merged under the key.
+	 */
+	@Test
+	void onProductElectsTheSameWeightWhicheverRawAttributeComesFirst() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "WEIGHT")));
+
+		Product merchantFirst = productWithAttributesInOrder(
+				new String[] { "POIDS", "72 kg", "some-merchant.com" },
+				new String[] { "WEIGHT", "70.5 kg", IcecatConstants.DATASOURCE_NAME });
+		Product icecatFirst = productWithAttributesInOrder(
+				new String[] { "WEIGHT", "70.5 kg", IcecatConstants.DATASOURCE_NAME },
+				new String[] { "POIDS", "72 kg", "some-merchant.com" });
+
+		service.onProduct(merchantFirst, verticalConfig);
+		service.onProduct(icecatFirst, verticalConfig);
+
+		IndexedAttribute weightMerchantFirst = merchantFirst.getAttributes().getIndexed().get("WEIGHT");
+		IndexedAttribute weightIcecatFirst = icecatFirst.getAttributes().getIndexed().get("WEIGHT");
+		assertThat(weightMerchantFirst.sourcesCount()).isEqualTo(2);
+		assertThat(weightIcecatFirst.sourcesCount()).isEqualTo(2);
+		assertThat(weightMerchantFirst.getValue()).isEqualTo(weightIcecatFirst.getValue());
+		assertThat(weightMerchantFirst.getNumericValue()).isEqualTo(weightIcecatFirst.getNumericValue());
+		// Both readings are equally confident: the trusted Icecat source is offered first and wins the tie
+		assertThat(weightMerchantFirst.getNumericValue()).isEqualTo(70.5);
+	}
+
+	/**
+	 * GOU-2276: {@code Product.akaBrands()} returns a filtered copy, so clearing it left the stored alternate brands
+	 * untouched and a brand excluded after ingestion stayed in akaBrands.
+	 */
+	@Test
+	void onProductDropsANewlyExcludedBrandFromAkaBrands() throws Exception {
+		Product product = new Product(123L);
+		product.addBrand("first-merchant.com", "Brand", null, null);
+		product.addBrand("old-merchant.com", "Old brand", null, null);
+		product.addBrand("other-merchant.com", "Other brand", null, null);
+		assertThat(product.getAkaBrands()).containsEntry("old-merchant.com", "OLD BRAND");
+		verticalConfig.setBrandsExclusion(Set.of("OLD BRAND"));
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.brand()).isEqualTo("BRAND");
+		assertThat(product.getAkaBrands()).containsExactly(Map.entry("other-merchant.com", "OTHER BRAND"));
+	}
+
+	/**
+	 * Builds a product whose raw attributes are visited in the given order, each one being
+	 * {@code {name, value, datasource}}.
+	 */
+	private Product productWithAttributesInOrder(String[]... attributes) {
+		Product product = new Product(123L);
+		product.getAttributes().setAll(new LinkedHashMap<>());
+		for (String[] attribute : attributes) {
+			addSourcedAttribute(product, attribute[0], attribute[1], attribute[2]);
+		}
+		return product;
+	}
+
+	/**
+	 * Returns the attribute configuration shipped for a vertical, with its real synonyms, parser and mappings.
+	 */
+	private static AttributeConfig realAttribute(String verticalId, String key) {
+		VerticalConfig vertical = realVerticals.getConfigById(verticalId);
+		AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(key);
+		assertThat(attribute).as("%s in %s", key, verticalId).isNotNull();
+		return attribute;
 	}
 
 	private void addSourcedAttribute(Product product, String name, String value, String datasourceName) {

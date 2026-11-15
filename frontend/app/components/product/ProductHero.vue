@@ -16,274 +16,289 @@
       <div class="product-hero__background-overlay" />
     </div>
     <div class="product-hero__content">
-      <Transition name="product-hero-rise" appear>
-        <v-row class="product-hero__layout align-stretch" density="comfortable">
-          <v-col
-            v-if="galleryItems.length > 0"
-            cols="12"
-            md="4"
-            class="product-hero__media-column"
-          >
-            <Transition name="fade">
-              <ProductHeroInlineGallery
-                v-if="showInlineGallery"
-                v-model:index="activeInlineGalleryIndex"
-                :items="galleryItems"
-                :start-index="activeInlineGalleryIndex"
-                @close="handleCloseInlineGallery"
-              />
-            </Transition>
+      <!--
+        No <Transition appear> here: Vue SSR wraps appear transitions in an inert
+        <template>, so the whole hero (and its LCP image) stayed invisible until
+        hydration and then pushed the page down (CLS 0.67 on mobile).
+      -->
+      <v-row class="product-hero__layout align-stretch" density="comfortable">
+        <v-col
+          v-if="galleryItems.length > 0"
+          cols="12"
+          md="4"
+          class="product-hero__media-column"
+        >
+          <Transition name="fade">
+            <ProductHeroInlineGallery
+              v-if="showInlineGallery"
+              v-model:index="activeInlineGalleryIndex"
+              :items="galleryItems"
+              :start-index="activeInlineGalleryIndex"
+              @close="handleCloseInlineGallery"
+            />
+          </Transition>
 
-            <div class="product-hero__gallery-section">
-              <ProductHeroGallery
-                class="product-hero__gallery"
+          <div class="product-hero__gallery-section">
+            <ProductHeroGallery
+              class="product-hero__gallery"
+              :product="product"
+              :title="heroTitle"
+              @open-inline-gallery="handleOpenInlineGallery"
+            />
+          </div>
+        </v-col>
+
+        <v-col
+          cols="12"
+          :md="galleryItems.length > 0 ? 8 : 12"
+          class="product-hero__decision-column"
+        >
+          <div class="product-hero__decision-shell">
+            <header class="product-hero__heading">
+              <CategoryNavigationBreadcrumbs
+                v-if="visibleBreadcrumbs.length"
+                v-bind="heroBreadcrumbProps"
+                class="product-hero__breadcrumbs"
+              />
+              <ProductDesignation
                 :product="product"
-                :title="heroTitle"
-                @open-inline-gallery="handleOpenInlineGallery"
+                variant="page"
+                title-tag="h1"
+                title-class="product-hero__title"
+                description-class="product-hero__short-description"
               />
-            </div>
-          </v-col>
+            </header>
 
-          <v-col
-            cols="12"
-            :md="galleryItems.length > 0 ? 8 : 12"
-            class="product-hero__decision-column"
-          >
-            <div class="product-hero__decision-shell">
-              <header class="product-hero__heading">
-                <CategoryNavigationBreadcrumbs
-                  v-if="visibleBreadcrumbs.length"
-                  v-bind="heroBreadcrumbProps"
-                  class="product-hero__breadcrumbs"
-                />
-                <ProductDesignation
-                  :product="product"
-                  variant="page"
-                  title-tag="h1"
-                  title-class="product-hero__title"
-                  description-class="product-hero__short-description"
-                />
-              </header>
+            <ProductVerdictPanel
+              :product="product"
+              class="product-hero__verdict"
+              @navigate="handleVerdictNavigate"
+            />
 
-              <ProductVerdictPanel
-                :product="product"
-                class="product-hero__verdict"
-                @navigate="handleVerdictNavigate"
-              />
-
-              <div
-                class="product-hero__decision-grid"
-                :class="{
-                  'product-hero__decision-grid--single': hidePricingPanel,
-                }"
-              >
-                <div class="product-hero__details-section">
-                  <div
-                    v-if="impactScore != null"
-                    class="product-hero__impact-card cursor-pointer"
-                    @click="handleImpactScoreClick"
-                  >
-                    <ImpactScore
-                      :score="impactScore"
-                      :min="impactScoreMin"
-                      :max="impactScoreMax"
-                      :show-methodology="false"
-                      :show-min-max="false"
-                      size="lg"
-                      :banner="true"
-                      :brand="productBrandName"
-                      :model="productModelName"
-                      :category="productVerticalName"
-                      :ranking="ecoscoreRanking"
-                      :count="ecoscoreCount"
-                    />
-                  </div>
-
-                  <div v-if="hasCategory" class="product-hero__actions">
-                    <v-btn
-                      class="product-hero__compare-button"
-                      :class="{
-                        'product-hero__compare-button--active':
-                          isCompareSelected,
-                      }"
-                      variant="flat"
-                      :aria-pressed="isCompareSelected"
-                      :aria-label="compareButtonAriaLabel"
-                      :title="compareButtonTitle"
-                      :disabled="isCompareDisabled"
-                      @click="toggleCompare"
-                    >
-                      <v-icon
-                        :icon="compareButtonIcon"
-                        size="20"
-                        class="product-hero__compare-icon"
-                      />
-                      <span class="product-hero__compare-label">{{
-                        compareButtonText
-                      }}</span>
-                    </v-btn>
-                  </div>
-
-                  <div class="product-hero__centered-info">
-                    <v-btn
-                      v-if="hasCategory"
-                      variant="text"
-                      class="product-hero__more-characteristics"
-                      @click="handleMoreCharacteristicsClick"
-                    >
-                      {{ t('product.hero.moreCharacteristics') }}
-                    </v-btn>
-                    <ul
-                      v-if="heroAttributes.length"
-                      class="product-hero__attributes"
-                      role="list"
-                    >
-                      <li
-                        v-for="attribute in heroAttributes"
-                        :key="attribute.key"
-                        class="product-hero__attribute"
-                        :class="{
-                          'product-hero__attribute--country':
-                            attribute.key === 'gtin-country',
-                        }"
-                        role="listitem"
-                      >
-                        <template v-if="attribute.key === 'descriptions-panel'">
-                          <div class="product-hero__descriptions-panel">
-                            <v-tabs
-                              v-model="activeDescriptionTab"
-                              density="compact"
-                              color="primary"
-                              align-tabs="start"
-                              class="mb-4 product-hero__tabs"
-                            >
-                              <v-tab
-                                v-for="(desc, source) in productDescriptions"
-                                :key="source"
-                                :value="source"
-                                class="text-body-2 font-weight-bold"
-                              >
-                                <img
-                                  v-if="productFavicons[source]"
-                                  :src="productFavicons[source]"
-                                  width="16"
-                                  height="16"
-                                  class="mr-2 rounded-circle"
-                                  alt=""
-                                />
-                                {{ source }}
-                              </v-tab>
-                            </v-tabs>
-
-                            <v-window
-                              v-model="activeDescriptionTab"
-                              class="product-hero__tab-content"
-                            >
-                              <v-window-item
-                                v-for="(desc, source) in productDescriptions"
-                                :key="source"
-                                :value="source"
-                              >
-                                <!-- eslint-disable vue/no-v-html -->
-                                <div class="product-hero__description-wrapper">
-                                  <div
-                                    class="text-body-2 text-medium-emphasis product-hero__description-body"
-                                    v-html="getDisplayDescription(source, desc)"
-                                  />
-                                  <v-btn
-                                    v-if="shouldShowToggle(desc)"
-                                    variant="text"
-                                    size="small"
-                                    color="primary"
-                                    class="mt-2"
-                                    @click="toggleDescription(source)"
-                                  >
-                                    {{
-                                      isDescriptionExpanded(source)
-                                        ? t('product.hero.description.showLess')
-                                        : t('product.hero.description.showMore')
-                                    }}
-                                  </v-btn>
-                                </div>
-                                <!-- eslint-enable vue/no-v-html -->
-                              </v-window-item>
-                            </v-window>
-                          </div>
-                        </template>
-                        <template v-else-if="attribute.showLabel !== false">
-                          <span class="product-hero__attribute-label">{{
-                            attribute.label
-                          }}</span>
-                          <span
-                            class="product-hero__attribute-separator"
-                            aria-hidden="true"
-                            >:</span
-                          >
-                        </template>
-                        <span
-                          v-if="attribute.key !== 'ai-summary'"
-                          class="product-hero__attribute-value"
-                        >
-                          <ProductAttributeSourcingLabel
-                            class="product-hero__attribute-value-label"
-                            :sourcing="attribute.sourcing"
-                            :value="attribute.value"
-                            :enable-tooltip="attribute.enableTooltip !== false"
-                          >
-                            <template #default="{ displayValue, displayHtml }">
-                              <v-tooltip
-                                location="bottom"
-                                :text="attribute.tooltip"
-                                :disabled="!attribute.tooltip"
-                              >
-                                <template #activator="{ props: tooltipProps }">
-                                  <span
-                                    class="product-hero__attribute-value-content"
-                                    v-bind="tooltipProps"
-                                  >
-                                    <NuxtImg
-                                      v-if="attribute.flag"
-                                      :src="attribute.flag"
-                                      :alt="displayValue"
-                                      width="32"
-                                      height="24"
-                                      class="product-hero__flag"
-                                    />
-                                    <v-icon
-                                      v-if="attribute.icon"
-                                      :icon="attribute.icon"
-                                      size="small"
-                                      class="product-hero__icon mr-2"
-                                    />
-                                    <!-- eslint-disable vue/no-v-html -->
-                                    <div
-                                      v-if="displayHtml"
-                                      v-html="displayHtml"
-                                    />
-                                    <!-- eslint-enable vue/no-v-html -->
-                                    <span v-else>{{ displayValue }}</span>
-                                  </span>
-                                </template>
-                              </v-tooltip>
-                            </template>
-                          </ProductAttributeSourcingLabel>
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
+            <div
+              class="product-hero__decision-grid"
+              :class="{
+                'product-hero__decision-grid--single': hidePricingPanel,
+              }"
+            >
+              <div class="product-hero__details-section">
+                <div
+                  v-if="impactScoreV2NotRated"
+                  class="product-hero__impact-card"
+                >
+                  <ImpactScoreNotRated
+                    :status="impactScoreV2!"
+                    :methodology-href="impactMethodologyHref"
+                  />
+                </div>
+                <div
+                  v-else-if="impactScore != null"
+                  class="product-hero__impact-card cursor-pointer"
+                  @click="handleImpactScoreClick"
+                >
+                  <ImpactScore
+                    :score="impactScore"
+                    :min="impactScoreMin"
+                    :max="impactScoreMax"
+                    :show-methodology="false"
+                    :show-min-max="false"
+                    :vertical-home-url="verticalHomeUrl"
+                    :vertical-plural-name="verticalPluralName"
+                    size="lg"
+                    :banner="true"
+                    :brand="productBrandName"
+                    :model="productModelName"
+                    :category="productVerticalName"
+                    :ranking="impactScoreV2 ? null : ecoscoreRanking"
+                    :count="impactScoreV2 ? null : ecoscoreCount"
+                    :v2="impactScoreV2"
+                  />
                 </div>
 
-                <aside
-                  v-if="!hidePricingPanel"
-                  class="product-hero__panel product-hero__panel--pricing"
-                >
-                  <ProductHeroPricing :product="product" />
-                </aside>
+                <div v-if="hasCategory" class="product-hero__actions">
+                  <v-btn
+                    class="product-hero__compare-button"
+                    :class="{
+                      'product-hero__compare-button--active':
+                        isCompareSelected,
+                    }"
+                    variant="flat"
+                    :aria-pressed="isCompareSelected"
+                    :aria-label="compareButtonAriaLabel"
+                    :title="compareButtonTitle"
+                    :disabled="isCompareDisabled"
+                    @click="toggleCompare"
+                  >
+                    <v-icon
+                      :icon="compareButtonIcon"
+                      size="20"
+                      class="product-hero__compare-icon"
+                    />
+                    <span class="product-hero__compare-label">{{
+                      compareButtonText
+                    }}</span>
+                  </v-btn>
+                </div>
+
+                <div class="product-hero__centered-info">
+                  <v-btn
+                    v-if="hasCategory"
+                    variant="text"
+                    class="product-hero__more-characteristics"
+                    @click="handleMoreCharacteristicsClick"
+                  >
+                    {{ t('product.hero.moreCharacteristics') }}
+                  </v-btn>
+                  <ul
+                    v-if="heroAttributes.length"
+                    class="product-hero__attributes"
+                    role="list"
+                  >
+                    <li
+                      v-for="attribute in heroAttributes"
+                      :key="attribute.key"
+                      class="product-hero__attribute"
+                      :class="{
+                        'product-hero__attribute--country':
+                          attribute.key === 'gtin-country',
+                      }"
+                      role="listitem"
+                    >
+                      <template v-if="attribute.key === 'descriptions-panel'">
+                        <div class="product-hero__descriptions-panel">
+                          <v-tabs
+                            v-model="activeDescriptionTab"
+                            density="compact"
+                            color="primary"
+                            align-tabs="start"
+                            class="mb-4 product-hero__tabs"
+                          >
+                            <v-tab
+                              v-for="(desc, source) in productDescriptions"
+                              :key="source"
+                              :value="source"
+                              class="text-body-2 font-weight-bold"
+                            >
+                              <img
+                                v-if="productFavicons[source]"
+                                :src="productFavicons[source]"
+                                width="16"
+                                height="16"
+                                class="mr-2 rounded-circle"
+                                alt=""
+                              />
+                              {{ source }}
+                            </v-tab>
+                          </v-tabs>
+
+                          <v-window
+                            v-model="activeDescriptionTab"
+                            class="product-hero__tab-content"
+                          >
+                            <v-window-item
+                              v-for="(desc, source) in productDescriptions"
+                              :key="source"
+                              :value="source"
+                            >
+                              <!-- eslint-disable vue/no-v-html -->
+                              <div class="product-hero__description-wrapper">
+                                <div
+                                  class="text-body-2 text-medium-emphasis product-hero__description-body"
+                                  v-html="getDisplayDescription(source, desc)"
+                                />
+                                <v-btn
+                                  v-if="shouldShowToggle(desc)"
+                                  variant="text"
+                                  size="small"
+                                  color="primary"
+                                  class="mt-2"
+                                  @click="toggleDescription(source)"
+                                >
+                                  {{
+                                    isDescriptionExpanded(source)
+                                      ? t('product.hero.description.showLess')
+                                      : t('product.hero.description.showMore')
+                                  }}
+                                </v-btn>
+                              </div>
+                              <!-- eslint-enable vue/no-v-html -->
+                            </v-window-item>
+                          </v-window>
+                        </div>
+                      </template>
+                      <template v-else-if="attribute.showLabel !== false">
+                        <span class="product-hero__attribute-label">{{
+                          attribute.label
+                        }}</span>
+                        <span
+                          class="product-hero__attribute-separator"
+                          aria-hidden="true"
+                          >:</span
+                        >
+                      </template>
+                      <span
+                        v-if="attribute.key !== 'ai-summary'"
+                        class="product-hero__attribute-value"
+                      >
+                        <ProductAttributeSourcingLabel
+                          class="product-hero__attribute-value-label"
+                          :sourcing="attribute.sourcing"
+                          :value="attribute.value"
+                          :enable-tooltip="attribute.enableTooltip !== false"
+                        >
+                          <template #default="{ displayValue, displayHtml }">
+                            <v-tooltip
+                              location="bottom"
+                              :text="attribute.tooltip"
+                              :disabled="!attribute.tooltip"
+                            >
+                              <template #activator="{ props: tooltipProps }">
+                                <span
+                                  class="product-hero__attribute-value-content"
+                                  v-bind="tooltipProps"
+                                >
+                                  <NuxtImg
+                                    v-if="attribute.flag"
+                                    :src="attribute.flag"
+                                    :alt="displayValue"
+                                    width="32"
+                                    height="24"
+                                    class="product-hero__flag"
+                                  />
+                                  <v-icon
+                                    v-if="attribute.icon"
+                                    :icon="attribute.icon"
+                                    size="small"
+                                    class="product-hero__icon mr-2"
+                                  />
+                                  <!-- eslint-disable vue/no-v-html -->
+                                  <div
+                                    v-if="displayHtml"
+                                    v-html="displayHtml"
+                                  />
+                                  <!-- eslint-enable vue/no-v-html -->
+                                  <span v-else>{{ displayValue }}</span>
+                                </span>
+                              </template>
+                            </v-tooltip>
+                          </template>
+                        </ProductAttributeSourcingLabel>
+                      </span>
+                    </li>
+                  </ul>
+                </div>
               </div>
+
+              <aside
+                v-if="!hidePricingPanel"
+                class="product-hero__panel product-hero__panel--pricing"
+              >
+                <ProductHeroPricing :product="product" />
+              </aside>
             </div>
-          </v-col>
-        </v-row>
-      </Transition>
+          </div>
+        </v-col>
+      </v-row>
     </div>
   </section>
 </template>
@@ -296,6 +311,7 @@ import CategoryNavigationBreadcrumbs from '~/components/category/navigation/Cate
 import ProductHeroPricing from '~/components/product/ProductHeroPricing.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ImpactScoreNotRated from '~/components/shared/ui/ImpactScoreNotRated.vue'
 import {
   MAX_COMPARE_ITEMS,
   useProductCompareStore,
@@ -310,6 +326,10 @@ import {
   resolveProductLongName,
   resolveProductShortName,
 } from '~/utils/_product-title-resolver'
+import {
+  isImpactScoreNotRated,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import { useThemedAsset } from '~/composables/useThemedAsset'
 import { useProductGallery } from '~/composables/useProductGallery'
 
@@ -335,6 +355,15 @@ const props = defineProps({
   product: {
     type: Object as PropType<ProductDto>,
     required: true,
+  },
+  verticalHomeUrl: {
+    type: String,
+    default: '',
+  },
+  /** Plural name of the vertical, used in the V2 position sentence. */
+  verticalPluralName: {
+    type: String,
+    default: '',
   },
   breadcrumbs: {
     type: Array as PropType<ProductHeroBreadcrumb[]>,
@@ -448,6 +477,15 @@ const productBrandName = computed(() =>
 const productModelName = computed(() =>
   normalizeString(props.product.identity?.model)
 )
+
+const impactScoreV2 = computed(() => resolveImpactScoreV2(props.product.scores))
+const impactScoreV2NotRated = computed(() =>
+  isImpactScoreNotRated(impactScoreV2.value)
+)
+const impactMethodologyHref = computed(() => {
+  const slug = props.verticalHomeUrl.trim().replace(/^\/+|\/+$/g, '')
+  return slug ? `/${slug}/ecoscore` : ''
+})
 
 const ecoscoreRanking = computed(
   () => props.product.scores?.scores?.ECOSCORE?.ranking ?? null
@@ -1088,19 +1126,6 @@ const heroBreadcrumbProps = computed(() => ({
   }
 }
 
-.product-hero-rise-enter-active,
-.product-hero-rise-leave-active {
-  transition:
-    opacity 0.34s ease,
-    transform 0.34s ease;
-}
-
-.product-hero-rise-enter-from,
-.product-hero-rise-leave-to {
-  opacity: 0;
-  transform: translateY(12px);
-}
-
 @keyframes productHeroMediaIn {
   from {
     opacity: 0;
@@ -1132,8 +1157,6 @@ const heroBreadcrumbProps = computed(() => ({
     animation: none;
   }
 
-  .product-hero-rise-enter-active,
-  .product-hero-rise-leave-active,
   .product-hero__compare-button,
   .product-hero__ai-button,
   .product-hero__impact-card {

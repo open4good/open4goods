@@ -295,6 +295,16 @@ public class ApiProperties {
 	private double resourceCleanupMinProductRatio = 0.9d;
 
 	/**
+	 * Thresholds of the automatic ImpactScore checks run after each vertical batch (GOU-1895).
+	 */
+	private ImpactScoreGuardProperties impactScoreGuard = new ImpactScoreGuardProperties();
+
+	/**
+	 * Clearing of the scores held by products outside the batched verticals, at the end of the batch (GOU-2133).
+	 */
+	private ScoreCleanupProperties scoreCleanup = new ScoreCleanupProperties();
+
+	/**
 	 * Retention, in milliseconds, of files parked in the deletion folder by the
 	 * {@link org.open4goods.api.services.ResourceCleanupMode#MOVE} mode. Files older than
 	 * this are purged for real, which is what actually reclaims disk space.
@@ -306,6 +316,30 @@ public class ApiProperties {
 	 * which it reads back at startup. Defaults to {@code <rootFolder>/batch-reports/datasource-purge-status.json}.
 	 */
 	private String datasourcePurgeStatusFile;
+
+	/**
+	 * JSON file where the backfill of the product index (GOU-2266) writes its status after each batch, read back at
+	 * startup. Defaults to {@code <rootFolder>/batch-reports/backfill-status.json}.
+	 */
+	private String backfillStatusFile;
+
+	/**
+	 * Folder of the JSONL backup files written by the backfill before each update (GOU-2266), read by its restore.
+	 * Defaults to {@code <rootFolder>/batch-reports/backfill}.
+	 */
+	private String backfillBackupFolder;
+
+	/**
+	 * JSON file where the api keeps the date of the last offer of each datasource (GOU-2037), served on
+	 * {@code GET /merchants/offer-activity}. Defaults to {@code <rootFolder>/batch-reports/datasource-offer-activity.json}.
+	 */
+	private String datasourceOfferActivityFile;
+
+	/**
+	 * File present while a full batch runs (GOU-2106), read by the beta deployment to postpone the api restart until
+	 * the end of the batch. Absent or blank, no marker is written.
+	 */
+	private String batchRunningMarker;
 
 	/**
 	 * The datasource purge logs and persists its progress every this many scanned products (and at least every
@@ -320,11 +354,19 @@ public class ApiProperties {
 	private int completionConcurrency = 10;
 
 	/**
-	 * Number of days before an EPREL-completed product is re-processed.
+	 * Number of days before a product associated with an EPREL record is searched again.
 	 * A product completed within this window is skipped to avoid redundant searches.
 	 */
 	@Min(1)
 	private int eprelRefreshDays = 1;
+
+	/**
+	 * Number of days before a product that got no EPREL association is searched again, as long as its GTIN and
+	 * model candidates did not change (a change triggers a new search at the next batch). Such a search runs every
+	 * model strategy, so repeating it every day made the batch last hours (GOU-2099).
+	 */
+	@Min(1)
+	private int eprelMissRefreshDays = 7;
 
 	public List<Integer> getAllowedImagesSizeSuffixes() {
 		return allowedImagesSizeSuffixes;
@@ -340,6 +382,22 @@ public class ApiProperties {
 
 	public void setResourceCleanupGracePeriodMs(long resourceCleanupGracePeriodMs) {
 		this.resourceCleanupGracePeriodMs = resourceCleanupGracePeriodMs;
+	}
+
+	public ImpactScoreGuardProperties getImpactScoreGuard() {
+		return impactScoreGuard;
+	}
+
+	public void setImpactScoreGuard(ImpactScoreGuardProperties impactScoreGuard) {
+		this.impactScoreGuard = impactScoreGuard;
+	}
+
+	public ScoreCleanupProperties getScoreCleanup() {
+		return scoreCleanup;
+	}
+
+	public void setScoreCleanup(ScoreCleanupProperties scoreCleanup) {
+		this.scoreCleanup = scoreCleanup;
 	}
 
 	public double getResourceCleanupMinProductRatio() {
@@ -372,6 +430,56 @@ public class ApiProperties {
 		this.datasourcePurgeStatusFile = datasourcePurgeStatusFile;
 	}
 
+	/**
+	 * @return the configured backfill status file, or {@code <rootFolder>/batch-reports/backfill-status.json}
+	 */
+	public String getBackfillStatusFile() {
+		if (backfillStatusFile == null || backfillStatusFile.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "backfill-status.json";
+		}
+		return backfillStatusFile;
+	}
+
+	public void setBackfillStatusFile(String backfillStatusFile) {
+		this.backfillStatusFile = backfillStatusFile;
+	}
+
+	/**
+	 * @return the configured backfill backup folder, or {@code <rootFolder>/batch-reports/backfill}
+	 */
+	public String getBackfillBackupFolder() {
+		if (backfillBackupFolder == null || backfillBackupFolder.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "backfill";
+		}
+		return backfillBackupFolder;
+	}
+
+	public void setBackfillBackupFolder(String backfillBackupFolder) {
+		this.backfillBackupFolder = backfillBackupFolder;
+	}
+
+	/**
+	 * @return the configured datasource offer activity file, or {@code <rootFolder>/batch-reports/datasource-offer-activity.json}
+	 */
+	public String getDatasourceOfferActivityFile() {
+		if (datasourceOfferActivityFile == null || datasourceOfferActivityFile.isBlank()) {
+			return rootFolder + File.separator + "batch-reports" + File.separator + "datasource-offer-activity.json";
+		}
+		return datasourceOfferActivityFile;
+	}
+
+	public void setDatasourceOfferActivityFile(String datasourceOfferActivityFile) {
+		this.datasourceOfferActivityFile = datasourceOfferActivityFile;
+	}
+
+	public String getBatchRunningMarker() {
+		return batchRunningMarker;
+	}
+
+	public void setBatchRunningMarker(String batchRunningMarker) {
+		this.batchRunningMarker = batchRunningMarker;
+	}
+
 	public long getDatasourcePurgeProgressInterval() {
 		return datasourcePurgeProgressInterval;
 	}
@@ -394,6 +502,14 @@ public class ApiProperties {
 
 	public void setEprelRefreshDays(int eprelRefreshDays) {
 		this.eprelRefreshDays = eprelRefreshDays;
+	}
+
+	public int getEprelMissRefreshDays() {
+		return eprelMissRefreshDays;
+	}
+
+	public void setEprelMissRefreshDays(int eprelMissRefreshDays) {
+		this.eprelMissRefreshDays = eprelMissRefreshDays;
 	}
 
 	public Integer getAggregatedDataElasticBuffer() {

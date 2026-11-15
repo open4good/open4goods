@@ -46,6 +46,15 @@
           <span class="product-price-rows__amount">
             {{ badge.price }}
           </span>
+
+          <!-- Merchant name -->
+          <span
+            v-if="badge.merchantName"
+            class="product-price-rows__merchant"
+            data-testid="price-row-merchant"
+          >
+            {{ badge.merchantName }}
+          </span>
         </v-btn>
 
         <!-- Trend -->
@@ -319,7 +328,7 @@ const offerBadges = computed<Badge[]>(() => {
           newOffer.currency ?? 'EUR'
         ),
         favicon: newOffer.favicon ?? newOffer.merchantFavicon,
-        merchantName: newOffer.merchantName,
+        merchantName: newOffer.datasourceName ?? newOffer.merchantName,
         url,
         offer: newOffer,
         hasAlternatives:
@@ -346,7 +355,8 @@ const offerBadges = computed<Badge[]>(() => {
           occasionOffer.currency ?? 'EUR'
         ),
         favicon: occasionOffer.favicon ?? occasionOffer.merchantFavicon,
-        merchantName: occasionOffer.merchantName,
+        merchantName:
+          occasionOffer.datasourceName ?? occasionOffer.merchantName,
         url,
         offer: occasionOffer,
         hasAlternatives:
@@ -378,7 +388,8 @@ const offerBadges = computed<Badge[]>(() => {
         price: formatted,
         appearance: 'default',
         favicon: fallbackOffer?.favicon ?? fallbackOffer?.merchantFavicon,
-        merchantName: fallbackOffer?.merchantName,
+        merchantName:
+          fallbackOffer?.datasourceName ?? fallbackOffer?.merchantName,
         url,
         offer: fallbackOffer,
         hasAlternatives: false,
@@ -506,6 +517,16 @@ const trackOfferClick = (
   &__amount
     font-size: 1.4rem
     font-weight: 700
+    white-space: nowrap
+
+  &__merchant
+    flex: 1 1 0
+    min-width: 0
+    font-size: 0.75rem
+    font-weight: 500
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    overflow: hidden
+    text-overflow: ellipsis
     white-space: nowrap
 
   &__trend

@@ -55,6 +55,10 @@
         </SearchSuggestField>
       </form>
 
+      <p class="search-hero__hint mt-2 text-body-2">
+        {{ t('search.form.hint') }}
+      </p>
+
       <p
         v-if="showInitialState"
         class="search-hero__helper mt-4 text-medium-emphasis"
@@ -69,41 +73,51 @@
       </p>
     </PageHeader>
 
-    <v-navigation-drawer
-      v-model="filtersOpen"
-      location="right"
-      width="320"
-      temporary
-      class="search-page__filters-drawer"
-    >
-      <div class="pa-4 d-flex align-center justify-space-between">
-        <h3 class="text-h6 font-weight-bold mb-0">
-          {{ t('category.filters.title') }}
-        </h3>
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          density="comfortable"
-          @click="filtersOpen = false"
-        />
-      </div>
+    <!--
+      Client-only, like the category filters drawer: rendered on the server, the
+      closed temporary drawer sat in the page flow until hydration moved it
+      off-screen (CLS 0.62 on desktop).
+    -->
+    <ClientOnly>
+      <v-navigation-drawer
+        v-model="filtersOpen"
+        location="right"
+        width="320"
+        temporary
+        class="search-page__filters-drawer"
+      >
+        <div class="pa-4 d-flex align-center justify-space-between">
+          <h3 class="text-h6 font-weight-bold mb-0">
+            {{ t('category.filters.title') }}
+          </h3>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            density="comfortable"
+            @click="filtersOpen = false"
+          />
+        </div>
 
-      <v-divider />
+        <v-divider />
 
-      <div class="pa-4">
-        <CategoryFilterList
-          :fields="filterFields"
-          :aggregations="productAggregations"
-          :baseline-aggregations="baselineAggregations"
-          :active-filters="activeFilters"
-          @update-range="updateRangeFilter"
-          @update-terms="updateTermsFilter"
-        />
-      </div>
-    </v-navigation-drawer>
+        <div class="pa-4">
+          <CategoryFilterList
+            :fields="filterFields"
+            :aggregations="productAggregations"
+            :baseline-aggregations="baselineAggregations"
+            :active-filters="activeFilters"
+            @update-range="updateRangeFilter"
+            @update-terms="updateTermsFilter"
+          />
+        </div>
+      </v-navigation-drawer>
+    </ClientOnly>
 
     <v-progress-linear
-      v-if="pending || productsPending || baselinePending || aggsPending"
+      v-if="
+        isMounted &&
+        (pending || productsPending || baselinePending || aggsPending)
+      "
       class="search-page__loader"
       indeterminate
       color="primary"
@@ -177,11 +191,12 @@
           align="start"
           justify="center"
         >
-          <v-col
-            v-if="hasVerticalResults"
-            cols="12"
-            :lg="hasGlobalResults ? 5 : 12"
-          >
+          <!--
+            Full-width stacked columns: the list rows need about 740 px to show
+            the price, merchant and score next to the title; a 5/12 column
+            clipped them on desktop.
+          -->
+          <v-col v-if="hasVerticalResults" cols="12">
             <section class="search-page__column">
               <div class="search-page__column-header d-flex justify-center">
                 <div class="search-page__column-heading text-center">
@@ -270,11 +285,7 @@
             </section>
           </v-col>
 
-          <v-col
-            v-if="hasGlobalResults"
-            cols="12"
-            :lg="hasVerticalResults ? 7 : 12"
-          >
+          <v-col v-if="hasGlobalResults" cols="12">
             <section class="search-page__column">
               <div
                 class="search-page__column-header search-page__column-header--with-actions d-flex justify-center"
@@ -375,6 +386,24 @@
               />
             </section>
           </v-col>
+
+          <v-col v-if="hasAccessoryResults" cols="12">
+            <SearchResultGroup
+              class="search-page__accessories"
+              data-test="search-accessories"
+              :title="t('search.accessories.title')"
+              :products="accessoryProducts"
+              :count-label="
+                translatePlural(
+                  'search.accessories.count',
+                  accessoryProducts.length,
+                  {
+                    count: accessoryProducts.length,
+                  }
+                )
+              "
+            />
+          </v-col>
         </v-row>
       </template>
     </v-container>
@@ -382,7 +411,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
@@ -401,6 +430,7 @@ import type {
   SortRequestDto,
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
+import SearchResultGroup from '~/components/search/SearchResultGroup.vue'
 import SearchSuggestField, {
   type CategorySuggestionItem,
   type ProductSuggestionItem,
@@ -423,14 +453,17 @@ import {
   resolveSortFieldTitle,
   SORT_FIELD_PRIORITIES,
 } from '~/utils/_field-localization'
+import {
+  slimGlobalSearchResponse,
+  slimProductSearchResponse,
+} from '~/utils/_search-result-payload'
 
-const MIN_QUERY_LENGTH = 3
+const MIN_QUERY_LENGTH = 2
 const VERTICAL_RESULTS_LIMIT = 4
+// Requête désignant une catégorie (verticalCta ou un seul groupe) : on montre
+// plus de produits avant la longue traîne.
+const SINGLE_VERTICAL_RESULTS_LIMIT = 8
 const isDev = process.env.NODE_ENV === 'development'
-
-definePageMeta({
-  ssr: false,
-})
 
 const { t, locale, availableLocales } = useI18n()
 const { mdAndUp } = useDisplay()
@@ -468,6 +501,13 @@ const countOthers = computed(
   () => stats.value?.productsWithoutVerticalCount ?? 0
 )
 const filtersOpen = ref(false)
+// Client-only fetches (aggregations, filtered search) report pending while the
+// page hydrates; showing the loader only once mounted keeps the hydrated DOM
+// identical to the server render.
+const isMounted = ref(false)
+onMounted(() => {
+  isMounted.value = true
+})
 const filterRequest = ref<FilterRequestDto>({ filters: [], filterGroups: [] })
 const openPanels = ref<number[]>([])
 
@@ -687,7 +727,10 @@ const { data, pending, error, refresh } =
       ],
       immediate: true,
       lazy: true,
-      server: false,
+      // Server-rendered so the HTML of /rechercher?q=... already lists the
+      // results: crawlers and Google's CSS review read that HTML, and a
+      // client-only fetch rendered "Aucun resultat" there for every query.
+      transform: slimGlobalSearchResponse,
     }
   )
 
@@ -745,7 +788,7 @@ const {
     ],
     immediate: true,
     lazy: true,
-    server: false,
+    transform: slimProductSearchResponse,
   }
 )
 
@@ -1019,9 +1062,15 @@ const primaryGroups = computed(() => {
 })
 
 const limitedGroups = computed(() => {
+  const isCategoryQuery =
+    Boolean(data.value?.verticalCta) || primaryGroups.value.length === 1
+  const limit = isCategoryQuery
+    ? SINGLE_VERTICAL_RESULTS_LIMIT
+    : VERTICAL_RESULTS_LIMIT
+
   return primaryGroups.value
     .map(group => {
-      const limitedProducts = group.products.slice(0, VERTICAL_RESULTS_LIMIT)
+      const limitedProducts = group.products.slice(0, limit)
       if (!limitedProducts.length) {
         return null
       }
@@ -1035,14 +1084,13 @@ const limitedGroups = computed(() => {
     .filter((group): group is SearchGroup => Boolean(group))
 })
 
+// Every category group starts open: a closed v-expansion-panel renders no
+// content, so brand queries spanning several categories ("samsung", "bosch")
+// showed collapsed headers and left the evaluated products out of the HTML.
 watch(
   limitedGroups,
   groups => {
-    if (groups.length === 1) {
-      openPanels.value = [0]
-    } else {
-      openPanels.value = []
-    }
+    openPanels.value = groups.map((_, index) => index)
   },
   { immediate: true }
 )
@@ -1176,12 +1224,18 @@ const pageCount = computed(() => {
   )
 })
 
+const accessoryProducts = computed(() =>
+  extractProducts(data.value?.accessoryResults ?? [])
+)
+const hasAccessoryResults = computed(() => accessoryProducts.value.length > 0)
+
 const hasVerticalResults = computed(() => limitedGroups.value.length > 0)
 const hasGlobalResults = computed(() => rightColumnProducts.value.length > 0)
 const showNoResultsHero = computed(
   () =>
     !hasVerticalResults.value &&
     !hasGlobalResults.value &&
+    !hasAccessoryResults.value &&
     !pending.value &&
     !rightColumnPending.value
 )

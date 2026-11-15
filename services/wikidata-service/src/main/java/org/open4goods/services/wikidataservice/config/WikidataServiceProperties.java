@@ -34,6 +34,13 @@ public class WikidataServiceProperties {
      */
     private int refreshInDays = 30;
 
+    /**
+     * Number of days before a product for which no Wikidata entity was found is searched again. Without it, every
+     * product unknown to Wikidata was searched (GTIN then brand and model SPARQL queries) on each daily batch
+     * (GOU-2099).
+     */
+    private int missRefreshInDays = 7;
+
     /** Whether to attempt brand+model fallback when no GTIN match is found. */
     private boolean brandModelFallbackEnabled = true;
 
@@ -90,6 +97,14 @@ public class WikidataServiceProperties {
 
     public void setRefreshInDays(int refreshInDays) {
         this.refreshInDays = refreshInDays;
+    }
+
+    public int getMissRefreshInDays() {
+        return missRefreshInDays;
+    }
+
+    public void setMissRefreshInDays(int missRefreshInDays) {
+        this.missRefreshInDays = missRefreshInDays;
     }
 
     public boolean isBrandModelFallbackEnabled() {

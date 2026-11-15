@@ -42,10 +42,14 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	 * Runs every registered scoring service through its full lifecycle against the
 	 * provided product collection.
 	 *
-	 * <p>Each product is processed independently: an {@link AggregationSkipException}
-	 * thrown for one product is caught and logged, allowing the remaining products
-	 * and services to continue. This mirrors the per-product isolation provided by
-	 * {@link StandardAggregator}.
+	 * <p>An {@link AggregationSkipException} thrown for one product is logged and skips that
+	 * product for that service only: the remaining products and services continue.
+	 *
+	 * <p>Any other exception stops the whole scoring run, on purpose: services such as
+	 * {@code CleanScoreAggregationService} clear the scores in {@code init}, so going on would
+	 * leave products without scores. The id of the product and the name of the service are
+	 * logged, then the exception is rethrown; {@code BatchService} then indexes nothing for the
+	 * vertical (GOU-2273).
 	 *
 	 * @param datas products to score; modified in-place
 	 * @param vConf vertical configuration driving score definitions and weights
@@ -67,6 +71,11 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 				} catch (AggregationSkipException e) {
 					logger.info("Product {} skipped during batch scoring by {}: {}",
 							p.getId(), service.getClass().getSimpleName(), e.getMessage());
+				} catch (RuntimeException e) {
+					// Callers log the stack trace
+					logger.error("Scoring of product {} failed in {}, the scoring run stops: {}",
+							p.getId(), service.getClass().getSimpleName(), e.toString());
+					throw e;
 				}
 			}
 

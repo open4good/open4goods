@@ -2,6 +2,7 @@ package org.open4goods.verticals;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.Assertions.within;
 
 import java.lang.reflect.Field;
@@ -9,8 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -18,8 +22,15 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.vertical.AttributeComparisonRule;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
+import org.open4goods.model.vertical.ImpactScorePositionLabel;
+import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.scoring.ScoreDerivationMethod;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
+import org.open4goods.model.vertical.scoring.ScoreNormalizationParams;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -237,6 +248,404 @@ class VerticalYamlValidationTest {
         assertImpactScoreCriterias(attributeConfigByKey, tvConfig.getAvailableImpactScoreCriterias());
     }
 
+    @Test
+    void onlyWaveOneVerticalsAreSwitchedToTheV2Methodology() {
+        // GOU-1889 wave 1: refrigerators and dishwashers; the other verticals stay in V1 (waves 2 and 3: GOU-2186)
+        assertThat(verticalsConfigService.getConfigsWithoutDefault())
+            .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
+                .as("methodology version of %s", config.getId())
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher").contains(config.getId()) ? 2
+                    : ImpactScoreConfig.METHODOLOGY_V1));
+    }
+
+    /**
+     * V2 criteria that replace a V1 criterion with its weight, by vertical (GOU-2041, gate 2 of GOU-1877): V1
+     * criterion to V2 criterion. Several V1 criteria replaced by the same V2 criterion add their weights: tv
+     * functional unit (GOU-1884), the HDR watts go to the SDR class; the SDR watts weight is split in two by
+     * {@link #V2_SPLIT_CRITERIA}.
+     */
+    private static final Map<String, Map<String, String>> V2_REPLACED_CRITERIA = Map.of(
+        "tv", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
+            "POWER_CONSUMPTION_HDR", "CLASSE_ENERGY_SDR"),
+        "washing-machine", Map.of("REPAIRABILITY_INDEX", "REPAIRABILITY_OR_DURABILITY_INDEX",
+            "POWER_CONSUMPTION_TYPICAL", "ENERGY_CONSUMPTION_100_CYCLES"),
+        "smartphones", Map.of("REPAIRABILITY_INDEX", "EU_REPAIRABILITY_CLASS"));
+
+    /**
+     * V1 criteria whose weight V2 splits in two equal halves, by vertical: V1 criterion to the V2 criterion that takes
+     * the other half (gate 3 of GOU-1888, GOU-2186): the tv SDR watts keep half and give half to the screen area density.
+     */
+    private static final Map<String, Map<String, String>> V2_SPLIT_CRITERIA = Map.of(
+        "tv", Map.of("POWER_CONSUMPTION_SDR", "POWER_DENSITY_SDR"));
+
+    /** V1 criteria removed from the V2 matrix, their weight spread pro rata, by vertical (gate 2 of GOU-1877). */
+    private static final Map<String, Set<String>> V2_REMOVED_CRITERIA = Map.of(
+        "air-conditioner", Set.of("REPAIRABILITY_INDEX"),
+        "tv", Set.of("DIAGONALE_POUCES"));
+
+    /**
+     * GOU-1880: every real vertical carries a valid {@code v2} block whose matrix is the V1 matrix without
+     * {@code DATA_QUALITY}, renormalised to 1 pro rata (design {@code docs/impactscore/v2-design.md}, 1.2 and 2.3),
+     * except the criteria {@link #V2_REPLACED_CRITERIA} replaces, weight unchanged, and the criteria
+     * {@link #V2_REMOVED_CRITERIA} removes.
+     */
+    @Test
+    void everyRealVerticalHasAV2MatrixWithoutDataQuality() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            ImpactScoreConfig impactScore = config.getImpactScoreConfig();
+            assertThat(impactScore.getV2()).as("v2 block of %s", config.getId()).isNotNull();
+            assertThat(ImpactScoreMethodology.validate(impactScore, config)).as("v2 errors of %s", config.getId()).isEmpty();
+            Map<String, String> replaced = V2_REPLACED_CRITERIA.getOrDefault(config.getId(), Map.of());
+            Map<String, Double> v1 = new HashMap<>();
+            Set<String> removed = V2_REMOVED_CRITERIA.getOrDefault(config.getId(), Set.of());
+            impactScore.getCriteriasPonderation().forEach((key, weight) -> {
+                if (removed.contains(key)) {
+                    return;
+                }
+                String split = V2_SPLIT_CRITERIA.getOrDefault(config.getId(), Map.of()).get(key);
+                if (split != null) {
+                    v1.merge(key, weight / 2, Double::sum);
+                    v1.merge(split, weight / 2, Double::sum);
+                } else {
+                    v1.merge(replaced.getOrDefault(key, key), weight, Double::sum);
+                }
+            });
+            Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
+            assertThat(v2).as("v2 matrix of %s", config.getId()).doesNotContainKey("DATA_QUALITY");
+            assertThat(v2.values().stream().mapToDouble(Double::doubleValue).sum())
+                .as("sum of the v2 weights of %s", config.getId()).isCloseTo(1.0, within(1e-6));
+
+            double withoutDataQuality = v1.entrySet().stream().filter(entry -> !"DATA_QUALITY".equals(entry.getKey()))
+                .mapToDouble(Map.Entry::getValue).sum();
+            assertThat(v2.keySet()).as("v2 criteria of %s", config.getId())
+                .containsExactlyInAnyOrderElementsOf(v1.keySet().stream().filter(key -> !"DATA_QUALITY".equals(key)).toList());
+            v2.forEach((key, weight) -> assertThat(weight).as("v2 weight of %s.%s", config.getId(), key)
+                .isCloseTo(v1.get(key) / withoutDataQuality, within(1e-6)));
+        });
+    }
+
+    /**
+     * Gate 2 (GOU-1877, approval c81ef147): EPREL filter and coverage threshold by vertical. Gate 3 (GOU-2191):
+     * the dishwasher keeps the EPREL filter.
+     */
+    private static final Map<String, Object[]> GATE_TWO_FILTER = Map.of(
+        "refrigerator", new Object[] { false, 0.50 },
+        "dishwasher", new Object[] { true, 0.60 },
+        "smartphones", new Object[] { true, 0.50 },
+        "oven", new Object[] { true, 0.50 },
+        "tv", new Object[] { true, 0.50 },
+        "washing-machine", new Object[] { true, 0.40 },
+        "air-conditioner", new Object[] { true, 0.50 });
+
+    /** Gate 2 fixed bounds, by vertical: criterion to upper bound in W (lower bound 0). */
+    private static final Map<String, Map<String, Double>> GATE_TWO_FIXED_BOUNDS = Map.of(
+        "dishwasher", Map.of("POWER_CONSUMPTION_STANDBY", 1.0, "POWER_CONSUMPTION_OFF", 1.0),
+        "tv", Map.of("POWER_CONSUMPTION_OFF", 1.0, "POWER_CONSUMPTION_STANDBY_NETWORKD", 2.0),
+        "washing-machine", Map.of("POWER_CONSUMPTION_OFF", 1.0));
+
+    /**
+     * GOU-2137: the v2 blocks carry the values of gate 2 (document {@code decision} of GOU-1877,
+     * {@code docs/impactscore/decisions.md}), but the washing machine threshold, 0.40 since gate 3 (GOU-2186).
+     */
+    @Test
+    void v2BlocksCarryTheGateTwoValues() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).extracting(VerticalConfig::getId)
+            .containsExactlyInAnyOrderElementsOf(GATE_TWO_FILTER.keySet());
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            ImpactScoreV2Config v2 = config.getImpactScoreConfig().getV2();
+            Object[] filter = GATE_TWO_FILTER.get(config.getId());
+            assertThat(v2.getEprelRequired()).as("eprelRequired of %s", config.getId()).isEqualTo(filter[0]);
+            assertThat(v2.getMinRealWeightCoverage()).as("minRealWeightCoverage of %s", config.getId())
+                .isEqualTo((Double) filter[1]);
+            assertThat(v2.getMinRatedForPositionLabel()).as("minRatedForPositionLabel of %s", config.getId())
+                .isEqualTo(100);
+            assertThat(v2.getPositionLabels()).as("positionLabels of %s", config.getId())
+                .extracting(ImpactScorePositionLabel::getLevel, ImpactScorePositionLabel::getMinBetterThan)
+                .containsExactly(tuple("excellent", 0.90), tuple("good", 0.50), tuple("fair", 0.10), tuple("poor", 0.0));
+
+            Map<String, Double> fixedBounds = GATE_TWO_FIXED_BOUNDS.getOrDefault(config.getId(), Map.of());
+            v2.getCriteriaScoring().forEach((key, scoring) -> {
+                assertThat(v2.getCriteriasPonderation()).as("override of %s.%s on a weighted criterion", config.getId(), key)
+                    .containsKey(key);
+                ScoreNormalizationParams params = scoring.getNormalization().getParams();
+                if (fixedBounds.containsKey(key)) {
+                    assertThat(scoring.getNormalization().getMethod()).isEqualTo(ScoreNormalizationMethod.MINMAX_FIXED);
+                    assertThat(params.getFixedMin()).as("lower bound of %s.%s", config.getId(), key).isEqualTo(0.0);
+                    assertThat(params.getFixedMax()).as("upper bound of %s.%s", config.getId(), key)
+                        .isEqualTo(fixedBounds.get(key));
+                } else {
+                    assertThat(scoring.getNormalization().getMethod()).as("method of %s.%s", config.getId(), key)
+                        .isEqualTo(ScoreNormalizationMethod.MINMAX_QUANTILE);
+                    assertThat(params.getQuantileLow()).isEqualTo(0.02);
+                    assertThat(params.getQuantileHigh()).isEqualTo(0.98);
+                }
+            });
+            assertThat(v2.getCriteriaScoring().keySet()).as("fixed bounds of %s", config.getId())
+                .containsAll(fixedBounds.keySet());
+        });
+        assertThat(verticalsConfigService.getConfigById("washing-machine").getImpactScoreConfig().getV2()
+            .getCriteriaScoring()).containsKey("ENERGY_CONSUMPTION_100_CYCLES");
+        assertThat(verticalsConfigService.getConfigById("air-conditioner").getImpactScoreConfig().getV2()
+            .getCriteriaScoring()).as("air conditioners: bounds unchanged").isEmpty();
+    }
+
+    /**
+     * GOU-1884, gate 3 (GOU-2186): the tv V2 matrix rates energy per screen area and in raw SDR watts.
+     * {@code DIAGONALE_POUCES} and the HDR watts leave it (weights checked by {@link #everyRealVerticalHasAV2MatrixWithoutDataQuality()}); the energy block keeps its V1
+     * weight, before renormalisation.
+     */
+    @Test
+    void tvV2MatrixRatesEnergyPerScreenArea() {
+        ImpactScoreConfig impactScore = verticalsConfigService.getConfigById("tv").getImpactScoreConfig();
+        Map<String, Double> v1 = impactScore.getCriteriasPonderation();
+        Map<String, Double> v2 = impactScore.getV2().getCriteriasPonderation();
+        assertThat(v2).doesNotContainKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_HDR");
+
+        double renormalisation = 1.0 - v1.get("DATA_QUALITY") - v1.get("DIAGONALE_POUCES");
+        double v1Energy = v1.get("POWER_CONSUMPTION_SDR") + v1.get("POWER_CONSUMPTION_HDR")
+            + v1.get("CLASSE_ENERGY_SDR") + v1.get("CLASSE_ENERGY_HDR");
+        double v2Energy = v2.get("POWER_DENSITY_SDR") + v2.get("POWER_CONSUMPTION_SDR") + v2.get("CLASSE_ENERGY_SDR") + v2.get("CLASSE_ENERGY_HDR");
+        assertThat(v2Energy * renormalisation).as("energy block, V1 units").isCloseTo(v1Energy, within(1e-6));
+        assertThat(v2.get("POWER_DENSITY_SDR")).isCloseTo(v2.get("POWER_CONSUMPTION_SDR"), within(1e-9));
+        assertThat(impactScore.getV2().getCriteriaScoring()).containsKeys("POWER_DENSITY_SDR", "POWER_CONSUMPTION_SDR")
+            .doesNotContainKey("POWER_CONSUMPTION_HDR");
+    }
+
+    /** GOU-1884: the density reads the SDR watts and the diagonal, 16:9, and is never read from merchant data. */
+    @Test
+    void powerDensityCriterionReadsSdrWattsPerScreenArea() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig density = tv.getAttributesConfig().getAttributeConfigByKey("POWER_DENSITY_SDR");
+        assertThat(density).isNotNull();
+        assertThat(density.isAsScore()).isTrue();
+        assertThat(density.getImpactBetterIs()).isEqualTo(AttributeComparisonRule.LOWER);
+        assertThat(density.getScoreSources()).containsExactly("POWER_CONSUMPTION_SDR", "DIAGONALE_POUCES");
+        assertThat(density.scoreDerivationMethod()).isEqualTo(ScoreDerivationMethod.SCREEN_AREA_DENSITY);
+        assertThat(density.getScoreDerivation().getAspectRatioWidth()).isEqualTo(16.0);
+        assertThat(density.getScoreDerivation().getAspectRatioHeight()).isEqualTo(9.0);
+        assertThat(density.getSynonyms()).as("never read from merchant data").isEmpty();
+        assertThat(tv.getImpactScoreConfig().getCriteriasPonderation()).as("V1 matrix unchanged")
+            .containsKeys("DIAGONALE_POUCES", "POWER_CONSUMPTION_SDR").doesNotContainKey("POWER_DENSITY_SDR");
+        assertThat(tv.getAvailableImpactScoreCriterias()).as("V1 DATA_QUALITY unchanged")
+            .doesNotContain("POWER_DENSITY_SDR");
+    }
+
+    @Test
+    void v2ScreenAreaDensityWithoutTwoSourcesIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig density = tv.getAttributesConfig().getAttributeConfigByKey("POWER_DENSITY_SDR");
+        List<String> sources = density.getScoreSources();
+        try {
+            density.setScoreSources(List.of("POWER_CONSUMPTION_SDR"));
+            assertThat(ImpactScoreMethodology.validate(tv.getImpactScoreConfig(), tv))
+                .anyMatch(error -> error.contains("POWER_DENSITY_SDR is a screen area density"));
+        } finally {
+            density.setScoreSources(sources);
+        }
+    }
+
+    @Test
+    void validV2BlockIsAccepted() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        assertThat(ImpactScoreMethodology.validate(impactScoreWithV2(tv, v2 -> { }), tv)).isEmpty();
+
+        ImpactScoreConfig active = impactScoreWithV2(tv, v2 -> { });
+        active.setMethodologyVersion(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(active, tv)).isEmpty();
+    }
+
+    @Test
+    void methodologyVersionOutsideOneAndTwoIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, v2 -> { });
+        config.setMethodologyVersion(3);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).anyMatch(error -> error.contains("methodologyVersion 3"));
+    }
+
+    @Test
+    void versionTwoWithoutV2BlockIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = new ImpactScoreConfig();
+        config.setCriteriasPonderation(tv.getImpactScoreConfig().getCriteriasPonderation());
+        config.setMethodologyVersion(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).containsExactly("methodology version 2 requires a v2 block");
+        assertThat(config.activeCriteriasPonderation()).as("no fallback to the V1 matrix").isEmpty();
+    }
+
+    @Test
+    void v2MatrixNotSummingToOneIsRefused() {
+        assertV2Refused(v2 -> v2.getCriteriasPonderation().replaceAll((key, weight) -> weight / 2), "sums to");
+    }
+
+    @Test
+    void v2MatrixWeightingDataQualityIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "DATA_QUALITY"), "cannot weight DATA_QUALITY");
+    }
+
+    @Test
+    void v2MatrixWeightingEcoscoreIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "ECOSCORE"), "cannot weight ECOSCORE");
+    }
+
+    @Test
+    void v2MatrixWeightingAnUnknownCriterionIsRefused() {
+        assertV2Refused(v2 -> moveWeight(v2, "NOT_AN_ATTRIBUTE"), "not an asScore attribute");
+    }
+
+    @Test
+    void v2DerivedCriterionWeightedWithItsSourceIsRefused() {
+        assertV2Refused(v2 -> {
+            moveWeight(v2, "REPAIRABILITY_OR_DURABILITY_INDEX");
+            v2.getCriteriasPonderation().put("REPAIRABILITY_OR_DURABILITY_INDEX",
+                v2.getCriteriasPonderation().get("REPAIRABILITY_OR_DURABILITY_INDEX") - 0.01);
+            v2.getCriteriasPonderation().put("DURABILITY_INDEX", 0.01);
+        }, "weights both REPAIRABILITY_OR_DURABILITY_INDEX and its source DURABILITY_INDEX");
+    }
+
+    @Test
+    void v2DerivedCriterionReadingAnUnknownSourceIsRefused() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        AttributeConfig derived = tv.getAttributesConfig().getAttributeConfigByKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+        List<String> sources = derived.getScoreSources();
+        try {
+            derived.setScoreSources(List.of("NOT_AN_ATTRIBUTE"));
+            assertThat(ImpactScoreMethodology.validate(tv.getImpactScoreConfig(), tv))
+                .anyMatch(error -> error.contains("reads NOT_AN_ATTRIBUTE, which is not an attribute"));
+        } finally {
+            derived.setScoreSources(sources);
+        }
+    }
+
+    /** GOU-2041: the derived criterion reads the durability index first, never from merchant data itself. */
+    @Test
+    void repairabilityOrDurabilityCriterionReadsDurabilityFirst() {
+        for (String id : List.of("tv", "washing-machine")) {
+            VerticalConfig vertical = verticalsConfigService.getConfigById(id);
+            AttributeConfig derived = vertical.getAttributesConfig()
+                .getAttributeConfigByKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(derived).as("derived criterion of %s", id).isNotNull();
+            assertThat(derived.isAsScore()).isTrue();
+            assertThat(derived.getScoreSources()).containsExactly("DURABILITY_INDEX", "REPAIRABILITY_INDEX");
+            assertThat(derived.getSynonyms()).as("never read from merchant data").isEmpty();
+            assertThat(derived.getScoring().getNormalization().getMethod().name()).isEqualTo("MINMAX_FIXED");
+            assertThat(derived.getScoring().getNormalization().getParams().getFixedMin()).isEqualTo(0.0);
+            assertThat(derived.getScoring().getNormalization().getParams().getFixedMax()).isEqualTo(10.0);
+            assertThat(vertical.getImpactScoreConfig().getCriteriasPonderation())
+                .as("V1 matrix of %s unchanged", id).containsKey("REPAIRABILITY_INDEX")
+                .doesNotContainKey("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(vertical.getAvailableImpactScoreCriterias()).as("V1 DATA_QUALITY of %s unchanged", id)
+                .doesNotContain("REPAIRABILITY_OR_DURABILITY_INDEX");
+            assertThat(vertical.getAttributesConfig().getAttributeConfigByKey("REPAIRABILITY_INDEX").getScoring()
+                .getNormalization().getMethod().name()).as("V1 REPAIRABILITY_INDEX scale").isEqualTo("MINMAX_OBSERVED");
+        }
+    }
+
+    @Test
+    void v2CoverageThresholdOutsideZeroOneIsRefused() {
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(0.0), "minRealWeightCoverage");
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(1.2), "minRealWeightCoverage");
+        assertV2Refused(v2 -> v2.setMinRealWeightCoverage(null), "minRealWeightCoverage");
+    }
+
+    @Test
+    void v2BlankExcludedEprelCategoryIsRefused() {
+        assertV2Refused(v2 -> v2.setExcludedEprelCategories(Arrays.asList("MONITOR", " ")),
+            "excludedEprelCategories");
+    }
+
+    /**
+     * GOU-2165: only the tv vertical excludes EPREL categories, the monitors and professional displays EPREL files
+     * apart from televisions.
+     */
+    @Test
+    void onlyTvExcludesEprelCategories() {
+        assertThat(verticalsConfigService.getConfigsWithoutDefault()).allSatisfy(config -> {
+            List<String> excluded = config.getImpactScoreConfig().getV2().getExcludedEprelCategories();
+            if ("tv".equals(config.getId())) {
+                assertThat(excluded).containsExactly("MONITOR", "PROFESSIONAL_DISPLAY", "SIGNAGE");
+            } else {
+                assertThat(excluded).as("excludedEprelCategories of %s", config.getId()).isEmpty();
+            }
+        });
+    }
+
+    @Test
+    void v2MinRatedForPositionLabelBelowOneIsRefused() {
+        assertV2Refused(v2 -> v2.setMinRatedForPositionLabel(0), "minRatedForPositionLabel");
+    }
+
+    @Test
+    void v2PositionLabelsNotStrictlyDecreasingAreRefused() {
+        assertV2Refused(v2 -> v2.setPositionLabels(List.of(
+            new ImpactScorePositionLabel("excellent", 0.5),
+            new ImpactScorePositionLabel("good", 0.5),
+            new ImpactScorePositionLabel("poor", 0.0))), "strictly decrease");
+    }
+
+    @Test
+    void v2PositionLabelsNotEndingAtZeroAreRefused() {
+        assertV2Refused(v2 -> v2.setPositionLabels(List.of(
+            new ImpactScorePositionLabel("excellent", 0.9),
+            new ImpactScorePositionLabel("good", 0.5))), "last threshold must be 0");
+    }
+
+    @Test
+    void invalidV2BlockFailsOnlyOnceActive() {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, v2 -> v2.setMinRealWeightCoverage(null));
+        // Merged dark: refused by this test, not blocking at startup while V1 is active
+        assertThat(ImpactScoreMethodology.validate(config, tv)).isNotEmpty();
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).isEmpty();
+
+        config.setMethodologyVersionOverride(2);
+        assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).isNotEmpty();
+    }
+
+    private static void assertV2Refused(Consumer<ImpactScoreV2Config> breaker, String expectedError) {
+        VerticalConfig tv = verticalsConfigService.getConfigById("tv");
+        ImpactScoreConfig config = impactScoreWithV2(tv, breaker);
+        assertThat(ImpactScoreMethodology.validate(config, tv))
+            .as("v2 block broken by the case expecting '%s'", expectedError)
+            .anyMatch(error -> error.contains(expectedError));
+    }
+
+    /**
+     * A V1 configuration of the vertical with a valid {@code v2} block (V1 matrix without DATA_QUALITY, normalised),
+     * then changed by {@code customizer}.
+     */
+    private static ImpactScoreConfig impactScoreWithV2(VerticalConfig vertical, Consumer<ImpactScoreV2Config> customizer) {
+        Map<String, Double> v1 = vertical.getImpactScoreConfig().getCriteriasPonderation();
+        Map<String, Double> v2Weights = new LinkedHashMap<>();
+        v1.forEach((key, weight) -> {
+            if (!"DATA_QUALITY".equals(key)) {
+                v2Weights.put(key, weight);
+            }
+        });
+        double sum = v2Weights.values().stream().mapToDouble(Double::doubleValue).sum();
+        v2Weights.replaceAll((key, weight) -> weight / sum);
+
+        ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+        v2.setCriteriasPonderation(v2Weights);
+        v2.setMinRealWeightCoverage(0.6);
+        v2.setPositionLabels(new ArrayList<>(List.of(
+            new ImpactScorePositionLabel("excellent", 0.9),
+            new ImpactScorePositionLabel("good", 0.67),
+            new ImpactScorePositionLabel("fair", 0.33),
+            new ImpactScorePositionLabel("poor", 0.0))));
+        customizer.accept(v2);
+
+        ImpactScoreConfig config = new ImpactScoreConfig();
+        config.setCriteriasPonderation(new HashMap<>(v1));
+        config.setV2(v2);
+        return config;
+    }
+
+    /** Moves the weight of the first criterion of the v2 matrix to {@code key}, keeping the sum at 1. */
+    private static void moveWeight(ImpactScoreV2Config v2, String key) {
+        String first = v2.getCriteriasPonderation().keySet().iterator().next();
+        v2.getCriteriasPonderation().put(key, v2.getCriteriasPonderation().remove(first));
+    }
+
     private static void assertAttributeReferences(Collection<String> attributes, Set<String> definedKeys, String section) {
         List<String> missing = attributes == null ? List.of() : attributes.stream()
             .filter(key -> !definedKeys.contains(key))
@@ -299,6 +708,13 @@ class VerticalYamlValidationTest {
             .isCloseTo(1.0d, within(1e-6));
 
         assertParticipatingScoresAreWeighted(config, sourceName, weights.keySet());
+
+        assertThat(ImpactScoreMethodology.validate(config.getImpactScoreConfig(), config))
+            .as("ImpactScore methodology version and v2 block must be valid (%s)", sourceName)
+            .isEmpty();
+        assertThat(config.getImpactScoreConfig().getMethodologyRevision())
+            .as("Methodology revision is computed at load time (%s)", sourceName)
+            .matches("[0-9a-f]{8}");
     }
 
     @SuppressWarnings("unchecked")

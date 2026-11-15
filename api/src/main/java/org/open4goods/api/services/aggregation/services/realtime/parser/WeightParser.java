@@ -4,11 +4,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,24 +28,44 @@ import org.slf4j.LoggerFactory;
  * <p>
  * <h3>Rule levels</h3>
  * <ol>
+ *   <li><b>Compound rule</b>: only a true compound is added up, i.e. an integer kilogram part
+ *       immediately followed by a gram part below 1000 ("1 kg 250 g" = 1.25 kg). An equivalent
+ *       given in parentheses ("3.5 kg (3500 g)") or a second value of the same magnitude
+ *       ("3 kg 2 kg", "1 kg 1500 g") is not added: the explicit unit rule applies.</li>
  *   <li><b>Explicit unit rules</b>: if the raw string contains an explicit unit ("kg", "g", "mg",
- *       "lb", "oz" ...), the parser will trust it (with sanity checks against configured bounds).</li>
+ *       "lb", "oz" ...), the parser will trust it (with sanity checks against configured bounds).
+ *       When several explicit values are found, a value inside the plausible range wins over one
+ *       outside it, then the first one in the string wins.</li>
  *   <li><b>Implicit unit rules</b>: if the raw string is numeric (or contains numeric tokens),
  *       the parser will infer the most plausible unit by trying several interpretations
  *       (kg/g/mg/…) and selecting the one fitting best inside plausible bounds.</li>
  *   <li><b>Category (vertical) bounds</b>: plausible ranges (min/max in kg) can be configured per
- *       vertical id (e.g. TVs will rarely exceed 200kg). If a raw numeric value does not fit in
- *       range as kg but fits as grams, grams will be selected.</li>
- *   <li><b>Datasource default unit</b>: when no unit is present, a datasource-specific default
- *       unit can be configured (e.g. "amazon" values are in grams), which strongly influences
- *       inference.</li>
+ *       vertical (e.g. TVs will rarely exceed 200kg), [0.001 ; 2000] kg otherwise. If a raw numeric
+ *       value does not fit in range as kg but fits as grams, grams will be selected.</li>
+ *   <li><b>Default unit</b>: when no unit is present, kilograms are favoured during inference.</li>
  * </ol>
  *
+ * <h3>Normalization and rejections</h3>
+ * <ul>
+ *   <li>Thousands groups are joined before extraction: "1 200 g" and "1 200,5 g" (space, no-break
+ *       space or thin space between groups of 3 digits) read as 1200 g and 1200.5 g.</li>
+ *   <li>A dash between two digits, or glued in front of a digit, <b>anywhere</b> in the value
+ *       rejects the whole value: "10-12 kg" and "10 - 12 kg" are ranges, not one measured weight,
+ *       and "45 kg, 60-85-60 cm" or "45 kg (ref. WM-1234)" give {@code null} too. Another source of
+ *       the same attribute may still provide a value.</li>
+ *   <li>A range written in words keeps the value that carries the unit, through the explicit unit
+ *       rule: "15 à 30 kg" gives 30, "+ de 100 kg" gives 100. This is the common
+ *       format of the "TRANCHE DE POIDS" synonym, so it is deliberately not rejected.</li>
+ *   <li>A negative value ("-5 kg") is rejected, and so is any result that is not strictly positive
+ *       once rounded to the output scale ("0 kg"), on every parsing path.</li>
+ *   <li>Lower plausibility bound: a weight under {@code minKg / 5} of the vertical is rejected,
+ *       symmetric to the 5x max check. It catches misreads such as "1.200 g" (thousands dot read as
+ *       a decimal, 0.0012 kg) or "0 à 100 g" (0.1 kg) on a TV (minKg 1, floor 0.2 kg), while a
+ *       0.1 kg smartphone (minKg 0.08, floor 0.016 kg) stays accepted.</li>
+ * </ul>
+ *
  * <p>
- * The configuration is exposed as a simple POJO ({@link WeightParserConfiguration}) so it can be
- * bound from YAML/JSON if desired.
- * <p>
- * Specific vertical configurations (min/max range) are now managed in {@link VerticalConfig#getParsers()}.
+ * The only configuration is the plausible range of each vertical, in {@link VerticalConfig#getParsers()}.
  * Unresolvable or unsafe weights (exceeding 5x max range) are rejected with a WARN log.
  */
 public class WeightParser extends AttributeParser {
@@ -79,35 +96,8 @@ public class WeightParser extends AttributeParser {
         /**
          * A plausible range for a weight (in kg).
          */
-        public static final class WeightRangeKg {
-                private double minKg = 0.0;
-                private double maxKg = 10_000.0;
-
-                public WeightRangeKg() {
-                }
-
-                public WeightRangeKg(double minKg, double maxKg) {
-                        this.minKg = minKg;
-                        this.maxKg = maxKg;
-                }
-
-                public double getMinKg() {
-                        return minKg;
-                }
-
-                public void setMinKg(double minKg) {
-                        this.minKg = minKg;
-                }
-
-                public double getMaxKg() {
-                        return maxKg;
-                }
-
-                public void setMaxKg(double maxKg) {
-                        this.maxKg = maxKg;
-                }
-
-                public boolean contains(double kg) {
+        private record WeightRangeKg(double minKg, double maxKg) {
+                boolean contains(double kg) {
                         return kg >= minKg && kg <= maxKg;
                 }
         }
@@ -120,135 +110,24 @@ public class WeightParser extends AttributeParser {
         }
 
         /**
-         * Parser configuration (bindable from YAML/JSON).
+         * Plausible range used when the vertical configures none: most product weights fall in [1 g ; 2000 kg].
          */
-        public static class WeightParserConfiguration {
-                /**
-                 * Default unit used as a hint when unit is absent (still combined with range inference).
-                 */
-                private WeightUnit defaultUnitHint = WeightUnit.KILOGRAM;
-
-                /**
-                 * Default unit hint by datasource name (lower-cased). Use "all" for global.
-                 */
-                private Map<String, WeightUnit> defaultUnitHintByDatasource = new HashMap<>();
-
-                /**
-                 * Plausible ranges (in kg) by vertical id (lower-cased). Use "all" for global.
-                 */
-                private Map<String, WeightRangeKg> plausibleRangeByVerticalId = new HashMap<>();
-
-                /**
-                 * If multiple sources disagree by more than this tolerance (in kg), a warning is logged.
-                 */
-                private double conflictToleranceKg = 0.25;
-
-                /**
-                 * Output scale used before stripping trailing zeros.
-                 */
-                private int outputScale = 6;
-
-                public WeightParserConfiguration() {
-                }
-
-                public WeightUnit getDefaultUnitHint() {
-                        return defaultUnitHint;
-                }
-
-                public void setDefaultUnitHint(WeightUnit defaultUnitHint) {
-                        this.defaultUnitHint = defaultUnitHint;
-                }
-
-                public Map<String, WeightUnit> getDefaultUnitHintByDatasource() {
-                        return defaultUnitHintByDatasource;
-                }
-
-                public void setDefaultUnitHintByDatasource(Map<String, WeightUnit> defaultUnitHintByDatasource) {
-                        this.defaultUnitHintByDatasource = defaultUnitHintByDatasource == null ? new HashMap<>()
-                                        : new HashMap<>(defaultUnitHintByDatasource);
-                }
-
-                public Map<String, WeightRangeKg> getPlausibleRangeByVerticalId() {
-                        return plausibleRangeByVerticalId;
-                }
-
-                public void setPlausibleRangeByVerticalId(Map<String, WeightRangeKg> plausibleRangeByVerticalId) {
-                        this.plausibleRangeByVerticalId = plausibleRangeByVerticalId == null ? new HashMap<>()
-                                        : new HashMap<>(plausibleRangeByVerticalId);
-                }
-
-                public double getConflictToleranceKg() {
-                        return conflictToleranceKg;
-                }
-
-                public void setConflictToleranceKg(double conflictToleranceKg) {
-                        this.conflictToleranceKg = conflictToleranceKg;
-                }
-
-                public int getOutputScale() {
-                        return outputScale;
-                }
-
-                public void setOutputScale(int outputScale) {
-                        this.outputScale = outputScale;
-                }
-
-                public WeightRangeKg resolveRangeForVertical(VerticalConfig verticalConfig) {
-                        final String vid = verticalConfig == null || verticalConfig.getId() == null ? "all"
-                                        : verticalConfig.getId().trim().toLowerCase(Locale.ROOT);
-                        if (plausibleRangeByVerticalId.containsKey(vid)) {
-                                return plausibleRangeByVerticalId.get(vid);
-                        }
-                        return plausibleRangeByVerticalId.getOrDefault("all", new WeightRangeKg());
-                }
-
-                public WeightUnit resolveDefaultUnitHintForDatasource(String datasource) {
-                        final String ds = datasource == null ? "all" : datasource.trim().toLowerCase(Locale.ROOT);
-                        if (defaultUnitHintByDatasource.containsKey(ds)) {
-                                return defaultUnitHintByDatasource.get(ds);
-                        }
-                        return defaultUnitHintByDatasource.getOrDefault("all", defaultUnitHint);
-                }
-        }
+        private static final WeightRangeKg DEFAULT_RANGE = new WeightRangeKg(0.001, 2000.0);
 
         /**
-         * Global configuration, designed to be overridden by application bootstrap (YAML binding etc.).
+         * Unit favoured when a value carries none (range inference may still pick another one).
          */
-        private static volatile WeightParserConfiguration GLOBAL_CONFIG = defaultConfiguration();
+        private static final WeightUnit DEFAULT_UNIT_HINT = WeightUnit.KILOGRAM;
 
         /**
-         * Replaces the global configuration.
-         *
-         * @param configuration non-null
+         * Two high-confidence sources further apart than this (in kg) are logged as a conflict.
          */
-        public static void setGlobalConfiguration(WeightParserConfiguration configuration) {
-                GLOBAL_CONFIG = Objects.requireNonNull(configuration, "configuration");
-        }
+        private static final double CONFLICT_TOLERANCE_KG = 0.25;
 
         /**
-         * Returns the current global configuration.
+         * Output scale used before stripping trailing zeros.
          */
-        public static WeightParserConfiguration getGlobalConfiguration() {
-                return GLOBAL_CONFIG;
-        }
-
-
-        /**
-         * Provides sensible defaults.
-         */
-        public static WeightParserConfiguration defaultConfiguration() {
-                WeightParserConfiguration cfg = new WeightParserConfiguration();
-
-                // Global plausible range: most product weights fall in [1g ; 2000kg]
-                cfg.plausibleRangeByVerticalId.put("all", new WeightRangeKg(0.001, 2000.0));
-
-                cfg.defaultUnitHint = WeightUnit.KILOGRAM;
-                cfg.defaultUnitHintByDatasource.put("all", WeightUnit.KILOGRAM);
-
-                cfg.conflictToleranceKg = 0.25;
-                cfg.outputScale = 6;
-                return cfg;
-        }
+        private static final int OUTPUT_SCALE = 6;
 
         // ----------------------------
         // Parsing
@@ -275,9 +154,9 @@ public class WeightParser extends AttributeParser {
                                 // Safety check: if weight is wildly out of bounds (e.g. > 5x max), we might reject or warn.
                                 // Logic moved inside parseInternal/inference, but we can double-check here against absolute safety.
                                 WeightRangeKg range = resolveEffectiveRange(verticalConfig);
-                                if (w.kilograms() > range.getMaxKg() * 5.0) {
+                                if (w.kilograms() > range.maxKg() * 5.0) {
                                 	LOGGER.warn("Rejected weight {}kg for '{}' (datasource={}): exceeds 5x max configured ({}kg)", 
-                                			formatKg(w.kilograms()), attribute.getName(), datasource, range.getMaxKg());
+                                			formatKg(w.kilograms()), attribute.getName(), datasource, range.maxKg());
                                 	continue;
                                 }
                                 
@@ -302,7 +181,7 @@ public class WeightParser extends AttributeParser {
                                 break;
                         }
                         double diff = Math.abs(other.kilograms() - best.kilograms());
-                        if (diff > GLOBAL_CONFIG.getConflictToleranceKg()) {
+                        if (diff > CONFLICT_TOLERANCE_KG) {
                                 LOGGER.debug(
                                                 "Weight conflict for attribute '{}': best={}kg ({}, conf={}) vs {}kg ({}, conf={})",
                                                 attribute.getName(), formatKg(best.kilograms()), best.datasource(),
@@ -322,32 +201,7 @@ public class WeightParser extends AttributeParser {
                 ParsedWeight w = parseInternal(value, verticalConfig, "all");
                 if (w != null) {
                     WeightRangeKg range = resolveEffectiveRange(verticalConfig);
-                    if (w.kilograms() > range.getMaxKg() * 5.0) {
-                        return null;
-                    }
-                }
-                return w == null ? null : formatKg(w.kilograms());
-        }
-
-        /**
-         * Convenience entry point allowing datasource-aware parsing when the unit is implicit.
-         * <p>
-         * This is especially useful when a datasource is known to provide raw numeric weights in
-         * a given unit (for example grams).
-         *
-         * @param value         raw value
-         * @param attributeConfig attribute configuration (currently not used but kept for API symmetry)
-         * @param verticalConfig vertical configuration (used for plausible bounds)
-         * @param datasource     datasource/store name (used for default unit hint)
-         * @return the weight in kilograms (string), or {@code null} if not parsable
-         * @throws ParseException unused for now (best-effort parsing)
-         */
-        public String parse(String value, AttributeConfig attributeConfig, VerticalConfig verticalConfig, String datasource)
-                        throws ParseException {
-                ParsedWeight w = parseInternal(value, verticalConfig, datasource);
-                if (w != null) {
-                    WeightRangeKg range = resolveEffectiveRange(verticalConfig);
-                    if (w.kilograms() > range.getMaxKg() * 5.0) {
+                    if (w.kilograms() > range.maxKg() * 5.0) {
                         return null;
                     }
                 }
@@ -358,18 +212,46 @@ public class WeightParser extends AttributeParser {
         // Internals
         // ----------------------------
 
-        private static final Pattern NUMBER_PATTERN = Pattern.compile("(-?\\d+(?:[\\.,]\\d+)?)");
+        // Unsigned on purpose: negative values and ranges are rejected upfront (RANGE_OR_SIGNED_PATTERN).
+        private static final Pattern NUMBER_PATTERN = Pattern.compile("(\\d+(?:[\\.,]\\d+)?)");
 
         // Find explicit unit occurrences, possibly surrounded by spaces.
         private static final Pattern EXPLICIT_UNIT_PATTERN = Pattern.compile(
-                        "(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?|g|gr|grammes?|grams?|mg|milligrammes?|milligrams?|lb|lbs|pounds?|oz|ounces?)\\b");
+                        "(?i)(\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?|g|gr|grammes?|grams?|mg|milligrammes?|milligrams?|lb|lbs|pounds?|oz|ounces?)\\b");
 
-        // Compound forms like "1 kg 250 g".
-        private static final Pattern KG_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?)\\b");
-        private static final Pattern G_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(g|gr|grammes?|grams?)\\b");
-        private static final Pattern MG_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(mg|milligrammes?|milligrams?)\\b");
+        // True compound "1 kg 250 g": integer kg part, then only whitespace, then a gram part below 1000.
+        private static final Pattern COMPOUND_PATTERN = Pattern.compile(
+                        "(?i)(?<![\\d.])(\\d+)\\s*(?:kilogrammes?|kilograms?|kgs|kg)\\s*(\\d{1,3}(?:\\.\\d+)?)\\s*(?:grammes?|grams?|gr|g)\\b");
 
+        // Groups of 3 digits separated by a space ("1 200", "12 345 678"), once Unicode spaces are normalized.
+        private static final Pattern THOUSANDS_PATTERN = Pattern.compile("(?<![\\d.,])\\d{1,3}(?: \\d{3})+(?!\\d)");
+
+        // A range ("10-12", "10 - 12", any dash) or a number with a dash or minus sign (U+2212) glued to it ("-5").
+        // A weight below minKg / LOWER_BOUND_DIVISOR is rejected (mirror of the 5x max check).
+        private static final double LOWER_BOUND_DIVISOR = 5.0;
+
+        private static final Pattern RANGE_OR_SIGNED_PATTERN = Pattern.compile("\\d\\s*[\\p{Pd}\\u2212]\\s*\\d|[\\p{Pd}\\u2212]\\d");
+
+        /**
+         * Parses one raw value and keeps the result only when it is a strictly positive weight once
+         * rounded to the output scale, so that no parsing path can yield a zero or negative weight.
+         */
         private ParsedWeight parseInternal(String rawValue, VerticalConfig verticalConfig, String datasource) {
+                final ParsedWeight weight = parseCandidate(rawValue, verticalConfig, datasource);
+                if (weight == null || !isStrictlyPositive(weight.kilograms())) {
+                        return null;
+                }
+                // Lower plausibility bound, symmetric to the 5x max check: below minKg / 5 the value is a misread.
+                final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+                if (weight.kilograms() < range.minKg() / LOWER_BOUND_DIVISOR) {
+                        LOGGER.debug("Rejected weight '{}' (datasource={}): {}kg is below min/{} ({}kg)", rawValue, datasource,
+                                        formatKg(weight.kilograms()), LOWER_BOUND_DIVISOR, range.minKg());
+                        return null;
+                }
+                return weight;
+        }
+
+        private ParsedWeight parseCandidate(String rawValue, VerticalConfig verticalConfig, String datasource) {
                 if (rawValue == null) {
                         return null;
                 }
@@ -379,10 +261,15 @@ public class WeightParser extends AttributeParser {
                         return null;
                 }
 
-                final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
-                final WeightUnit datasourceHint = GLOBAL_CONFIG.resolveDefaultUnitHintForDatasource(datasource);
+                // A range or a negative value is never a single measured weight (see class Javadoc).
+                if (RANGE_OR_SIGNED_PATTERN.matcher(normalized).find()) {
+                        LOGGER.debug("Rejected weight '{}' (datasource={}): range or negative value", rawValue, datasource);
+                        return null;
+                }
 
-                // Level 1: compound forms like "1 kg 250 g" or "500 g 250 mg".
+                final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
+
+                // Level 1: true compound forms like "1 kg 250 g".
                 ParsedWeight compound = parseCompound(normalized, range, datasource);
                 if (compound != null) {
                         return compound;
@@ -409,7 +296,7 @@ public class WeightParser extends AttributeParser {
                                 continue;
                         }
                         number = Double.parseDouble(token);
-                        ParsedWeight candidate = inferUnit(number, hasDecimal, range, datasourceHint, rawValue, datasource);
+                        ParsedWeight candidate = inferUnit(number, hasDecimal, range, DEFAULT_UNIT_HINT, rawValue, datasource);
                         if (candidate == null) {
                                 continue;
                         }
@@ -428,7 +315,7 @@ public class WeightParser extends AttributeParser {
         			return new WeightRangeKg(wpc.getMinKg(), wpc.getMaxKg());
         		}
         	}
-        	return GLOBAL_CONFIG.resolveRangeForVertical(verticalConfig);
+        	return DEFAULT_RANGE;
         }
 
         private static String normalize(String raw) {
@@ -438,6 +325,10 @@ public class WeightParser extends AttributeParser {
                 s = Normalizer.normalize(s, Normalizer.Form.NFKC);
                 s = s.replace('\u00A0', ' '); // NBSP
                 s = s.replace('\u202F', ' '); // narrow NBSP
+                s = s.replace('\u2009', ' '); // thin space
+
+                // Join thousands groups ("1 200" -> "1200") before the comma becomes a decimal point.
+                s = THOUSANDS_PATTERN.matcher(s).replaceAll(m -> m.group().replace(" ", ""));
 
                 // Common separators.
                 s = s.replace(',', '.');
@@ -468,45 +359,22 @@ public class WeightParser extends AttributeParser {
                 return numbers;
         }
 
+        /**
+         * Adds up a true compound ("1 kg 250 g", see COMPOUND_PATTERN). Returns {@code null}
+         * otherwise, so that the explicit unit rule picks a single value.
+         */
         private static ParsedWeight parseCompound(String normalized, WeightRangeKg range, String datasource) {
-                Double kgPart = extractSingleUnit(normalized, KG_PART_PATTERN);
-                Double gPart = extractSingleUnit(normalized, G_PART_PATTERN);
-                Double mgPart = extractSingleUnit(normalized, MG_PART_PATTERN);
-
-                if (kgPart == null && gPart == null && mgPart == null) {
+                Matcher m = COMPOUND_PATTERN.matcher(normalized);
+                if (!m.find()) {
                         return null;
                 }
 
-                double kg = 0.0;
-                if (kgPart != null) {
-                        kg += WeightUnit.KILOGRAM.toKg(kgPart);
-                }
-                if (gPart != null) {
-                        kg += WeightUnit.GRAM.toKg(gPart);
-                }
-                if (mgPart != null) {
-                        kg += WeightUnit.MILLIGRAM.toKg(mgPart);
-                }
+                double kg = WeightUnit.KILOGRAM.toKg(Double.parseDouble(m.group(1)))
+                                + WeightUnit.GRAM.toKg(Double.parseDouble(m.group(2)));
 
                 double conf = range.contains(kg) ? 0.99 : 0.85;
                 String reason = "compound-units";
                 return new ParsedWeight(kg, conf, WeightUnit.KILOGRAM, reason, normalized, datasource);
-        }
-
-        private static Double extractSingleUnit(String normalized, Pattern p) {
-                Matcher m = p.matcher(normalized);
-                if (!m.find()) {
-                        return null;
-                }
-                String token = m.group(1);
-                if (token == null) {
-                        return null;
-                }
-                token = token.trim().replace(',', '.');
-                if (!IdHelper.isPureDouble(token)) {
-                        return null;
-                }
-                return Double.parseDouble(token);
         }
 
         private static ParsedWeight parseExplicitUnit(String normalized, WeightRangeKg range, String datasource) {
@@ -541,11 +409,8 @@ public class WeightParser extends AttributeParser {
                                 continue;
                         }
 
-                        // Prefer higher confidence; if tied, prefer the smallest plausible weight.
+                        // Prefer higher confidence (inside the plausible range); if tied, keep the first explicit value.
                         if (candidate.confidence() > best.confidence()) {
-                                best = candidate;
-                        } else if (Double.compare(candidate.confidence(), best.confidence()) == 0
-                                        && candidate.kilograms() < best.kilograms()) {
                                 best = candidate;
                         }
                 }
@@ -646,11 +511,11 @@ public class WeightParser extends AttributeParser {
                 }
 
                 // Penalize obviously absurd weights.
-                if (kg > range.getMaxKg() * 5) {
+                if (kg > range.maxKg() * 5) {
                         score -= 0.75;
                 }
 
-                if (kg < range.getMinKg() / 100) {
+                if (kg < range.minKg() / 100) {
                         score -= 0.50;
                 }
 
@@ -661,16 +526,21 @@ public class WeightParser extends AttributeParser {
                 if (range.contains(kg)) {
                         return 0.0;
                 }
-                double nearest = kg < range.getMinKg() ? range.getMinKg() : range.getMaxKg();
+                double nearest = kg < range.minKg() ? range.minKg() : range.maxKg();
                 double denom = Math.max(1e-9, nearest);
                 return Math.abs(kg - nearest) / denom;
+        }
+
+        private static boolean isStrictlyPositive(double kg) {
+                return Double.isFinite(kg) && BigDecimal.valueOf(kg)
+                                .setScale(OUTPUT_SCALE, RoundingMode.HALF_UP).signum() > 0;
         }
 
         private static String formatKg(double kg) {
                 if (!Double.isFinite(kg)) {
                         return null;
                 }
-                BigDecimal bd = BigDecimal.valueOf(kg).setScale(GLOBAL_CONFIG.getOutputScale(), RoundingMode.HALF_UP)
+                BigDecimal bd = BigDecimal.valueOf(kg).setScale(OUTPUT_SCALE, RoundingMode.HALF_UP)
                                 .stripTrailingZeros();
                 return bd.toPlainString();
         }

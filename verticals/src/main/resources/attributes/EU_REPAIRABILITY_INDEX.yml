@@ -1,0 +1,25 @@
+# ============================================================================
+# EU_REPAIRABILITY_INDEX — EU repairability index (GOU-1891)
+# Source: EPREL, group smartphonestablets20231669 (Reg. (EU) 2023/1669). Scale 1.00 to 5.00, not the French index out of 10.
+# ============================================================================
+key: "EU_REPAIRABILITY_INDEX"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-tools"
+name:
+  default: "EU repairability index"
+  fr: "Indice de réparabilité européen"
+suffix:
+  default: "/5"
+  fr: "/5"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  eprel:
+    - "REPAIRABILITYINDEX"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

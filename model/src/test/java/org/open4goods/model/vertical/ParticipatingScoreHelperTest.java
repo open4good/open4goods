@@ -128,4 +128,46 @@ class ParticipatingScoreHelperTest {
 
         assertThat(aggregates).doesNotContainKey("AGG_ZERO");
     }
+
+    /**
+     * GOU-2041: in V2 a derived criterion takes the place of the source it replaces in a composite, while V1 keeps
+     * the source.
+     */
+    @Test
+    void v2DerivedCriterionReplacesItsSourceInComposites() {
+        AttributeConfig source = new AttributeConfig();
+        source.setKey("SOURCE");
+        source.setAsScore(true);
+        source.setParticipateInScores(Set.of("AGG"));
+
+        AttributeConfig derived = new AttributeConfig();
+        derived.setKey("DERIVED");
+        derived.setAsScore(true);
+        derived.setScoreSources(List.of("OTHER_SOURCE", "SOURCE"));
+        derived.setParticipateInScores(Set.of("AGG"));
+
+        AttributeConfig other = new AttributeConfig();
+        other.setKey("OTHER");
+        other.setAsScore(true);
+        other.setParticipateInScores(Set.of("AGG"));
+
+        ImpactScoreV2Config v2 = new ImpactScoreV2Config();
+        v2.setCriteriasPonderation(Map.of("DERIVED", 0.25, "OTHER", 0.75));
+        ImpactScoreConfig impactScoreConfig = new ImpactScoreConfig();
+        impactScoreConfig.setCriteriasPonderation(Map.of("SOURCE", 0.5, "OTHER", 0.5));
+        impactScoreConfig.setV2(v2);
+
+        VerticalConfig verticalConfig = new VerticalConfig();
+        verticalConfig.setImpactScoreConfig(impactScoreConfig);
+        verticalConfig.setAttributesConfig(new AttributesConfig(List.of(source, derived, other)));
+        verticalConfig.setAvailableImpactScoreCriterias(List.of("SOURCE", "OTHER"));
+
+        assertThat(ParticipatingScoreHelper.buildNormalizedParticipatingScores(verticalConfig).get("AGG"))
+                .containsOnlyKeys("SOURCE", "OTHER");
+
+        impactScoreConfig.setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
+        assertThat(ParticipatingScoreHelper.buildNormalizedParticipatingScores(verticalConfig).get("AGG"))
+                .containsOnlyKeys("DERIVED", "OTHER")
+                .containsEntry("DERIVED", 0.25);
+    }
 }

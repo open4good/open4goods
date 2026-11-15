@@ -24,6 +24,86 @@ front:
   max-page-size: 50
   # Elasticsearch index.max_result_window: (pageNumber + 1) * pageSize above it gives a 400
   max-result-window: 10000
+  # Global search relevance (/rechercher), see README "Global search relevance" (GOU-2029).
+  global-search:
+    # A product is an accessory when one of these terms starts its offer name (first 3 words).
+    # Plural (+s) and unaccented forms are matched too. Ambiguous words (lampe, pompe, carte,
+    # thermostat, brosse...) are left out or narrowed so that a real product is never set apart:
+    # "thermostat" only counts followed by "pour" or an appliance name ("thermostat connecté" is a
+    # real product). Besides these head terms, when the query does not use the words itself, a name
+    # is an accessory with "pour <query term>", "<term above> de <query term>" or "compatible"
+    # (GOU-2077); "Lave-linge pour petits espaces" stays a product.
+    accessory-terms:
+      - accessoire
+      - adaptateur
+      - amortisseur
+      - balconnet
+      - batterie
+      - brosse pour
+      - câble
+      - capsule
+      - chambre à air
+      - chargeur
+      - clayette
+      - coque
+      - courroie
+      - coussinet
+      - détartrant
+      - diffuseur
+      - dosette
+      - embout
+      - étui
+      - filtre
+      - fixation
+      - foret
+      - frein
+      - gaine
+      - garde-boue
+      - housse
+      - insertion
+      - joint
+      - lame
+      - meuble tv
+      - module
+      - moteur
+      - papier cuisson
+      - pièce
+      - pneu
+      - poignée
+      - protection d'écran
+      - protège écran
+      - résistance
+      - sac aspirateur
+      - support
+      - télécommande
+      - thermostat pour
+      - thermostat réfrigérateur
+      - thermostat frigo
+      - thermostat congélateur
+      - thermostat lave-linge
+      - thermostat lave-vaisselle
+      - thermostat four
+      - thermostat sèche-linge
+      - tube
+      - verre trempé
+    # Expressions that mark an accessory anywhere in the name (GOU-2235), for names without a category
+    # whose object comes after the 3rd word.
+    accessory-phrases:
+      - meuble tv
+      - kit calfeutrage
+      - kit d'étanchéité
+      - panneau de lave-vaisselle
+      - pour pièces
+    accessory-head-words: 3
+    accessory-negative-boost: 0.1
+    accessory-results-limit: 8
+    offers-count-weight: 1.0
+    phrase-boost: 2.0
+    phrase-slop: 1
+    long-tail-over-read: 3
+    long-tail-max-candidates: 1200
+    min-title-words: 3
+    min-title-word-length: 3
   cache:
     path: ./cache
     one-minute-ttl: 1m
@@ -74,6 +154,21 @@ front:
   rate-limit:
     anonymous: 100
     authenticated: 1000
+
+  # Distinct merchant domains with an active offer (GOU-2037), computed hourly from the api
+  # GET /merchants/offer-activity (same base URL and key as affiliation-partners). Affiliation
+  # networks (excluded-domains, see MerchantDomainsProperties) are never counted. datasource-domains
+  # gives the domain of a datasource whose partner has no portal URL and whose name is not a domain.
+  merchant-domains:
+    datasource-domains:
+      - datasource: "Carrefour - marketplace"
+        domain: carrefour.fr
+      - datasource: "Carrefour - non alimentaire"
+        domain: carrefour.fr
+      - datasource: "Oscaro FR"
+        domain: oscaro.com
+      - datasource: "Vevor FR"
+        domain: vevor.fr
 
   # Offers older than front.offers.max-age are not served (GOU-1385). Left unset, it follows the api
   # rule (ProductRepository.VALID_UNTIL_DURATION, 2 days); override with e.g. FRONT_OFFERS_MAX_AGE=3d.
@@ -163,6 +258,8 @@ management:
 
 open-data-config:
   generation-enabled: false
+  # Public base URL of the dataset downloads (lot 0c: https://data.nudger.fr). Empty keeps api.resource-root-path.
+  public-base-url: ${OPEN_DATA_PUBLIC_BASE_URL:}
 
 google-indexation:
   enabled: ${GOOGLE_INDEXATION_ENABLED:false}

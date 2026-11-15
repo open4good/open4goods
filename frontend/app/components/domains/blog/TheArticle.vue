@@ -5,10 +5,14 @@ import { useHead, useRequestURL, useSeoMeta } from '#imports'
 import { useLocalePath } from '#i18n'
 import type { BlogPostDto } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
+import {
+  splitBlogBody,
+  type BlogBodyPart,
+} from '~~/shared/utils/blog-product-widget'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 
-import BlogOfferBlocks from '~/components/domains/blog/BlogOfferBlocks.vue'
+import GuideProductGrid from '~/components/product/GuideProductGrid.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
 
 interface BlogArticle extends BlogPostDto {
@@ -18,13 +22,10 @@ interface BlogArticle extends BlogPostDto {
   content?: string
 }
 
-type BodyPart = { type: 'html' | 'assistant'; content?: string }
-
 const props = defineProps<{
   article: BlogArticle
   assistantId?: string | null
   assistantCategoryId?: string | null
-  offerBlocksSlug?: string | null
 }>()
 
 const article = computed(() => props.article)
@@ -120,27 +121,11 @@ const sanitizedBody = computed(() => {
 
 const hasBody = computed(() => sanitizedBody.value.trim().length > 0)
 
-const bodyParts = computed<BodyPart[]>(() => {
-  const content = sanitizedBody.value
-  if (!content.includes('[assistant]')) {
-    return [{ type: 'html', content }]
-  }
-
-  const parts = content.split('[assistant]')
-  const result: BodyPart[] = []
-
-  parts.forEach((part, index) => {
-    if (part) {
-      result.push({ type: 'html', content: part })
-    }
-    // Add assistant between parts, but not after the last one
-    if (index < parts.length - 1) {
-      result.push({ type: 'assistant' })
-    }
-  })
-
-  return result
-})
+// `[assistant]` and product widget markers (see shared/utils/blog-product-widget.ts) split the
+// body; the components render in their place, server-side.
+const bodyParts = computed<BlogBodyPart[]>(() =>
+  splitBlogBody(sanitizedBody.value)
+)
 
 const readingTimeMinutes = computed(() => {
   if (!plainBody.value) {
@@ -456,8 +441,18 @@ useHead(() => ({
             compact
           />
         </div>
+        <GuideProductGrid
+          v-else-if="part.type === 'product-widget'"
+          :vertical="part.widget.vertical"
+          :subcategory="part.widget.subcategory"
+          :top="part.widget.top"
+          require-offers
+          hide-when-empty
+          see-all-category
+          class="article-product-widget"
+          data-test="article-product-widget"
+        />
       </template>
-      <BlogOfferBlocks :slug="offerBlocksSlug" />
     </section>
     <section
       v-else

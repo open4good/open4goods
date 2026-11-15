@@ -105,7 +105,6 @@ const assistantCategoryId = computed(() =>
           :article="article"
           :assistant-id="assistantConfigId"
           :assistant-category-id="assistantCategoryId"
-          :offer-blocks-slug="slug"
         />
       </v-col>
     </v-row>

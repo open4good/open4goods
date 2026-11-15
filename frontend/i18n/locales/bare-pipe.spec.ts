@@ -8,8 +8,10 @@ import frFR from './fr-FR.json'
 // here are real plurals (called with a count); any other message must write
 // the separator as a literal: {'|'}.
 const PLURAL_KEYS = new Set([
+  'category.ecoscorePage.method.products.ratedCompared',
   'common.count.months',
   'common.count.years',
+  'components.impactScore.v2.criteria',
   'home.hero.search.partnerLinkLabel',
   'product.banner.offersCount',
   'product.docs.pageCount',
@@ -20,6 +22,7 @@ const PLURAL_KEYS = new Set([
   'product.hero.trendPeriodMinutes',
   'product.hero.viewOffersNew',
   'product.hero.viewOffersOccasion',
+  'product.price.shipping.delay',
   'product.vigilance.teaser.alertCount',
   'siteIdentity.menu.account.privacy.compare.count',
 ])

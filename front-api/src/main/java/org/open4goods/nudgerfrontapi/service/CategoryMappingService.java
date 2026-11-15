@@ -34,7 +34,12 @@ import org.open4goods.nudgerfrontapi.dto.category.AttributesConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.CategoryNavigationDto;
 import org.open4goods.nudgerfrontapi.dto.category.FeatureGroupDto;
 import org.open4goods.nudgerfrontapi.dto.category.GoogleCategoryDto;
+import org.open4goods.model.ai.ImpactScoreAiResult;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreAuditCriterionDto;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreAuditDto;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreAuditSourceDto;
 import org.open4goods.nudgerfrontapi.dto.category.ImpactScoreConfigDto;
+import org.open4goods.nudgerfrontapi.dto.category.ImpactScorePositionLabelDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolConfigDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolScoreDto;
 import org.open4goods.nudgerfrontapi.dto.category.NudgeToolSubsetGroupDto;
@@ -511,18 +516,59 @@ public class CategoryMappingService {
     }
 
     /**
-     * Map the impact score configuration (weights and prompts).
+     * Map the impact score configuration of the vertical's current methodology (weights, threshold, position
+     * labels) and the generation prompts.
      */
     private ImpactScoreConfigDto mapImpactScoreConfig(ImpactScoreConfig impactScoreConfig, DomainLanguage domainLanguage) {
         if (impactScoreConfig == null) {
             return null;
         }
+        List<ImpactScorePositionLabelDto> positionLabels = impactScoreConfig.positionLabels().stream()
+                .filter(Objects::nonNull)
+                .map(label -> new ImpactScorePositionLabelDto(label.getLevel(), label.getMinBetterThan()))
+                .toList();
         return new ImpactScoreConfigDto(
-                defaultMap(impactScoreConfig.getCriteriasPonderation()),
+                defaultMap(impactScoreConfig.activeCriteriasPonderation()),
+                impactScoreConfig.effectiveMethodologyVersion(),
+                impactScoreConfig.minRealWeightCoverage(),
+                positionLabels,
+                impactScoreConfig.getMethodologyRevision(),
+                mapImpactScoreAudit(impactScoreConfig.getAiResult()),
                 impactScoreConfig.getYamlPrompt(),
                 impactScoreConfig.getAiJsonResponse());
     }
 
+
+    /**
+     * Keep the useful texts of the stored AI audit (meaning, limits, criteria and their justifications, sources);
+     * the raw prompt and response stay apart.
+     */
+    private ImpactScoreAuditDto mapImpactScoreAudit(ImpactScoreAiResult aiResult) {
+        if (aiResult == null) {
+            return null;
+        }
+        ImpactScoreAiResult.Positioning positioning = aiResult.getPositioning();
+        ImpactScoreAiResult.GapAnalysis gap = aiResult.getGapAnalysis();
+        List<ImpactScoreAuditCriterionDto> criteria = defaultList(aiResult.getCriteriaWeights()).stream()
+                .filter(Objects::nonNull)
+                .map(c -> new ImpactScoreAuditCriterionDto(c.criterion, c.weight, c.directionality, c.rationale,
+                        c.evidenceStrength == null ? null : c.evidenceStrength.level))
+                .toList();
+        List<ImpactScoreAuditSourceDto> sources = defaultList(aiResult.getSources()).stream()
+                .filter(Objects::nonNull)
+                .filter(source -> source.used)
+                .map(source -> new ImpactScoreAuditSourceDto(source.id, source.type, source.title, source.authorsOrOrg,
+                        source.year, source.url))
+                .toList();
+        return new ImpactScoreAuditDto(
+                positioning == null ? null : positioning.whatItMeansForUsers,
+                positioning == null ? null : positioning.notAnAbsoluteFootprint,
+                gap == null ? null : gap.whatIsMissingVsFullLca,
+                gap == null ? null : gap.whyRelativeIsStillUseful,
+                gap == null ? List.of() : defaultList(gap.mitigations),
+                criteria,
+                sources);
+    }
 
     /**
      * Map the nudge tool configuration to its DTO representation.

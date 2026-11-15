@@ -126,8 +126,10 @@ open-data-config:
   download-speed-kb: 256
   # Maximum parallel downloads allowed.
   concurrent-downloads: 4
-  # Set to true to enable scheduled file generation (disabled by default in dev).
-  generation-enabled: true
+  # Generation runs in the api only (GOU-2248): ui never generates the files.
+  generation-enabled: false
+  # When set, GET/HEAD on /opendata/{gtin,isbn}-open-data.zip answer 301 to {redirect-base-url}/{name}.
+  redirect-base-url: ${OPEN_DATA_REDIRECT_BASE_URL:}
 
 ###############################################
 # TODO scanner (reads taglist.xml from Maven site)

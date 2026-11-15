@@ -32,7 +32,9 @@ import tools.jackson.databind.JsonNode;
  * {@code Authorization} header, never in the URL. Parameters: {@code startDate} / {@code endDate}
  * ({@code yyyy-MM-ddTHH:mm:ss}, at most 31 days apart), {@code timezone=UTC}, {@code dateType=transaction}. The
  * window days, expressed in the report's time zone, are converted to UTC bounds, and each returned
- * {@code transactionDate} (UTC) is converted back to that zone.
+ * {@code transactionDate} (UTC) is converted back to that zone. A longer range is split into consecutive requests
+ * of at most {@value #MAX_DAYS_PER_REQUEST} days, one request per chunk, contiguous and without overlap (each chunk
+ * ends one second before the next starts), so that no transaction is counted twice.
  * <p>
  * Status mapping ({@code commissionStatus}):
  * <ul>
@@ -52,6 +54,8 @@ public class AwinReportClient extends AbstractAffiliationReportClient {
     static final String PUBLISHER_ID_PROPERTY = "metriks.affiliation.awin.publisher-id";
     static final String API_TOKEN_PROPERTY = "metriks.affiliation.awin.api-token";
     static final String TRANSACTIONS_URL = "https://api.awin.com/publishers/%s/transactions/";
+    /** Maximum span of one transactions request, imposed by the Awin API. */
+    static final int MAX_DAYS_PER_REQUEST = 31;
     private static final DateTimeFormatter AWIN_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private final String publisherId;
@@ -98,6 +102,23 @@ public class AwinReportClient extends AbstractAffiliationReportClient {
         if (!publisherId.matches("\\d+")) {
             throw failure(PUBLISHER_ID_PROPERTY + " doit être numérique");
         }
+        List<AffiliationReportTransaction> transactions = new ArrayList<>();
+        for (LocalDate chunkStart = startDate; !chunkStart.isAfter(endDate);
+                chunkStart = chunkStart.plusDays(MAX_DAYS_PER_REQUEST)) {
+            LocalDate chunkEnd = chunkStart.plusDays(MAX_DAYS_PER_REQUEST - 1L);
+            if (chunkEnd.isAfter(endDate)) {
+                chunkEnd = endDate;
+            }
+            transactions.addAll(fetchChunk(chunkStart, chunkEnd, zone));
+        }
+        return transactions;
+    }
+
+    /**
+     * Reads one request of at most {@value #MAX_DAYS_PER_REQUEST} days.
+     */
+    private List<AffiliationReportTransaction> fetchChunk(LocalDate startDate, LocalDate endDate, ZoneId zone)
+            throws AffiliationReportException {
         Instant from = startDate.atStartOfDay(zone).toInstant();
         Instant to = endDate.plusDays(1).atStartOfDay(zone).toInstant().minusSeconds(1);
 

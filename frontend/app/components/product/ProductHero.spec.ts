@@ -295,4 +295,23 @@ describe('ProductHero', () => {
     expect(wrapper.find('.product-hero__gallery-section').exists()).toBe(true)
     await wrapper.unmount()
   })
+
+  it('forwards the vertical home url to the impact score banner', async () => {
+    const wrapper = await mountSuspended(ProductHero, {
+      props: {
+        product: baseProduct,
+        breadcrumbs: [{ title: 'Category' }],
+        popularAttributes: [],
+        hasCategory: true,
+        impactScore: 14,
+        verticalHomeUrl: 'climatiseurs',
+      },
+      global: { plugins: [createI18nInstance()], stubs },
+    })
+
+    expect(
+      wrapper.get('.impact-score-stub').attributes('vertical-home-url')
+    ).toBe('climatiseurs')
+    await wrapper.unmount()
+  })
 })

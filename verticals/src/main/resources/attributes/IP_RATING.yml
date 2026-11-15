@@ -1,0 +1,19 @@
+# IP_RATING — Ingress protection rating (GOU-1891). Source: EPREL smartphonestablets20231669, ingressProtectionRating.
+key: "IP_RATING"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-water-off"
+name:
+  default: "IP rating"
+  fr: "Indice de protection IP"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  eprel:
+    - "INGRESSPROTECTIONRATING"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

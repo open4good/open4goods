@@ -86,7 +86,6 @@
         <module>api</module>
         <module>ui</module>
         <module>front-api</module>
-        <module>b2b-api</module>
         <module>services/urlfetching</module>
         <module>services/googlesearch</module>
         <module>services/google-indexation</module>
@@ -173,6 +172,12 @@
 				<groupId>com.sleepycat</groupId>
 				<artifactId>je</artifactId>
 				<version>${sleepycat-je.version}</version>
+			</dependency>
+			<dependency>
+				<!-- Google Merchant API, CSS (Comparison Shopping Service) client: CssProductInput (GOU-2080) -->
+				<groupId>com.google.shopping</groupId>
+				<artifactId>google-shopping-css</artifactId>
+				<version>0.70.0</version>
 			</dependency>
 			<dependency>
 				<groupId>io.opentelemetry.semconv</groupId>

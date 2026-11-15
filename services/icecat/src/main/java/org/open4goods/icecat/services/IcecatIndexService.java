@@ -367,7 +367,7 @@ public class IcecatIndexService {
         if (normalizedName == null) {
             return List.of();
         }
-        return featureCache.computeIfAbsent(normalizedName, featureRepository::findByNormalizedName);
+        return featureCache.computeIfAbsent(normalizedName, featureRepository::findByNormalizedNames);
     }
 
     /**

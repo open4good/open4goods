@@ -115,6 +115,56 @@ describe('ProductPriceRows', () => {
     expect(trendIconComp?.props('icon')).toBe('mdi-trending-down')
   })
 
+  it('shows the merchant name next to the favicon, which uses it as alt', async () => {
+    const product: ProductDto = {
+      ...baseProduct,
+      offers: {
+        ...baseProduct.offers,
+        bestNewOffer: {
+          price: 90,
+          currency: 'EUR',
+          merchantName: 'Boutique',
+          datasourceName: 'boutique.example',
+          favicon: 'https://boutique.example/favicon.ico',
+        },
+        bestOccasionOffer: {
+          price: 70,
+          currency: 'EUR',
+          merchantName: 'Seconde Main',
+          favicon: 'https://seconde.example/favicon.ico',
+        },
+      },
+    }
+
+    const wrapper = await mountComponent(product)
+    const names = wrapper.findAll('[data-testid="price-row-merchant"]')
+
+    expect(names.map(n => n.text())).toEqual([
+      'boutique.example',
+      'Seconde Main',
+    ])
+    expect(wrapper.findAll('img').map(i => i.attributes('alt'))).toEqual([
+      'boutique.example',
+      'Seconde Main',
+    ])
+  })
+
+  it('omits the merchant name when the API does not expose one', async () => {
+    const product: ProductDto = {
+      ...baseProduct,
+      offers: {
+        ...baseProduct.offers,
+        bestNewOffer: { price: 90, currency: 'EUR' },
+      },
+    }
+
+    const wrapper = await mountComponent(product)
+
+    expect(wrapper.find('[data-testid="price-row-merchant"]').exists()).toBe(
+      false
+    )
+  })
+
   it('renders the offer link with sponsored rel and a /contrib/ href when a token exists', async () => {
     const product: ProductDto = {
       ...baseProduct,

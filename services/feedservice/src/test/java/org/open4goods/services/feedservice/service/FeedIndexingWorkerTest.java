@@ -27,6 +27,7 @@ import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.services.feedservice.model.FeedIndexingJobStat;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.slf4j.LoggerFactory;
 
@@ -204,7 +205,8 @@ class FeedIndexingWorkerTest {
 
     private FeedIndexingWorker newWorker(DataFragmentIndexer indexer) {
         return new FeedIndexingWorker(csvService, mock(DataFragmentCompletionService.class), indexer,
-                10, tempDir.resolve("logs").toString(), new RemoteFileCachingService(tempDir.resolve("cache").toString()));
+                10, tempDir.resolve("logs").toString(), new RemoteFileCachingService(tempDir.resolve("cache").toString(),
+                        new RemoteFileCachingProperties(), tempDir.resolve("feeds").toFile()));
     }
 
     private DataSourceProperties datasource(String url) {

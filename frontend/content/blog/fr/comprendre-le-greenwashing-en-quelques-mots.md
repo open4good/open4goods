@@ -68,7 +68,7 @@ La meilleure arme contre le greenwashing, c'est l'information. Avant d'acheter, 
 - **Se renseigner sur les pratiques** : d'où viennent les matières premières ? Comment sont traités les employés ? Quelles sont les politiques de transparence ?
 - **Privilégier la durabilité** : un produit qui dure longtemps est souvent le plus écologique, même sans grande étiquette verte.
 
-Et bien sûr, des outils comme **Nudger** vous aident à y voir plus clair. En évaluant les entreprises selon des critères ESG (Environnement, Social, Gouvernance), Nudger vous donne une vision objective de leur impact réel, au-delà des discours marketing.
+Des outils de comparaison peuvent aider. **Nudger** intègre le score ESG des marques parmi les critères de son Impact Score (sur 20). Ce score ne remplace pas la lecture des labels officiels et des fiches du fabricant.
 
 
 Ainsi, si vous ne deviez retenir que quelques mots, le **greenwashing**, c'est l'art de paraître écolo sans vraiment l'être. Derrière des campagnes bien pensées peuvent en réalité se cacher des pratiques inchangées, voire néfastes.

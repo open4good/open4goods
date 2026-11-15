@@ -99,6 +99,16 @@
           </v-btn>
         </v-btn-toggle>
       </div>
+
+      <NuxtLink
+        v-if="showSort"
+        class="category-results-toolbar__ranking-link"
+        :to="rankingPolicyPath"
+        data-testid="results-toolbar-ranking-link"
+      >
+        <v-icon icon="mdi-information-outline" size="small" />
+        {{ t('category.products.rankingPolicyLink') }}
+      </NuxtLink>
     </div>
 
     <div
@@ -180,6 +190,10 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { CategoryViewMode } from '~/utils/_category-filter-state'
 import CategoryResultsCount from '~/components/category/CategoryResultsCount.vue'
+import {
+  normalizeLocale,
+  resolveLocalizedRoutePath,
+} from '~~/shared/utils/localized-routes'
 
 type SortItem = {
   title: string
@@ -235,7 +249,15 @@ const emit = defineEmits<{
   'update:viewMode': [CategoryViewMode]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// Ranking criteria page (art. D111-6 C. conso), linked next to the sort control.
+const rankingPolicyPath = computed(() =>
+  resolveLocalizedRoutePath(
+    'ranking-and-listing',
+    normalizeLocale(locale.value)
+  )
+)
 
 const internalViewMode = computed({
   get: () => props.viewMode,
@@ -312,6 +334,19 @@ const hasSortItems = computed(() => availableSortItems.value.length > 0)
     border-radius: 8px
     border: 1px solid rgba(var(--v-theme-border-primary), 0.15)
     background: rgba(var(--v-theme-surface-default), 0.4)
+
+  &__ranking-link
+    display: inline-flex
+    align-items: center
+    gap: 0.25rem
+    font-size: 0.8125rem
+    color: rgb(var(--v-theme-text-neutral-secondary))
+    text-decoration: underline
+    text-underline-offset: 2px
+
+    &:hover,
+    &:focus-visible
+      color: rgb(var(--v-theme-primary))
 
   &__search
     flex: 1 1 100%

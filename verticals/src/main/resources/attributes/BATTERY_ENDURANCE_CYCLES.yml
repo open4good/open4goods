@@ -1,0 +1,41 @@
+# ============================================================================
+# BATTERY_ENDURANCE_CYCLES — Battery endurance (cycles) (GOU-1891)
+# Source: EPREL, group smartphonestablets20231669 (Reg. (EU) 2023/1669). EPREL publishes hundreds of cycles (20 = 2000): converted by EprelCompletionService.
+# ============================================================================
+key: "BATTERY_ENDURANCE_CYCLES"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-battery-sync"
+name:
+  default: "Battery endurance (cycles)"
+  fr: "Endurance de la batterie (cycles)"
+suffix:
+  default: "cycle(s)"
+  fr: "cycle(s)"
+filteringType: "NUMERIC"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_OBSERVED"
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Endurance de la batterie (cycles)"
+  en: "Battery endurance (cycles)"
+scoreDescription:
+  fr: "Nombre de cycles de charge garantis avec 80 % de capacité"
+  en: "Guaranteed charge cycles at 80% capacity"
+participateInScores:
+  - DURABILITY
+synonyms:
+  eprel:
+    - "BATTERYENDURANCECYCLES"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

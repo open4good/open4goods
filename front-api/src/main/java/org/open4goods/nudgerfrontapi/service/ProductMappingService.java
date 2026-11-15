@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -38,6 +39,7 @@ import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.EcoScoreRanking;
 import org.open4goods.model.product.ExternalIds;
 import org.open4goods.model.product.GtinInfo;
+import org.open4goods.model.product.ImpactScoreMeta;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCanonicalUrl;
 import org.open4goods.model.product.ProductCondition;
@@ -49,6 +51,7 @@ import org.open4goods.model.resource.ImageInfo;
 import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.AttributeConfig;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
@@ -70,6 +73,7 @@ import org.open4goods.nudgerfrontapi.dto.product.ProductExternalIdsDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductGtinInfoDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIdentityDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductImageDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductImpactScoreStatusDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductIndexedAttributeDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductNamesDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductOffersDto;
@@ -126,7 +130,17 @@ public class ProductMappingService {
     private static final String ICON_PATH = "/icon/";
     private static final String FAVICON_ENDPOINT = "/api/favicon?url=";
     private static final String IMAGE_WEBP_MEDIATYPE = "image/webp";
+    /**
+     * Technical keys of {@code Product.datasourceCodes} written by the api completions, which are not datasources:
+     * {@code EprelCompletionService.EPREL_SEARCH_SIGNATURE_CODE} and {@code WikidataCompletionService.MISS_CODE}
+     * (GOU-2099). Hidden from the datasources facet, the compare page lists its keys as sources.
+     */
+    static final Set<String> TECHNICAL_DATASOURCE_CODES = Set.of("eprel.searchSignature", "wikidata.miss");
     private static final String PRODUCT_REFERENCE_CACHE_PREFIX = "product-ref";
+    /** Not rated: the product's ImpactScore belongs to another methodology version than the vertical's current one. */
+    private static final String OUTDATED_METHOD = "OUTDATED_METHOD";
+    /** Not rated: the product was never assessed. */
+    private static final String NOT_SCORED = "NOT_SCORED";
 
     private final ProductRepository repository;
     private final ApiProperties apiProperties;
@@ -208,7 +222,8 @@ public class ProductMappingService {
         VerticalConfig vConfig = resolveVerticalConfig(product.getVertical());
         EnumSet<ProductDtoComponent> components = resolveComponents(includes);
 
-        ProductBaseDto base = components.contains(ProductDtoComponent.base) ? mapBase(product, domainLanguage, locale)
+        ProductBaseDto base = components.contains(ProductDtoComponent.base)
+                ? mapBase(product, vConfig, domainLanguage, locale)
                 : null;
         ProductIdentityDto identity = components.contains(ProductDtoComponent.identity)
                 ? mapIdentity(product, domainLanguage, locale)
@@ -463,8 +478,9 @@ public class ProductMappingService {
      * Map immutable product fields describing core metadata (creation timestamps,
      * vertical etc.).
      */
-    private ProductBaseDto mapBase(Product product, DomainLanguage domainLanguage, Locale locale) {
-        Score ecoscore = product.ecoscore();
+    private ProductBaseDto mapBase(Product product, VerticalConfig vConfig, DomainLanguage domainLanguage,
+            Locale locale) {
+        Score ecoscore = currentEcoscore(product, vConfig);
         String preferredName = resolvePreferredName(product, domainLanguage, locale);
         return new ProductBaseDto(
                 product.getId(),
@@ -537,7 +553,7 @@ public class ProductMappingService {
         String seoName = resolveProductSeoName(product, domainLanguage, locale);
         String metaDescription = productSeoMetaService.buildMetaDescription(product, seoName, vConfig, domainLanguage);
         return new ProductNamesDto(
-                safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale)),
+                resolveDisplayName(product, domainLanguage, locale),
                 safeCanonicalName(product, resolveLocalisedString(product.getNames().getCardName(), domainLanguage, locale)),
                 productSeoMetaService.stripManufacturerReference(
                         safeCanonicalName(product, resolveLocalisedString(product.getNames().getPageTitle(), domainLanguage, locale)),
@@ -548,6 +564,63 @@ public class ProductMappingService {
                         : resolveLocalisedString(product.getNames().getMetaDescription(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphTitle(), domainLanguage, locale),
                 resolveLocalisedString(product.getNames().getProductMetaOpenGraphDescription(), domainLanguage, locale));
+    }
+
+    /**
+     * Resolve the display name. A product without vertical whose name falls back to brand and model (or the GTIN)
+     * takes the name of its best offer instead, cleaned and truncated; otherwise the name is unchanged.
+     */
+    private String resolveDisplayName(Product product, DomainLanguage domainLanguage, Locale locale) {
+        String name = safeCanonicalName(product, resolveLocalisedString(product.getNames().getDisplayName(), domainLanguage, locale));
+        if (StringUtils.hasText(product.getVertical())) {
+            return name;
+        }
+        String fallback = (product.brand() == null ? "" : product.brand().trim()) + " "
+                + (product.model() == null ? "" : product.model().trim());
+        String normalizedName = name == null ? "" : name.trim().replaceAll("\\s+", " ");
+        boolean properName = StringUtils.hasText(normalizedName)
+                && !normalizedName.equalsIgnoreCase(fallback.trim().replaceAll("\\s+", " "))
+                && !normalizedName.equals(String.valueOf(product.getId()));
+        if (properName) {
+            return name;
+        }
+        String offerName = cleanOfferName(bestOfferName(product));
+        return offerName != null ? offerName : name;
+    }
+
+    private String bestOfferName(Product product) {
+        AggregatedPrices prices = product.getPrice();
+        if (prices != null) {
+            AggregatedPrice best = prices.getMinPrice();
+            if (best != null && StringUtils.hasText(best.getOfferName())) {
+                return best.getOfferName();
+            }
+            if (prices.getOffers() != null) {
+                String named = prices.getOffers().stream()
+                        .filter(o -> o != null && StringUtils.hasText(o.getOfferName()))
+                        .min(Comparator.comparing((AggregatedPrice o) -> o.getPrice() == null ? Double.MAX_VALUE : o.getPrice()))
+                        .map(AggregatedPrice::getOfferName).orElse(null);
+                if (named != null) {
+                    return named;
+                }
+            }
+        }
+        return product.getOfferNames() == null ? null : product.getOfferNames().stream()
+                .filter(StringUtils::hasText).max(Comparator.comparingInt(String::length)).orElse(null);
+    }
+
+    private static final int MAX_DISPLAY_NAME_LENGTH = 120;
+
+    private String cleanOfferName(String raw) {
+        if (!StringUtils.hasText(raw)) {
+            return null;
+        }
+        String cleaned = raw.replace("\"\"", "\"").replaceAll("\\s+", " ").trim();
+        if (cleaned.length() > MAX_DISPLAY_NAME_LENGTH) {
+            int cut = cleaned.lastIndexOf(' ', MAX_DISPLAY_NAME_LENGTH - 1);
+            cleaned = cleaned.substring(0, cut > MAX_DISPLAY_NAME_LENGTH / 2 ? cut : MAX_DISPLAY_NAME_LENGTH - 1).trim() + "…";
+        }
+        return StringUtils.hasText(cleaned) ? cleaned : null;
     }
 
     /**
@@ -704,13 +777,17 @@ public class ProductMappingService {
         if (attributes == null) {
             return new ProductAttributesDto(Collections.emptyMap(), Collections.emptyMap(), classifiedAttributes, Collections.emptyMap());
         }
+        Set<String> excluded = resolveExcludedAttributes(vConfig);
         Map<String, ProductIndexedAttributeDto> indexed;
         if (attributes.getIndexed() == null) {
             indexed = Collections.emptyMap();
         } else {
             indexed = new LinkedHashMap<>();
-            attributes.getIndexed()
-                    .forEach((key, value) -> indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage)));
+            attributes.getIndexed().forEach((key, value) -> {
+                if (!excluded.contains(key)) {
+                    indexed.put(key, mapIndexedAttribute(value, vConfig, domainLanguage));
+                }
+            });
         }
         Map<String, String> referential;
         if (attributes.getReferentielAttributes() == null) {
@@ -725,10 +802,27 @@ public class ProductMappingService {
             allAttributes = Collections.emptyMap();
         } else {
             allAttributes = new LinkedHashMap<>();
-            attributes.getAll().forEach((key, value) -> allAttributes.put(key, mapProductAttribute(value)));
+            attributes.getAll().forEach((key, value) -> {
+                if (!excluded.contains(key)) {
+                    allAttributes.put(key, mapProductAttribute(value));
+                }
+            });
         }
 
         return new ProductAttributesDto(referential, indexed, classifiedAttributes, allAttributes);
+    }
+
+    /**
+     * Attribute keys excluded by the applicable configuration (the vertical one, or the default one for a product
+     * outside any vertical). Exact key match: stale indexed documents must not leak excluded attributes.
+     */
+    private Set<String> resolveExcludedAttributes(VerticalConfig vConfig) {
+        VerticalConfig config = vConfig != null ? vConfig : verticalsConfigService.getDefaultConfig();
+        if (config == null || config.getAttributesConfig() == null
+                || config.getAttributesConfig().getExclusions() == null) {
+            return Collections.emptySet();
+        }
+        return config.getAttributesConfig().getExclusions();
     }
 
     private List<ProductClassifiedAttributeGroupDto> mapClassifiedAttributes(Product product, VerticalConfig vConfig,
@@ -808,9 +902,14 @@ public class ProductMappingService {
      * Map datasource statistics associated with the product.
      */
     private ProductDatasourcesDto mapDatasources(Product product) {
-        Map<String, Long> datasourceCodes = product.getDatasourceCodes() == null
-                ? Collections.emptyMap()
-                : new LinkedHashMap<>(product.getDatasourceCodes());
+        Map<String, Long> datasourceCodes = new LinkedHashMap<>();
+        if (product.getDatasourceCodes() != null) {
+            product.getDatasourceCodes().forEach((name, code) -> {
+                if (!TECHNICAL_DATASOURCE_CODES.contains(name)) {
+                    datasourceCodes.put(name, code);
+                }
+            });
+        }
 
         return new ProductDatasourcesDto(datasourceCodes, product.getDescriptionsByDatasource(), resolveFavicons(product));
     }
@@ -843,21 +942,107 @@ public class ProductMappingService {
 
     /**
      * Map eco score and other computed scores into DTO representations.
+     * <p>
+     * Only an ImpactScore of the vertical's current methodology is exposed (design
+     * {@code docs/impactscore/v2-design.md}, section 4.2): the product's version is
+     * {@code impactScoreMeta.methodologyVersion}, or 1 for a legacy score without metadata. When it differs from the
+     * vertical's effective version, {@code ecoscore}, {@code scores.ECOSCORE} and {@code ranking} are left out and
+     * {@code impactScore} says {@code NOT_RATED}. In methodology version 1 a legacy score is still shown, so nothing
+     * changes before a switch.
      */
     private ProductScoresDto mapScores(Product product, DomainLanguage domainLanguage, VerticalConfig vConf,
             Map<Long, ProductReferenceDto> referencedProducts) {
+        ImpactScoreConfig impactScoreConfig = vConf == null ? null : vConf.getImpactScoreConfig();
+        boolean currentMethodology = ImpactScoreConfig.isCurrentMethodology(impactScoreConfig,
+                product.impactScoreMethodologyVersion());
         Map<String, ProductScoreDto> scores = product.getScores() == null
                 ? Collections.emptyMap()
                 : product.getScores().entrySet().stream()
+                        .filter(entry -> currentMethodology || !Product.ECOSCORE_NAME.equals(entry.getKey()))
                         .collect(Collectors.toMap(Entry::getKey,
                                 entry -> mapScore(entry.getValue(), domainLanguage, vConf, referencedProducts),
                                 (left, right) -> right,
                                 LinkedHashMap::new));
-        ProductScoreDto ecoscore = product.ecoscore() == null
+        ProductScoreDto ecoscore = !currentMethodology || product.ecoscore() == null
                 ? null
                 : mapScore(product.ecoscore(), domainLanguage, vConf, referencedProducts);
-        ProductRankingDto ranking = mapRanking(product, referencedProducts);
-        return new ProductScoresDto(scores, ecoscore, ranking);
+        ProductRankingDto ranking = currentMethodology ? mapRanking(product, referencedProducts) : null;
+        ProductImpactScoreStatusDto impactScore = impactScoreConfig == null ? null
+                : mapImpactScoreStatus(product, impactScoreConfig, currentMethodology);
+        return new ProductScoresDto(scores, ecoscore, ranking, impactScore);
+    }
+
+    /**
+     * The product's ImpactScore when it may be shown, that is when it belongs to the vertical's current methodology
+     * (design {@code docs/impactscore/v2-design.md}, 4.2).
+     *
+     * @param product the product
+     * @param vConf   the product's vertical, {@code null} when unknown
+     * @return the ECOSCORE score, or {@code null} when absent or of another methodology version
+     */
+    static Score currentEcoscore(Product product, VerticalConfig vConf) {
+        ImpactScoreConfig impactScoreConfig = vConf == null ? null : vConf.getImpactScoreConfig();
+        return ImpactScoreConfig.isCurrentMethodology(impactScoreConfig, product.impactScoreMethodologyVersion())
+                ? product.ecoscore()
+                : null;
+    }
+
+    /**
+     * Map the ImpactScore status of a product under the vertical's current methodology (design section 4.1).
+     *
+     * @param product            the product
+     * @param impactScoreConfig  the vertical's ImpactScore configuration
+     * @param currentMethodology whether the product was assessed with the vertical's current methodology
+     * @return the status, never {@code null}
+     */
+    private ProductImpactScoreStatusDto mapImpactScoreStatus(Product product, ImpactScoreConfig impactScoreConfig,
+            boolean currentMethodology) {
+        ImpactScoreMeta meta = product.getImpactScoreMeta();
+        Score ecoscore = product.ecoscore();
+        String status;
+        String notRatedReason;
+        if (!currentMethodology) {
+            status = ImpactScoreMeta.Status.NOT_RATED.name();
+            notRatedReason = meta == null && ecoscore == null ? NOT_SCORED : OUTDATED_METHOD;
+        } else if (ecoscore != null) {
+            status = ImpactScoreMeta.Status.RATED.name();
+            notRatedReason = null;
+        } else {
+            status = ImpactScoreMeta.Status.NOT_RATED.name();
+            notRatedReason = meta == null ? NOT_SCORED : meta.getNotRatedReason();
+        }
+
+        boolean rated = ecoscore != null && currentMethodology;
+        EcoScoreRanking ranking = product.getRanking();
+        Long position = null;
+        Long ratedCount = null;
+        Integer betterThanPercent = null;
+        String level = null;
+        if (rated && ranking != null && ranking.getGlobalCount() > 0) {
+            position = ranking.getGlobalPosition();
+            ratedCount = ranking.getGlobalCount();
+            if (ranking.getGlobalCount() > 1 && ecoscore.getRanking() != null) {
+                double betterThan = Math.max(0.0,
+                        Math.min(1.0, ecoscore.getRanking() / (double) (ranking.getGlobalCount() - 1)));
+                betterThanPercent = (int) Math.round(betterThan * 100);
+                level = impactScoreConfig.positionLevel(betterThan, ratedCount);
+            }
+        }
+
+        return new ProductImpactScoreStatusDto(
+                status,
+                notRatedReason,
+                meta == null ? null : meta.getMethodologyVersion(),
+                meta == null ? null : meta.getMethodologyRevision(),
+                meta == null ? null : meta.getScoredAt(),
+                impactScoreConfig.effectiveMethodologyVersion(),
+                meta == null ? null : meta.getRealWeightCoverage(),
+                meta == null ? null : meta.getRealCriteriaCount(),
+                meta == null ? null : meta.getTotalCriteriaCount(),
+                position,
+                ratedCount,
+                betterThanPercent,
+                level);
     }
 
     /**

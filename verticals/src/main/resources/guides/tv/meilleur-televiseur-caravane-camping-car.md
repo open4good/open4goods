@@ -112,7 +112,7 @@ Un téléviseur qu'on garde 8 ans a un impact carbone bien inférieur à deux mo
 
 **Ignorer le score de réparabilité** : un modèle sans pièces disponibles devient un déchet électronique dès la première panne. Privilégiez les marques avec SAV Europe.
 
-## Les modèles les plus durables / écolo
+## Les modèles les mieux classés à l'Impact Score (consommation en kWh/an indiquée)
 
 Notre top trié par score d'impact nudger, mis à jour en temps réel :
 

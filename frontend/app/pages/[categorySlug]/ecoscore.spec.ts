@@ -5,6 +5,7 @@ import { flushPromises } from '@vue/test-utils'
 import type { VerticalConfigFullDto } from '~~/shared/api-client'
 
 const selectCategoryBySlugMock = vi.fn()
+const impactScoreStatsMock = vi.fn()
 const useSeoMetaMock = vi.hoisted(() => vi.fn())
 const mdAndDown = ref(false)
 const localeRef = ref('en-US')
@@ -18,6 +19,7 @@ const messages: Record<string, string> = {
   'category.ecoscorePage.navigation.overview': 'Overview',
   'category.ecoscorePage.navigation.purpose': 'Purpose & data',
   'category.ecoscorePage.navigation.criteria': 'Criteria',
+  'category.ecoscorePage.navigation.method': 'Method',
   'category.ecoscorePage.navigation.transparency': 'Transparency',
   'category.ecoscorePage.navigation.aiAudit': 'AI audit',
   'category.ecoscorePage.sections.availableCriteria.title':
@@ -162,6 +164,7 @@ mockNuxtImport(
   () => () => new URL(`https://example.com${route.fullPath}`)
 )
 mockNuxtImport('useSeoMeta', () => useSeoMetaMock)
+mockNuxtImport('useRequestFetch', () => () => impactScoreStatsMock)
 mockNuxtImport(
   'createError',
   () => (input: { statusMessage?: string } & Record<string, unknown>) => {
@@ -402,6 +405,20 @@ beforeEach(() => {
   route.fullPath = '/televisions/ecoscore'
   mdAndDown.value = false
   localeRef.value = 'en-US'
+  impactScoreStatsMock.mockReset()
+  impactScoreStatsMock.mockResolvedValue({
+    verticalId: 'tv',
+    methodologyVersion: 2,
+    ratedCount: 100,
+    notRatedLowCoverageCount: 20,
+    notRatedNoCriteriaCount: 5,
+    outdatedCount: 0,
+    excludedCount: 0,
+    coverageByCriterion: { POWER: 90, REPAIRABILITY: 40 },
+    realCriteriaCountDistribution: {},
+    scoreHistogram: [0, 5, 20, 50, 25],
+    scoreBandWidth: 2,
+  })
   selectCategoryBySlugMock.mockClear()
   selectCategoryBySlugMock.mockImplementation(async () => categoryFixture)
   useSeoMetaMock.mockClear()
@@ -420,9 +437,10 @@ describe('Category ecosystem Impact Score page', () => {
     expect(breadcrumbText).toContain('impactscore')
 
     const navItems = wrapper.findAll('.sticky-nav-stub__item')
-    expect(navItems).toHaveLength(3)
+    expect(navItems).toHaveLength(4)
     expect(navItems.map(item => item.text())).toEqual([
       'Available criteria',
+      'Method',
       'Transparency',
       'AI audit',
     ])
@@ -446,6 +464,15 @@ describe('Category ecosystem Impact Score page', () => {
     expect(utilityButtons[0]?.attributes('aria-label')).toBe(
       'Display criterion utility'
     )
+
+    expect(impactScoreStatsMock).toHaveBeenCalledWith(
+      '/api/categories/tv/impact-score-stats'
+    )
+    expect(wrapper.find('[data-test="impact-method"]').exists()).toBe(true)
+    expect(wrapper.findAll('[data-test="coverage"] li')).toHaveLength(3)
+    expect(wrapper.findAll('[data-test="distribution"] li')).toHaveLength(5)
+    expect(wrapper.find('[data-test="ai-audit-panels"]').exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('not yet available')
 
     const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
     expect(yamlBlock).toContain('key: value')
@@ -523,5 +550,64 @@ describe('Category ecosystem Impact Score page', () => {
     }
     expect(secondSeoPayload.title()).toBe('Impact Score for Vacuum cleaners')
     expect(secondSeoPayload.title()).not.toBe(firstSeoPayload.title())
+  })
+
+  it('presents a V2 matrix without the stored V1 audit', async () => {
+    const v2Category = {
+      ...categoryFixture,
+      impactScoreConfig: {
+        ...categoryFixture.impactScoreConfig,
+        methodologyVersion: 2,
+        criteriasPonderation: { POWER_DENSITY: 0.6, REPAIRABILITY: 0.4 },
+        aiJsonResponse: JSON.stringify({
+          criteriasPonderation: { POWER: 0.35, DATA_QUALITY: 0.13 },
+          mitigations: [
+            'Raise DATA_QUALITY because missing criteria are imputed to the mean.',
+          ],
+        }),
+      },
+      attributesConfig: {
+        configs: [
+          ...(categoryFixture.attributesConfig?.configs ?? []),
+          {
+            key: 'POWER_DENSITY',
+            name: 'Power per screen area',
+            scoreTitle: 'Power per screen area (SDR)',
+            impactBetterIs: 'LOWER',
+            scoreUtility: 'Compares a 32-inch and a 75-inch television.',
+          },
+        ],
+      },
+    } as unknown as VerticalConfigFullDto
+    selectCategoryBySlugMock.mockResolvedValueOnce(v2Category)
+
+    const wrapper = await mountPage()
+    await flushPromises()
+
+    const cards = wrapper.findAll('[data-test="impact-criteria-card"]')
+    expect(cards.map(card => card.text())).toHaveLength(2)
+    expect(wrapper.text()).not.toContain('Data quality')
+
+    const rows = wrapper.findAll('[data-test="criteria-table"] tbody tr')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]!.text()).toContain('Power per screen area (SDR)')
+    expect(rows[0]!.text()).toContain(
+      'Compares a 32-inch and a 75-inch television.'
+    )
+
+    const table = wrapper.get('[data-test="comparison-table"]')
+    expect(table.findAll('thead th')).toHaveLength(2)
+    expect(table.text()).not.toContain('0.35')
+
+    expect(wrapper.find('[data-test="ai-audit-panels"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="ai-json"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="ai-audit-v1-history"]').exists()).toBe(
+      true
+    )
+
+    const text = wrapper.text()
+    for (const forbidden of ['POWER_DENSITY', 'DATA_QUALITY', 'imputed']) {
+      expect(text).not.toContain(forbidden)
+    }
   })
 })

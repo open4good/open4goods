@@ -40,6 +40,46 @@ class AwinReportClientTest {
     }
 
     @Test
+    void fetchTransactions_splitsARangeOverThirtyOneDaysIntoContiguousRequests() throws Exception {
+        FakeHttp http = new FakeHttp(request -> response(200, "[]"));
+        AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
+
+        // 56 days [2026-08-27, 2026-10-21]: 31 days then 25 days.
+        client.fetchTransactions(LocalDate.of(2026, 8, 27), END, AffiliationMetriksService.ZONE);
+
+        assertThat(http.requests).hasSize(2);
+        // Paris is UTC+2: 08-27 00:00 = 08-26T22:00Z; the first chunk ends 09-26 (23:59:59 Paris), the second starts
+        // the next second, so no instant is read twice and none is skipped.
+        assertThat(http.requests.get(0).uri().getQuery()).contains("startDate=2026-08-26T22:00:00",
+                "endDate=2026-09-26T21:59:59");
+        assertThat(http.requests.get(1).uri().getQuery()).contains("startDate=2026-09-26T22:00:00",
+                "endDate=2026-10-21T21:59:59");
+    }
+
+    @Test
+    void fetchTransactions_doesNotSplitARangeOfThirtyOneDays() throws Exception {
+        FakeHttp http = new FakeHttp(request -> response(200, "[]"));
+        AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
+
+        client.fetchTransactions(LocalDate.of(2026, 9, 21), END, AffiliationMetriksService.ZONE);
+
+        assertThat(http.requests).hasSize(1);
+        http.requests.clear();
+        client.fetchTransactions(LocalDate.of(2026, 9, 20), END, AffiliationMetriksService.ZONE);
+        assertThat(http.requests).hasSize(2);
+    }
+
+    @Test
+    void fetchTransactions_failsWhenOneChunkFails() {
+        java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
+        FakeHttp http = new FakeHttp(request -> response(calls.incrementAndGet() == 1 ? 200 : 503, "[]"));
+        AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> client.fetchTransactions(LocalDate.of(2026, 8, 27),
+                END, AffiliationMetriksService.ZONE)).isInstanceOf(AffiliationReportException.class);
+    }
+
+    @Test
     void fetchTransactions_mapsStatusesDatesAndCommissions() throws Exception {
         FakeHttp http = new FakeHttp(request -> response(200, fixture("awin-transactions.json")));
         AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
