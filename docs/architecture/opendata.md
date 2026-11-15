@@ -10,7 +10,8 @@ R2 : [opendata-r2-upload.md](../operations/opendata-r2-upload.md).
 flowchart LR
   ES[(Elasticsearch partagé)] -- nuit, projection minimale --> API[api : passage hebdomadaire]
   API -- zips + manifests, manifest.json en dernier --> DISK[/opt/open4goods/opendata]
-  DISK -- lot 0 / lot 1 --> R2[(R2 nudger-opendata, data.nudger.fr)]
+  API -- après le passage, S3 multipart, si publication.enabled --> R2[(R2 nudger-opendata, data.nudger.fr)]
+  DISK -. lot 0, envoi manuel opendataR2Upload.yml .-> R2
   UI[ui : /opendata/*.zip] -- 301 si redirect-base-url --> R2
   FAPI[front-api /api/opendata/*] --> FE[pages /opendata]
 ```
@@ -36,6 +37,44 @@ flowchart LR
   `ERROR`, health `openData` DOWN, métriques (voir l'exploitation). L'état n'est pas persisté : un redémarrage le remet
   à `IDLE`.
 
+## Publication sur R2 (GOU-2289)
+
+`OpenDataPublisher`, appelé par `api` après un passage réussi, publie les fichiers locaux sur le bucket R2 par son API
+S3 (`S3OpenDataStorage`, AWS SDK for Java v2, client synchrone Apache). Désactivée par défaut et en bêta
+(`open-data-config.publication.enabled: false`) ; l'activation en prod passe par une PR dédiée. Un passage en échec
+ne publie rien.
+
+Les clés publiques sont les mêmes à chaque passage. Un zip n'est donc jamais écrit sur sa clé publique : il passe
+par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
+
+1. **Contrôles locaux** : chaque zip a la taille et un sha256 valide de son manifest.
+2. **Garde-fou budgétaire** : la taille du bucket après la publication (objets conservés, hors clés remplacées et
+   temporaires, plus les nouveaux zips et manifests) ne doit pas dépasser `max-bucket-size` (9 Go, unités binaires de
+   Spring). Sinon refus, rien n'est envoyé. Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
+   pendant quelques heures : l'effet sur les Go-mois facturés est négligeable.
+3. **Envoi multipart** de chaque zip vers `staging-prefix` + clé (`.staging/gtin-open-data.zip`), en parts de
+   `part-size` (64 Mo), débit limité à `upload-bandwidth` (2 Mo/s). En-têtes : `Content-Type: application/zip`,
+   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control`, métadonnée `sha256`. Un envoi en échec est
+   abandonné (`AbortMultipartUpload`).
+4. **Relecture** : chaque objet temporaire est relu en entier ; son sha256 et sa taille sont comparés au manifest.
+   L'ETag d'un envoi multipart n'est pas un condensé du fichier : seule la relecture prouve le contenu.
+5. **Bascule** : copie serveur de chaque zip vers sa clé publique (en-têtes reposés, copie multipart au-delà de
+   `copy-part-size`, car une copie simple est limitée à 5 Go), contrôle de la taille et du `sha256` de l'objet public,
+   puis `gtin-manifest.json` et `isbn-manifest.json`, puis `manifest.json` en dernier, point de validation
+   (`Cache-Control` de `manifest-cache-control`, 5 min).
+6. **Nettoyage** : les objets temporaires, de ce passage et d'un passage interrompu, ne sont supprimés qu'après
+   l'écriture de `manifest.json`.
+
+Un échec aux étapes 1 à 4 laisse tous les objets publics intacts ; les objets temporaires du passage sont supprimés.
+Un échec à l'étape 5 (rare : copies serveur et petits `PUT`) laisse `manifest.json` à l'ancienne version, alors qu'un
+zip peut déjà être le nouveau, jusqu'au passage suivant. Tout échec écrit un log `ERROR`, passe la health `openData`
+en DOWN et se compte dans `opendata_publication_*`.
+
+Identifiants : `R2_ACCOUNT_ID` (variable), `R2_ACCESS_KEY_ID` et `R2_SECRET_ACCESS_KEY` (secrets) de l'environnement
+GitHub `prod`, rendus pour `api` par `scripts/deploy/render-service-secrets.sh` dans son config tree
+(`open-data-config.publication.*`). Ils ne sont ni dans le code ni dans `open4goods-config`. L'environnement `beta` ne
+les a pas.
+
 ## Fichiers publiés
 
 | Fichier local | Objet public | Contenu |
@@ -44,11 +83,8 @@ flowchart LR
 | `isbn.zip` | `isbn-open-data.zip` | `open4goods-isbn-dataset.csv` (UTF-8) |
 | `gtin-manifest.json`, `isbn-manifest.json` | idem | manifest d'un jeu (GOU-2239) |
 | `manifest.json` | `manifest.json` | tous les jeux (contrat du plan GOU-2237) |
-<<<<<<< HEAD
 | `impact-{vertical}.zip` | idem | `impact-{vertical}.csv` : critères bruts d'une verticale (GOU-2250) |
 | `impact-{vertical}-manifest.json` | idem | manifest d'un jeu impact |
-=======
->>>>>>> origin/main
 
 ## Contrat des manifests (`schemaVersion` 1)
 
@@ -102,7 +138,6 @@ Journal des modifications du schéma (à compléter par la version 2) :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,
   `classification_decitre_2`, `classification_decitre_3` ne figurent plus dans les fichiers. `nb_page` reste dans le
   jeu ISBN, sans changement de nom.
-<<<<<<< HEAD
 
 ## Datasets impact (lot 2, GOU-2250)
 
@@ -120,6 +155,8 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
   `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
 - **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
 - Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
-- Non fait : le ZIP global de la spécification GOU-2240 et la date de la source par critère (absente de l'index).
-=======
->>>>>>> origin/main
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
+  (`impact-all`, lignes = somme des jeux).
+- **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
+- **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
+  `impact-*-manifest.json`.

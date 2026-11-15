@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
@@ -366,6 +367,32 @@ class AttributeRealtimeAggregationServiceTest {
 		});
 	}
 
+	@Test
+	void mergeSourcesKeepsATextValueThatOnlyLooksNumeric() throws Exception {
+		// IdHelper.isPureDouble accepts ".", which Double.valueOf rejects: the text value is kept without a
+		// numeric value instead of failing the attribute.
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		ProductAttribute attr = new ProductAttribute();
+		attr.setName("COLOR");
+		SourcedAttribute source = new SourcedAttribute();
+		source.setDataSourcename("source1");
+		source.setValue(".");
+		source.setName("COLOR");
+		attr.addSourceAttribute(source);
+
+		IndexedAttribute indexedAttr = new IndexedAttribute("COLOR", ".");
+
+		Method method = AttributeRealtimeAggregationService.class.getDeclaredMethod("mergeSourcesAndRefreshValue",
+				IndexedAttribute.class, ProductAttribute.class, AttributeConfig.class, VerticalConfig.class);
+		method.setAccessible(true);
+		method.invoke(service, indexedAttr, attr, attrConfig, verticalConfig);
+
+		assertThat(indexedAttr.getValue()).isEqualTo(".");
+		assertThat(indexedAttr.getNumericValue()).isNull();
+	}
+
 
 	@Test
 	void testDeleteTokensWithUpperCase() throws Exception {
@@ -531,6 +558,25 @@ class AttributeRealtimeAggregationServiceTest {
 		attrConfig.getParser().setTrim(true);
 
 		assertThat(service.parseValue("false", attrConfig, verticalConfig)).isEmpty();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "Donnée non spécifiée", "Données non spécifiées", "Non spécifié", "Non spécifiée", "N/A",
+			"NA", "nc", "null", "FALSE" })
+	void parseValueTreatsPlaceholdersAsEmpty(String raw) throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEmpty();
+	}
+
+	@Test
+	void parseValueKeepsTheWarrantyOnlyPlaceholder() throws Exception {
+		AttributeConfig attrConfig = new AttributeConfig();
+		attrConfig.setKey("COLOR");
+
+		// "eur" is a placeholder for WarrantyParser only: sharing the common set must not bring it here.
+		assertThat(service.parseValue("eur", attrConfig, verticalConfig)).isNotEmpty();
 	}
 
 	@Test

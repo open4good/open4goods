@@ -189,3 +189,16 @@ open-data-config:
   min-rows-ratio: 0.9
   # Written in the manifests (url field).
   public-base-url: https://data.nudger.fr
+  # Publication on R2 after a successful pass (GOU-2289): zips to .staging/, read back and sha256 check, copy to the
+  # public keys, per-dataset manifests, manifest.json last. Disabled here and in beta; prod enables it by a dedicated
+  # change. account-id, access-key-id and secret-access-key come from the prod GitHub Environment (R2_ACCOUNT_ID,
+  # R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY), rendered by scripts/deploy/render-service-secrets.sh: never here.
+  publication:
+    enabled: false
+    bucket: nudger-opendata
+    staging-prefix: .staging/
+    # Budget guard: refused when the bucket would exceed it after the publication (R2 free under 10 GB-month).
+    max-bucket-size: 9GB
+    part-size: 64MB
+    # Upload bandwidth per second (as the upload_limit of opendataR2Upload.yml); 0 disables the limit.
+    upload-bandwidth: 2MB

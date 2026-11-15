@@ -57,6 +57,7 @@ import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
+import org.open4goods.services.opendata.model.OpenDataPublicationStatus;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.model.Localisable;
@@ -329,6 +330,58 @@ class OpenDataServiceTest {
     }
 
     @Test
+    void publicationShouldReceiveTheLocalFilesOfASuccessfulPass() throws Exception {
+        OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
+        when(publisher.isEnabled()).thenReturn(true);
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher, verticalsConfigService);
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<OpenDataPublisher.Dataset>> datasets = ArgumentCaptor.forClass(List.class);
+        verify(publisher).publish(datasets.capture(), Mockito.eq(openDataConfig.manifestFile().toPath()));
+        assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::zipFile)
+                .containsExactly(openDataConfig.gtinZipFile().toPath(), openDataConfig.isbnZipFile().toPath());
+        assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::manifestFile)
+                .containsExactly(openDataConfig.gtinManifestFile().toPath(), openDataConfig.isbnManifestFile().toPath());
+        assertThat(datasets.getValue().get(0).manifest())
+                .isEqualTo(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow());
+    }
+
+    @Test
+    void failedPassShouldNotPublish() {
+        OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
+        lenient().when(publisher.isEnabled()).thenReturn(true);
+        lenient().when(publisher.status()).thenReturn(OpenDataPublicationStatus.idle());
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher, verticalsConfigService);
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenThrow(new IllegalStateException("ES down"));
+
+        assertThat(publishing.generateOpendata()).isFalse();
+
+        verify(publisher, never()).publish(any(), any());
+    }
+
+    @Test
+    void failedPublicationShouldTurnHealthDownAndKeepTheGenerationSucceeded() {
+        openDataConfig.getPublication().setEnabled(true);
+        OpenDataPublisher publisher = new OpenDataPublisher(openDataConfig, meterRegistry, publication -> {
+            throw new IllegalStateException("R2 unreachable");
+        });
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher, verticalsConfigService);
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        assertThat(publishing.status().state()).isEqualTo(State.SUCCEEDED);
+        assertThat(publisher.status().state()).isEqualTo(State.FAILED);
+        assertThat(publishing.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(publishing.health().getDetails()).containsEntry("publication", "FAILED")
+                .containsEntry("publicationError", "IllegalStateException: R2 unreachable");
+        assertThat(meterRegistry.get("opendata.publication.runs").tag("outcome", "failure").counter().count()).isEqualTo(1);
+    }
+
+    @Test
     void healthShouldBeUnknownWhenNoFileWasPublished() {
         assertThat(service.health().getStatus()).isEqualTo(Status.UNKNOWN);
     }
@@ -337,6 +390,17 @@ class OpenDataServiceTest {
     void humanReadableByteCountShouldFormatValues() {
         assertThat(OpenDataService.humanReadableByteCountBin(999)).isEqualTo("999 B");
         assertThat(OpenDataService.humanReadableByteCountBin(1_500).replace("," , ".")) .isEqualTo("1.5 kB");
+    }
+
+    @Test
+    void corruptedOfferNamesShouldBeSkippedInExports() throws Exception {
+        Product product = buildProduct("1234567890123", BarcodeType.GTIN_13);
+        product.setOfferNames(new HashSet<>(Set.of("P\u00BF\u00BAcheur", "bad \uFFFD", "Chapeau de p\u00EAcheur")));
+        assertThat(invokeMapper("toGtinEntry", product)[3]).isEqualTo("Chapeau de p\u00EAcheur");
+        assertThat(invokeMapper("toIsbnEntry", product)[1]).isEqualTo("Chapeau de p\u00EAcheur");
+
+        product.setOfferNames(new HashSet<>(Set.of("V\u00BF\u00BFlo")));
+        assertThat(invokeMapper("toGtinEntry", product)[3]).isEmpty();
     }
 
     @Test
@@ -391,8 +455,19 @@ class OpenDataServiceTest {
 
         OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
         assertThat(all.datasets()).extracting(DatasetManifest::id)
-                .containsExactly("gtin", "isbn", "impact-oven", "impact-tv");
+                .containsExactly("gtin", "isbn", "impact-oven", "impact-tv", "impact-all");
         assertThat(all.datasets().get(3).rows()).isEqualTo(1);
+
+        // Global zip (GOU-2240): the CSV of every impact dataset, rows and sha256 in its own manifest entry.
+        DatasetManifest global = all.datasets().get(4);
+        assertThat(global.file()).isEqualTo("impact-all.zip");
+        assertThat(global.rows()).isEqualTo(3);
+        assertThat(global.sha256()).isEqualTo(sha256(openDataConfig.impactZipFile("all")));
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("all"))).isPresent();
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(openDataConfig.impactZipFile("all"))) {
+            assertThat(java.util.Collections.list(zip.entries())).extracting(java.util.zip.ZipEntry::getName)
+                    .containsExactly("impact-oven.csv", "impact-tv.csv");
+        }
 
         // No aggregated score, no sub-score, no percentile, no rank, no DATA_QUALITY in any impact file.
         for (String vertical : List.of("oven", "tv")) {
@@ -425,6 +500,7 @@ class OpenDataServiceTest {
         List<String> produced = new ArrayList<>(readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv"));
         produced.add(Files.readString(openDataConfig.impactManifestFile("oven").toPath()));
         produced.add(Files.readString(openDataConfig.manifestFile().toPath()));
+        produced.add(Files.readString(openDataConfig.impactManifestFile("all").toPath()));
         assertThat(produced).allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
         ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
         verify(productRepository).exportAll(fields.capture(), anyInt());

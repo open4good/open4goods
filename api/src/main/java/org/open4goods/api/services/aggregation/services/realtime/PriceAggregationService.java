@@ -26,8 +26,6 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Sets;
-
 /**
  * Aggregates pricing information from all contributing {@link DataFragment}s
  * into a consolidated {@link AggregatedPrices} structure on the product.
@@ -147,7 +145,7 @@ public class PriceAggregationService extends AbstractAggregationService {
 		data.setOffersCount(prices.size());
 
 		// Reseting prices (reducing)
-		data.getPrice().setOffers(Sets.newHashSet(prices));
+		data.getPrice().setOffers(prices);
 
 		// Computing / incrementing history
 		computePriceHistory(aggPrices, ProductCondition.OCCASION);
@@ -156,11 +154,6 @@ public class PriceAggregationService extends AbstractAggregationService {
 		// Setting the product state summary
 		aggPrices.getConditions().clear();
 		aggPrices.getOffers().forEach(i -> aggPrices.getConditions().add(i.getProductState()));
-
-		// Setting the result
-		data.setPrice(aggPrices);
-
-		// Setting if has an occasion offer
 	}
 
 

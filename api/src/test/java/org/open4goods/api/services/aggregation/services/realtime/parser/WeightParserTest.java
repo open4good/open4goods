@@ -74,14 +74,13 @@ class WeightParserTest {
     }
     
     @Test
-    void datasourceHint() throws ParseException {
+    void valueWithoutUnitIsReadAsKilograms() throws ParseException {
         VerticalConfig vc = new VerticalConfig();
         vc.setParsers(new ParsersConfig());
         vc.getParsers().getWeight().setMinKg(0.001);
         vc.getParsers().getWeight().setMaxKg(2000.0);
-        
-        // verify simple parse with datasource
-        assertThat(parser.parse("100", null, vc, "test-source")).isEqualTo("100"); // assumes kg
+
+        assertThat(parser.parse("100", null, vc)).isEqualTo("100"); // assumes kg
     }
 
     @Test
@@ -186,6 +185,28 @@ class WeightParserTest {
         assertThat(parser.parse(mixed, null, vc)).isEqualTo("1.2");
         assertThat(parser.parse(attribute("WEIGHT", "a:3.5 kg (3500 g)"), null, vc)).isEqualTo("3.5");
         assertThat(parser.parse(attribute("WEIGHT", "a:1 200 g"), null, vc)).isEqualTo("1.2");
+    }
+
+    @Test
+    void belowLowerBoundIsRejected() throws ParseException {
+        VerticalConfig tv = new VerticalConfig();
+        tv.setParsers(new ParsersConfig());
+        tv.getParsers().getWeight().setMinKg(1.0);
+        tv.getParsers().getWeight().setMaxKg(100.0);
+
+        assertThat(parser.parse("1.200 g", null, tv)).isNull();
+        assertThat(parser.parse("0 à 100 g", null, tv)).isNull();
+        assertThat(parser.parse("0.1", null, tv)).isNull();
+        assertThat(parser.parse("a:0.1 kg", null, tv)).isNull();
+        assertThat(parser.parse("1 200 g", null, tv)).isEqualTo("1.2");
+        assertThat(parser.parse("8.5 kg", null, tv)).isEqualTo("8.5");
+
+        VerticalConfig phone = new VerticalConfig();
+        phone.setParsers(new ParsersConfig());
+        phone.getParsers().getWeight().setMinKg(0.08);
+        phone.getParsers().getWeight().setMaxKg(0.6);
+        assertThat(parser.parse("0.1 kg", null, phone)).isEqualTo("0.1");
+        assertThat(parser.parse("100 g", null, phone)).isEqualTo("0.1");
     }
 
     private VerticalConfig defaultRangeConfig() {

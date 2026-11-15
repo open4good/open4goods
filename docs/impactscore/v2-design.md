@@ -250,7 +250,8 @@ ECOSCORE):
   when its `impactScoreMeta.methodologyVersion` is not the current version it
   shows as "Not rated" (decision 5, 4.2). It is not deleted from the index, so
   rollback stays complete.
-- `POST /score/{vertical}` follows the same rules (same aggregator).
+- On request, scores are recomputed by `POST /batch/{vertical}`, the batch of
+  one vertical: same aggregator, same cohort, same rules.
 
 Implementation (GOU-1879): sections 2.1, 2.2, 2.4 and 2.5 apply when
 `ImpactScoreConfig.isV2Active()`. `AbstractScoreAggregationService.done()`
@@ -261,8 +262,9 @@ within 1e-9 and treats a missing `minRealWeightCoverage` as no threshold
 new `EcoScoreRanking`. `globalBetter` is the lowest strictly better product;
 `globalBest` the best product, ties broken by GTIN. `BatchService.clearObsoleteScores`
 does not recompute composite ImpactScores in V2 and
-`recomputeFromStoredSubScores` returns null. `POST /score/{vertical}` scores
-and reindexes only products with offers that are not excluded in V2.
+`recomputeFromStoredSubScores` returns null. Products are scored only by
+the batch: the on-demand scoring of a vertical, which skipped the ImpactScore
+checks and the realtime offer refresh, was removed in GOU-2274.
 
 ### 2.6 Robust bounds
 

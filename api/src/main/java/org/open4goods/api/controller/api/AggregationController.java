@@ -44,11 +44,9 @@ public class AggregationController {
     @PostMapping("/aggregate/verticals")
     @Operation(
             summary = "Aggregate all verticals",
-            description = "Runs the sanitization pipeline for every active vertical in sequence. "
-                    + "Sanitization normalises and merges product attributes, recomputes derived fields "
-                    + "and re-indexes products in Elasticsearch. "
-                    + "Use /aggregate/verticals/{vertical} to restrict the run to a single category.")
-    @ApiResponse(responseCode = "200", description = "Aggregation completed for all verticals")
+            description = "Runs /aggregate/verticals/{vertical} for every active vertical, one after the other. "
+                    + "Same behaviour and same precautions as the single-vertical run.")
+    @ApiResponse(responseCode = "200", description = "Products of every vertical aggregated and queued for indexation")
     public void aggregateAllVerticals() throws InvalidParameterException, IOException {
         aggregationFacadeService.sanitizeAllVerticals();
     }
@@ -56,28 +54,22 @@ public class AggregationController {
     @PostMapping("/aggregate/verticals/{vertical}")
     @Operation(
             summary = "Aggregate a specific vertical",
-            description = "Runs the sanitization pipeline for the named vertical only. "
-                    + "Sanitization normalises and merges product attributes, recomputes derived fields "
-                    + "and re-indexes the affected products in Elasticsearch.")
+            description = "Reloads the products whose datasourceCategories match the vertical's matchingCategories, "
+                    + "or whose vertical is already this one, and runs the standard aggregation chain on them "
+                    + "(identity, taxonomy, attributes, usage cost, names, price, media): the taxonomy re-assigns the "
+                    + "vertical from the categories. No completion and no scoring: scores are rebuilt by the 13:00 batch or by "
+                    + "POST /batch/{vertical}. Products are queued for full indexation by pages of 500; each page first "
+                    + "gets the newest realtime offers (price, offersCount, lastChange) from the index and the "
+                    + "indexation queues, so offers updated during the run are not overwritten. Returns once the "
+                    + "products are queued, not once they are indexed. Run it outside the 13:00 batch.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Aggregation completed for the vertical"),
+            @ApiResponse(responseCode = "200", description = "Products aggregated and queued for indexation"),
             @ApiResponse(responseCode = "404", description = "Vertical not found")
     })
     public void aggregateVertical(
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @PathVariable String vertical) throws InvalidParameterException, IOException {
         aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(vertical));
-    }
-
-    @PostMapping("/aggregate/products")
-    @Operation(
-            summary = "Aggregate all products",
-            description = "Runs the sanitization pipeline across every product in the index regardless of vertical. "
-                    + "This is a heavier operation than /aggregate/verticals because it also processes products "
-                    + "that are not yet assigned to any vertical.")
-    @ApiResponse(responseCode = "200", description = "Aggregation completed for all products")
-    public void aggregateAllProducts() throws InvalidParameterException, IOException {
-        aggregationFacadeService.sanitizeAll();
     }
 
     @PostMapping("/aggregate/gtin/{gtin}")

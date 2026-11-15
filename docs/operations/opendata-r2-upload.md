@@ -48,8 +48,17 @@ Les identifiants passent en variables d'environnement (configuration rclone `RCL
 standard SSH (`bash -s`, script `scripts/deploy/opendata-r2-upload.sh`) : ils n'apparaissent dans aucune ligne de
 commande (ni runner ni hôte), ne sont pas écrits sur disque et sont masqués dans les logs par GitHub.
 
+Depuis GOU-2289, `api` publie lui-même zips et manifests après chaque passage quand
+`open-data-config.publication.enabled` est vrai ([opendata-generation.md](opendata-generation.md#publication-sur-r2)).
+Ce workflow reste un secours manuel pour les seuls zips.
+
 ## Coût
 
 R2 : 10 Go-mois de stockage et 1 M d'opérations de classe A / 10 M de classe B gratuits par mois, sortie réseau
 gratuite. Les deux zips tiennent largement sous 10 Go : coût 0 €. Surveiller la taille cumulée dans le tableau de bord
 Cloudflare si les fichiers grossissent.
+
+## Jeux impact (GOU-2250)
+
+Le choix `impact` du workflow envoie tous les `impact-*.zip` (7 verticales et `impact-all.zip`) et les
+`impact-*-manifest.json` du dossier source, sous le même nom. `all` envoie GTIN, ISBN et impact.
