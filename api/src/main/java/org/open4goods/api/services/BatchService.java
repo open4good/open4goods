@@ -635,6 +635,11 @@ public class BatchService {
 		}
 	}
 
+	/**
+	 * Nightly batch of every vertical, then the score cleanup outside verticals. A vertical that fails is logged
+	 * (ERROR, and a {@code failed} line on the {@link #TIMINGS_LOGGER}) and skipped: the next verticals and the
+	 * cleanup still run (GOU-2273).
+	 */
 	// TODO(p3,conf) : schedule from conf
 	@Scheduled(cron = "0 0 13 * * ?")
 	public void batch() {
@@ -647,7 +652,15 @@ public class BatchService {
 			// On each vertical, products are in memory loaded
 			/////////////////////////////////////////////
 			for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-				batch(vertical);
+				// A failing vertical (loading, completion, aggregation) must not stop the next ones nor the
+				// score cleanup outside verticals (GOU-2273)
+				long verticalStart = System.nanoTime();
+				try {
+					batch(vertical);
+				} catch (RuntimeException e) {
+					logger.error("Batch of vertical {} failed, moving on to the next vertical", vertical.getId(), e);
+					timings.info("Batch of vertical {} : failed, {} s", vertical.getId(), seconds(verticalStart));
+				}
 			}
 
 			clearScoresOutsideVerticals();
@@ -725,6 +738,10 @@ public class BatchService {
 	 * Batch a specific vertical: loads its products, classifies, completes, aggregates and scores them, then
 	 * queues them for full indexation.
 	 *
+	 * <p>Only the products still in this vertical after the classification, and again after the aggregation, are
+	 * completed and scored with its configuration and cohort. A product moved to another vertical is indexed with
+	 * its scores untouched: the batch of its new vertical scores it (GOU-2273).
+	 *
 	 * <p>The realtime indexation keeps running meanwhile. The full queue is not flushed, and each page of
 	 * products gets the newest realtime offers ({@link ProductRepository#applyNewerOfferStates}) just before
 	 * being queued: an offer update indexed or queued during the batch is never overwritten by the offers
@@ -752,10 +769,11 @@ public class BatchService {
 		aggregationFacadeService.classificationAggregator(vertical, allProducts);
 		long loaded = System.nanoTime();
 
-		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price
+		// The living products: with offers, and still in this vertical after the classification. A product moved to
+		// another vertical is indexed without being scored here, its own vertical batch will score it (GOU-2273)
 		Set<Product> products = allProducts.stream()
-				.filter(e -> e.getOffersCount().intValue() > 0)
-				.filter(e-> null != e.getVertical())
+				.filter(e -> e.getOffersCount() != null && e.getOffersCount() > 0)
+				.filter(e -> belongsTo(e, vertical))
 				.collect(Collectors.toSet());
 
 		logger.info("Will complete {} products of {}", products.size(), allProducts.size() );
@@ -780,17 +798,18 @@ public class BatchService {
 
 
 		try {
-			// Scoring
+			// The aggregation replays the taxonomy after the EPREL completion: the vertical can change again
+			Set<Product> cohort = products.stream().filter(e -> belongsTo(e, vertical)).collect(Collectors.toSet());
 			// We only score the products that are not excluded
-			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
-			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
+			Set<Product> scorable = cohort.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
+			logger.info("Will score {} products on a total of {}", scorable.size(), cohort.size());
 			aggregationFacadeService.score(vertical, scorable);
 			clearObsoleteScores(allProducts, vertical);
 			if (!impactScoreChecksPass(vertical, scorable)) {
 				timings.info("Batch of vertical {} : not indexed, ImpactScore checks failed, {} s", vertical.getId(), seconds(start));
 				return;
 			}
-			snapshotImpactScore(vertical, products);
+			snapshotImpactScore(vertical, cohort);
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
@@ -860,6 +879,10 @@ public class BatchService {
 	 * defect only: in V2 a product without offers is neither recomputed nor cleared, the front-api shows it as not
 	 * rated when its score is of another version (design GOU-1878, 2.5).
 	 *
+	 * <p>A product now in another vertical (moved by the classification or the aggregation) is left untouched: its
+	 * scores are neither cleared nor recomputed with the weights of this vertical, the batch of its new vertical
+	 * scores it (GOU-2273).
+	 *
 	 * @param products every product of the vertical, after scoring
 	 * @param vertical the vertical configuration, for the ImpactScore weights
 	 */
@@ -868,6 +891,9 @@ public class BatchService {
 		boolean v2 = vertical != null && vertical.getImpactScoreConfig() != null
 				&& vertical.getImpactScoreConfig().isV2Active();
 		for (Product product : products) {
+			if (movedToAnotherVertical(product, vertical)) {
+				continue;
+			}
 			if (product.isExcluded() || product.getVertical() == null) {
 				product.getScores().clear();
 				product.setRanking(new EcoScoreRanking());
@@ -886,6 +912,21 @@ public class BatchService {
 				clearRanks(product);
 			}
 		}
+	}
+
+	/**
+	 * @return true when the product is in the batched vertical
+	 */
+	private static boolean belongsTo(Product product, VerticalConfig vertical) {
+		return vertical.getId().equals(product.getVertical());
+	}
+
+	/**
+	 * @return true when the product is in another vertical than the batched one, false when either is unknown
+	 */
+	private static boolean movedToAnotherVertical(Product product, VerticalConfig vertical) {
+		return product.getVertical() != null && vertical != null && vertical.getId() != null
+				&& !vertical.getId().equals(product.getVertical());
 	}
 
 	/**

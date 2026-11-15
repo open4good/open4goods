@@ -380,6 +380,18 @@ les met en file d'indexation complète. L'indexation temps réel continue pendan
   vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
   l'indexation de la page peut recouvrir les champs calculés par le batch.
 
+Cohorte et isolation (GOU-2273) :
+
+- Seuls les produits avec offres encore dans la verticale après la classification sont complétés, et seuls ceux qui y
+  sont encore après l'agrégation (qui rejoue la taxonomie après EPREL) sont notés avec sa configuration et sa cohorte.
+  Un produit reclassé ailleurs est indexé sans être noté ni nettoyé : le batch de sa nouvelle verticale le notera.
+- Une verticale qui lève une exception (chargement, complétion, agrégation) est journalisée en `ERROR` et par une
+  ligne `Batch of vertical <id> : failed` ; les verticales suivantes et `clearScoresOutsideVerticals()` passent
+  quand même.
+- Une exception de notation sur un produit arrête la notation de toute la verticale (rien n'est indexé, les scores
+  ont été vidés au début) ; le log donne le produit et le service. En complétion, un service qui échoue n'empêche
+  plus les suivants pour ce produit.
+
 Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings`, à INFO dans `application.yml` malgré
 le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
 (chargement et classification, complétion, agrégation, notation, mise en file), et pour la complétion, tous les
