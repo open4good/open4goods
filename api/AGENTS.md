@@ -309,6 +309,23 @@ curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/ba
 - le seuil 0,5 ;
 - les gardes du script (verticale reçue, catégories changées).
 
+## Génération open data
+
+GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services/opendata`) : `ui` et `front-api` gardent
+`open-data-config.generation-enabled: false`, et `OpenDataService` n'a pas de `@Scheduled`.
+
+- `OpenDataGenerationScheduler` : cron `open-data-config.generation-cron` (dimanche 01:30 Europe/Paris par défaut). Ne
+  le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
+- `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
+  est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
+- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size`, avec `page-pause`.
+  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+  ES (GOU-2249).
+- Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
+  `opendata_generation_failed`.
+
+Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
+
 ## Date de la dernière offre par datasource
 
 GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir
