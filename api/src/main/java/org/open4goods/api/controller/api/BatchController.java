@@ -61,13 +61,12 @@ public class BatchController {
     @PostMapping("/batch/tweak")
     @Operation(
             summary = "Run the data-cleanup (tweak) routine",
-            description = "Executes the ad-hoc data-cleanup routine implemented in BatchService.clean(). "
-                    + "The exact operations performed depend on the current implementation and are typically "
-                    + "one-shot fixes, deduplication passes or orphan-record removals. "
-                    + "Check the BatchService source for the current behaviour.")
+            description = "Removes, in every vertical, the attribute sources whose datasource name contains "
+                    + "\"ai\" (case-insensitive), then recomputes the affected attribute values. "
+                    + "No product is deleted.")
     @ApiResponse(responseCode = "200", description = "Cleanup routine completed")
     public void batchCleanup() throws InvalidParameterException, IOException, InterruptedException {
-        batchService.clean();
+        batchService.cleanAiData();
     }
 
     @PostMapping("/batch/clean-resources")
