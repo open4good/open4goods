@@ -702,6 +702,21 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
+     * Picks the shortest offer name that is not corrupted by an encoding loss ({@code ¿} or {@code �}). Returns an
+     * empty string when every name is corrupted: a missing name is better than a wrong one.
+     */
+    static String exportName(Product data) {
+        Set<String> names = data.getOfferNames();
+        if (names == null) {
+            return "";
+        }
+        return names.stream()
+                .filter(n -> n != null && n.indexOf('\u00BF') < 0 && n.indexOf('\uFFFD') < 0)
+                .min(java.util.Comparator.comparingInt(String::length))
+                .orElse("");
+    }
+
+    /**
      * Converts a Product object into a CSV row for GTIN.
      */
     private String[] toGtinEntry(Product data) {
@@ -711,7 +726,7 @@ public class OpenDataService implements HealthIndicator {
         line[0] = StringUtils.defaultString(data.gtin());
         line[1] = StringUtils.defaultString(data.brand());
         line[2] = StringUtils.defaultString(data.model());
-        line[3] = StringUtils.defaultString(data.shortestOfferName());
+        line[3] = exportName(data);
 
         line[4] = String.valueOf(data.getLastChange());
 
@@ -759,7 +774,7 @@ public class OpenDataService implements HealthIndicator {
         Arrays.fill(line, "");
 
         line[0] = StringUtils.defaultString(data.gtin());
-        line[1] = StringUtils.defaultString(data.shortestOfferName());
+        line[1] = exportName(data);
         line[2] = String.valueOf(data.getLastChange());
         if (data.getOffersCount() != null) {
             line[3] = String.valueOf(data.getOffersCount());
