@@ -83,6 +83,8 @@ les a pas.
 | `isbn.zip` | `isbn-open-data.zip` | `open4goods-isbn-dataset.csv` (UTF-8) |
 | `gtin-manifest.json`, `isbn-manifest.json` | idem | manifest d'un jeu (GOU-2239) |
 | `manifest.json` | `manifest.json` | tous les jeux (contrat du plan GOU-2237) |
+| `impact-{vertical}.zip` | idem | `impact-{vertical}.csv` : critères bruts d'une verticale (GOU-2250) |
+| `impact-{vertical}-manifest.json` | idem | manifest d'un jeu impact |
 
 ## Contrat des manifests (`schemaVersion` 1)
 
@@ -136,3 +138,25 @@ Journal des modifications du schéma (à compléter par la version 2) :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,
   `classification_decitre_2`, `classification_decitre_3` ne figurent plus dans les fichiers. `nb_page` reste dans le
   jeu ISBN, sans changement de nom.
+
+## Datasets impact (lot 2, GOU-2250)
+
+Un CSV zippé par verticale activée de `verticals/`, `impact-{vertical}.zip`, produit dans le même passage que GTIN et
+ISBN (une seule lecture de l'index, un produit va dans chaque jeu dont il relève) et listé dans `manifest.json` avec
+l'identifiant `impact-{vertical}`. La liste des verticales et des critères vient de `VerticalsConfigService` et de
+`availableImpactScoreCriterias` : une nouvelle verticale donne un nouveau jeu, sans liste en dur. `DATA_QUALITY` est
+exclu ; une verticale sans autre critère n'a pas de jeu.
+
+- **Critères bruts uniquement** (décision du 15/11) : valeur de `attributes.indexed.{CRITERE}` telle quelle, jamais de
+  score agrégé, sous-score, percentile ni rang. Valeur absente : cellule vide, jamais de défaut.
+- **Lignes** : tous les produits de la verticale (`vertical` dans l'index), exclus compris ; `indexCount` du manifest
+  est `countItemsByVertical` au début du passage et le garde-fou de lignes (0,9) s'applique.
+- **Projection** : les champs ci-dessus plus `vertical`, `names.url`, `externalIds.eprel` et un champ
+  `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
+- **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
+- Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
+  (`impact-all`, lignes = somme des jeux).
+- **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
+- **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
+  `impact-*-manifest.json`.
