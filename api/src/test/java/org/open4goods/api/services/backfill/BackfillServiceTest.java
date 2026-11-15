@@ -44,10 +44,31 @@ class BackfillServiceTest {
 	void restoreRefusesTheBackupOfAnotherOperation() throws IOException {
 		BackfillService service = service();
 		Files.createDirectories(tmp.resolve("backups"));
-		Files.writeString(tmp.resolve("backups").resolve("nature-1.jsonl"), "", StandardCharsets.UTF_8);
+		Files.writeString(tmp.resolve("backups").resolve("nature-20261120T000000Z.jsonl"), "", StandardCharsets.UTF_8);
 
-		assertThatThrownBy(() -> service.startRestore(new DecitrePurgeOperation(), "nature-1.jsonl", 10, 0))
-				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("decitre-purge");
+		assertThatThrownBy(() -> service.startRestore(new DecitrePurgeOperation(), "nature-20261120T000000Z.jsonl", 10,
+				0)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("decitre-purge");
+		assertThatThrownBy(() -> service.startRestore(new DecitrePurgeOperation(),
+				"decitre-purge-x/../nature-20261120T000000Z.jsonl", 10, 0)).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@Test
+	void resumeWithTheSameParametersIsAcceptedAfterARestart() throws IOException {
+		Files.writeString(tmp.resolve("status.json"), """
+				{"state":"STOPPED","operation":"nature","dryRun":true,"restore":false,
+				 "parameters":{"threshold":0.5,"reportThresholds":[0.0,0.5],"lastChangeDays":2},
+				 "report":{"operation":"nature","cursor":{"pitId":"pit-1","searchAfter":[42]}}}
+				""", StandardCharsets.UTF_8);
+		BackfillService service = service();
+		NatureBackfillOperation operation = new NatureBackfillOperation(
+				org.mockito.Mockito.mock(org.open4goods.verticals.VerticalsConfigService.class), 0.5, null, 2);
+
+		BackfillStatus started = service.start(operation, new BackfillOptions(true, 10, 0, true));
+
+		assertThat(started.state()).isEqualTo(BackfillStatus.State.RUNNING);
+		assertThat(started.report().cursor().searchAfter()).containsExactly(42L);
+		// Waits for the background run (the mocked engine ends it at once) before the temporary folder is deleted
+		service.close();
 	}
 
 	@Test

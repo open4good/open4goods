@@ -50,4 +50,15 @@ public interface BackfillOperation {
 	default Map<String, Object> parameters() {
 		return Map.of();
 	}
+
+	/**
+	 * Operation-specific counters added to each report, for instance the products marked per threshold of the
+	 * {@code nature} backfill (GOU-2234). They cover the products scanned by this operation instance only: a resumed
+	 * run starts them again.
+	 *
+	 * @return the details, empty by default
+	 */
+	default Map<String, Object> details() {
+		return Map.of();
+	}
 }

@@ -251,6 +251,49 @@ Le test d'intégration `BackfillEngineIT` (Testcontainers, hors CI) se lance ave
 -Dtest=BackfillEngineIT -Dsurefire.failIfNoSpecifiedTests=false`. Il couvre le dry-run, l'écriture (le reste du
 `_source` est identique), la restauration, l'arrêt suivi de la reprise et le PIT expiré.
 
+### Reprise de `nature` (GOU-2234)
+
+`POST /batch/backfill/nature` pose ou retire `nature` (lot CSS 4e.2 de GOU-2226) sur les produits vivants sans
+verticale.
+
+**Pourquoi.** Une ligne de flux inchangée ne fait qu'une mise à jour partielle, et le batch ne charge que les produits
+des verticales. Sans cette reprise, les produits sans verticale n'auraient jamais la `nature` calculée par
+l'agrégation (GOU-2233).
+
+**Périmètre.** Pas de `vertical`, `lastChange` dans les `lastChangeDays` derniers jours (défaut 2), `offersCount` > 0,
+et `datasourceCategories` présent. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
+
+**Calcul.** C'est celui de l'agrégation, `VerticalsConfigService.getNatureForCategories(categories, threshold)`, sans
+copie. `threshold` est le `natureMinMarkedCategoryShare` de la nature écrite ; sa valeur par défaut est celle de
+`_default.yml`.
+
+**Écriture.**
+- Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
+- Le script ne touche pas un produit qui a reçu une verticale entre-temps.
+- La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
+- `sanitizeAll()` n'est pas utilisé.
+
+**Rapport du dry-run** (mesure 7.4 de GOU-2226). `report.labelCounts` donne les écritures prévues par valeur
+(`nature=SPARE_PART`, `nature=ACCESSORY`, `nature=absent`). `report.details` donne :
+- `markedByThreshold` : les produits marqués par valeur, pour chaque seuil de `reportThresholds` (défaut 0 et 0,5) ;
+- `examplesMarkedOnlyAtLowestThreshold` : 20 exemples (GTIN, nom, `datasourceCategories`) marqués au seuil le plus
+  bas mais pas au plus haut.
+
+Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
+
+**Exécution en prod** (Ops). D'abord le dry-run, dont le résultat est publié sur GOU-2234. Ensuite l'écriture, avec le
+seuil fixé par le CTO, après le premier batch de 13 h qui suit le déploiement de #3649, hors des fenêtres de 13 h et de
+23 h :
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false&threshold=0.5"
+```
+
+`NatureBackfillIT` (Testcontainers, hors CI) couvre le dry-run (comptes par seuil et exemple), l'écriture (seul
+`nature` change, et seulement sur les produits du périmètre), le second passage qui n'écrit rien, et le seuil 0,5.
+
 ## Date de la dernière offre par datasource
 
 GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir

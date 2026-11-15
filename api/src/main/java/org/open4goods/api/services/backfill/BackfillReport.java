@@ -24,6 +24,7 @@ import java.util.Map;
  * @param stopReason      null when the scan reached its end, {@code STOP_REQUESTED} or {@code BACKPRESSURE}
  *                        (Elasticsearch answered 429 to a search, a shard or a bulk item) otherwise
  * @param durationMs      duration of the run
+ * @param details         operation-specific counters ({@link BackfillOperation#details()}), empty when none
  */
 public record BackfillReport(
 		String operation,
@@ -39,7 +40,8 @@ public record BackfillReport(
 		String backupFile,
 		BackfillCursor cursor,
 		String stopReason,
-		long durationMs) {
+		long durationMs,
+		Map<String, Object> details) {
 
 	/** Stop asked through {@link BackfillService#requestStop()}. */
 	public static final String STOP_REQUESTED = "STOP_REQUESTED";

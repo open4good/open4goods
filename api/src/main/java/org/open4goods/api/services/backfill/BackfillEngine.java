@@ -91,7 +91,8 @@ public class BackfillEngine {
 	 *
 	 * @param operation  what to change
 	 * @param options    mode, batch size and rate cap
-	 * @param backupFile JSONL backup file, appended to; required outside dry run, ignored in dry run
+	 * @param backupFile JSONL backup file, appended to; required outside dry run when the operation can be restored,
+	 *                   ignored otherwise
 	 * @param resumeFrom cursor of a stopped run to continue, null to start from the beginning
 	 * @param stop       polled between two pages: true stops the run cleanly
 	 * @param onBatch    receives the counters after each page
@@ -100,7 +101,8 @@ public class BackfillEngine {
 	 */
 	public BackfillReport run(BackfillOperation operation, BackfillOptions options, Path backupFile,
 			BackfillCursor resumeFrom, BooleanSupplier stop, Consumer<BackfillReport> onBatch) throws IOException {
-		if (!options.dryRun()) {
+		boolean backedUp = !options.dryRun() && operation.restoreScript() != null;
+		if (backedUp) {
 			Objects.requireNonNull(backupFile, "backupFile is required outside dry run");
 		}
 		requirePaceWithinKeepAlive(options.batchSize(), options.maxProductsPerSecond());
@@ -114,9 +116,9 @@ public class BackfillEngine {
 		long batch = 0;
 		logger.info("Backfill {} started (dryRun={}, batchSize={}, maxProductsPerSecond={}, resumeFrom={}, backup={})",
 				operation.name(), options.dryRun(), options.batchSize(), options.maxProductsPerSecond(), resumeFrom,
-				options.dryRun() ? null : backupFile);
+				backedUp ? backupFile : null);
 
-		try (BackupWriter backup = options.dryRun() ? null : new BackupWriter(backupFile)) {
+		try (BackupWriter backup = backedUp ? new BackupWriter(backupFile) : null) {
 			while (true) {
 				if (stop.getAsBoolean()) {
 					stopReason = BackfillReport.STOP_REQUESTED;
@@ -172,8 +174,10 @@ public class BackfillEngine {
 				}
 
 				boolean rejected = false;
-				if (backup != null && !changes.isEmpty()) {
-					backup.append(ids, changes);
+				if (!options.dryRun() && !changes.isEmpty()) {
+					if (backup != null) {
+						backup.append(ids, changes);
+					}
 					rejected = write(operation, ids, changes, counters);
 				}
 				if (rejected) {
@@ -182,7 +186,7 @@ public class BackfillEngine {
 				}
 
 				after = hits.getLast().sort();
-				BackfillReport progress = counters.report(operation, options.dryRun(), backupFile,
+				BackfillReport progress = counters.report(operation, options.dryRun(), backedUp ? backupFile : null,
 						new BackfillCursor(pitId, toLongs(after)), null, start);
 				logger.info("Backfill {} (dryRun={}) batch {}: {} scanned, {} matched, {} written, {} unchanged, {} failed, "
 						+ "labels {}", operation.name(), options.dryRun(), batch, counters.scanned, counters.matched,
@@ -196,7 +200,7 @@ public class BackfillEngine {
 			}
 		}
 
-		BackfillReport report = counters.report(operation, options.dryRun(), backupFile,
+		BackfillReport report = counters.report(operation, options.dryRun(), backedUp ? backupFile : null,
 				new BackfillCursor(pitId, toLongs(after)), stopReason, start);
 		logger.info("Backfill {} {}: {}", operation.name(), completed ? "done" : "stopped", report);
 		return report;
@@ -548,13 +552,13 @@ public class BackfillEngine {
 			return new BackfillReport(operation.name(), dryRun, false, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples),
 					dryRun || backupFile == null ? null : backupFile.toString(), cursor, stopReason,
-					System.currentTimeMillis() - start);
+					System.currentTimeMillis() - start, Map.copyOf(operation.details()));
 		}
 
 		BackfillReport restoreReport(BackfillOperation operation, Path backupFile, String stopReason, long start) {
 			return new BackfillReport(operation.name(), false, true, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples), backupFile.toString(), null, stopReason,
-					System.currentTimeMillis() - start);
+					System.currentTimeMillis() - start, Map.of());
 		}
 	}
 }
