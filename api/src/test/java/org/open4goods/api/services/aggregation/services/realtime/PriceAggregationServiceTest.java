@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -203,6 +204,58 @@ class PriceAggregationServiceTest {
         assertThat(product.getPrice().getOccasionPricehistory()).containsExactly(tenDaysAgo);
         assertThat(product.getPrice().getNewPricehistory()).singleElement()
                 .extracting(PriceHistory::getPrice).isEqualTo(849.99);
+    }
+
+    /**
+     * Mirror of {@link #conditionWithoutOfferDropsItsTrendAndTrimsItsHistory()} for the new condition, the most
+     * frequent case in production (discontinued products only sold second-hand): the NEW trend is removed and
+     * the NEW history trimmed (GOU-2277).
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void newConditionWithoutOfferDropsItsTrendAndTrimsItsHistory() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+        long now = System.currentTimeMillis();
+        PriceHistory threeYearsAgo = new PriceHistory(now - Duration.ofDays(3 * 365).toMillis(), 899.0);
+        PriceHistory tenDaysAgo = new PriceHistory(now - Duration.ofDays(10).toMillis(), 799.0);
+        product.getPrice().setNewPricehistory(new ArrayList<>(List.of(threeYearsAgo, tenDaysAgo)));
+        product.getPrice().getTrends().put(ProductCondition.NEW, -1);
+
+        service.onDataFragment(offer("backmarket.fr", "https://example.com/bm", 499.0, 0.0, 2, 4,
+                ProductCondition.OCCASION, InStock.INSTOCK), product, new VerticalConfig());
+
+        assertThat(product.getPrice().getTrends())
+                .doesNotContainKey(ProductCondition.NEW)
+                .containsEntry(ProductCondition.OCCASION, 0);
+        assertThat(product.getPrice().getNewPricehistory()).containsExactly(tenDaysAgo);
+    }
+
+    /**
+     * Verifies stored history entries without timestamp or price are dropped instead of failing the
+     * aggregation. The history of a condition without offer is now read again (GOU-2277), and legacy data may
+     * hold such entries: an exception on the partial update path would lose the whole realtime buffer.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void historyEntriesWithoutTimestampOrPriceAreDropped() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+        long now = System.currentTimeMillis();
+        PriceHistory tenDaysAgo = new PriceHistory(now - Duration.ofDays(10).toMillis(), 199.0);
+        product.getPrice().setOccasionPricehistory(new ArrayList<>(Arrays.asList(
+                new PriceHistory(null, 199.0),
+                new PriceHistory(now - Duration.ofDays(5).toMillis(), null),
+                null,
+                tenDaysAgo)));
+
+        service.onDataFragment(offer("darty.com", "https://example.com/darty", 849.99, 0.0, 2, 4), product,
+                new VerticalConfig());
+
+        assertThat(product.getPrice().getOccasionPricehistory()).containsExactly(tenDaysAgo);
+        assertThat(product.getOffersCount()).isEqualTo(1);
     }
 
     private static DataFragment offer(String datasource, String url, double priceValue, double shippingCost,

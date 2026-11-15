@@ -217,11 +217,11 @@ public class PriceAggregationService extends AbstractAggregationService {
     /**
      * Compute the price history and the trend of a given product condition.
      *
-     * <p>The history is always normalized (lowest price per day, sorted) and trimmed (entries priced 0 or older
-     * than 2 years are dropped), even when the condition has no offer left. With an offer, its lowest price is
-     * appended to the history and the trend compares the last two entries. Without an offer, the trend of the
-     * condition is removed, as for a product that never had an offer of this condition; it used to keep its last
-     * value indefinitely (GOU-2277).
+     * <p>The history is always normalized (lowest price per day, sorted) and trimmed (entries without timestamp or
+     * price, priced 0 or older than 2 years are dropped), even when the condition has no offer left. With an
+     * offer, its lowest price is appended to the history and the trend compares the last two entries. Without an
+     * offer, the trend of the condition is removed, as for a product that never had an offer of this condition;
+     * it used to keep its last value indefinitely (GOU-2277).
      *
      * @param prices the aggregated prices data, updated in place
      * @param state  the product condition (NEW or OCCASION)
@@ -234,13 +234,23 @@ public class PriceAggregationService extends AbstractAggregationService {
         // contain multiple entries for the same day from earlier ingestion runs).
         Map<Long, PriceHistory> dailyLowestPrices = new HashMap<>();
         List<PriceHistory> storedHistory = prices.getHistory(state);
+        int invalidEntries = 0;
         if (storedHistory != null) {
             for (PriceHistory ph : storedHistory) {
+
+                // Entries without timestamp or price cannot be dated nor compared: dropped, as legacy data may hold some
+                if (ph == null || ph.getTimestamp() == null || ph.getPrice() == null) {
+                    invalidEntries++;
+                    continue;
+                }
 
                 // Check if we have a price for the current day
                 dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) ->
                     existing.getPrice() <= newPrice.getPrice() ? existing : newPrice);
             }
+        }
+        if (invalidEntries > 0) {
+            dedicatedLogger.debug("Dropped {} {} price history entries without timestamp or price", invalidEntries, state);
         }
 
 
