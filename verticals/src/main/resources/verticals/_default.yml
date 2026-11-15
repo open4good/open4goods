@@ -55,11 +55,15 @@ descriptionAttributes:
   - PRODUCT_SHORT_DESCRIPTION
 
 # If product categories contains one of this token, this will be unmatched
+# Categories are compared upper-cased and without accents (IdHelper.getCategoryName), as substrings:
+# "PIECES DETACHEE" covers "PIECES DETACHEES", "PIECE DETACHEE" covers "PIECE DETACHEES" (GOU-2231).
 excludingTokensFromCategoriesMatching:
   - ACCESSOIRE
   - QUINCAILLERIE
   - CABLE
   - MEUBLE
+  - PIECE DETACHEE
+  - PIECES DETACHEE
 
 # The global scores that are available to build the impact score
 availableImpactScoreCriterias:
