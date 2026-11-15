@@ -68,6 +68,21 @@ Ce que ce relevé dit, et ne dit pas : il suit le prix le plus bas proposé à c
 
 Pour choisir la bonne taille avant de regarder le prix, lisez notre article [quelle taille de TV choisir pour son salon](/blog/quelle-taille-de-tv-choisir-pour-son-salon). Pour comparer les offres et l'Impact Score (la note de Nudger qui résume l'impact environnemental d'un produit) des téléviseurs : [tous les téléviseurs sur Nudger](/televiseurs). La fiche de l'exemple : [Samsung TQ77S90FAE](/televiseurs/8806097084532-tv-samsung-tq77s90fae-2025).
 
+Les téléviseurs 43 pouces les mieux notés par l'Impact Score, avec une offre en ligne :
+
+::guide-product-grid{vertical="tv" subcategory="tv_43_inches" top="3"}
+::
+
+En 55 pouces :
+
+::guide-product-grid{vertical="tv" subcategory="tv_55_inches" top="3"}
+::
+
+En 65 pouces :
+
+::guide-product-grid{vertical="tv" subcategory="tv_65_inches" top="3"}
+::
+
 *Les prix sont ceux relevés par Nudger aux dates indiquées ; ils peuvent avoir changé depuis. Source de la règle : [article L112-1-1 du Code de la consommation, Légifrance](https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069565/LEGISCTA000032220919/).*
 
 Rédigé avec l'aide d'une IA à partir des données Nudger, relu par l'équipe.

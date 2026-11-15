@@ -149,6 +149,29 @@ describe('blog-content', () => {
       )
     })
 
+    it('renders the three TV widgets of the Black Friday article', async () => {
+      const rawbody = readFileSync(
+        resolve(
+          process.cwd(),
+          'content/blog/fr/black-friday-tv-reperer-fausses-promotions.md'
+        ),
+        'utf-8'
+      )
+      const dto = await toBlogPostDto(
+        doc({
+          path: '/blog/fr/black-friday-tv-reperer-fausses-promotions',
+          rawbody,
+        })
+      )
+
+      const markers = dto.body.match(/data-product-widget="[^"]*"/g)
+      expect(markers).toEqual([
+        'data-product-widget="tv|tv_43_inches|3"',
+        'data-product-widget="tv|tv_55_inches|3"',
+        'data-product-widget="tv|tv_65_inches|3"',
+      ])
+    })
+
     it('accepts a directive without closing line, right after a paragraph', async () => {
       const body = await render(
         'Before\n::guide-product-grid{vertical="oven"}\nAfter'
