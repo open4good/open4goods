@@ -45,7 +45,8 @@ import com.google.common.collect.Sets;
  *   <li>Compute the estimated nudger contribution for each offer.</li>
  *   <li>Update min-price, offer count, and available product conditions.</li>
  *   <li>Maintain and trim a per-condition price history (max 2 years,
- *       one entry per day, computed trends).</li>
+ *       one entry per day, computed trends). A condition without offer keeps
+ *       its trimmed history but loses its trend.</li>
  * </ol>
  *
  * <p>TODO(p3,conf): The price-history maximum size (currently 2 years) should
@@ -214,27 +215,32 @@ public class PriceAggregationService extends AbstractAggregationService {
 	}
 
     /**
-     * Compute the price history for a given product condition.
+     * Compute the price history and the trend of a given product condition.
      *
-     * @param prices the aggregated prices data
+     * <p>The history is always normalized (lowest price per day, sorted) and trimmed (entries priced 0 or older
+     * than 2 years are dropped), even when the condition has no offer left. With an offer, its lowest price is
+     * appended to the history and the trend compares the last two entries. Without an offer, the trend of the
+     * condition is removed, as for a product that never had an offer of this condition; it used to keep its last
+     * value indefinitely (GOU-2277).
+     *
+     * @param prices the aggregated prices data, updated in place
      * @param state  the product condition (NEW or OCCASION)
      */
     private void computePriceHistory(AggregatedPrices prices, ProductCondition state) {
 
         AggregatedPrice minPrice = prices.getMinPrice(state).orElse(null);
-        // Skip history computation when no price is available for the condition
-        if (minPrice == null) {
-            return;
-        }
 
         // Ensure only the lowest price is kept per day (deduplicates history that may
         // contain multiple entries for the same day from earlier ingestion runs).
         Map<Long, PriceHistory> dailyLowestPrices = new HashMap<>();
-        for (PriceHistory ph : prices.getHistory(state)) {
+        List<PriceHistory> storedHistory = prices.getHistory(state);
+        if (storedHistory != null) {
+            for (PriceHistory ph : storedHistory) {
 
-            // Check if we have a price for the current day
-            dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) ->
-                existing.getPrice() <= newPrice.getPrice() ? existing : newPrice);
+                // Check if we have a price for the current day
+                dailyLowestPrices.merge(ph.getDay(), ph, (existing, newPrice) ->
+                    existing.getPrice() <= newPrice.getPrice() ? existing : newPrice);
+            }
         }
 
 
@@ -243,40 +249,47 @@ public class PriceAggregationService extends AbstractAggregationService {
         history.sort(Comparator.comparingLong(PriceHistory::getTimestamp)); // Sort by timestamp to maintain order
 
 
-
-        /*
-         * Maintain one price entry per day. If the price changed, append a new entry.
-         * If the price is unchanged but we already have an entry for today, replace it
-         * to refresh the timestamp rather than leaving a gap.
-         */
-        long today = System.currentTimeMillis() / (1000 * 60 * 60 * 24);
-        if (history.isEmpty() || !history.getLast().getPrice().equals(minPrice.getPrice())) {
-            history.add(new PriceHistory(minPrice));
+        if (minPrice == null) {
+            // No offer left for the condition: no current price to compare, so no trend (GOU-2277)
+            if (prices.getTrends() != null) {
+                prices.getTrends().remove(state);
+            }
         } else {
-            PriceHistory lastEntry = history.getLast();
-            if (lastEntry.getDay() == today) {
-                // Refresh today's entry with the current timestamp
-                history.removeLast();
+
+            /*
+             * Maintain one price entry per day. If the price changed, append a new entry.
+             * If the price is unchanged but we already have an entry for today, replace it
+             * to refresh the timestamp rather than leaving a gap.
+             */
+            long today = System.currentTimeMillis() / (1000 * 60 * 60 * 24);
+            if (history.isEmpty() || !history.getLast().getPrice().equals(minPrice.getPrice())) {
                 history.add(new PriceHistory(minPrice));
-            }
-        }
-
-        // Set the trend based on the last two price history values if the minimum price timestamp matches today's date
-        if (history.size() >= 2) {
-    		int trend = 0;
-            PriceHistory secondLastPrice = history.get(history.size() - 2);
-            PriceHistory lastPrice = history.get(history.size() - 1);
-
-            if (lastPrice.getPrice() < secondLastPrice.getPrice()) {
-                trend = -1; // Price decreased
-            } else if (lastPrice.getPrice() > secondLastPrice.getPrice()) {
-                trend = 1; // Price increased
+            } else {
+                PriceHistory lastEntry = history.getLast();
+                if (lastEntry.getDay() == today) {
+                    // Refresh today's entry with the current timestamp
+                    history.removeLast();
+                    history.add(new PriceHistory(minPrice));
+                }
             }
 
-            prices.getTrends().put(state, trend);
+            // Set the trend based on the last two price history values if the minimum price timestamp matches today's date
+            if (history.size() >= 2) {
+                int trend = 0;
+                PriceHistory secondLastPrice = history.get(history.size() - 2);
+                PriceHistory lastPrice = history.get(history.size() - 1);
 
-        } else {
-        	 prices.getTrends().put(state, 0);
+                if (lastPrice.getPrice() < secondLastPrice.getPrice()) {
+                    trend = -1; // Price decreased
+                } else if (lastPrice.getPrice() > secondLastPrice.getPrice()) {
+                    trend = 1; // Price increased
+                }
+
+                prices.getTrends().put(state, trend);
+
+            } else {
+                prices.getTrends().put(state, 0);
+            }
         }
 
 

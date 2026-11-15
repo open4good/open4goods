@@ -3,12 +3,15 @@ package org.open4goods.api.services.aggregation.services.realtime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.Currency;
 import org.open4goods.model.price.Price;
+import org.open4goods.model.price.PriceHistory;
 import org.open4goods.model.product.InStock;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductCondition;
@@ -169,6 +172,37 @@ class PriceAggregationServiceTest {
 
         assertThat(product.getPrice().getOffers()).singleElement()
                 .extracting(AggregatedPrice::getPrice).isEqualTo(799.0);
+    }
+
+    /**
+     * Verifies a condition left without offer loses its stored trend and still gets its history trimmed
+     * (GOU-2277). The early return of the history computation used to freeze the last trend (here -1) and skip
+     * the removal of entries older than 2 years or priced 0. The condition that still has an offer keeps a
+     * recomputed trend.
+     *
+     * @throws Exception when aggregation fails
+     */
+    @Test
+    void conditionWithoutOfferDropsItsTrendAndTrimsItsHistory() throws Exception {
+        PriceAggregationService service = new PriceAggregationService(LOGGER);
+        Product product = new Product(123L);
+        long now = System.currentTimeMillis();
+        PriceHistory threeYearsAgo = new PriceHistory(now - Duration.ofDays(3 * 365).toMillis(), 259.0);
+        PriceHistory zeroPrice = new PriceHistory(now - Duration.ofDays(20).toMillis(), 0.0);
+        PriceHistory tenDaysAgo = new PriceHistory(now - Duration.ofDays(10).toMillis(), 199.0);
+        product.getPrice().setOccasionPricehistory(new ArrayList<>(List.of(threeYearsAgo, zeroPrice, tenDaysAgo)));
+        product.getPrice().getTrends().put(ProductCondition.OCCASION, -1);
+        product.getPrice().getTrends().put(ProductCondition.NEW, -1);
+
+        service.onDataFragment(offer("darty.com", "https://example.com/darty", 849.99, 0.0, 2, 4), product,
+                new VerticalConfig());
+
+        assertThat(product.getPrice().getTrends())
+                .doesNotContainKey(ProductCondition.OCCASION)
+                .containsEntry(ProductCondition.NEW, 0);
+        assertThat(product.getPrice().getOccasionPricehistory()).containsExactly(tenDaysAgo);
+        assertThat(product.getPrice().getNewPricehistory()).singleElement()
+                .extracting(PriceHistory::getPrice).isEqualTo(849.99);
     }
 
     private static DataFragment offer(String datasource, String url, double priceValue, double shippingCost,
