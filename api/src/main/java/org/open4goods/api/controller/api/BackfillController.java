@@ -79,8 +79,9 @@ public class BackfillController {
 	@PostMapping("/batch/backfill/decitre-purge/restore")
 	@Operation(summary = "Put back the Decitre attribute keys from a backup file",
 			description = "Reads a JSONL backup file written by a decitre-purge run (file name only, inside the backfill "
-					+ "backup folder, see the backupFile of the run status) and puts each saved attribute back into "
-					+ "attributes.all of its product. Asynchronous: this call answers 202.")
+					+ "backup folder, see the backupFile of the run status, named decitre-purge-...) and puts each saved "
+					+ "attribute back into attributes.all of its product. The keys stay only if their ingestion "
+					+ "exclusion (GOU-2264) is reverted too. Asynchronous: this call answers 202.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "202", description = "Restore started (or a run is already in progress: current status returned)"),
 			@ApiResponse(responseCode = "400", description = "Unknown backup file, or a path outside the backup folder")
@@ -89,12 +90,14 @@ public class BackfillController {
 			@Parameter(description = "Backup file name, for instance decitre-purge-20261116T220000Z.jsonl", required = true)
 			@RequestParam String backupFile,
 			@Parameter(description = "Products restored per bulk (1 to 5000)")
-			@RequestParam(defaultValue = "1000") int batchSize) {
+			@RequestParam(defaultValue = "1000") int batchSize,
+			@Parameter(description = "Restore rate cap, in products per second; 0 means no cap")
+			@RequestParam(defaultValue = "2000") int maxProductsPerSecond) {
 		try {
-			// Validates the batch size the same way as a run
-			new BackfillOptions(false, batchSize, 0, false);
-			return ResponseEntity.accepted()
-					.body(backfillService.startRestore(new DecitrePurgeOperation(), backupFile, batchSize));
+			// Validates the batch size and the rate the same way as a run
+			new BackfillOptions(false, batchSize, maxProductsPerSecond, false);
+			return ResponseEntity.accepted().body(backfillService.startRestore(new DecitrePurgeOperation(), backupFile,
+					batchSize, maxProductsPerSecond));
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
 		}

@@ -149,8 +149,11 @@ class BackfillEngineIT {
 				r -> { });
 		assertThat(after.matchedProducts()).isZero();
 
-		BackfillReport restored = engine().restore(new DecitrePurgeOperation(), backup, 5, () -> false, r -> { });
+		// A corrupt line (an interrupted append) is skipped, the others are restored
+		Files.writeString(backup, "{\"id\":\"97820\n", StandardCharsets.UTF_8, java.nio.file.StandardOpenOption.APPEND);
+		BackfillReport restored = engine().restore(new DecitrePurgeOperation(), backup, 5, 0, () -> false, r -> { });
 		assertThat(restored.writtenProducts()).isEqualTo(12);
+		assertThat(restored.failedProducts()).isEqualTo(1);
 		refresh();
 		assertSources(originals);
 	}
@@ -172,6 +175,7 @@ class BackfillEngineIT {
 
 		assertThat(resumed.stopReason()).isNull();
 		assertThat(resumed.scannedProducts()).isEqualTo(9);
+		assertThat(stopped.unchangedProducts() + resumed.unchangedProducts()).isZero();
 		assertThat(stopped.writtenProducts() + resumed.writtenProducts()).isEqualTo(12);
 		assertThat(Files.readAllLines(backup, StandardCharsets.UTF_8)).hasSize(12);
 	}

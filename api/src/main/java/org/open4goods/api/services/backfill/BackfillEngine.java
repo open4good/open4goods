@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,6 +25,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.ElasticsearchException;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.Refresh;
+import co.elastic.clients.elasticsearch._types.ShardFailure;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -49,8 +51,8 @@ import tools.jackson.databind.json.JsonMapper;
  *       fields of the operation are written, never the complete document;</li>
  *   <li>the cursor moves past the page, the counters are reported and logged, and the reading rate is capped.</li>
  * </ol>
- * The run stops cleanly when a stop is requested (between two pages) or when Elasticsearch answers 429 (search or bulk
- * item): the report then carries the cursor of the last page fully handled, and the point in time stays open for
+ * The run stops cleanly when a stop is requested (between two pages) or when Elasticsearch answers 429 (search, shard
+ * or bulk item): the report then carries the cursor of the last page fully handled, and the point in time stays open for
  * {@code keepAlive}, so a resumed run continues from there. A page with a rejected item is handled again on resume;
  * the operations are idempotent, so the products already changed are skipped.
  *
@@ -101,6 +103,7 @@ public class BackfillEngine {
 		if (!options.dryRun()) {
 			Objects.requireNonNull(backupFile, "backupFile is required outside dry run");
 		}
+		requirePaceWithinKeepAlive(options.batchSize(), options.maxProductsPerSecond());
 		long start = System.currentTimeMillis();
 		Counters counters = new Counters();
 		String pitId = resumeFrom == null || resumeFrom.pitId() == null ? openPit() : resumeFrom.pitId();
@@ -119,6 +122,7 @@ public class BackfillEngine {
 					stopReason = BackfillReport.STOP_REQUESTED;
 					break;
 				}
+				long pageStart = System.currentTimeMillis();
 				SearchResponse<Map<String, Object>> page;
 				try {
 					page = search(operation, options.batchSize(), pitId, after);
@@ -142,6 +146,11 @@ public class BackfillEngine {
 				resuming = false;
 				if (page.pitId() != null) {
 					pitId = page.pitId();
+				}
+				if (partial(operation, page)) {
+					// A shard rejected the page: its products are not in it, so the cursor must not move past them
+					stopReason = BackfillReport.BACKPRESSURE;
+					break;
 				}
 				List<Hit<Map<String, Object>>> hits = page.hits().hits();
 				if (hits.isEmpty()) {
@@ -175,11 +184,11 @@ public class BackfillEngine {
 				after = hits.getLast().sort();
 				BackfillReport progress = counters.report(operation, options.dryRun(), backupFile,
 						new BackfillCursor(pitId, toLongs(after)), null, start);
-				logger.info("Backfill {} (dryRun={}) batch {}: {} scanned, {} matched, {} written, {} failed, labels {}",
-						operation.name(), options.dryRun(), batch, counters.scanned, counters.matched,
-						counters.written, counters.failed, counters.labels);
+				logger.info("Backfill {} (dryRun={}) batch {}: {} scanned, {} matched, {} written, {} unchanged, {} failed, "
+						+ "labels {}", operation.name(), options.dryRun(), batch, counters.scanned, counters.matched,
+						counters.written, counters.unchanged, counters.failed, counters.labels);
 				onBatch.accept(progress);
-				throttle(options.maxProductsPerSecond(), counters.scanned, start);
+				pace(options.maxProductsPerSecond(), hits.size(), pageStart, stop);
 			}
 		} finally {
 			if (completed) {
@@ -199,14 +208,15 @@ public class BackfillEngine {
 	 * @param operation  operation that wrote the backup file
 	 * @param backupFile JSONL backup file
 	 * @param batchSize  lines restored per bulk
+	 * @param maxProductsPerSecond restore rate cap, in lines per second; 0 means no cap
 	 * @param stop       polled between two bulks: true stops the restore
 	 * @param onBatch    receives the counters after each bulk
 	 * @return the report of the restore
 	 * @throws IOException                   when the backup file cannot be read
 	 * @throws UnsupportedOperationException when the operation has no restore script
 	 */
-	public BackfillReport restore(BackfillOperation operation, Path backupFile, int batchSize, BooleanSupplier stop,
-			Consumer<BackfillReport> onBatch) throws IOException {
+	public BackfillReport restore(BackfillOperation operation, Path backupFile, int batchSize,
+			int maxProductsPerSecond, BooleanSupplier stop, Consumer<BackfillReport> onBatch) throws IOException {
 		String script = operation.restoreScript();
 		if (script == null) {
 			throw new UnsupportedOperationException("Operation " + operation.name() + " cannot be restored");
@@ -220,24 +230,35 @@ public class BackfillEngine {
 			List<String> ids = new ArrayList<>();
 			List<BackfillChange> changes = new ArrayList<>();
 			String line;
+			long lineNumber = 0;
+			long pageStart = System.currentTimeMillis();
 			boolean more = true;
 			while (more) {
 				line = reader.readLine();
 				more = line != null;
 				if (more && !line.isBlank()) {
-					BackupLine parsed = JSON.readValue(line, BackupLine.class);
-					BackfillChange change = new BackfillChange(script, Map.of("data", parsed.data()), null,
-							List.copyOf(parsed.data().keySet()));
+					lineNumber++;
 					counters.scanned++;
-					counters.matched(parsed.id(), change);
-					ids.add(parsed.id());
-					changes.add(change);
+					BackupLine parsed = parse(line);
+					if (parsed == null) {
+						// A truncated or corrupt line is skipped: the other lines are still restored
+						counters.failed++;
+						logger.error("Restore of backfill {}: unreadable line {} of {}, skipped", operation.name(),
+								lineNumber, backupFile);
+					} else {
+						BackfillChange change = new BackfillChange(script, Map.of("data", parsed.data()), null,
+								List.copyOf(parsed.data().keySet()));
+						counters.matched(parsed.id(), change);
+						ids.add(parsed.id());
+						changes.add(change);
+					}
 				}
 				if (!changes.isEmpty() && (changes.size() >= batchSize || !more)) {
 					if (stop.getAsBoolean()) {
 						stopReason = BackfillReport.STOP_REQUESTED;
 						break;
 					}
+					int size = changes.size();
 					if (write(operation, ids, changes, counters)) {
 						stopReason = BackfillReport.BACKPRESSURE;
 						break;
@@ -245,10 +266,10 @@ public class BackfillEngine {
 					ids.clear();
 					changes.clear();
 					onBatch.accept(counters.restoreReport(operation, backupFile, null, start));
+					pace(maxProductsPerSecond, size, pageStart, stop);
+					pageStart = System.currentTimeMillis();
 				}
 			}
-		} catch (JacksonException e) {
-			throw new IOException("Unreadable backup line in " + backupFile, e);
 		}
 		BackfillReport report = counters.restoreReport(operation, backupFile, stopReason, start);
 		logger.info("Restore of backfill {} from {} {}: {}", operation.name(), backupFile,
@@ -268,7 +289,12 @@ public class BackfillEngine {
 			String id = ids.get(i);
 			BackfillChange change = changes.get(i);
 			Map<String, JsonData> params = new LinkedHashMap<>();
-			change.params().forEach((k, v) -> params.put(k, JsonData.of(v)));
+			// JsonData refuses null: a missing parameter reads as null in painless
+			change.params().forEach((k, v) -> {
+				if (v != null) {
+					params.put(k, JsonData.of(v));
+				}
+			});
 			operations.add(BulkOperation.of(o -> o.update(u -> u
 					.index(index)
 					.id(id)
@@ -293,7 +319,11 @@ public class BackfillEngine {
 		boolean backpressure = false;
 		for (BulkResponseItem item : response.items()) {
 			if (item.error() == null) {
-				counters.written++;
+				if ("noop".equals(item.result())) {
+					counters.unchanged++;
+				} else {
+					counters.written++;
+				}
 			} else {
 				counters.failed++;
 				backpressure |= item.status() == 429;
@@ -315,6 +345,8 @@ public class BackfillEngine {
 					.query(operation.query())
 					.size(size)
 					.trackTotalHits(t -> t.enabled(false))
+					// A failed shard fails the page rather than leaving its products out of it
+					.allowPartialSearchResults(false)
 					.sort(o -> o.field(f -> f.field("_shard_doc").order(SortOrder.Asc)))
 					.source(src -> src.filter(f -> f.includes(operation.sourceFields())));
 			if (after != null && !after.isEmpty()) {
@@ -341,19 +373,97 @@ public class BackfillEngine {
 		return keepAlive.toSeconds() + "s";
 	}
 
-	/** Sleeps when the products scanned so far went faster than the cap. */
-	private static void throttle(int maxProductsPerSecond, long scanned, long start) {
+	/**
+	 * Paces each page on its own: a page of {@code size} products takes at least {@code size / rate} seconds, so a slow
+	 * period never builds up a credit spent at full speed afterwards. Sleeps by slices of at most 1 s and stops
+	 * sleeping as soon as a stop is requested.
+	 */
+	private static void pace(int maxProductsPerSecond, int size, long pageStart, BooleanSupplier stop) {
 		if (maxProductsPerSecond <= 0) {
 			return;
 		}
-		long expectedMs = scanned * 1000 / maxProductsPerSecond;
-		long elapsedMs = System.currentTimeMillis() - start;
-		if (expectedMs > elapsedMs) {
+		long wakeUp = pageStart + (long) size * 1000 / maxProductsPerSecond;
+		long now = System.currentTimeMillis();
+		while (now < wakeUp && !stop.getAsBoolean()) {
 			try {
-				Thread.sleep(expectedMs - elapsedMs);
+				Thread.sleep(Math.min(1000, wakeUp - now));
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
+				return;
 			}
+			now = System.currentTimeMillis();
+		}
+	}
+
+	/**
+	 * Refuses a pace that would leave the point in time idle past half its keep alive: a page of {@code batchSize}
+	 * products at {@code maxProductsPerSecond} must take less than that.
+	 *
+	 * @throws IllegalArgumentException when the page would take too long
+	 */
+	public void requirePaceWithinKeepAlive(int batchSize, int maxProductsPerSecond) {
+		if (maxProductsPerSecond > 0 && (long) batchSize * 1000 / maxProductsPerSecond > keepAlive.toMillis() / 2) {
+			throw new IllegalArgumentException("batchSize / maxProductsPerSecond must stay under " + keepAlive.dividedBy(2)
+					+ ", or the point in time expires between two pages");
+		}
+	}
+
+	/**
+	 * Tells whether shards failed on this page. Partial results are refused in the request, so this is a safety net:
+	 * a rejection (429) stops the run like a rejected search, any other failure fails it.
+	 *
+	 * @return true when a shard rejected the page (backpressure)
+	 * @throws IllegalStateException when a shard failed for another reason
+	 */
+	private static boolean partial(BackfillOperation operation, SearchResponse<?> page) {
+		if (page.shards() == null || page.shards().failed() == null || page.shards().failed().intValue() == 0) {
+			return false;
+		}
+		List<ShardFailure> failures = page.shards().failures();
+		boolean rejected = failures.stream().anyMatch(f -> "429".equals(f.status())
+				|| (f.reason() != null && f.reason().type() != null && f.reason().type().contains("rejected")));
+		if (rejected) {
+			logger.warn("Backfill {}: {} shards rejected the page, stopping", operation.name(), page.shards().failed());
+			return true;
+		}
+		throw new IllegalStateException("Backfill " + operation.name() + ": " + page.shards().failed()
+				+ " shards failed: " + failures.stream().map(f -> f.reason() == null ? "?" : f.reason().reason()).toList());
+	}
+
+	/**
+	 * A run killed in the middle of {@code BackupWriter.append} can leave a partial last line. Its page was never sent (the
+	 * backup is forced to disk before the bulk), so the fragment is dropped before a resumed run appends after
+	 * it, which would otherwise glue its first line to the fragment.
+	 */
+	static void dropPartialLastLine(Path file) throws IOException {
+		if (!Files.isRegularFile(file) || Files.size(file) == 0) {
+			return;
+		}
+		try (RandomAccessFile raf = new RandomAccessFile(file.toFile(), "rw")) {
+			long end = raf.length();
+			long position = end - 1;
+			while (position >= 0) {
+				raf.seek(position);
+				if (raf.read() == '\n') {
+					break;
+				}
+				position--;
+			}
+			long keep = position + 1;
+			if (keep < end) {
+				logger.warn("Backup {}: dropping a partial last line of {} bytes left by an interrupted run", file,
+						end - keep);
+				raf.setLength(keep);
+			}
+		}
+	}
+
+	private static BackupLine parse(String line) {
+		try {
+			BackupLine parsed = JSON.readValue(line, BackupLine.class);
+			return parsed == null || parsed.id() == null || parsed.data() == null ? null : parsed;
+		} catch (JacksonException e) {
+			return null;
 		}
 	}
 
@@ -391,6 +501,7 @@ public class BackfillEngine {
 			if (folder != null) {
 				Files.createDirectories(folder);
 			}
+			dropPartialLastLine(file);
 			out = new FileOutputStream(file.toFile(), true);
 			writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
 		}
@@ -419,6 +530,7 @@ public class BackfillEngine {
 		long scanned;
 		long matched;
 		long written;
+		long unchanged;
 		long failed;
 		final Map<String, Long> labels = new LinkedHashMap<>();
 		final List<String> samples = new ArrayList<>();
@@ -433,14 +545,14 @@ public class BackfillEngine {
 
 		BackfillReport report(BackfillOperation operation, boolean dryRun, Path backupFile, BackfillCursor cursor,
 				String stopReason, long start) {
-			return new BackfillReport(operation.name(), dryRun, false, scanned, matched, written, failed,
+			return new BackfillReport(operation.name(), dryRun, false, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples),
 					dryRun || backupFile == null ? null : backupFile.toString(), cursor, stopReason,
 					System.currentTimeMillis() - start);
 		}
 
 		BackfillReport restoreReport(BackfillOperation operation, Path backupFile, String stopReason, long start) {
-			return new BackfillReport(operation.name(), false, true, scanned, matched, written, failed,
+			return new BackfillReport(operation.name(), false, true, scanned, matched, written, unchanged, failed,
 					Map.copyOf(labels), List.copyOf(samples), backupFile.toString(), null, stopReason,
 					System.currentTimeMillis() - start);
 		}

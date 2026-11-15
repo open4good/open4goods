@@ -42,4 +42,12 @@ public interface BackfillOperation {
 	 *         {@code params.data}; null when the operation cannot be rolled back
 	 */
 	String restoreScript();
+
+	/**
+	 * @return the parameters that shape the scan and the changes (query window, keys...), kept in the status: a run
+	 *         is only resumed with the same ones
+	 */
+	default Map<String, Object> parameters() {
+		return Map.of();
+	}
 }

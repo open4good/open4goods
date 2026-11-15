@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,12 +35,15 @@ import tools.jackson.databind.json.JsonMapper;
  * its last counters and cursor, and can be resumed. Backup files are written under one folder, named
  * {@code <operation>-<UTC timestamp>.jsonl}; a restore only reads a file of that folder.
  */
-public class BackfillService {
+public class BackfillService implements AutoCloseable {
 
 	private static final Logger logger = LoggerFactory.getLogger(BackfillService.class);
 
 	private static final DateTimeFormatter BACKUP_TIMESTAMP = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
 			.withZone(ZoneOffset.UTC);
+
+	/** How long the shutdown waits for the current batch of a run. */
+	static final Duration SHUTDOWN_WAIT = Duration.ofSeconds(20);
 
 	private static final JsonMapper JSON = JsonMapper.builder()
 			.enable(SerializationFeature.INDENT_OUTPUT)
@@ -82,19 +87,26 @@ public class BackfillService {
 	 * @param operation what to change
 	 * @param options   mode, batch size, rate cap and resume flag
 	 * @return the RUNNING status of the new run, or the current status unchanged when a run is already in progress
-	 * @throws IllegalStateException when {@code resume} is set but the last run is not a stopped, interrupted or failed
-	 *                               run of the same operation and mode with a cursor
+	 * @throws IllegalStateException    when {@code resume} is set but the last run is not a stopped, interrupted or
+	 *                                  failed run of the same operation, mode and parameters with a cursor
+	 * @throws IllegalArgumentException when a page would take longer than the point in time stays open
 	 */
 	public BackfillStatus start(BackfillOperation operation, BackfillOptions options) {
 		Objects.requireNonNull(operation, "operation");
 		Objects.requireNonNull(options, "options");
+		engine.requirePaceWithinKeepAlive(options.batchSize(), options.maxProductsPerSecond());
+		if (status.get().state() == BackfillStatus.State.RUNNING) {
+			return status.get();
+		}
 		BackfillCursor resumeFrom = null;
 		Path backupFile = null;
 		if (options.resume()) {
 			BackfillStatus last = status.get();
 			if (!resumable(last, operation, options)) {
 				throw new IllegalStateException("Nothing to resume for " + operation.name() + " (dryRun="
-						+ options.dryRun() + "): last run is " + last.state() + " of " + last.operation());
+						+ options.dryRun() + ", parameters=" + operation.parameters() + "): last run is " + last.state()
+						+ " of " + last.operation() + " (dryRun=" + last.dryRun() + ", parameters=" + last.parameters()
+						+ ")");
 			}
 			resumeFrom = last.report().cursor();
 			backupFile = last.report().backupFile() == null ? null : Path.of(last.report().backupFile());
@@ -105,8 +117,8 @@ public class BackfillService {
 		BackfillCursor cursor = resumeFrom;
 		Path backup = backupFile;
 		Instant now = Instant.now();
-		BackfillStatus running = BackfillStatus.running(operation.name(), options.dryRun(), false, now,
-				emptyReport(operation, options.dryRun(), false, backup, cursor));
+		BackfillStatus running = BackfillStatus.running(operation.name(), options.dryRun(), false,
+				operation.parameters(), now, emptyReport(operation, options.dryRun(), false, backup, cursor));
 		if (!claim(running)) {
 			return status.get();
 		}
@@ -118,22 +130,30 @@ public class BackfillService {
 	/**
 	 * Starts in the background the restore of a backup file of the backfill folder.
 	 *
-	 * @param operation  operation that wrote the file
-	 * @param backupName file name, inside the backup folder
-	 * @param batchSize  lines restored per bulk
+	 * @param operation            operation that wrote the file
+	 * @param backupName           file name, inside the backup folder, written by this operation
+	 *                             ({@code <operation>-...})
+	 * @param batchSize            lines restored per bulk
+	 * @param maxProductsPerSecond restore rate cap, in lines per second; 0 means no cap
 	 * @return the RUNNING status of the restore, or the current status unchanged when a run is already in progress
-	 * @throws IllegalArgumentException when the name leaves the backup folder or the file does not exist
+	 * @throws IllegalArgumentException when the name leaves the backup folder, belongs to another operation or the
+	 *                                  file does not exist
 	 */
-	public BackfillStatus startRestore(BackfillOperation operation, String backupName, int batchSize) {
+	public BackfillStatus startRestore(BackfillOperation operation, String backupName, int batchSize,
+			int maxProductsPerSecond) {
 		Objects.requireNonNull(operation, "operation");
+		if (backupName == null || !backupName.startsWith(operation.name() + "-")) {
+			throw new IllegalArgumentException("backupFile must be a backup of " + operation.name() + " ("
+					+ operation.name() + "-...jsonl)");
+		}
 		Path backupFile = resolveBackup(backupName);
-		BackfillStatus running = BackfillStatus.running(operation.name(), false, true, Instant.now(),
-				emptyReport(operation, false, true, backupFile, null));
+		BackfillStatus running = BackfillStatus.running(operation.name(), false, true, operation.parameters(),
+				Instant.now(), emptyReport(operation, false, true, backupFile, null));
 		if (!claim(running)) {
 			return status.get();
 		}
-		executor.execute(() -> complete(() -> engine.restore(operation, backupFile, batchSize, stopRequested::get,
-				this::progress)));
+		executor.execute(() -> complete(() -> engine.restore(operation, backupFile, batchSize, maxProductsPerSecond,
+				stopRequested::get, this::progress)));
 		return running;
 	}
 
@@ -182,9 +202,37 @@ public class BackfillService {
 	private static boolean resumable(BackfillStatus last, BackfillOperation operation, BackfillOptions options) {
 		return last != null && !last.restore() && operation.name().equals(last.operation())
 				&& last.dryRun() == options.dryRun()
+				&& Objects.equals(normalised(last.parameters()), normalised(operation.parameters()))
 				&& List.of(BackfillStatus.State.STOPPED, BackfillStatus.State.INTERRUPTED, BackfillStatus.State.FAILED)
 						.contains(last.state())
 				&& last.report() != null && last.report().cursor() != null;
+	}
+
+	/** Parameters compared through their JSON form: a status read back holds lists and numbers of other classes. */
+	private static String normalised(Map<String, Object> parameters) {
+		try {
+			return JSON.writeValueAsString(parameters == null ? Map.of() : new java.util.TreeMap<>(parameters));
+		} catch (JacksonException e) {
+			return String.valueOf(parameters);
+		}
+	}
+
+	/**
+	 * Asks the current run to stop after its current batch and waits for it, a bounded time, when the api shuts down:
+	 * a deployment then stops a run between two pages, with its cursor, rather than in the middle of one.
+	 */
+	@Override
+	public void close() {
+		requestStop();
+		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(SHUTDOWN_WAIT.toSeconds(), TimeUnit.SECONDS)) {
+				logger.warn("Backfill {} still running after {}, the api stops anyway", status.get().operation(),
+						SHUTDOWN_WAIT);
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	/** Publishes the RUNNING status unless a run is already in progress. */
@@ -229,7 +277,7 @@ public class BackfillService {
 
 	private static BackfillReport emptyReport(BackfillOperation operation, boolean dryRun, boolean restore,
 			Path backupFile, BackfillCursor cursor) {
-		return new BackfillReport(operation.name(), dryRun, restore, 0, 0, 0, 0, Map.of(), List.of(),
+		return new BackfillReport(operation.name(), dryRun, restore, 0, 0, 0, 0, 0, Map.of(), List.of(),
 				backupFile == null ? null : backupFile.toString(), cursor, null, 0);
 	}
 

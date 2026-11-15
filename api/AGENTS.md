@@ -176,22 +176,29 @@ documents complets. Il sert à la purge Decitre (GOU-2266) et servira à la repr
 Une opération doit être idempotente : un produit déjà traité ne reçoit plus de changement.
 
 - **Parcours** : point in time (PIT), puis `search_after` sur `_shard_doc`, par pages de `batchSize` (1 à 5 000). Seuls
-  les champs de l'opération sont lus. Le débit est plafonné par `maxProductsPerSecond` (produits lus par seconde,
-  0 = sans plafond).
+  les champs de l'opération sont lus.
+  - Les résultats partiels sont refusés : un shard en échec fait échouer la page au lieu de laisser ses produits de
+    côté.
+  - Le débit est plafonné par `maxProductsPerSecond` (produits lus par seconde, 0 = sans plafond). Chaque page dure au
+    moins `taille / débit`, ce qui évite qu'un retard accumulé ne se rattrape à pleine vitesse. Une page ne peut pas
+    durer plus de la moitié de la durée de vie du PIT : au-delà, le run est refusé (400).
 - **Écriture** (`dryRun=false`) :
   - la ligne de sauvegarde de chaque changement (`{"id":...,"data":...}`) est ajoutée au fichier JSONL et forcée sur
     disque **avant** l'envoi du bulk ;
   - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
-  - un produit qui n'a plus besoin du changement donne un `noop`.
+  - un produit qui n'a plus besoin du changement donne un `noop`, compté dans `unchangedProducts` et non dans
+    `writtenProducts`.
 - **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
   les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
   clé), et donne 20 ids d'exemple.
 - **Arrêt propre** : il a lieu entre deux pages, sur `POST /batch/backfill/stop` (`stopReason=STOP_REQUESTED`) ou dès
-  qu'Elasticsearch répond 429 (`BACKPRESSURE`), en recherche comme sur un élément de bulk. L'état passe à `STOPPED`,
+  qu'Elasticsearch répond 429 (`BACKPRESSURE`), sur la recherche, sur un shard ou sur un élément de bulk. L'état passe à `STOPPED`,
   avec le `cursor` de la dernière page entièrement traitée. Le PIT reste ouvert 30 minutes après la dernière page
-  (`ApiConfig.BACKFILL_KEEP_ALIVE`).
+  (`ApiConfig.BACKFILL_KEEP_ALIVE`). À l'arrêt de l'api (déploiement), le run en cours est arrêté entre deux pages,
+  avec un délai d'attente maximal de 20 s.
 - **Reprise** (`resume=true`) : elle continue le dernier run `STOPPED`, `INTERRUPTED` ou `FAILED` de la même
-  opération et du même mode, depuis son curseur et avec le même fichier de sauvegarde.
+  opération, du même mode et des mêmes paramètres (`status.parameters`, par exemple `keys`), depuis son curseur et avec le
+  même fichier de sauvegarde. Les compteurs du statut ne couvrent alors que la partie reprise.
   - Si le PIT a expiré, le parcours repart du début. Les produits déjà traités ne sont pas réécrits, mais ils sont
     relus.
   - Une page dont un élément a été rejeté est relue.
@@ -203,9 +210,14 @@ Une opération doit être idempotente : un produit déjà traité ne reçoit plu
   le `application.yml` du jar.
 - **Sauvegardes** : `backfill-backup-folder` (défaut `<root-folder>/batch-reports/backfill`), un fichier
   `<opération>-<horodatage UTC>.jsonl` par run d'écriture. Son chemin est dans `report.backupFile`.
-- **Retour arrière** : `POST /batch/backfill/<opération>/restore?backupFile=<nom du fichier>`. Le nom est relatif au
-  dossier des sauvegardes, aucun autre chemin n'est accepté. Le script de restauration de l'opération remet le
-  contenu de `data` de chaque ligne.
+- **Retour arrière** : `POST /batch/backfill/<opération>/restore?backupFile=<nom du fichier>`.
+  - Le nom est relatif au dossier des sauvegardes et doit être une sauvegarde de cette opération
+    (`<opération>-...jsonl`) ; aucun autre chemin n'est accepté.
+  - Le script de restauration de l'opération remet le contenu de `data` de chaque ligne.
+  - Le débit est plafonné par `maxProductsPerSecond`.
+  - Une ligne illisible est sautée et comptée dans `failedProducts` ; les autres sont restaurées.
+  - Une ligne partielle, laissée par un run tué pendant l'écriture, est retirée avant qu'une reprise n'ajoute la
+    suite.
 
 ### Purge Decitre (GOU-2266)
 
@@ -220,6 +232,8 @@ Une opération doit être idempotente : un produit déjà traité ne reçoit plu
 - Seules les clés visées sont lues (`attributes.all.<clé>`).
 - Le script ne touche à aucun autre champ, `lastChange` compris : aucun autre traitement ne se déclenche.
 - Chaque attribut retiré est sauvegardé entier. La restauration le remet dans `attributes.all`.
+- Une restauration ne tient que si l'exclusion de GOU-2264 est aussi retirée de `_default.yml`. Sinon, l'ingestion
+  retire de nouveau ces clés au passage suivant, et front-api les masque de toute façon.
 
 Appel Ops, hors de la fenêtre du batch : dry-run, état, écriture une fois le dry-run vérifié, arrêt, reprise et
 retour arrière.

@@ -12,7 +12,9 @@ import java.util.Map;
  * @param scannedProducts products read from the index (restore: backup lines read)
  * @param matchedProducts products that needed the change (would be or were written); equals the scanned lines in a
  *                        restore
- * @param writtenProducts updates accepted by Elasticsearch, always 0 in dry run
+ * @param writtenProducts updates applied by Elasticsearch, always 0 in dry run
+ * @param unchangedProducts updates Elasticsearch found already done ({@code noop}: the product changed since it was
+ *                        read)
  * @param failedProducts  updates rejected by Elasticsearch, see the logs
  * @param labelCounts     occurrences of each {@link BackfillChange#labels() label} among the matched products, for
  *                        instance the removed keys
@@ -20,7 +22,7 @@ import java.util.Map;
  * @param backupFile      JSONL backup file of the run, null in dry run
  * @param cursor          position after the last batch fully handled, to resume a stopped run; null for a restore
  * @param stopReason      null when the scan reached its end, {@code STOP_REQUESTED} or {@code BACKPRESSURE}
- *                        (Elasticsearch answered 429) otherwise
+ *                        (Elasticsearch answered 429 to a search, a shard or a bulk item) otherwise
  * @param durationMs      duration of the run
  */
 public record BackfillReport(
@@ -30,6 +32,7 @@ public record BackfillReport(
 		long scannedProducts,
 		long matchedProducts,
 		long writtenProducts,
+		long unchangedProducts,
 		long failedProducts,
 		Map<String, Long> labelCounts,
 		List<String> sampleIds,

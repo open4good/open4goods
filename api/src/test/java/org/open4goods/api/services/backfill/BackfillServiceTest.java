@@ -41,6 +41,30 @@ class BackfillServiceTest {
 	}
 
 	@Test
+	void restoreRefusesTheBackupOfAnotherOperation() throws IOException {
+		BackfillService service = service();
+		Files.createDirectories(tmp.resolve("backups"));
+		Files.writeString(tmp.resolve("backups").resolve("nature-1.jsonl"), "", StandardCharsets.UTF_8);
+
+		assertThatThrownBy(() -> service.startRestore(new DecitrePurgeOperation(), "nature-1.jsonl", 10, 0))
+				.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("decitre-purge");
+	}
+
+	@Test
+	void resumeWithOtherParametersIsRefused() throws IOException {
+		Files.writeString(tmp.resolve("status.json"), """
+				{"state":"STOPPED","operation":"decitre-purge","dryRun":false,"restore":false,
+				 "parameters":{"keys":["ATTRIBUTS"]},
+				 "report":{"operation":"decitre-purge","cursor":{"pitId":"pit-1","searchAfter":[42]}}}
+				""", StandardCharsets.UTF_8);
+		BackfillService service = service();
+
+		assertThatThrownBy(() -> service.start(new DecitrePurgeOperation(), new BackfillOptions(false, 10, 0, true)))
+				.isInstanceOf(IllegalStateException.class);
+		assertThat(service.getStatus().parameters()).isEqualTo(java.util.Map.of("keys", java.util.List.of("ATTRIBUTS")));
+	}
+
+	@Test
 	void resumeWithoutAResumableRunIsRefused() {
 		assertThatThrownBy(() -> service().start(new DecitrePurgeOperation(), new BackfillOptions(false, 10, 0, true)))
 				.isInstanceOf(IllegalStateException.class);

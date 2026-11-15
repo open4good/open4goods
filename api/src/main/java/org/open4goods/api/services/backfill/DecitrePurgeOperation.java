@@ -111,4 +111,9 @@ public class DecitrePurgeOperation implements BackfillOperation {
 	public String restoreScript() {
 		return RESTORE_SCRIPT;
 	}
+
+	@Override
+	public Map<String, Object> parameters() {
+		return Map.of("keys", keys);
+	}
 }
