@@ -482,7 +482,7 @@ public class OpenDataConfig {
         /**
          * {@code Cache-Control} of the zips.
          */
-        private String zipCacheControl = "public, max-age=86400";
+        private String zipCacheControl = "public, max-age=300";
 
         /**
          * {@code Cache-Control} of the manifests, short so that a new manifest is seen soon after the new zips.

@@ -65,8 +65,7 @@ par un arrêt brutal de `api` est supprimé au passage suivant.
 ## Publication sur R2
 
 Ordre et garanties : [architecture](../architecture/opendata.md#publication-sur-r2-gou-2289). Désactivée par défaut
-et en bêta ; l'activation en prod est une PR dédiée (`open-data-config.publication.enabled: true` pour le profil de
-prod). Prérequis : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` dans l'environnement `prod`, rendus par
+et en bêta ; activée en prod par `application-prod.yml` (`open-data-config.publication.enabled: true`, GOU-2300). Prérequis : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` dans l'environnement `prod`, rendus par
 un déploiement ou par `serviceSecrets.yml` (`service=api`) ; la publication lit les identifiants au moment de l'envoi.
 
 Durée : environ 55 min pour 6,4 Go à 2 Mo/s (`upload-bandwidth`), plus la relecture sans limite de débit. Le passage
@@ -79,6 +78,19 @@ garde le verrou de génération pendant la publication : `POST /opendata/generat
 | Envoi, relecture | `Upload or read back failed, public objects untouched` ou `read back has sha256 ...` | objets publics intacts ; vérifier le réseau et R2, attendre le passage suivant ou relancer la génération |
 | Bascule | `Switch to the new version failed: manifest.json not written` | un zip peut déjà être le nouveau ; relancer la génération dès que possible |
 | Nettoyage | `New version published, but the temporary objects ... were not all deleted` | version publiée ; le passage suivant supprime les objets `.staging/` restants |
+
+### Bascule en échec (étape 4 ou 5)
+
+Un zip peut être le nouveau alors que `manifest.json` décrit encore l'ancien : le sha256 annoncé ne correspond plus au
+zip téléchargé. Réponse retenue pour le lot 1, sans déclencheur « publier seulement » :
+
+1. Le health `openData` passe DOWN (`publication: FAILED`) et un log ERROR `Switch to the new version failed` est écrit.
+2. Relancer un passage de génération à la main (`POST /opendata/generate`, 409 si un passage tourne) : il régénère,
+   renvoie `.staging/`, rebascule et écrit `manifest.json` en dernier.
+3. Vérifier ensuite : health UP avec `publication: SUCCEEDED`, plus rien sous `.staging/`, sha256 d'un zip téléchargé
+   depuis `https://data.nudger.fr` égal à celui de `manifest.json`.
+
+Le cache des zips et des manifests est de 5 min : l'écart visible côté public dure au plus ce délai après la reprise.
 
 L'envoi manuel `opendataR2Upload.yml` ([opendata-r2-upload.md](opendata-r2-upload.md)) reste un secours : il ne
 publie que les zips, pas les manifests.
