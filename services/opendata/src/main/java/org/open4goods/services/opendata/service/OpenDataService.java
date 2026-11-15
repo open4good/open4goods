@@ -154,6 +154,8 @@ public class OpenDataService implements HealthIndicator {
     private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
     private volatile OpenDataGenerationStatus status = OpenDataGenerationStatus.idle();
     private final Map<String, AtomicLong> exportedRows = new ConcurrentHashMap<>();
+    private volatile Runnable passStartHook = () -> { };
+    private volatile Runnable passEndHook = () -> { };
 
     @Autowired
     public OpenDataService(ProductRepository aggregatedDataRepository,
@@ -354,6 +356,19 @@ public class OpenDataService implements HealthIndicator {
         }
     }
 
+    /**
+     * Registers callbacks run when a generation pass starts and when it ends (success, failure or interruption,
+     * R2 publication included). The api uses them to hold the batch running marker that defers the beta restart
+     * (GOU-2298). The end callback runs even if the start one failed; callbacks must not throw.
+     *
+     * @param onStart run at the start of each pass
+     * @param onEnd run at the end of each pass
+     */
+    public void setPassHooks(Runnable onStart, Runnable onEnd) {
+        this.passStartHook = onStart == null ? () -> { } : onStart;
+        this.passEndHook = onEnd == null ? () -> { } : onEnd;
+    }
+
     private boolean acquire() {
         if (!generationEnabled) {
             LOGGER.warn("Open data generation skipped: open-data-config.generation-enabled is false");
@@ -372,6 +387,15 @@ public class OpenDataService implements HealthIndicator {
      * nothing is sent. A failure of the publication has its own status and metrics ({@link OpenDataPublisher}).
      */
     private boolean runPass() {
+        passStartHook.run();
+        try {
+            return doRunPass();
+        } finally {
+            passEndHook.run();
+        }
+    }
+
+    private boolean doRunPass() {
         Instant startedAt = Instant.now();
         OpenDataGenerationStatus previous = status;
         status = new OpenDataGenerationStatus(State.RUNNING, startedAt, null, previous.lastSuccessAt(), null, previous.rows());
