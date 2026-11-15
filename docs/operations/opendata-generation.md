@@ -40,7 +40,7 @@ Le garde-fou de lignes (`min-rows-ratio`, 0,9) s'applique jeu par jeu. Un jeu **
 zip et son manifest publiés restent ceux du passage précédent (le manifest précédent reste listé dans `manifest.json`),
 et GTIN, ISBN et les autres jeux impact sont rafraîchis et publiés. `impact-all.zip` est reconstruit sans le jeu
 refusé. Le log `ERROR` `Open data impact dataset not published, the previous version stays` donne la cause, le passage
-est en `FAILED` (`error` : `Datasets not published: …`), la health `openDataService` passe DOWN et la métrique
+est en `FAILED` (`error` : `Datasets not published: <jeux et causes>`), la health `openDataService` passe DOWN et la métrique
 `outcome="partial"` est incrémentée. Un jeu GTIN ou ISBN sous le seuil fait toujours échouer tout le passage.
 
 ## Surveillance
