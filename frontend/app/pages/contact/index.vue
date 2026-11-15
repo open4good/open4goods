@@ -86,13 +86,18 @@
       </template>
     </PageHeader>
 
-    <ContactDetailsSection
-      v-if="!hasPrefill"
-      :eyebrow="t('contact.details.eyebrow')"
-      :title="t('contact.details.title')"
-      :subtitle="t('contact.details.subtitle')"
-      :items="contactDetailItems"
-    />
+    <v-container class="contact-page__direct-email py-6">
+      <i18n-t
+        keypath="contact.directEmail"
+        tag="p"
+        class="text-body-1 text-center mb-0"
+        data-test="contact-direct-email"
+      >
+        <template #email>
+          <a :href="`mailto:${CONTACT_EMAIL}`">{{ CONTACT_EMAIL }}</a>
+        </template>
+      </i18n-t>
+    </v-container>
 
     <ContactFormCard
       :site-key="siteKey"
@@ -114,8 +119,8 @@ import { FetchError } from 'ofetch'
 import type { ContactResponseDto } from '~~/shared/api-client'
 import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import PageHeader from '~/components/shared/header/PageHeader.vue'
+import { CONTACT_EMAIL } from '~/constants/contact'
 import type { ContactFormPayload } from '~/components/domains/contact/ContactFormCard.vue'
-import type { ContactDetailItem } from '~/components/domains/contact/ContactDetailsSection.vue'
 
 interface HeroHighlight {
   icon: string
@@ -136,7 +141,6 @@ const { t, te, locale, availableLocales } = useI18n()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
-const localePath = useLocalePath()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 const siteKey = computed(() => runtimeConfig.public.hcaptchaSiteKey ?? '')
@@ -207,45 +211,6 @@ const heroChannels = computed<HeroContactChannel[]>(() => [
     icon: 'mdi-shield-check-outline',
     label: String(t('contact.hero.channels.trust.label')),
     description: String(t('contact.hero.channels.trust.description')),
-  },
-])
-
-const contactDetailItems = computed<ContactDetailItem[]>(() => [
-  {
-    icon: 'mdi-chat-question-outline',
-    title: String(t('contact.details.cards.support.title')),
-    description: String(t('contact.details.cards.support.description')),
-    links: [
-      {
-        label: String(t('contact.details.cards.support.cta')),
-        href: '#contact-form',
-        ariaLabel: String(t('contact.details.cards.support.ctaAria')),
-      },
-    ],
-  },
-  {
-    icon: 'mdi-handshake-outline',
-    title: String(t('contact.details.cards.partnerships.title')),
-    description: String(t('contact.details.cards.partnerships.description')),
-    links: [
-      {
-        label: String(t('contact.details.cards.partnerships.cta')),
-        href: localePath('team'),
-        ariaLabel: String(t('contact.details.cards.partnerships.ctaAria')),
-      },
-    ],
-  },
-  {
-    icon: 'mdi-earth',
-    title: String(t('contact.details.cards.community.title')),
-    description: String(t('contact.details.cards.community.description')),
-    links: [
-      {
-        label: String(t('contact.details.cards.community.cta')),
-        href: linkedinUrl.value,
-        ariaLabel: String(t('contact.details.cards.community.ctaAria')),
-      },
-    ],
   },
 ])
 

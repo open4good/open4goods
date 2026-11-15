@@ -124,7 +124,7 @@ Un split réversible est une pompe à chaleur air/air. Pour 1 kWh d'électricit�
 
 ---
 
-## Les modèles les plus durables - top score d'impact nudger
+## Les modèles les mieux classés à l'Impact Score
 
 Notre score d'impact combine classe énergie, puissance consommée, fluide frigorigène, garantie et réparabilité quand elle est connue. Voici les meilleurs du vertical climatiseurs dans notre index :
 

@@ -6,8 +6,6 @@
         product.gtin ?? resolveListProductName(product) ?? `product-${index}`
       "
       class="category-product-list__item"
-      :to="productLink(product)"
-      link
       rounded="lg"
     >
       <template #prepend>
@@ -26,6 +24,22 @@
           </v-img>
         </v-avatar>
       </template>
+
+      <!--
+        Stretched link instead of a link row: the price rows hold their own
+        affiliate <a>, and an <a> nested in another <a> is invalid HTML that
+        the browser re-parses, breaking hydration of server-rendered lists.
+      -->
+      <NuxtLink
+        v-if="productLink(product)"
+        :to="productLink(product)"
+        class="category-product-list__overlay-link"
+        :aria-label="
+          resolveListProductName(product) ||
+          $t('category.products.untitledProduct')
+        "
+        data-test="product-row-link"
+      />
 
       <div class="category-product-list__layout">
         <div class="category-product-list__content">
@@ -88,11 +102,12 @@
 
         <div class="category-product-list__score">
           <ImpactScore
-            v-if="impactScoreValue(product) != null"
+            v-if="hasImpactScore(product)"
             :score="impactScoreValue(product) ?? 0"
             :max="20"
             size="xs"
             flat
+            :v2="resolveImpactScoreV2(product.scores)"
           />
           <span v-else class="category-product-list__score-fallback">
             {{ $t('category.products.notRated') }}
@@ -129,6 +144,10 @@ import {
   resolvePopularAttributes,
 } from '~/utils/_product-attributes'
 import { resolvePrimaryImpactScore } from '~/utils/_product-scores'
+import {
+  isImpactScoreNotRated,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import { resolveProductShortName } from '~/utils/_product-title-resolver'
 import { resolveSortedFieldDisplay } from '~/utils/_sort-attribute-display'
 
@@ -160,6 +179,11 @@ const productLink = (product: ProductDto) => product.fullSlug ?? undefined
 
 const impactScoreValue = (product: ProductDto) =>
   resolvePrimaryImpactScore(product)
+
+// A V2 "not rated" product shows the fallback even when a score is present.
+const hasImpactScore = (product: ProductDto) =>
+  impactScoreValue(product) != null &&
+  !isImpactScoreNotRated(resolveImpactScoreV2(product.scores))
 
 type DisplayedAttribute = {
   key: string
@@ -254,6 +278,7 @@ const sortedFieldDisplay = (
     align-self: center
 
   &__item
+    position: relative
     background: rgb(var(--v-theme-surface-default))
     border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.22)
     border-radius: 8px
@@ -265,6 +290,21 @@ const sortedFieldDisplay = (
     &:hover
       border-color: rgba(var(--v-theme-border-primary-strong), 0.45)
       box-shadow: 0 10px 24px -20px rgba(21, 46, 73, 0.22)
+
+  &__overlay-link
+    position: absolute
+    inset: 0
+    z-index: 1
+    border-radius: inherit
+
+    &:focus-visible
+      outline: 2px solid rgb(var(--v-theme-primary))
+      outline-offset: 2px
+
+  &__prices-column,
+  &__actions
+    position: relative
+    z-index: 2
 
   &__layout
     display: grid

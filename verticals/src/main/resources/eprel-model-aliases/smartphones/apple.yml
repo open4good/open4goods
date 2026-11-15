@@ -1,0 +1,73 @@
+# Apple iPhone: commercial name and part numbers -> model registered in EPREL (Reg. (EU) 2023/1669).
+#
+# Apple registers in EPREL the regulatory number for "other countries and regions" (A3094 for the
+# iPhone 15 Plus). Offers never print it: they give the commercial name or a part number (MU163ZD/A),
+# and public EPREL records carry no GTIN. EprelCompletionService adds the resolved number to the
+# model candidates of the product. Rules: docs/datasources/integration/05-eprel-smartphones.md, 3.4.
+#
+# Maintenance (once a year, after the September launch, and after a spring model):
+#  1. Read the Apple page in `source`: eprelModel = the number listed for "other countries and
+#     regions" (the last one of each model), otherModels = the other numbers.
+#  2. Check EPREL: aggregate eprel-products on productGroup = smartphonestablets20231669 and
+#     supplierOrTrademark = APPLE, deviceType = SMARTPHONE. Every eprelModel there must be in this file.
+#  3. Keep every iPhone from the iPhone 15 on, even without an EPREL record (iPhone 15 Pro): the
+#     longest name wins, so "iPhone 15 Pro" must not fall back to "iPhone 15".
+#  4. mpnBases are optional: five-character bases of part numbers seen in the catalogue together
+#     with titles that name the same model. They help when a product has no usable title.
+brand: APPLE
+source: https://support.apple.com/en-us/108044 (published 2026-10-22); EPREL index eprel-products
+checkedOn: "2026-11-10"
+models:
+  - eprelModel: A3090
+    otherModels: [A2846, A3089, A3092]
+    names: ["iPhone 15"]
+  - eprelModel: A3094
+    otherModels: [A2847, A3093, A3096]
+    names: ["iPhone 15 Plus"]
+    mpnBases: [MU0Y3, MU103, MU123, MU163, MU173, MU183, MU193, MU1D3, MU1F3, MU1G3, MU1H3, MU1J3, MU1M3, MU1P3, MU1Q3]
+  # No EPREL record (withdrawn before 2025-06-20); kept so that its name does not resolve to the iPhone 15.
+  - eprelModel: A3102
+    otherModels: [A2848, A3101, A3104]
+    names: ["iPhone 15 Pro"]
+  - eprelModel: A3106
+    otherModels: [A2849, A3105, A3108]
+    names: ["iPhone 15 Pro Max"]
+  - eprelModel: A3287
+    otherModels: [A3081, A3286, A3288]
+    names: ["iPhone 16"]
+  - eprelModel: A3290
+    otherModels: [A3082, A3289, A3291]
+    names: ["iPhone 16 Plus"]
+  - eprelModel: A3293
+    otherModels: [A3083, A3292, A3294]
+    names: ["iPhone 16 Pro"]
+  - eprelModel: A3296
+    otherModels: [A3084, A3295, A3297]
+    names: ["iPhone 16 Pro Max"]
+  - eprelModel: A3409
+    otherModels: [A3212, A3408, A3410]
+    names: ["iPhone 16e"]
+  - eprelModel: A3517
+    otherModels: [A3260, A3516, A3518]
+    names: ["iPhone Air"]
+  - eprelModel: A3520
+    otherModels: [A3258, A3519, A3521]
+    names: ["iPhone 17"]
+  - eprelModel: A3523
+    otherModels: [A3256, A3522, A3524]
+    names: ["iPhone 17 Pro"]
+  - eprelModel: A3526
+    otherModels: [A3257, A3525, A3527]
+    names: ["iPhone 17 Pro Max"]
+  - eprelModel: A3634
+    otherModels: [A3575, A3635]
+    names: ["iPhone 17e"]
+  - eprelModel: A3714
+    otherModels: [A3472, A3713, A3715]
+    names: ["iPhone 18 Pro"]
+  - eprelModel: A3717
+    otherModels: [A3473, A3716, A3718]
+    names: ["iPhone 18 Pro Max"]
+  - eprelModel: A3720
+    otherModels: [A3447, A3719, A3721]
+    names: ["iPhone Duo"]

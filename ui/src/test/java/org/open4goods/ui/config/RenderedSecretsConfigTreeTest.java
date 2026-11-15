@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.Banner;
@@ -50,6 +51,10 @@ class RenderedSecretsConfigTreeTest {
             entry("o4g.actuator.monitor.password",
                     binder -> bind(binder, "o4g.actuator.monitor", ActuatorMonitorCredentials.class).getPassword()),
             entry("captcha-secret", binder -> bind(binder, "", UiConfig.class).getCaptchaSecret()),
+            // ImpactScore methodology version forced per vertical, read by the VerticalsConfigService bean (GOU-1882).
+            entry(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY,
+                    binder -> binder.bind(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY, String.class)
+                            .orElse(null)),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 

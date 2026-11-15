@@ -1,0 +1,101 @@
+name: 📤 Open data → R2
+
+run-name: 📤 Open data → R2 (${{ inputs.dataset }}, ${{ inputs.mode }}) by @${{ github.actor }}
+
+# Sends the open data zips from the prod host to the Cloudflare R2 bucket served as data.nudger.fr (GOU-2245).
+# Procedure: docs/operations/opendata-r2-upload.md
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: "Jeu de données à envoyer"
+        required: true
+        default: all
+        type: choice
+        options: [gtin, isbn, all]
+      mode:
+        description: "test = liste et sommes, rien n'est écrit ; apply = envoi et vérification"
+        required: true
+        default: test
+        type: choice
+        options: [test, apply]
+      upload_limit:
+        description: "Débit montant maximal (rclone --bwlimit, ex. 2M = 2 Mio/s)"
+        required: false
+        default: 2M
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    environment: prod
+    timeout-minutes: 180
+    concurrency:
+      group: opendata-r2-upload
+      cancel-in-progress: false
+    env:
+      DATASET: ${{ inputs.dataset }}
+      MODE: ${{ inputs.mode }}
+      UPLOAD_LIMIT: ${{ inputs.upload_limit }}
+      R2_ACCOUNT_ID: ${{ vars.R2_ACCOUNT_ID }}
+    steps:
+      - name: 🔎 Validate inputs
+        shell: bash
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          # 0 would mean "no limit" for rclone: refused.
+          [[ "${UPLOAD_LIMIT}" =~ ^[1-9][0-9]*[kKMG]?$ ]] || { echo "::error::upload_limit invalide"; exit 1; }
+          [[ "${R2_ACCOUNT_ID}" =~ ^[0-9a-f]{32}$ ]] || { echo "::error::variable R2_ACCOUNT_ID absente ou invalide dans l'environnement prod"; exit 1; }
+          if [ -z "${R2_ACCESS_KEY_ID}" ] || [ -z "${R2_SECRET_ACCESS_KEY}" ]; then
+            echo "::error::secrets R2 absents de l'environnement prod"
+            exit 1
+          fi
+
+      - name: 📥 Checkout the remote script (this workflow's commit)
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/deploy
+          persist-credentials: false
+
+      - name: 📤 Upload on the prod host
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.REMOTE_HOST }}
+          SSH_USER: ${{ secrets.REMOTE_USER }}
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          umask 077
+          work="$(mktemp -d)"
+          trap 'rm -rf "${work}"' EXIT
+          printf '%s\n' "${SSH_KEY}" > "${work}/id"
+          # Credentials travel as `export` lines on SSH stdin (printf is a builtin): they never reach a
+          # command line, on the runner or on the host, and are never written to disk.
+          {
+            printf 'export DATASET=%q\n' "${DATASET}"
+            printf 'export MODE=%q\n' "${MODE}"
+            printf 'export UPLOAD_LIMIT=%q\n' "${UPLOAD_LIMIT}"
+            printf 'export RCLONE_CONFIG_R2_TYPE=s3\n'
+            printf 'export RCLONE_CONFIG_R2_PROVIDER=Cloudflare\n'
+            printf 'export RCLONE_CONFIG_R2_ENDPOINT=%q\n' "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+            printf 'export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true\n'
+            printf 'export RCLONE_CONFIG_R2_ACCESS_KEY_ID=%q\n' "${R2_ACCESS_KEY_ID}"
+            printf 'export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY=%q\n' "${R2_SECRET_ACCESS_KEY}"
+            cat scripts/deploy/opendata-r2-upload.sh
+          } | ssh -i "${work}/id" \
+            -o BatchMode=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=6 \
+            -o StrictHostKeyChecking=accept-new \
+            -o UserKnownHostsFile="${work}/known_hosts" \
+            "${SSH_USER}@${SSH_HOST}" 'bash -s'

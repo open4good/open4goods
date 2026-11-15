@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.open4goods.model.RolesConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.services.opendata.config.OpenDataConfig;
@@ -16,9 +16,10 @@ import org.open4goods.services.opendata.service.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
@@ -46,17 +47,31 @@ public class OpenDataController {
     }
 
 
-	@GetMapping(path = "/opendata/gtin-open-data.zip")
-	public void downloadGtinData(final HttpServletResponse response) throws IOException, TechnicalException {
-        downloadData(response, "gtin-open-data.zip", openDataConfig.gtinZipFile());
+	@RequestMapping(path = "/opendata/gtin-open-data.zip", method = { RequestMethod.GET, RequestMethod.HEAD })
+	public void downloadGtinData(final HttpServletRequest request, final HttpServletResponse response) throws IOException, TechnicalException {
+        downloadData(request, response, "gtin-open-data.zip", openDataConfig.gtinZipFile());
 	}
 
-	@GetMapping(path = "/opendata/isbn-open-data.zip")
-	public void downloadIsbnData(final HttpServletResponse response) throws IOException, TechnicalException {
-        downloadData(response, "isbn-open-data.zip", openDataConfig.isbnZipFile());
+	@RequestMapping(path = "/opendata/isbn-open-data.zip", method = { RequestMethod.GET, RequestMethod.HEAD })
+	public void downloadIsbnData(final HttpServletRequest request, final HttpServletResponse response) throws IOException, TechnicalException {
+        downloadData(request, response, "isbn-open-data.zip", openDataConfig.isbnZipFile());
 	}
 
-	private void downloadData(final HttpServletResponse response, String fileName, File zipFile) throws IOException, TechnicalException {
+	private void downloadData(final HttpServletRequest request, final HttpServletResponse response, String fileName, File zipFile) throws IOException, TechnicalException {
+		String redirectBase = openDataConfig.getRedirectBaseUrl();
+		if (StringUtils.isNotBlank(redirectBase)) {
+			String base = redirectBase.endsWith("/") ? redirectBase.substring(0, redirectBase.length() - 1) : redirectBase;
+			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+			response.setHeader("Location", base + "/" + fileName);
+			return;
+		}
+		if (HttpMethod.HEAD.matches(request.getMethod())) {
+			// A HEAD never starts the throttled stream nor counts as a download.
+			response.setHeader("Content-type", "application/octet-stream");
+			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+			response.setContentLengthLong(zipFile.length());
+			return;
+		}
 		try (InputStream str = openDataService.limitedRateStream(zipFile.getAbsolutePath())) {
 			response.setHeader("Content-type", "application/octet-stream");
 			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
@@ -82,12 +97,6 @@ public class OpenDataController {
 		String message = exception.getMessage();
 		return message != null && (message.contains("Broken pipe") || message.contains("ClientAbortException")
 				|| message.contains("Connection reset by peer"));
-	}
-
-	@GetMapping(path = "/opendata/generate")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void generate(final HttpServletResponse response) throws IOException {
-		openDataService.generateOpendata();
 	}
 
 }

@@ -1,5 +1,8 @@
 <template>
   <article v-if="score" class="impact-ecoscore">
+    <p v-if="impactStatus" class="impact-ecoscore__disclaimer text-caption">
+      {{ $t('components.impactScore.v2.disclaimer') }}
+    </p>
     <div v-if="aiImpactText" class="impact-ecoscore__ai-text mb-6">
       <v-icon :icon="mdiRobot" size="small" class="mr-2 text-primary" />
       <span class="text-body-2">{{ aiImpactText }}</span>
@@ -28,8 +31,10 @@
             :max="scoreMax"
             :show-methodology="false"
             :show-min-max="false"
+            :vertical-home-url="verticalHomeUrl ?? ''"
             size="lg"
             class="align-self-center w-100"
+            :v2="impactStatus ?? null"
           />
           <ProductImpactRadarChart
             class="impact-ecoscore__analysis-radar-chart"
@@ -40,6 +45,18 @@
         </div>
       </v-col>
     </v-row>
+  </article>
+  <article
+    v-else-if="impactStatus && impactStatus.status === 'NOT_RATED'"
+    class="impact-ecoscore impact-ecoscore--empty"
+  >
+    <ImpactScoreNotRated
+      :status="impactStatus"
+      :methodology-href="normalizedVerticalEcoscorePath ?? ''"
+    />
+    <p class="impact-ecoscore__disclaimer text-caption">
+      {{ $t('components.impactScore.v2.disclaimer') }}
+    </p>
   </article>
   <article v-else class="impact-ecoscore impact-ecoscore--empty">
     <div class="impact-ecoscore__empty-content">
@@ -66,6 +83,8 @@ import { computed, provide } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiRobot, mdiArrowTopRight } from '@mdi/js'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ImpactScoreNotRated from '~/components/shared/ui/ImpactScoreNotRated.vue'
+import type { ProductImpactScoreStatusDto } from '~~/shared/api-client'
 import ProductImpactDetailsTable from './ProductImpactDetailsTable.vue'
 import ProductImpactRadarChart from './ProductImpactRadarChart.vue'
 import { impactMethodologyHrefKey } from './impact-types'
@@ -102,6 +121,7 @@ const props = defineProps<{
   productImage?: string
   verticalTitle?: string
   expandedScoreId?: string | null
+  impactStatus?: ProductImpactScoreStatusDto | null
   aiImpactText?: string | null
   scoreMin?: number
   scoreMax?: number

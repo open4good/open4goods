@@ -4,6 +4,13 @@
       <p v-if="!hideTitle" class="category-filter-terms__title">
         {{ displayTitle }}
       </p>
+      <p
+        v-if="!hideTitle && field.mapping === COUNTRY_MAPPING"
+        class="category-filter-terms__help text-caption"
+        data-test="filter-country-help"
+      >
+        {{ $t('category.filters.countryHelp') }}
+      </p>
       <v-text-field
         v-if="showSearch"
         v-model="search"

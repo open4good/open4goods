@@ -59,6 +59,12 @@
                       })
                     }}
                   </p>
+                  <p
+                    v-if="methodologyV2Note"
+                    class="category-ecoscore__subtitle"
+                  >
+                    {{ methodologyV2Note }}
+                  </p>
                 </header>
 
                 <v-row
@@ -191,6 +197,40 @@
             </section>
 
             <section
+              :id="sectionIds.method"
+              class="category-ecoscore__section"
+              role="region"
+              :aria-labelledby="`${sectionIds.method}-title`"
+            >
+              <v-sheet
+                class="category-ecoscore__surface"
+                elevation="0"
+                rounded="xl"
+              >
+                <header class="category-ecoscore__header">
+                  <h2
+                    :id="`${sectionIds.method}-title`"
+                    class="category-ecoscore__title"
+                  >
+                    {{
+                      t('category.ecoscorePage.method.title', {
+                        category: categoryLabel,
+                      })
+                    }}
+                  </h2>
+                </header>
+                <CategoryImpactMethod
+                  :config="impactScoreConfig"
+                  :stats="impactScoreStats"
+                  :category-label="categoryLabel"
+                  :criteria-labels="criteriaLabels"
+                  :criteria-attributes="criteriaAttributes"
+                  :id-prefix="sectionIds.method"
+                />
+              </v-sheet>
+            </section>
+
+            <section
               :id="sectionIds.transparency"
               class="category-ecoscore__section"
               role="region"
@@ -211,7 +251,7 @@
                 </header>
 
                 <v-row class="category-ecoscore__critical-grid" align="stretch">
-                  <v-col cols="12" md="6">
+                  <v-col v-if="criticalReviewText" cols="12" md="6">
                     <v-card
                       class="category-ecoscore__critical-card"
                       elevation="0"
@@ -233,18 +273,13 @@
                           }}
                         </h3>
                         <p class="category-ecoscore__critical-text">
-                          {{
-                            criticalReviewText ??
-                            t(
-                              'category.ecoscorePage.sections.transparency.criticalReviewFallback'
-                            )
-                          }}
+                          {{ criticalReviewText }}
                         </p>
                       </div>
                     </v-card>
                   </v-col>
 
-                  <v-col cols="12" md="5">
+                  <v-col cols="12" :md="criticalReviewText ? 5 : 12">
                     <v-card
                       class="category-ecoscore__community-card"
                       elevation="0"
@@ -313,9 +348,14 @@
                     class="category-ecoscore__table-helper"
                   >
                     {{
-                      t(
-                        'category.ecoscorePage.sections.transparency.tableHelper'
-                      )
+                      isV2
+                        ? t(
+                            'category.ecoscorePage.sections.transparency.tableHelperV2',
+                            { version: methodologyVersion }
+                          )
+                        : t(
+                            'category.ecoscorePage.sections.transparency.tableHelper'
+                          )
                     }}
                   </p>
 
@@ -335,7 +375,7 @@
                             )
                           }}
                         </th>
-                        <th scope="col" class="text-left">
+                        <th v-if="!isV2" scope="col" class="text-left">
                           {{
                             t(
                               'category.ecoscorePage.sections.transparency.tableHeaders.proposed'
@@ -354,7 +394,7 @@
                     <tbody>
                       <tr v-for="row in coefficientComparison" :key="row.key">
                         <th scope="row">{{ row.label }}</th>
-                        <td>{{ formatDecimal(row.proposed) }}</td>
+                        <td v-if="!isV2">{{ formatDecimal(row.proposed) }}</td>
                         <td>{{ formatDecimal(row.applied) }}</td>
                       </tr>
                     </tbody>
@@ -454,42 +494,77 @@
                   </h2>
                 </header>
 
-                <p class="category-ecoscore__ai-helper">
-                  {{
-                    t('category.ecoscorePage.sections.aiAudit.intro', {
-                      category: categoryLabel,
-                    })
-                  }}
-                </p>
-
-                <v-row class="category-ecoscore__ai-grid" align="stretch">
-                  <v-col cols="12" lg="12">
-                    <v-card
-                      class="category-ecoscore__code-card"
-                      elevation="0"
-                      rounded="xl"
-                    >
-                      <h3 class="category-ecoscore__code-title">
+                <div v-if="isV2" data-test="ai-audit-v1-history">
+                  <p class="category-ecoscore__ai-helper">
+                    {{
+                      t('category.ecoscorePage.sections.aiAudit.v1History', {
+                        category: categoryLabel,
+                        version: methodologyVersion,
+                      })
+                    }}
+                  </p>
+                  <v-btn
+                    v-if="githubImpactScoreUrl"
+                    color="primary"
+                    variant="tonal"
+                    :href="githubImpactScoreUrl"
+                    rel="noopener"
+                    target="_blank"
+                  >
+                    <v-icon class="me-2" icon="mdi-github" size="18" />
+                    {{
+                      t(
+                        'category.ecoscorePage.sections.transparency.communityCta'
+                      )
+                    }}
+                  </v-btn>
+                </div>
+                <v-expansion-panels
+                  v-else
+                  variant="accordion"
+                  data-test="ai-audit-panels"
+                >
+                  <v-expansion-panel>
+                    <v-expansion-panel-title>
+                      {{ t('category.ecoscorePage.sections.aiAudit.toggle') }}
+                    </v-expansion-panel-title>
+                    <v-expansion-panel-text eager>
+                      <p class="category-ecoscore__ai-helper">
                         {{
-                          t(
-                            'category.ecoscorePage.sections.aiAudit.promptTitle'
-                          )
-                        }}
-                      </h3>
-                      <p class="category-ecoscore__code-helper">
-                        {{
-                          t(
-                            'category.ecoscorePage.sections.aiAudit.promptHelper'
-                          )
+                          t('category.ecoscorePage.sections.aiAudit.intro', {
+                            category: categoryLabel,
+                          })
                         }}
                       </p>
-                      <!-- eslint-disable vue/no-v-html -->
-                      <pre
-                        class="category-ecoscore__code-block"
-                        data-test="ai-yaml"
-                        role="region"
-                        aria-live="polite"
-                      >
+
+                      <v-row class="category-ecoscore__ai-grid" align="stretch">
+                        <v-col cols="12" lg="12">
+                          <v-card
+                            class="category-ecoscore__code-card"
+                            elevation="0"
+                            rounded="xl"
+                          >
+                            <h3 class="category-ecoscore__code-title">
+                              {{
+                                t(
+                                  'category.ecoscorePage.sections.aiAudit.promptTitle'
+                                )
+                              }}
+                            </h3>
+                            <p class="category-ecoscore__code-helper">
+                              {{
+                                t(
+                                  'category.ecoscorePage.sections.aiAudit.promptHelper'
+                                )
+                              }}
+                            </p>
+                            <!-- eslint-disable vue/no-v-html -->
+                            <pre
+                              class="category-ecoscore__code-block"
+                              data-test="ai-yaml"
+                              role="region"
+                              aria-live="polite"
+                            >
                         <code
                           v-if="highlightedYamlPrompt"
                           class="hljs language-yaml"
@@ -499,35 +574,35 @@
                           {{ t('category.ecoscorePage.sections.aiAudit.yamlUnavailable') }}
                         </code>
                       </pre>
-                    </v-card>
-                  </v-col>
+                          </v-card>
+                        </v-col>
 
-                  <v-col cols="12" lg="12">
-                    <v-card
-                      class="category-ecoscore__code-card"
-                      elevation="0"
-                      rounded="xl"
-                    >
-                      <h3 class="category-ecoscore__code-title">
-                        {{
-                          t(
-                            'category.ecoscorePage.sections.aiAudit.responseTitle'
-                          )
-                        }}
-                      </h3>
-                      <p class="category-ecoscore__code-helper">
-                        {{
-                          t(
-                            'category.ecoscorePage.sections.aiAudit.responseHelper'
-                          )
-                        }}
-                      </p>
-                      <pre
-                        class="category-ecoscore__code-block"
-                        data-test="ai-json"
-                        role="region"
-                        aria-live="polite"
-                      >
+                        <v-col cols="12" lg="12">
+                          <v-card
+                            class="category-ecoscore__code-card"
+                            elevation="0"
+                            rounded="xl"
+                          >
+                            <h3 class="category-ecoscore__code-title">
+                              {{
+                                t(
+                                  'category.ecoscorePage.sections.aiAudit.responseTitle'
+                                )
+                              }}
+                            </h3>
+                            <p class="category-ecoscore__code-helper">
+                              {{
+                                t(
+                                  'category.ecoscorePage.sections.aiAudit.responseHelper'
+                                )
+                              }}
+                            </p>
+                            <pre
+                              class="category-ecoscore__code-block"
+                              data-test="ai-json"
+                              role="region"
+                              aria-live="polite"
+                            >
                         <code
                           v-if="highlightedAiJson"
                           class="hljs language-json"
@@ -537,10 +612,13 @@
                           {{ t('category.ecoscorePage.sections.aiAudit.jsonUnavailable') }}
                         </code>
                       </pre>
-                      <!-- eslint-enable vue/no-v-html -->
-                    </v-card>
-                  </v-col>
-                </v-row>
+                            <!-- eslint-enable vue/no-v-html -->
+                          </v-card>
+                        </v-col>
+                      </v-row>
+                    </v-expansion-panel-text>
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </v-sheet>
             </section>
           </main>
@@ -555,11 +633,23 @@
 </template>
 
 <script setup lang="ts">
-import { createError, useRequestURL, useRoute, useSeoMeta } from '#imports'
+import {
+  createError,
+  useHead,
+  useRequestURL,
+  useRoute,
+  useSeoMeta,
+} from '#imports'
+import {
+  IMPACT_SCORE_CURRENT_METHOD_VERSION,
+  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+} from '~~/shared/utils/impact-score-versions'
+import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDisplay } from 'vuetify'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryImpactMethod from '~/components/category/CategoryImpactMethod.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import { loadHighlightJs } from '~/utils/highlight-loader'
@@ -567,6 +657,7 @@ import type {
   AttributeConfigDto,
   CategoryBreadcrumbItemDto,
   ImpactScoreConfigDto,
+  ImpactScoreStatsDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
 
@@ -655,6 +746,26 @@ const impactScoreConfig = computed<ImpactScoreConfigDto | null>(
 
 const impactScoreTexts = computed(() => impactScoreConfig.value?.texts ?? {})
 
+const methodologyVersion = computed(
+  () => impactScoreConfig.value?.methodologyVersion ?? 1
+)
+// From V2 on, the stored AI audit (V1 matrix, not rerun) never describes the
+// current method: criteria come from the active matrix and their attributes.
+const isV2 = computed(() => methodologyVersion.value >= 2)
+
+// V2: version of the method, coverage threshold and "not filled in" rule.
+// The weights listed below already come from the active matrix.
+const methodologyV2Note = computed(() => {
+  const config = impactScoreConfig.value
+  const version = config?.methodologyVersion ?? 1
+  const coverage = config?.minRealWeightCoverage
+  if (version < 2 || typeof coverage !== 'number') return null
+  return t('components.impactScore.v2.methodPage', {
+    version,
+    coverage: typeof coverage === 'number' ? Math.round(coverage * 100) : null,
+  })
+})
+
 const purposeText = computed(
   () => impactScoreTexts.value?.purpose?.trim() || null
 )
@@ -664,6 +775,19 @@ const availableDataText = computed(
 const criticalReviewText = computed(
   () => impactScoreTexts.value?.criticalReview?.trim() || null
 )
+
+const impactScoreStats = ref<ImpactScoreStatsDto | null>(null)
+
+try {
+  if (category.value?.id) {
+    impactScoreStats.value = await useRequestFetch()<ImpactScoreStatsDto>(
+      `/api/categories/${encodeURIComponent(category.value.id)}/impact-score-stats`
+    )
+  }
+} catch (error) {
+  // The method page stays useful without the measured figures.
+  console.error('Failed to load ImpactScore stats', error)
+}
 
 const availableImpactScoreCriterias = computed<string[]>(
   () => category.value?.availableImpactScoreCriterias ?? []
@@ -701,6 +825,35 @@ const availableCriteriaMap = computed(() => {
   }, new Map<string, { key: string; label: string; description: string; utility: string | null }>())
 })
 
+// Keys of the active matrix and of the available criteria: a V2 matrix weighs
+// derived criteria that are not listed in availableImpactScoreCriterias.
+const criteriaKeys = computed(
+  () =>
+    new Set<string>([
+      ...availableImpactScoreCriterias.value,
+      ...Object.keys(impactScoreConfig.value?.criteriasPonderation ?? {}),
+    ])
+)
+
+const criteriaLabels = computed<Record<string, string>>(() =>
+  Object.fromEntries(
+    Array.from(criteriaKeys.value).map(key => {
+      const attribute = attributeMap.value.get(key)
+      return [key, attribute?.scoreTitle ?? attribute?.name ?? key]
+    })
+  )
+)
+
+const criteriaAttributes = computed<Record<string, AttributeConfigDto>>(() =>
+  Object.fromEntries(
+    Array.from(criteriaKeys.value)
+      .map(key => [key, attributeMap.value.get(key)] as const)
+      .filter((entry): entry is readonly [string, AttributeConfigDto] =>
+        Boolean(entry[1])
+      )
+  )
+)
+
 const defaultCriteriaIcons: Record<string, string> = {
   DATA_QUALITY: 'mdi-database-check-outline',
   QUALITE_DONNEE: 'mdi-database-check-outline',
@@ -711,11 +864,12 @@ const criteriaCards = computed(() => {
   const weights = impactScoreConfig.value?.criteriasPonderation ?? {}
   const analysis = impactScoreTexts.value?.criteriasAnalysis ?? {}
   const available = availableImpactScoreCriterias.value
-  const keys = new Set<string>([
-    ...Object.keys(weights),
-    ...Object.keys(analysis),
-    ...available,
-  ])
+  // V2: only the criteria of the active matrix, without the V1 ones it dropped.
+  const keys = new Set<string>(
+    isV2.value
+      ? Object.keys(weights)
+      : [...Object.keys(weights), ...Object.keys(analysis), ...available]
+  )
 
   return Array.from(keys).map(key => {
     const attribute = attributeMap.value.get(key)
@@ -859,7 +1013,8 @@ const aiCoefficients = computed<Record<string, number>>(() => {
 
 const coefficientComparison = computed(() => {
   const applied = impactScoreConfig.value?.criteriasPonderation ?? {}
-  const proposed = aiCoefficients.value ?? {}
+  // V2: the AI proposal covered the V1 matrix, so only applied weights show.
+  const proposed = isV2.value ? {} : (aiCoefficients.value ?? {})
   const available = availableImpactScoreCriterias.value
   const keys = new Set<string>([
     ...Object.keys(applied ?? {}),
@@ -886,6 +1041,7 @@ const navAriaLabel = computed(() =>
 
 const sectionIds = {
   criteria: 'category-impact-criteria',
+  method: 'category-impact-method',
   transparency: 'category-impact-transparency',
   aiAudit: 'category-impact-ai-audit',
 } as const
@@ -897,6 +1053,11 @@ const navigationSections = computed(() => [
     id: sectionIds.criteria as SectionId,
     label: t('category.ecoscorePage.navigation.availableCriteria'),
     icon: 'mdi-format-list-bulleted',
+  },
+  {
+    id: sectionIds.method as SectionId,
+    label: t('category.ecoscorePage.navigation.method'),
+    icon: 'mdi-clipboard-text-outline',
   },
   {
     id: sectionIds.transparency as SectionId,
@@ -1022,6 +1183,12 @@ const githubConfigUrl = computed(() =>
     : null
 )
 
+const githubImpactScoreUrl = computed(() =>
+  category.value?.id
+    ? `https://github.com/open4good/open4goods/blob/main/verticals/src/main/resources/verticals/impactscores/${category.value.id}.yml`
+    : null
+)
+
 const transparencyCards = computed(() => {
   const cards = [
     {
@@ -1109,6 +1276,27 @@ const ogImage = computed(() => {
 })
 
 const ogLocale = computed(() => locale.value.replace('-', '_'))
+
+useHead(() => ({
+  script: [
+    {
+      key: 'impact-score-method-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(
+        buildImpactScoreMethodJsonLd({
+          type: 'TechArticle',
+          name: seoTitle.value,
+          description: seoDescription.value,
+          url: canonicalUrl.value,
+          dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
+          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
+          inLanguage: locale.value,
+          aboutName: categoryLabel.value,
+        })
+      ),
+    },
+  ],
+}))
 
 useSeoMeta({
   title: () => seoTitle.value,

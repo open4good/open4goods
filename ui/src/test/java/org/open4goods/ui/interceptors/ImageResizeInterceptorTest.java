@@ -20,10 +20,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
@@ -253,6 +259,144 @@ class ImageResizeInterceptorTest {
         assertThat(result).isFalse();
         assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
         assertThat(response.getContentType()).isEqualTo("application/json");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("encodedFormats")
+    void decodeBoundedSubsamplesImagesLargerThanTheBound(String format) throws IOException {
+        // GOU-1952: the decoded raster depends on the bound, not on the source size
+        byte[] encoded = encode(new BufferedImage(1000, 800, BufferedImage.TYPE_INT_RGB), format);
+        ImageResizeInterceptor interceptor = boundedInterceptor(10_000, 2, Duration.ofSeconds(1));
+
+        BufferedImage decoded = interceptor.decodeBounded(new ByteArrayInputStream(encoded));
+
+        assertThat((long) decoded.getWidth() * decoded.getHeight()).isLessThanOrEqualTo(10_000);
+        assertThat(decoded.getWidth()).isGreaterThan(decoded.getHeight());
+    }
+
+    static Stream<String> encodedFormats() {
+        return Stream.of("png", "jpg", "webp");
+    }
+
+    @Test
+    void decodeBoundedKeepsImagesUnderTheBoundAtFullSize() throws IOException {
+        byte[] encoded = encode(new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB), "png");
+        ImageResizeInterceptor interceptor = boundedInterceptor(10_000, 2, Duration.ofSeconds(1));
+
+        BufferedImage decoded = interceptor.decodeBounded(new ByteArrayInputStream(encoded));
+
+        assertThat(decoded.getWidth()).isEqualTo(120);
+        assertThat(decoded.getHeight()).isEqualTo(80);
+    }
+
+    @Test
+    void defaultBoundSubsamplesAHugeSource() throws IOException {
+        // 6000 x 6000 = 36 MP: a full decode would allocate 144 MB per ARGB copy.
+        // One bit per pixel keeps the test source itself small.
+        byte[] encoded = encode(new BufferedImage(6000, 6000, BufferedImage.TYPE_BYTE_BINARY), "png");
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com");
+
+        BufferedImage decoded = interceptor.decodeBounded(new ByteArrayInputStream(encoded));
+
+        assertThat((long) decoded.getWidth() * decoded.getHeight())
+                .isLessThanOrEqualTo(ImageResizeInterceptor.MAX_DECODED_PIXELS);
+        assertThat(decoded.getWidth()).isEqualTo(3000);
+    }
+
+    @Test
+    void decodeBoundedReturnsNullForUnknownFormat() throws IOException {
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com");
+
+        assertThat(interceptor.decodeBounded(new ByteArrayInputStream("not an image".getBytes()))).isNull();
+    }
+
+    @Test
+    void fetchImageFromUrlDecodesWithinTheBound() throws IOException {
+        byte[] imageBytes = encode(new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_RGB), "png");
+        MockHttpURLConnection connection = new MockHttpURLConnection(new ByteArrayInputStream(imageBytes), HttpURLConnection.HTTP_OK);
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com",
+                10_000, 2, Duration.ofSeconds(1)) {
+            @Override
+            HttpURLConnection openConnection(String urlString) {
+                return connection;
+            }
+        };
+
+        BufferedImage image = interceptor.fetchImageFromURL("http://example.com/image.png");
+
+        assertThat((long) image.getWidth() * image.getHeight()).isLessThanOrEqualTo(10_000);
+    }
+
+    @Test
+    void subsamplingStepKeepsEveryDecodedSideUnderTheWebpLimit() {
+        // A very long and thin image fits the pixel bound but not the WebP encoder
+        int step = ImageResizeInterceptor.subsamplingStep(40_000, 100, ImageResizeInterceptor.MAX_DECODED_PIXELS);
+
+        assertThat(Math.ceilDiv(40_000, step)).isLessThanOrEqualTo(ImageResizeInterceptor.WEBP_MAX_DIMENSION);
+        assertThat(ImageResizeInterceptor.subsamplingStep(4096, 4096, ImageResizeInterceptor.MAX_DECODED_PIXELS)).isEqualTo(1);
+        assertThat(ImageResizeInterceptor.subsamplingStep(4097, 4096, ImageResizeInterceptor.MAX_DECODED_PIXELS)).isEqualTo(2);
+    }
+
+    @Test
+    void preHandleAnswers503WhenEveryConversionSlotIsBusy() throws Exception {
+        // GOU-1952: concurrent cache misses must not each hold a decoded image
+        File cacheDir = java.nio.file.Files.createTempDirectory("image-cache-test").toFile();
+        when(resourceService.getCacheFile(any(Resource.class)))
+                .thenAnswer(invocation -> new File(cacheDir, ((Resource) invocation.getArgument(0)).getCacheKey()));
+        CountDownLatch converting = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        ImageResizeInterceptor interceptor = new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com",
+                10_000, 1, Duration.ofMillis(200)) {
+            @Override
+            BufferedImage findSourceImage(String baseImageName, boolean hasDimensionsArgument) {
+                converting.countDown();
+                try {
+                    release.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return null;
+            }
+        };
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            Future<MockHttpServletResponse> first = executor.submit(() -> {
+                MockHttpServletResponse response = new MockHttpServletResponse();
+                interceptor.preHandle(webpRequest("/images/first.webp"), response, new Object());
+                return response;
+            });
+            assertThat(converting.await(5, TimeUnit.SECONDS)).isTrue();
+
+            MockHttpServletResponse second = new MockHttpServletResponse();
+            boolean result = interceptor.preHandle(webpRequest("/images/second.webp"), second, new Object());
+
+            assertThat(result).isFalse();
+            assertThat(second.getStatus()).isEqualTo(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            assertThat(second.getHeader("Retry-After")).isNotNull();
+
+            release.countDown();
+            assertThat(first.get(5, TimeUnit.SECONDS).getStatus()).isEqualTo(HttpServletResponse.SC_NOT_FOUND);
+        } finally {
+            release.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    private ImageResizeInterceptor boundedInterceptor(long maxPixels, int conversions, Duration wait) {
+        return new ImageResizeInterceptor(resourceService, allowedResize, "http://example.com", maxPixels, conversions, wait);
+    }
+
+    private static MockHttpServletRequest webpRequest(String uri) {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRequestURI(uri);
+        return request;
+    }
+
+    private static byte[] encode(BufferedImage image, String format) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        assertThat(ImageIO.write(image, format, outputStream)).isTrue();
+        return outputStream.toByteArray();
     }
 
     private byte[] createPngBytes() throws IOException {

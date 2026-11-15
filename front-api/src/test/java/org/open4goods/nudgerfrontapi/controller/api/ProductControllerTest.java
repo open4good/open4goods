@@ -212,6 +212,23 @@ class ProductControllerTest {
     }
 
     @Test
+    void globalSearchReturnsAccessoriesApart() {
+        ProductDto accessory = org.mockito.Mockito.mock(ProductDto.class);
+        SearchService.GlobalSearchHit accessoryHit = new SearchService.GlobalSearchHit(null, accessory, 3.5);
+        when(searchService.globalSearch(any(), any(), any(), any(), any())).thenReturn(
+                new SearchService.GlobalSearchResult(List.of(), List.of(), 0L, 0, 0, 20, null, List.of(accessoryHit)));
+
+        ResponseEntity<org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto> response =
+                controller.globalSearch(DomainLanguage.fr, new org.open4goods.nudgerfrontapi.dto.search.GlobalSearchRequestDto(
+                        "machine a cafe", null, null, null, 0, 20));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().missingVerticalResults()).isEmpty();
+        assertThat(response.getBody().accessoryResults()).singleElement()
+                .satisfies(dto -> assertThat(dto.product()).isSameAs(accessory));
+    }
+
+    @Test
     void globalSearchWithEmptyAggsShouldBeAllowed() {
         // Setup SearchCapabilities mock for Global Search
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Collections.emptySet(), Set.of(), Set.of());

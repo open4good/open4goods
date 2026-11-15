@@ -2,6 +2,8 @@ package org.open4goods.api.config;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -9,8 +11,13 @@ import java.util.concurrent.TimeUnit;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.EprelMatchMetrics;
+import org.open4goods.api.services.ImpactScoreBatchGuard;
 import org.open4goods.api.services.CompletionFacadeService;
+import org.open4goods.api.services.DatasourceOfferActivityService;
 import org.open4goods.api.services.DatasourcePurgeService;
+import org.open4goods.api.services.backfill.BackfillEngine;
+import org.open4goods.api.services.backfill.BackfillService;
 import org.open4goods.api.services.VerticalsGenerationService;
 import org.open4goods.api.services.completion.AmazonCompletionService;
 import org.open4goods.api.services.completion.EprelCompletionService;
@@ -90,9 +97,11 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshotRepository;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -109,12 +118,16 @@ import org.springframework.beans.factory.ObjectProvider;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
 @Configuration
 public class ApiConfig {
 
 	private final ApiProperties apiProperties;
 	private static final Logger logger = LoggerFactory.getLogger(ApiConfig.class);
+
+	/** How long the point in time of a backfill stays open after each page, and so after a stop (GOU-2266). */
+	static final Duration BACKFILL_KEEP_ALIVE = Duration.ofMinutes(30);
 
 	public ApiConfig(ApiProperties apiProperties) {
 		this.apiProperties = apiProperties;
@@ -223,9 +236,47 @@ public class ApiConfig {
 				dataSourceConfigService, aggregationFacade);
 	}
 
+	/** Storage of the monthly ImpactScore snapshots written by the batch (GOU-1896). */
 	@Bean
-	BatchService batchService(AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService) {
-		return new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+	ImpactScoreSnapshotRepository impactScoreSnapshotRepository(ElasticsearchOperations elasticsearchOperations) {
+		return new ImpactScoreSnapshotRepository(elasticsearchOperations);
+	}
+
+	@Bean
+	BatchService batchService(ImpactScoreBatchGuard impactScoreBatchGuard, EprelMatchMetrics eprelMatchMetrics, AggregationFacadeService aggregationFacadeService, CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository productRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
+		BatchService batchService = new BatchService(aggregationFacadeService, completionFacadeService, verticalsConfigService, productRepository,  feedIndexingService, feedService, serialisationService, resourceService, apiProperties);
+		batchService.setImpactScoreGuard(impactScoreBatchGuard);
+		batchService.setEprelMatchMetrics(eprelMatchMetrics);
+		batchService.setImpactScoreSnapshotRepository(impactScoreSnapshotRepository);
+		return batchService;
+	}
+
+	/**
+	 * Post-batch ImpactScore checks, also exposed as the {@code impactScoreGuard} health component (GOU-1895).
+	 */
+	@Bean
+	ImpactScoreBatchGuard impactScoreGuard(MeterRegistry meterRegistry) {
+		return new ImpactScoreBatchGuard(apiProperties.getImpactScoreGuard(), meterRegistry,
+				java.nio.file.Path.of(apiProperties.getRootFolder(), "impactscore-guard"));
+	}
+
+	/**
+	 * EPREL match rate per vertical after each batch, exposed as {@code eprel.match.*} gauges (GOU-1893).
+	 */
+	@Bean
+	EprelMatchMetrics eprelMatchMetrics(MeterRegistry meterRegistry) {
+		return new EprelMatchMetrics(meterRegistry);
+	}
+
+	/**
+	 * Batched, resumable updates of a few fields of many products (GOU-2266). The point in time of a stopped run
+	 * stays open for {@link #BACKFILL_KEEP_ALIVE}, so it can be resumed within that time.
+	 */
+	@Bean
+	BackfillService backfillService(ElasticsearchClient elasticsearchClient) {
+		return new BackfillService(
+				new BackfillEngine(elasticsearchClient, ProductRepository.MAIN_INDEX_NAME, BACKFILL_KEEP_ALIVE),
+				Path.of(apiProperties.getBackfillStatusFile()), Path.of(apiProperties.getBackfillBackupFolder()));
 	}
 
 	@Bean
@@ -363,8 +414,9 @@ public class ApiConfig {
     }
 
 	@Bean
-	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService) throws IOException {
-		return new VerticalsConfigService(serialisationService, googleTaxonomyService, resolver);
+	VerticalsConfigService verticalConfigsService(ResourcePatternResolver resolver, SerialisationService serialisationService, GoogleTaxonomyService googleTaxonomyService,
+			@Value("${" + VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY + ":}") String methodologyVersionOverrides) throws IOException {
+		return new VerticalsConfigService(serialisationService, googleTaxonomyService, resolver, methodologyVersionOverrides);
 	}
 
 
@@ -511,8 +563,13 @@ public class ApiConfig {
         }
 
 	@Bean
-	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService) {
-		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig());
+	DatasourceOfferActivityService datasourceOfferActivityService() {
+		return new DatasourceOfferActivityService(Path.of(apiProperties.getDatasourceOfferActivityFile()), Clock.systemUTC());
+	}
+
+	@Bean
+	DataFragmentStoreService dataFragmentStoreService(final ApiProperties config, @Autowired StandardiserService standardiserService, @Autowired AggregationFacadeService generationService, @Autowired ProductRepository aggregatedDataRepository, @Autowired BarcodeValidationService barcodeValidationService, DatasourceOfferActivityService datasourceOfferActivityService) {
+		return new DataFragmentStoreService(standardiserService, generationService, aggregatedDataRepository, barcodeValidationService, config.getIndexationConfig(), datasourceOfferActivityService);
 	}
 
 	/**

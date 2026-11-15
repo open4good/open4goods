@@ -354,6 +354,13 @@
             than the ones displayed in the toolbar (GOU-1940).
           -->
           <template v-else-if="!productError">
+            <p
+              v-if="showNotRatedAfterRatedNotice"
+              class="category-page__not-rated-notice text-body-2 text-medium-emphasis mb-3"
+              role="note"
+            >
+              {{ t('components.impactScore.v2.notRatedAfterRated') }}
+            </p>
             <v-fade-transition hide-on-leave>
               <component
                 :is="viewComponent"
@@ -530,6 +537,7 @@ import CategoryRelatedSubcategoriesCard from '~/components/category/CategoryRela
 import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import CategoryProductListView from '~/components/category/products/CategoryProductListView.vue'
+import { shouldShowNotRatedAfterRatedNotice } from '~/utils/_impact-score-v2'
 import CategoryProductTable from '~/components/category/products/CategoryProductTable.vue'
 import NudgeToolWizard from '~/components/nudge-tool/NudgeToolWizard.vue'
 import CtaCard from '~/components/shared/CtaCard.vue'
@@ -1813,6 +1821,10 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 })
 
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
+
+const showNotRatedAfterRatedNotice = computed(() =>
+  shouldShowNotRatedAfterRatedNotice(sortField.value, currentProducts.value)
+)
 const resultsCount = computed(
   () => productsData.value?.products?.page?.totalElements ?? 0
 )

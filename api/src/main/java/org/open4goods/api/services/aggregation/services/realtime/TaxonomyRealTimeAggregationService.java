@@ -32,6 +32,8 @@ import org.slf4j.Logger;
  *       to it, and clear both in every other case. Generated names are left
  *       untouched — the URL slug is (re)generated downstream by
  *       {@code NamesAggregationService}.</li>
+ *   <li>Set the product {@code nature} (accessory, spare part) from its
+ *       categories when it has no vertical, clear it otherwise (GOU-2233).</li>
  * </ol>
  *
  * <p>The {@link #onDataFragment(DataFragment, Product, VerticalConfig)} hook stores
@@ -86,6 +88,11 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	 * excluding token found in another datasource category (a marketplace row
 	 * categorised as a shoe-care accessory) or a feed category that no longer
 	 * matches cannot clear it (GOU-1700).
+	 *
+	 * <p>Once the vertical is resolved, a product without vertical gets the nature
+	 * read from its categories ({@link VerticalsConfigService#getNatureForCategories}),
+	 * and a product with a vertical gets none. The nature is recomputed, and so
+	 * cleared, on every call (GOU-2233).
 	 */
 	@Override
 	public void onProduct(final Product data, final VerticalConfig vConf) throws AggregationSkipException {
@@ -115,6 +122,13 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 			data.setVertical(null);
 			data.setGoogleTaxonomyId(null);
 		}
+
+		// Nature (accessory, spare part) only for a product left without vertical:
+		// EPREL can keep a real appliance in its vertical while a marketplace
+		// categorises it as an accessory (GOU-2233)
+		data.setNature(data.getVertical() == null
+				? verticalService.getNatureForCategories(data.getDatasourceCategories())
+				: null);
 	}
 
 }

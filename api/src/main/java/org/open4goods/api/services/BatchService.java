@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.time.Instant;
+import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,9 +38,13 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.open4goods.model.impactscore.ImpactScoreSnapshot;
+import org.open4goods.model.impactscore.ImpactScoreSnapshotBuilder;
+import org.open4goods.services.productrepository.impactscore.ImpactScoreSnapshotRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import org.open4goods.api.config.yml.ApiProperties;
+import org.open4goods.api.config.yml.ScoreCleanupProperties;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.resource.ResourceType;
@@ -54,6 +60,15 @@ import org.apache.commons.io.FileUtils;
 public class BatchService {
 
 	protected static final Logger logger = LoggerFactory.getLogger(BatchService.class);
+
+	/**
+	 * Logger of the batch durations (per vertical, per phase and per completion service). Set to INFO in
+	 * {@code application.yml}: beta and prod set {@code org.open4goods} to warn, which hid every INFO line of the
+	 * batch (GOU-2099).
+	 */
+	public static final String TIMINGS_LOGGER = "org.open4goods.api.services.BatchService.timings";
+
+	private static final Logger timings = LoggerFactory.getLogger(TIMINGS_LOGGER);
 
 	private VerticalsConfigService verticalsConfigService;
 
@@ -73,6 +88,16 @@ public class BatchService {
 
 	private ApiProperties apiProperties;
 
+	/** Post-scoring ImpactScore checks (GOU-1895). */
+	private ImpactScoreBatchGuard impactScoreGuard;
+	private EprelMatchMetrics eprelMatchMetrics = new EprelMatchMetrics(null);
+
+	/** Storage of the monthly ImpactScore snapshots; {@code null} disables them. */
+	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
+
+	/** File present while a full batch runs, read by the beta deployment (GOU-2106). */
+	private final BatchRunningMarker batchRunningMarker;
+
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
 			CompletionFacadeService completionFacadeService, VerticalsConfigService verticalsConfigService, ProductRepository dataRepository, FeedIndexingService feedIndexingService, FeedService feedService, SerialisationService serialisationService, ResourceService resourceService, ApiProperties apiProperties) {
@@ -86,6 +111,62 @@ public class BatchService {
 		this.serialisationService = serialisationService;
 		this.resourceService = resourceService;
 		this.apiProperties = apiProperties;
+		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
+		this.batchRunningMarker = new BatchRunningMarker(apiProperties == null ? null : apiProperties.getBatchRunningMarker());
+	}
+
+	/**
+	 * Replaces the ImpactScore guard (shared with the health indicator and metrics in the application context).
+	 *
+	 * @param impactScoreGuard the guard to run after each vertical scoring
+	 */
+	/**
+	 * Replaces the EPREL match metrics (shared with the metrics registry of the application context).
+	 *
+	 * @param eprelMatchMetrics the metrics recorded after each vertical scoring
+	 */
+	public void setEprelMatchMetrics(EprelMatchMetrics eprelMatchMetrics) {
+		this.eprelMatchMetrics = eprelMatchMetrics;
+	}
+
+	public void setImpactScoreGuard(ImpactScoreBatchGuard impactScoreGuard) {
+		this.impactScoreGuard = impactScoreGuard;
+	}
+
+	/**
+	 * Enables the monthly ImpactScore snapshots (GOU-1896).
+	 *
+	 * @param impactScoreSnapshotRepository the snapshot storage
+	 */
+	public void setImpactScoreSnapshotRepository(ImpactScoreSnapshotRepository impactScoreSnapshotRepository) {
+		this.impactScoreSnapshotRepository = impactScoreSnapshotRepository;
+	}
+
+	/**
+	 * Stores the ImpactScore snapshot of the vertical for the current month: on the 1st of the month, or when the
+	 * month has none yet (batch missed on the 1st). The document id is the vertical and the month, so running it
+	 * again never duplicates. A failure is logged and never stops the batch.
+	 *
+	 * @param vertical the vertical, already scored
+	 * @param cohort   its products having offers, excluded ones included
+	 */
+	void snapshotImpactScore(VerticalConfig vertical, Collection<Product> cohort) {
+		if (impactScoreSnapshotRepository == null) {
+			return;
+		}
+		try {
+			Instant now = Instant.now();
+			YearMonth month = ImpactScoreSnapshotBuilder.monthOf(now);
+			String id = ImpactScoreSnapshot.idOf(vertical.getId(), month.toString());
+			boolean firstOfMonth = now.atZone(ZoneOffset.UTC).getDayOfMonth() == 1;
+			if (!firstOfMonth && impactScoreSnapshotRepository.exists(id)) {
+				return;
+			}
+			impactScoreSnapshotRepository.save(ImpactScoreSnapshotBuilder.build(vertical, cohort, month, now));
+			logger.info("ImpactScore snapshot {} stored", id);
+		} catch (Exception e) {
+			logger.error("ImpactScore snapshot failed for vertical {}", vertical.getId(), e);
+		}
 	}
 
 	/**
@@ -554,24 +635,112 @@ public class BatchService {
 		}
 	}
 
+	/**
+	 * Nightly batch of every vertical, then the score cleanup outside verticals. A vertical that fails is logged
+	 * (ERROR, and a {@code failed} line on the {@link #TIMINGS_LOGGER}) and skipped: the next verticals and the
+	 * cleanup still run (GOU-2273).
+	 */
 	// TODO(p3,conf) : schedule from conf
 	@Scheduled(cron = "0 0 13 * * ?")
 	public void batch() {
+		long start = System.nanoTime();
+		timings.info("Start of batch");
+		// Deleted in finally: a failed batch must not hold the beta deployments until the marker gets stale.
+		batchRunningMarker.begin();
+		try {
+			/////////////////////////////////////////////
+			// On each vertical, products are in memory loaded
+			/////////////////////////////////////////////
+			for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
+				// A failing vertical (loading, completion, aggregation) must not stop the next ones nor the
+				// score cleanup outside verticals (GOU-2273)
+				long verticalStart = System.nanoTime();
+				try {
+					batch(vertical);
+				} catch (RuntimeException e) {
+					logger.error("Batch of vertical {} failed, moving on to the next vertical", vertical.getId(), e);
+					timings.info("Batch of vertical {} : failed, {} s", vertical.getId(), seconds(verticalStart));
+				}
+			}
 
-		/////////////////////////////////////////////
-		// On each vertical, products are in memory loaded
-		/////////////////////////////////////////////
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-			batch(vertical);
+			clearScoresOutsideVerticals();
+		} finally {
+			batchRunningMarker.end();
 		}
 
+		timings.info("End of batch in {} s", seconds(start));
+	}
 
-		logger.info("End of batch");
+	/**
+	 * Clears the scores, ranking and ImpactScore assessment metadata of the products outside the batched verticals
+	 * (GOU-2133): without a vertical, or of a vertical the batch does not run. The vertical batches never load them,
+	 * so {@link #clearObsoleteScores} cannot reach them, and their old ImpactScore stayed on the product page, the
+	 * global search and the comparator. Same rule as {@link #clearObsoleteScores} for a product leaving its vertical.
+	 *
+	 * <p>Disabled by default ({@code score-cleanup.enabled}): it then only counts the products it would clear. When
+	 * enabled, it clears at most {@code score-cleanup.max-products} products per run, by partial bulk updates of
+	 * those three fields only. A cleared product no longer matches, so a second run touches nothing. Both outcomes
+	 * are logged in INFO by the {@link #TIMINGS_LOGGER}, with the duration. A failure is logged and never stops the
+	 * batch.
+	 */
+	void clearScoresOutsideVerticals() {
+		ScoreCleanupProperties conf = apiProperties == null ? null : apiProperties.getScoreCleanup();
+		if (conf == null) {
+			return;
+		}
+		long start = System.nanoTime();
+		Set<String> batchedVerticals = verticalsConfigService.getConfigsWithoutDefault().stream()
+				.map(VerticalConfig::getId)
+				.collect(Collectors.toSet());
+		if (batchedVerticals.isEmpty()) {
+			// Every scored product would be outside the verticals: never clear the whole index on a missing config
+			logger.error("Score cleanup skipped: no batched vertical");
+			return;
+		}
+		try {
+			long targeted = dataRepository.countScoredOutsideVerticals(batchedVerticals);
+			if (!conf.isEnabled()) {
+				timings.info("Score cleanup outside verticals : disabled, {} products would be cleared", targeted);
+				return;
+			}
+			int bulkSize = Math.max(1, conf.getBulkSize());
+			List<Long> page = new ArrayList<>(bulkSize);
+			long cleared = 0;
+			long failed = 0;
+			try (Stream<Long> ids = dataRepository.exportIdsScoredOutsideVerticals(batchedVerticals)) {
+				Iterator<Long> iterator = ids.limit(Math.max(0, conf.getMaxProducts())).iterator();
+				while (iterator.hasNext()) {
+					page.add(iterator.next());
+					if (page.size() == bulkSize || !iterator.hasNext()) {
+						try {
+							dataRepository.clearScores(page, batchedVerticals);
+							cleared += page.size();
+						} catch (RuntimeException e) {
+							failed += page.size();
+							logger.error("Score cleanup: bulk of {} products failed", page.size(), e);
+						}
+						page.clear();
+					}
+				}
+			}
+			timings.info("Score cleanup outside verticals : {} products cleared, {} failed, of {} targeted, in {} s",
+					cleared, failed, targeted, seconds(start));
+		} catch (RuntimeException e) {
+			logger.error("Score cleanup outside verticals failed", e);
+		}
+	}
+
+	private static long seconds(long startNanos) {
+		return (System.nanoTime() - startNanos) / 1_000_000_000L;
 	}
 
 	/**
 	 * Batch a specific vertical: loads its products, classifies, completes, aggregates and scores them, then
 	 * queues them for full indexation.
+	 *
+	 * <p>Only the products still in this vertical after the classification, and again after the aggregation, are
+	 * completed and scored with its configuration and cohort. A product moved to another vertical is indexed with
+	 * its scores untouched: the batch of its new vertical scores it (GOU-2273).
 	 *
 	 * <p>The realtime indexation keeps running meanwhile. The full queue is not flushed, and each page of
 	 * products gets the newest realtime offers ({@link ProductRepository#applyNewerOfferStates}) just before
@@ -582,6 +751,8 @@ public class BatchService {
 	 */
 	public void batch(VerticalConfig vertical) {
 		Set<Product> allProducts = new HashSet<>();
+		long start = System.nanoTime();
+		timings.info("Batch of vertical {} : start", vertical.getId());
 
 		logger.info("Loading products in memory for vertical {}", vertical);
 
@@ -596,11 +767,13 @@ public class BatchService {
 		// We apply simple classification to unmatch products from verticals if needed
 		////////////////////
 		aggregationFacadeService.classificationAggregator(vertical, allProducts);
+		long loaded = System.nanoTime();
 
-		// We filter the products into the "living one" (that have not been unmatched from caegories matching, and that have a valid price
+		// The living products: with offers, and still in this vertical after the classification. A product moved to
+		// another vertical is indexed without being scored here, its own vertical batch will score it (GOU-2273)
 		Set<Product> products = allProducts.stream()
-				.filter(e -> e.getOffersCount().intValue() > 0)
-				.filter(e-> null != e.getVertical())
+				.filter(e -> e.getOffersCount() != null && e.getOffersCount() > 0)
+				.filter(e -> belongsTo(e, vertical))
 				.collect(Collectors.toSet());
 
 		logger.info("Will complete {} products of {}", products.size(), allProducts.size() );
@@ -609,12 +782,14 @@ public class BatchService {
 		//  Launch completion on this products
 		////////////////////
 		completionFacadeService.processAll(products, vertical);
+		long completed = System.nanoTime();
 
 		logger.info("Will aggregate {} products", products.size());
 		//////////////////////////////////
 		// Launch aggregation, (now will complete on more Datas (eg API ones)
 		/////////////////////////////////
 		aggregationFacadeService.aggregateProducts(vertical, allProducts);
+		long aggregated = System.nanoTime();
 
 
 		////////////////////
@@ -623,17 +798,25 @@ public class BatchService {
 
 
 		try {
-			// Scoring
+			// The aggregation replays the taxonomy after the EPREL completion: the vertical can change again
+			Set<Product> cohort = products.stream().filter(e -> belongsTo(e, vertical)).collect(Collectors.toSet());
 			// We only score the products that are not excluded
-			Set<Product> scorable = products.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
-			logger.info("Will score {} products on a total of {}", scorable.size(), products.size());
+			Set<Product> scorable = cohort.stream().filter(e-> !e.isExcluded()).collect(Collectors.toSet());
+			logger.info("Will score {} products on a total of {}", scorable.size(), cohort.size());
 			aggregationFacadeService.score(vertical, scorable);
 			clearObsoleteScores(allProducts, vertical);
+			if (!impactScoreChecksPass(vertical, scorable)) {
+				timings.info("Batch of vertical {} : not indexed, ImpactScore checks failed, {} s", vertical.getId(), seconds(start));
+				return;
+			}
+			snapshotImpactScore(vertical, cohort);
 		} catch (Exception e) {
 			// Scores are cleared before being rebuilt: indexing now would persist partial results
 			logger.error("Scoring failed for vertical {} : nothing is indexed for this run", vertical.getId(), e);
+			timings.info("Batch of vertical {} : not indexed, scoring failed, {} s", vertical.getId(), seconds(start));
 			return;
 		}
+		long scored = System.nanoTime();
 
 
 		////////////////////
@@ -651,27 +834,71 @@ public class BatchService {
 			dataRepository.addToFullindexationQueue(page);
 		}
 		logger.info("{} products of vertical {} got offers updated in realtime during the batch", refreshed, vertical.getId());
+		long end = System.nanoTime();
+		timings.info("Batch of vertical {} : end in {} s ({} products, {} completed) ; load and classification {} s, "
+				+ "completion {} s, aggregation {} s, scoring {} s, indexation queue {} s", vertical.getId(),
+				(end - start) / 1_000_000_000L, allProducts.size(), products.size(), (loaded - start) / 1_000_000_000L,
+				(completed - loaded) / 1_000_000_000L, (aggregated - completed) / 1_000_000_000L,
+				(scored - aggregated) / 1_000_000_000L, (end - scored) / 1_000_000_000L);
+	}
+
+	/**
+	 * Runs the ImpactScore checks (GOU-1895). A blocking violation forbids the indexation, like a scoring failure.
+	 * A failure of the guard itself never blocks: the alert would then hide the data it is meant to protect.
+	 *
+	 * @param vertical the vertical being batched
+	 * @param scorable the products just scored
+	 * @return false when the indexation must not happen
+	 */
+	private boolean impactScoreChecksPass(VerticalConfig vertical, Collection<Product> scorable) {
+		try {
+			eprelMatchMetrics.record(vertical.getId(), scorable);
+		} catch (RuntimeException e) {
+			logger.error("EPREL match metrics could not be recorded for vertical {}", vertical.getId(), e);
+		}
+		try {
+			ImpactScoreBatchGuard.Report report = impactScoreGuard.verify(vertical.getId(), scorable);
+			if (report.blocking()) {
+				logger.error("ImpactScore checks failed for vertical {} : nothing is indexed for this run", vertical.getId());
+				return false;
+			}
+		} catch (RuntimeException e) {
+			logger.error("ImpactScore checks could not run for vertical {}", vertical.getId(), e);
+		}
+		return true;
 	}
 
 	/**
 	 * Removes the scores a scoring run cannot have refreshed and that must not stay published.
 	 *
 	 * <p>Excluded products and products unmatched from the vertical no longer belong to the scored cohort, so
-	 * all their scores and their ranking are removed. Products without offers keep their last score (they stay
-	 * in the sitemap, GOU-1744). If that ImpactScore was overwritten by a composite (only that defect sets
+	 * all their scores, their ranking and their ImpactScore assessment metadata are removed. Products without offers keep their last score and its assessment
+	 * metadata (they stay in the sitemap, GOU-1744) but lose their ranks, which belong to an earlier cohort (GOU-2071). If that ImpactScore was overwritten by a composite (only that defect sets
 	 * aggregates on it), it is recomputed from the sub-scores the product holds, since the batch does not rescore
-	 * products without offers; it is removed when it cannot be recomputed.
+	 * products without offers; it is removed when it cannot be recomputed. That recomputation fixes a methodology V1
+	 * defect only: in V2 a product without offers is neither recomputed nor cleared, the front-api shows it as not
+	 * rated when its score is of another version (design GOU-1878, 2.5).
+	 *
+	 * <p>A product now in another vertical (moved by the classification or the aggregation) is left untouched: its
+	 * scores are neither cleared nor recomputed with the weights of this vertical, the batch of its new vertical
+	 * scores it (GOU-2273).
 	 *
 	 * @param products every product of the vertical, after scoring
 	 * @param vertical the vertical configuration, for the ImpactScore weights
 	 */
 	static void clearObsoleteScores(Collection<Product> products, VerticalConfig vertical) {
 		EcoScoreAggregationService impactScore = new EcoScoreAggregationService(logger);
+		boolean v2 = vertical != null && vertical.getImpactScoreConfig() != null
+				&& vertical.getImpactScoreConfig().isV2Active();
 		for (Product product : products) {
+			if (movedToAnotherVertical(product, vertical)) {
+				continue;
+			}
 			if (product.isExcluded() || product.getVertical() == null) {
 				product.getScores().clear();
 				product.setRanking(new EcoScoreRanking());
-			} else if (hasCompositeImpactScore(product)) {
+				product.setImpactScoreMeta(null);
+			} else if (!v2 && hasCompositeImpactScore(product)) {
 				Score recomputed = impactScore.recomputeFromStoredSubScores(product, vertical);
 				if (recomputed == null) {
 					product.getScores().remove(product.ecoscore().getName());
@@ -680,6 +907,38 @@ public class BatchService {
 					product.getScores().put(recomputed.getName(), recomputed);
 				}
 			}
+			if (!product.isExcluded() && product.getVertical() != null
+					&& (product.getOffersCount() == null || product.getOffersCount() == 0)) {
+				clearRanks(product);
+			}
+		}
+	}
+
+	/**
+	 * @return true when the product is in the batched vertical
+	 */
+	private static boolean belongsTo(Product product, VerticalConfig vertical) {
+		return vertical.getId().equals(product.getVertical());
+	}
+
+	/**
+	 * @return true when the product is in another vertical than the batched one, false when either is unknown
+	 */
+	private static boolean movedToAnotherVertical(Product product, VerticalConfig vertical) {
+		return product.getVertical() != null && vertical != null && vertical.getId() != null
+				&& !vertical.getId().equals(product.getVertical());
+	}
+
+	/**
+	 * Clears the ranks a product without offers holds from an earlier cohort, keeping score values and assessment
+	 * metadata (GOU-2071).
+	 */
+	private static void clearRanks(Product product) {
+		product.setRanking(new EcoScoreRanking());
+		for (Score score : product.getScores().values()) {
+			score.setRanking(null);
+			score.setLowestScoreId(null);
+			score.setHighestScoreId(null);
 		}
 	}
 

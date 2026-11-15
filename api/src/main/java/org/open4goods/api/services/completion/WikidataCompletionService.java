@@ -43,10 +43,16 @@ import com.google.common.collect.Sets;
  * <p>On success, converts the {@link WikidataEntity} to a {@link DataFragment} and runs it
  * through the standard aggregator pipeline, so all existing normalisation and merging logic
  * applies without special-casing.
+ *
+ * <p>A product found is refreshed after {@code wikidata.refresh-in-days}; a product not found is
+ * searched again after {@code wikidata.miss-refresh-in-days} ({@link #MISS_CODE}, GOU-2099).
  */
 public class WikidataCompletionService extends AbstractCompletionService {
 
     public static final String DATASOURCE_NAME = "wikidata.org";
+
+    /** Key of {@code datasourceCodes} dating the last search that found no entity (negative cache, GOU-2099). */
+    public static final String MISS_CODE = DATASOURCE_NAME + ".miss";
 
     private final Logger LOGGER = logger;
 
@@ -79,12 +85,17 @@ public class WikidataCompletionService extends AbstractCompletionService {
 
     @Override
     public boolean shouldProcess(VerticalConfig vertical, Product data) {
+        long now = System.currentTimeMillis();
+        Long lastMiss = data.getDatasourceCodes().get(MISS_CODE);
+        if (lastMiss != null && now - lastMiss < Duration.ofDays(wikidataProperties.getMissRefreshInDays()).toMillis()) {
+            return false;
+        }
         Long lastProcessed = data.getDatasourceCodes().get(getDatasourceName());
         if (lastProcessed == null) {
             return true;
         }
         long refreshMs = Duration.ofDays(wikidataProperties.getRefreshInDays()).toMillis();
-        return System.currentTimeMillis() - lastProcessed >= refreshMs;
+        return now - lastProcessed >= refreshMs;
     }
 
     @Override
@@ -95,8 +106,10 @@ public class WikidataCompletionService extends AbstractCompletionService {
 
         if (entityOpt.isEmpty()) {
             LOGGER.info("No Wikidata entity found for {}", data.getId());
+            data.getDatasourceCodes().put(MISS_CODE, System.currentTimeMillis());
             return;
         }
+        data.getDatasourceCodes().remove(MISS_CODE);
 
         WikidataEntity entity = entityOpt.get();
         data.getExternalIds().setWikidata(entity.getQId());

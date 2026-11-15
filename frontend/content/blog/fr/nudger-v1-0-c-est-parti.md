@@ -22,7 +22,7 @@ Quand on comprend mieux, on choisit mieux - et souvent - on achète mieux.
 Ce que vous pouvez faire avec Nudger :
 
 - comparer la performance et les caractéristiques des produits
-- comprendre l'impact écologique de vos achats grâce à [l'Impact Score](https://nudger.fr/impact-score), un éco-score innovant offrant une note sur 20
+- comparer les produits grâce à l'[Impact Score](https://nudger.fr/impact-score), une note sur 20
 - faire un choix responsable et cohérent avec votre budget et vos valeurs
 - trouver les meilleurs prix grâce à nos nombreux partenaires marchands
 

@@ -12,6 +12,7 @@ import org.open4goods.services.geocode.config.yml.GeoNamesProperties;
 import org.open4goods.services.geocode.dto.IpGeolocationResponse;
 import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.services.geocode.service.geonames.GeoNamesDatasetProvider;
+import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -88,7 +89,8 @@ class GeocodeControllerIntegrationTest
         {
             ClassPathResource resource = new ClassPathResource("geonames/cities5000_sample.txt");
             Path fixturePath = resource.getFile().toPath();
-            RemoteFileCachingService stubCache = new RemoteFileCachingService("target/geocode-test-cache");
+            RemoteFileCachingService stubCache = new RemoteFileCachingService("target/geocode-test-cache",
+                    new RemoteFileCachingProperties(), new java.io.File("target/geocode-test-tmp"));
             GeoNamesProperties properties = new GeoNamesProperties();
             return new GeoNamesDatasetProvider(stubCache, properties)
             {

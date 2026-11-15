@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.open4goods.model.StandardiserService;
 import org.open4goods.model.constants.CacheConstants;
+import org.open4goods.model.eprel.EprelModelAliasTable;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Score;
@@ -71,6 +72,12 @@ public class VerticalConfig {
 	 * The corresponding EPREL taxonomy IDs.
 	 */
 	private List<String> eprelGroupNames = new ArrayList<>();
+
+	/**
+	 * Brand tables mapping commercial names and part numbers to the model registered in EPREL, discovered from
+	 * classpath eprel-model-aliases/{vertical-id}/*.yml files.
+	 */
+	private List<EprelModelAliasTable> eprelModelAliases = new ArrayList<>();
 
 	/**
 	 * If true, then the vertical is handled through batch processing, but is not
@@ -147,6 +154,37 @@ public class VerticalConfig {
 	 */
 	@JsonMerge
 	private Set<String> excludingTokensFromCategoriesMatching = new HashSet<String>();
+
+	/**
+	 * Tokens that mark a product as a spare part when one of its normalised
+	 * merchant categories contains one of them (GOU-2233). Read from
+	 * {@code _default.yml}, for products without vertical.
+	 */
+	@JsonMerge
+	private Set<String> sparePartCategoryMarkers = new HashSet<String>();
+
+	/**
+	 * Tokens that mark a product as an accessory when one of its normalised
+	 * merchant categories contains one of them (GOU-2233). A spare part marker
+	 * wins over an accessory marker.
+	 */
+	@JsonMerge
+	private Set<String> accessoryCategoryMarkers = new HashSet<String>();
+
+	/**
+	 * Fragments removed from each normalised merchant category before the nature
+	 * markers are searched (GOU-2233), e.g. {@code ET ACCESSOIRES} in
+	 * {@code PACK TV LED ET ACCESSOIRES}.
+	 */
+	@JsonMerge
+	private Set<String> natureNeutralCategoryFragments = new HashSet<String>();
+
+	/**
+	 * Minimum share (0 to 1) of a product's distinct normalised merchant
+	 * categories that must carry a nature marker for the nature to be set
+	 * (GOU-2233, measure 7 of GOU-2226). 0 means one marked category is enough.
+	 */
+	private double natureMinMarkedCategoryShare = 0d;
 
 	/**
 	 * The set of datasourcenames that will be excluded in generation of categories
@@ -457,7 +495,7 @@ public class VerticalConfig {
 	 */
 	public Integer ecoscorePercentOf(String scoreName) {
 
-		Double ponderation = impactScoreConfig.getCriteriasPonderation().get(scoreName);
+		Double ponderation = impactScoreConfig.activeCriteriasPonderation().get(scoreName);
 		if (null == ponderation) {
 			return -1;
 		} else {
@@ -557,7 +595,7 @@ public class VerticalConfig {
 	 * @return the sum of the coefficient applyed to this ecoscore
 	 */
 	public Double getEcoscoreCriteriasSum() {
-		return impactScoreConfig.getCriteriasPonderation().values().stream().mapToDouble(Double::doubleValue).sum();
+		return impactScoreConfig.activeCriteriasPonderation().values().stream().mapToDouble(Double::doubleValue).sum();
 	}
 
 	public String getBaseUrl(final String siteLocale) {
@@ -660,7 +698,7 @@ public class VerticalConfig {
 
 		List<Score> ret = new ArrayList<Score>();
 
-		impactScoreConfig.getCriteriasPonderation().keySet().forEach(ecoConfig -> {
+		impactScoreConfig.activeCriteriasPonderation().keySet().forEach(ecoConfig -> {
 			existing.forEach(exisiting -> {
 				if (exisiting.getName().equals(ecoConfig)) {
 					ret.add(exisiting);
@@ -1040,6 +1078,38 @@ public class VerticalConfig {
 		this.excludingTokensFromCategoriesMatching = excludingTokens;
 	}
 
+	public Set<String> getSparePartCategoryMarkers() {
+		return sparePartCategoryMarkers;
+	}
+
+	public void setSparePartCategoryMarkers(Set<String> sparePartCategoryMarkers) {
+		this.sparePartCategoryMarkers = sparePartCategoryMarkers;
+	}
+
+	public Set<String> getAccessoryCategoryMarkers() {
+		return accessoryCategoryMarkers;
+	}
+
+	public void setAccessoryCategoryMarkers(Set<String> accessoryCategoryMarkers) {
+		this.accessoryCategoryMarkers = accessoryCategoryMarkers;
+	}
+
+	public Set<String> getNatureNeutralCategoryFragments() {
+		return natureNeutralCategoryFragments;
+	}
+
+	public void setNatureNeutralCategoryFragments(Set<String> natureNeutralCategoryFragments) {
+		this.natureNeutralCategoryFragments = natureNeutralCategoryFragments;
+	}
+
+	public double getNatureMinMarkedCategoryShare() {
+		return natureMinMarkedCategoryShare;
+	}
+
+	public void setNatureMinMarkedCategoryShare(double natureMinMarkedCategoryShare) {
+		this.natureMinMarkedCategoryShare = natureMinMarkedCategoryShare;
+	}
+
 	public Set<String> getGenerationExcludedFromAttributesMatching() {
 		return generationExcludedFromAttributesMatching;
 	}
@@ -1096,6 +1166,14 @@ public class VerticalConfig {
 
 	public void setGuides(List<String> guides) {
 		this.guides = guides;
+	}
+
+	public List<EprelModelAliasTable> getEprelModelAliases() {
+		return eprelModelAliases;
+	}
+
+	public void setEprelModelAliases(List<EprelModelAliasTable> eprelModelAliases) {
+		this.eprelModelAliases = eprelModelAliases == null ? new ArrayList<>() : eprelModelAliases;
 	}
 
 	public NudgeToolConfig getNudgeToolConfig() {
@@ -1245,7 +1323,6 @@ public class VerticalConfig {
 	public static class WeightParserConfig {
 		private Double minKg;
 		private Double maxKg;
-		private String defaultUnit;
 
 		public Double getMinKg() {
 			return minKg;
@@ -1261,14 +1338,6 @@ public class VerticalConfig {
 
 		public void setMaxKg(Double maxKg) {
 			this.maxKg = maxKg;
-		}
-
-		public String getDefaultUnit() {
-			return defaultUnit;
-		}
-
-		public void setDefaultUnit(String defaultUnit) {
-			this.defaultUnit = defaultUnit;
 		}
 	}
 

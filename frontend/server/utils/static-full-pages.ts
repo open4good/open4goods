@@ -29,12 +29,14 @@ const STATIC_FULL_PAGES: Record<string, StaticFullPageEntry> = {
     html: {
       fr: `<h2>1. Présentation du site et de l’éditeur</h2>
 <p><strong>Nom du site :</strong> <a href="https://nudger.fr">https://nudger.fr</a><br>
-<strong>Activité :</strong> Comparateur écologique (B2C), en cours d’immatriculation.</p>
+<strong>Activité :</strong> Comparateur de prix et d’Impact Score (B2C).</p>
 <p><strong>Éditeur (ci-après « Nudger ») :</strong><br>
-Goulven FURET<br>
+Goulven FURET, entrepreneur individuel (micro-entreprise), exploitant le Site sous le nom « Nudger »<br>
 Adresse : 8 Venelle de Keralloche, 29200 Brest, France<br>
-Statut : Activité en cours d’immatriculation (micro-entrepreneur / SAS à venir)<br>
-Responsable de la publication : Goulven FURET (contact : goulven.furet(at)gmail.com)</p>
+SIRET : 945 307 593 00018 – Code APE : 6202A<br>
+TVA : franchise en base, TVA non applicable (art. 293 B du CGI)<br>
+Contact : <a href="mailto:goulven@nudger.fr">goulven@nudger.fr</a><br>
+Responsable de la publication : Goulven FURET</p>
 <p><strong>Hébergement :</strong><br>
 Hetzner Online GmbH,<br>
 Stuttgarter St. 1<br>
@@ -42,18 +44,18 @@ Stuttgarter St. 1<br>
 <h2>2. Objet et acceptation des présentes conditions</h2>
 <p>Le présent document a pour objet de définir les conditions générales d’utilisation (CGU) du site <a href="https://nudger.fr">https://nudger.fr</a> (ci-après « le Site »). Toute connexion et navigation sur le Site implique l’acceptation pleine et entière des présentes CGU.</p>
 <p>L’éditeur (Nudger) se réserve le droit de modifier à tout moment ces CGU. Les utilisateurs sont invités à les consulter régulièrement.</p>
-<h2>3. Services fournis - Comparateur écologique</h2>
+<h2>3. Services fournis - Comparateur de prix et d’Impact Score</h2>
 <p>Nudger propose un comparateur de produits permettant :</p>
 <ul>
 <li>La comparaison des prix auprès de divers marchands (B2C).</li>
-<li>L’affichage d’un <strong>Impact Score</strong> ou « éco-score » indicatif, concernant l’empreinte environnementale potentielle d’un produit.</li>
+<li>L’affichage d’un <strong>Impact Score</strong> indicatif, concernant l’empreinte environnementale potentielle d’un produit.</li>
 </ul>
 <h3>Avertissement sur l’Impact Score</h3>
 <p>L’Impact Score fourni par Nudger est purement indicatif. Il peut comporter des imprécisions ou des erreurs, liées à la qualité ou à la disponibilité des données (ex. informations partielles sur la chaîne de production, codes-barres, etc.). L’utilisateur reconnaît que l’Impact Score ne peut se substituer à une analyse complète du produit, et que Nudger n’est pas responsable de l’exactitude ou de l’exhaustivité de ces informations.</p>
 <h3>Gratuité du service</h3>
 <p>Le Site est entièrement gratuit pour l’utilisateur. Nudger ne vend pas de produits directement et n’est pas responsable des éventuelles variations de prix pratiquées par des marchands tiers.</p>
 <h3>Liens d’affiliation</h3>
-<p>Les liens vers les marchands sont des liens d’affiliation : Nudger peut percevoir une commission sur les achats effectués après un clic, sans surcoût pour l’utilisateur. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>
+<p>Les liens vers les marchands sont des liens d’affiliation : Nudger peut percevoir une commission sur les achats effectués après un clic, sans surcoût pour l’utilisateur. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises. Cette rémunération n’influence aucun classement : les critères de classement des produits et des offres, et les conditions de référencement des marchands, sont décrits dans la rubrique <a href="https://nudger.fr/classement-et-referencement">Classement et référencement</a>.</p>
 <h2>4. Contenu UGC et commentaires</h2>
 <p>Les utilisateurs ont la possibilité de poster des commentaires ou du contenu (UGC). En contrepartie, Nudger se réserve le droit de modérer ou de supprimer tout contenu sans avertissement préalable, notamment en cas de contenu illicite, diffamatoire, injurieux, ou contraire aux présentes CGU.</p>
 <h2>5. Limitation de responsabilité</h2>
@@ -85,7 +87,6 @@ Nudger peut être amené à interrompre l’accès au Site pour effectuer des op
 <ul>
 <li><a href="https://nudger.fr/contact">Contact</a></li>
 <li><a href="https://nudger.fr/politique-confidentialite">Politique de Confidentialité</a></li>
-<li><a href="https://nudger.fr/compensation-ecologique">Contribution écologique</a></li>
 </ul>
 <hr>
 <p><em>« Dernière mise à jour : 29 octobre 2026 »</em></p>`,
@@ -103,7 +104,8 @@ Nudger peut être amené à interrompre l’accès au Site pour effectuer des op
 <p><strong>Responsable du traitement :</strong><br>
 <a href="https://www.linkedin.com/in/goulven-furet-b448b582/">Goulven FURET</a><br>
 8 Venelle de Keralloche, 29200 Brest, France<br>
-« Activité en cours d’immatriculation »</p>
+SIRET : 945 307 593 00018<br>
+Contact : <a href="mailto:goulven@nudger.fr">goulven@nudger.fr</a></p>
 <p><strong>Délégué à la Protection des Données (DPO) :</strong><br>
 Goulven FURET (contact identique)</p>
 <h2>3. Données collectées et finalités</h2>

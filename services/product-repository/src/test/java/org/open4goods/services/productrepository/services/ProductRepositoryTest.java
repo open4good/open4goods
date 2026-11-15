@@ -360,6 +360,32 @@ class ProductRepositoryTest
     }
 
     @Test
+    void categoryMatchScrollOutlivesASlowIndexationQueue()
+    {
+        // GOU-2274: the caller queues pages of products between two scroll requests; the 1 minute default could expire
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(it);
+        org.open4goods.model.vertical.VerticalConfig vertical = new org.open4goods.model.vertical.VerticalConfig();
+        vertical.setId("washing-machine");
+        vertical.setMatchingCategories(Map.of("fnac.com", Set.of("LAVE-LINGE")));
+
+        repository.getProductsMatchingCategoriesOrVerticalId(vertical).close();
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
+                ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        assertThat(captor.getValue().getScrollTime()).isEqualTo(java.time.Duration.ofMinutes(5))
+                .isEqualTo(ProductRepository.CATEGORY_MATCH_SCROLL_KEEP_ALIVE);
+        assertThat(captor.getValue().getPageable().getPageSize()).isEqualTo(ProductRepository.CATEGORY_MATCH_SCROLL_PAGE_SIZE)
+                .isGreaterThan(10)
+                .isLessThanOrEqualTo(ProductRepository.FULL_PRODUCT_PAGE_SIZE);
+        // Closing the stream releases the scroll
+        verify(it).close();
+    }
+
+    @Test
     void applyNewerOfferStatesReadsOnlyOfferFieldsChangedSinceTheOldestProduct()
     {
         // GOU-1709: one index read per batch page, restricted to its ids and to documents changed since
@@ -415,7 +441,7 @@ class ProductRepositoryTest
                 eq(Product.class), any(org.springframework.data.elasticsearch.core.mapping.IndexCoordinates.class)))
                 .thenReturn(iterator);
 
-        repository.exportVerticalForSitemap("tv").close();
+        repository.exportVerticalForSitemap("tv", 1).close();
 
         ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> captor =
                 ArgumentCaptor.forClass(org.springframework.data.elasticsearch.core.query.Query.class);
@@ -436,6 +462,27 @@ class ProductRepositoryTest
         assertThat(recentOffer.must()).hasSize(2);
         assertThat(recentOffer.must().get(0).range().date().field()).isEqualTo("lastChange");
         assertThat(recentOffer.must().get(1).range().number().field()).isEqualTo("offersCount");
-        assertThat(or.should().get(1).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        // score present AND of the current methodology: version 1, or no recorded version (legacy score)
+        BoolQuery currentScore = or.should().get(1).bool();
+        assertThat(currentScore.must()).hasSize(2);
+        assertThat(currentScore.must().get(0).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        BoolQuery v1 = currentScore.must().get(1).bool();
+        assertThat(v1.minimumShouldMatch()).isEqualTo("1");
+        assertThat(v1.should()).hasSize(2);
+        assertThat(v1.should().get(0).term().field()).isEqualTo("impactScoreMeta.methodologyVersion");
+        assertThat(v1.should().get(0).term().value().longValue()).isEqualTo(1L);
+        assertThat(v1.should().get(1).bool().mustNot().get(0).exists().field())
+                .isEqualTo("impactScoreMeta.methodologyVersion");
+    }
+
+    @Test
+    void currentImpactScoreQueryKeepsOnlyScoresOfTheVersionFromV2()
+    {
+        // GOU-1882: in V2 a legacy score (no recorded version) or a V1 score does not keep a product in the sitemap
+        BoolQuery currentScore = ProductRepository.currentImpactScoreQuery(2).bool();
+        assertThat(currentScore.must()).hasSize(2);
+        assertThat(currentScore.must().get(0).exists().field()).isEqualTo("scores.ECOSCORE.value");
+        assertThat(currentScore.must().get(1).term().field()).isEqualTo("impactScoreMeta.methodologyVersion");
+        assertThat(currentScore.must().get(1).term().value().longValue()).isEqualTo(2L);
     }
 }

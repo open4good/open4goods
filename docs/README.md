@@ -29,37 +29,19 @@ owned, and linked from this index when they become durable project knowledge.
 - [Products index mapping at startup, api only (GOU-1835)](operations/product-index-mapping.md)
 - [Recreated products and lost verticals, count and repair (GOU-1700)](operations/product-recreation-recovery.md)
 - [Beta deployment workflows (auto deploy on merge, BETA_DEPLOY_FREEZE)](operations/ci-workflows-status.md)
+- [Open data generation in the api: schedule, manual run, monitoring (GOU-2248)](operations/opendata-generation.md)
 - [ADR index](adr/README.md)
 - [Icecat reference data](architecture/icecat-reference-data.md)
+- [Open data: generation, manifests, distribution (GOU-2237)](architecture/opendata.md)
 - [Amazon PA-API completion](architecture/amazon-paapi-completion.md)
 - [ETIM integration and cross-referential design](architecture/etim_integration_design.md)
 - [Outbound affiliation clicks](architecture/affiliation-clicks.md)
+- [Ranking and listing disclosure, art. D111-6 C. conso (GOU-1995)](business/ranking-and-listing-disclosure.md)
+- [External GTIN/ISBN datasources: integration plans](datasources/integration/README.md)
 - [ImpactScore V2 design (versioned methodology, coverage, switch, simulation)](impactscore/v2-design.md)
+- [ImpactScore V1/V2 simulation of 2026-11-13 (GOU-1887)](impactscore/v2-simulation-2026-11-13.md)
 - [ADR 0001: EPREL matching logic scoring](adr/0001-eprel-matching-logic-scoring.md)
 - [ADR 0002: Product model identity confidence](adr/0002-product-model-identity-confidence.md)
 - [ADR 0003: EPREL dry-run and logging redirection](adr/0003-eprel-dry-run-and-logging-redirection.md)
 - [ADR 0004: Aggregation service design](adr/0004-aggregation-service-design.md)
-- [ADR 0005: Product Data API B2B v1](adr/0005-product-data-api-b2b-v1.md)
-
-## Product Data API (B2B)
-
-- [Corpus map & reading order](b2b/README.md) - start here
-- [Canonical decisions](b2b/00-canonical-decisions.md) - source of truth
-- [Master implementation prompt](b2b/implementation/master-prompt.md)
-- [Phased plan](b2b/implementation/plan.md) & [living task state](b2b/implementation/tasks.md)
-- [Facet specs](b2b/facets/README.md) - lifecycle, template, authoring prompt,
-  [price facet](b2b/facets/product-price.md)
-- [Facet catalogue & credit tiers](b2b/product/facet-catalog.md)
-- [Data coverage study](b2b/business/data-coverage.md)
-- [Competitive study](b2b/business/competition.md)
-- [Frontend UX specification](b2b/frontend/ui-spec.md)
-- [Frontend build & OpenAPI codegen](b2b/frontend/build.md)
-- Architecture: [data model](architecture/product-data-api-data-model.md),
-  [redis contract](architecture/product-data-api-redis-contract.md),
-  [billing ledger](architecture/product-data-api-billing-ledger.md),
-  [API contract](architecture/product-data-api-contract.md),
-  [errors](architecture/product-data-api-errors.md),
-  [auth](architecture/product-data-api-auth.md),
-  [stripe](architecture/product-data-api-stripe-contract.md),
-  [ops](architecture/product-data-api-ops.md)
-- [Local runbook](operations/product-data-api-local-runbook.md)
+- [ADR 0005: Product Data API B2B v1 (withdrawn)](adr/0005-product-data-api-b2b-v1.md)

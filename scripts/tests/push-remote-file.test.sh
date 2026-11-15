@@ -215,7 +215,7 @@ expect_fail "render: missing environment (old interface)" render check api
 ########################################
 # render-service-secrets.sh: nothing set
 ########################################
-for service in api ui front-api admin b2b-api frontend; do
+for service in api ui front-api admin frontend; do
   for env_name in beta prod; do
     run render --if-present check "${env_name}" "${service}"
     if [[ ${status} -eq 0 ]] && [[ "${out}" == *"::warning::"*"is not set in the ${env_name} GitHub Environment: not rendered for ${service}"* ]] \
@@ -227,7 +227,7 @@ for service in api ui front-api admin b2b-api frontend; do
     fi
   done
 done
-for service in api ui admin b2b-api; do
+for service in api ui admin; do
   run render check prod "${service}"
   [[ ${status} -eq 0 ]] && pass "render: check prod ${service} passes with every optional secret missing" \
     || ko "render check prod ${service} (status ${status}): ${out}"
@@ -441,6 +441,33 @@ else
   ko "render api SSO and monitor tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
 fi
 
+# api: R2 account and token of the open data publication (GOU-2289).
+for half in "R2_ACCESS_KEY_ID=r2-access-key-id" "R2_SECRET_ACCESS_KEY=${TREE_VALUE}"; do
+  reset_host
+  run render_with "${half}" -- --if-present apply prod api
+  if [[ ${status} -ne 0 ]] \
+    && [[ "${out}" == *"R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY go together for api"* ]] \
+    && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && [[ ! -s "${FAKE_SSH_LOG}" ]] && [[ ! -e "${FAKE_ROOT}/etc" ]]; then
+    pass "render: api refuses half of the R2 token (${half%%=*}) before anything is written"
+  else
+    ko "render api half R2 token ${half%%=*} (status ${status}): ${out}"
+  fi
+done
+reset_host
+run render_with R2_ACCOUNT_ID=0123456789abcdef0123456789abcdef R2_ACCESS_KEY_ID=r2-access-key-id \
+  R2_SECRET_ACCESS_KEY="${TREE_VALUE}" -- --if-present apply prod api
+tree="${FAKE_ROOT}/etc/open4goods/secrets/api"
+if [[ ${status} -eq 0 ]] \
+  && cmp -s "${tree}/open-data-config.publication.account-id" <(printf '%s' 0123456789abcdef0123456789abcdef) \
+  && cmp -s "${tree}/open-data-config.publication.access-key-id" <(printf '%s' r2-access-key-id) \
+  && cmp -s "${tree}/open-data-config.publication.secret-access-key" <(printf '%s' "${TREE_VALUE}") \
+  && [[ "$(stat -c '%a' "${tree}/open-data-config.publication.secret-access-key")" == 600 ]] \
+  && [[ "${out}" != *"${TREE_SENTINEL}"* ]] && ! grep -q "${TREE_SENTINEL}" "${GITHUB_STEP_SUMMARY}" "${FAKE_SSH_LOG}"; then
+  pass "render: api receives the R2 account and token in its tree"
+else
+  ko "render api R2 tree (status ${status}): ${out} / $(ls -la "${tree}" 2>&1)"
+fi
+
 ########################################
 # render-service-secrets.sh: frontend env lines and coupled secrets
 ########################################
@@ -519,7 +546,7 @@ import yaml
 render, workflows = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
 table, source = {}, {}
 for service, secret, need in re.findall(
-        r"(?m)^(api|ui|front-api|admin|b2b-api|frontend|infra) ([A-Z0-9_]+) \S+ \S+ (\S+)$", render.read_text()):
+        r"(?m)^(api|ui|front-api|admin|frontend|infra) ([A-Z0-9_]+) \S+ \S+ (\S+)$", render.read_text()):
     # `source` rows are only rendered with --source (infraSecrets.yml), which renders nothing else.
     (source if need == "source" else table).setdefault(service, set()).add(secret)
     table.setdefault(service, set())
@@ -544,7 +571,9 @@ for workflow in sorted(workflows.glob("*.yml")):
                     value = str(env.get(secret, ""))
                     # serviceSecrets.yml maps a secret only for the services listed in its contains(...).
                     listed = re.search(r"contains\(fromJSON\('(\[[^']*\])'\), inputs\.service\)", value)
-                    if f"secrets.{secret}" not in value or (listed and service not in json.loads(listed.group(1))):
+                    # A non-secret setting (IMPACTSCORE_METHODOLOGY_OVERRIDES) is a GitHub variable, vars.<NAME>.
+                    mapped = f"secrets.{secret}" in value or f"vars.{secret}" in value
+                    if not mapped or (listed and service not in json.loads(listed.group(1))):
                         errors.append(f"{workflow.name} / {step.get('name')}: {secret} ({service}) not mapped")
 print("\n".join(errors) or f"{steps} steps checked")
 sys.exit(1 if errors or steps < 6 else 0)

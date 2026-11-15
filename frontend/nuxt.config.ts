@@ -338,6 +338,8 @@ export default defineNuxtConfig({
     '/offline': { prerender: true },
     '/ecoscore': { redirect: { to: '/impact-score', statusCode: 301 } },
     '/eco-score': { redirect: { to: '/impact-score', statusCode: 301 } },
+    // Page withdrawn: the donation claim is not substantiated (GOU-1993)
+    '/compensation-ecologique': { redirect: { to: '/impact-score', statusCode: 301 } },
     // The 3 remaining XWiki-backed /blog/* full pages: absent from the XWiki export archive and
     // live XWiki access has been down since 2026-09-09 (incident_xwiki_blog_locked_down_sept2026)
     // -- no recoverable source, dropped rather than left broken (xwiki-editorial-content-to-nuxt-content AC2).
@@ -348,6 +350,13 @@ export default defineNuxtConfig({
     // in prod): redirect to the current Markdown post's slug (GOU-386).
     '/blog/v-0-0-1---premiere-iteration': {
       redirect: { to: '/blog/v-0-0-1-premiere-iteration', statusCode: 301 },
+    },
+    // Articles depublished for unsubstantiated environmental claims (compensation, GOU-1985)
+    '/blog/comment-compenser-l-impact-environnemental-de-ses-achats-effectues-en-ligne': {
+      redirect: { to: '/blog/comparer-l-impact-environnemental-des-produits', statusCode: 301 },
+    },
+    '/blog/qu-est-ce-que-la-contribution-ecologique': {
+      redirect: { to: '/blog/comparer-l-impact-environnemental-des-produits', statusCode: 301 },
     },
     // Fix SWR handler error by disabling cache for assistant configs (conflicts with cookie setting)
     '/assistant-configs/**': { cache: false },
@@ -529,6 +538,15 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
     publicAssets: [{ dir: 'app/public' }],
+    // Cached handlers live in the `cache` mount, which is an unbounded Map in
+    // memory by default: bound it so caches can never fill the heap (GOU-2093).
+    storage: {
+      cache: {
+        driver: 'lru-cache',
+        max: 1000,
+        maxSize: 128 * 1024 * 1024,
+      },
+    },
     experimental: {
       wasm: true,
     },

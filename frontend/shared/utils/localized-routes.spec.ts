@@ -23,6 +23,12 @@ describe('localized-routes utilities', () => {
     expect(resolveLocalizedRoutePath('team', 'en-US')).toBe('/team')
     expect(resolveLocalizedRoutePath('releases', 'fr-FR')).toBe('/versions')
     expect(resolveLocalizedRoutePath('releases', 'en-US')).toBe('/releases')
+    expect(resolveLocalizedRoutePath('ranking-and-listing', 'fr-FR')).toBe(
+      '/classement-et-referencement'
+    )
+    expect(resolveLocalizedRoutePath('ranking-and-listing', 'en-US')).toBe(
+      '/ranking-and-listing'
+    )
     expect(resolveLocalizedRoutePath('legal-notice', 'fr-FR')).toBe(
       '/mentions-legales'
     )

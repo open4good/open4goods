@@ -44,6 +44,14 @@ order: 1
 #https://www.culture.gouv.fr/Media/medias-creation-rapide/chiffres-cles-2024_deps_television_fiche.pdf
 averageHoursPerDay: 3.19
 
+# Power attributes (W) used by UsageCostAggregationService to compute USAGE_COST_YEAR
+usagePowerAttribute: "POWER_CONSUMPTION_SDR"
+standbyPowerAttribute: "POWER_CONSUMPTION_STANDBY"
+
+# Filters surfaced in the "Les sous" (money) group
+moneyFilters:
+  - "USAGE_COST_YEAR"
+
 # The associated google taxonomyID. (Ex : FR - https://ww.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404
@@ -245,7 +253,7 @@ i18n:
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Téléviseurs"
     # Text displaid as title for the vertical
-    verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires, nos téléviseurs ne sont malheureusement pas neutres pour l'environnement. Heureusement, Nudger est là pour vous informer et vous aider à choisir le téléviseur le plus écologique et le plus adapté à votre besoin."
+    verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires, nos téléviseurs ne sont malheureusement pas neutres pour l'environnement. Heureusement, Nudger est là pour vous informer et vous aider à comparer les téléviseurs : le mieux classé à l'Impact Score parmi ceux qui répondent à votre besoin."
     # The image used as a logo
 
     # A mapping beetween custom page names behind this vertical and wiki pages
@@ -288,7 +296,7 @@ i18n:
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "TVs"
     # Text displaid as title for the vertical
-    verticalHomeDescription: "Welcome to our Television section. Televisions have become essential, but they have an environmental cost. Nudger is here to help you choose the most eco-friendly TV that fits your needs."
+    verticalHomeDescription: "Welcome to our Television section. Televisions have become essential, but they have an environmental cost. Nudger is here to help you compare them: the best ranked on the Impact Score among those that fit your needs."
     # The image used as a logo
 
 nudgeToolConfig:
@@ -321,7 +329,7 @@ nudgeToolConfig:
     ################
     # Impact Score
     ################
-    - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
+    - id: "impact_high" # Unique identifier for the subset - Worst 33% (see Impact Score ranking)
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.ranking"
@@ -329,17 +337,17 @@ nudgeToolConfig:
           toPercent: 33
       image: "example-image.png"
       url:
-        en: "high-impact"
-        fr: "fort-impact"
+        en: "lower-ranked"
+        fr: "moins-bien-classes"
       caption:
-        en: "High "
-        fr: "Élevé "
+        en: "Lower "
+        fr: "Moins bien "
       title:
-        en: "High Impact"
-        fr: "Impact Élevé"
+        en: "Lower ranked"
+        fr: "Moins bien classés"
       description:
-        en: "Products with a high environmental impact"
-        fr: "Produits ayant un fort impact environnemental"
+        en: "Products in the bottom third of their category on the Impact Score"
+        fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
     - id: "impact_medium" # Middle 34%
       group: "impactscore"
@@ -349,19 +357,19 @@ nudgeToolConfig:
           toPercent: 67
       image: "example-image.png"
       url:
-        en: "medium-impact"
-        fr: "impact-moyen"
+        en: "mid-ranked"
+        fr: "milieu-de-classement"
       caption:
-        en: "Medium"
-        fr: "Moyen "
+        en: "Mid "
+        fr: "Milieu "
       title:
-        en: "Medium Impact"
-        fr: "Impact Moyen"
+        en: "Mid-ranked"
+        fr: "Milieu de classement"
       description:
-        en: "Products with a medium environmental impact"
-        fr: "Produits ayant un impact environnemental moyen"
+        en: "Products in the middle third of their category on the Impact Score"
+        fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
-    - id: "impact_low" # Best 33% (low environmental impact)
+    - id: "impact_low" # Best 33% (see Impact Score ranking)
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.ranking"
@@ -369,17 +377,17 @@ nudgeToolConfig:
           toPercent: 100
       image: "example-image.png"
       url:
-        en: "low-impact"
-        fr: "faible-impact"
+        en: "best-ranked"
+        fr: "mieux-classes"
       caption:
-        en: "Low "
-        fr: "Faible "
+        en: "Best "
+        fr: "Mieux "
       title:
-        en: "Low Impact"
-        fr: "Impact Faible"
+        en: "Best ranked (top third by Impact Score)"
+        fr: "Mieux classés (premier tiers Impact Score)"
       description:
-        en: "Products with a low environmental impact"
-        fr: "Produits ayant un faible impact environnemental"
+        en: "Products in the top third of their category on the Impact Score"
+        fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
     ################
     # Price
@@ -521,7 +529,7 @@ subsets:
   ################
   # Impact Score
   ################
-  - id: "impact_high" # Unique identifier for the subset - Worst 33% (high environmental impact)
+  - id: "impact_high" # Unique identifier for the subset - Worst 33% (see Impact Score ranking)
     group: "impactscore"
     criterias:
       - field: "scores.ECOSCORE.ranking"
@@ -529,17 +537,17 @@ subsets:
         toPercent: 33
     image: "example-image.png"
     url:
-      en: "high-impact"
-      fr: "fort-impact"
+      en: "lower-ranked"
+      fr: "moins-bien-classes"
     caption:
-      en: "High "
-      fr: "Élevé "
+      en: "Lower "
+      fr: "Moins bien "
     title:
-      en: "High Impact"
-      fr: "Impact Élevé"
+      en: "Lower ranked"
+      fr: "Moins bien classés"
     description:
-      en: "Products with a high environmental impact"
-      fr: "Produits ayant un fort impact environnemental"
+      en: "Products in the bottom third of their category on the Impact Score"
+      fr: "Produits du dernier tiers de leur catégorie à l'Impact Score"
 
   - id: "impact_medium" # Middle 34%
     group: "impactscore"
@@ -549,19 +557,19 @@ subsets:
         toPercent: 67
     image: "example-image.png"
     url:
-      en: "medium-impact"
-      fr: "impact-moyen"
+      en: "mid-ranked"
+      fr: "milieu-de-classement"
     caption:
-      en: "Medium"
-      fr: "Moyen "
+      en: "Mid "
+      fr: "Milieu "
     title:
-      en: "Medium Impact"
-      fr: "Impact Moyen"
+      en: "Mid-ranked"
+      fr: "Milieu de classement"
     description:
-      en: "Products with a medium environmental impact"
-      fr: "Produits ayant un impact environnemental moyen"
+      en: "Products in the middle third of their category on the Impact Score"
+      fr: "Produits du tiers intermédiaire de leur catégorie à l'Impact Score"
 
-  - id: "impact_low" # Best 33% (low environmental impact)
+  - id: "impact_low" # Best 33% (see Impact Score ranking)
     group: "impactscore"
     criterias:
       - field: "scores.ECOSCORE.ranking"
@@ -569,17 +577,17 @@ subsets:
         toPercent: 100
     image: "example-image.png"
     url:
-      en: "low-impact"
-      fr: "faible-impact"
+      en: "best-ranked"
+      fr: "mieux-classes"
     caption:
-      en: "Low "
-      fr: "Faible "
+      en: "Best "
+      fr: "Mieux "
     title:
-      en: "Low Impact"
-      fr: "Impact Faible"
+      en: "Best ranked (top third by Impact Score)"
+      fr: "Mieux classés (premier tiers Impact Score)"
     description:
-      en: "Products with a low environmental impact"
-      fr: "Produits ayant un faible impact environnemental"
+      en: "Products in the top third of their category on the Impact Score"
+      fr: "Produits du premier tiers de leur catégorie à l'Impact Score"
 
   ################
   # Price
@@ -34715,6 +34723,8 @@ attributesConfig:
     - key: "MINAVAILABILITYSPAREPARTSYEARS"
     - key: "MINGUARANTEEDSUPPORTYEARS"
     - key: "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+    - key: "DURABILITY_INDEX"
+    - key: "REPAIRABILITY_OR_DURABILITY_INDEX"
     - key: "DIAGONALE_POUCES"
     - key: "DISPLAY_TECHNOLOGY"
     - key: "HDMI_PORTS_QUANTITY"
@@ -34724,6 +34734,7 @@ attributesConfig:
     - key: "POWER_CONSUMPTION_STANDBY"
     - key: "POWER_CONSUMPTION_STANDBY_NETWORKD"
     - key: "POWER_CONSUMPTION_SDR"
+    - key: "POWER_DENSITY_SDR"
     - key: "POWER_CONSUMPTION_HDR"
     - key: "CLASSE_ENERGY_HDR"
     - key: "CLASSE_ENERGY_SDR"
@@ -34791,19 +34802,52 @@ matchingCategories:
   rakuten.com-csv.yml:
     - "HIFI | TELEVISION"
   Fnac FR:
+    - "9 | TELEVISIONS | TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
+    - "9 | TELEVISIONS | TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
     - "TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS"
   Boulanger - Référentiel produits:
     - "TV - IMAGE - SON | TELEVISEUR"
     - "TV - IMAGE - SON | TELEVISEUR | TV LED | TV LED"
     - "TV - IMAGE - SON | TELEVISEUR | TV QLED | TV QLED"
   ManoMano FR:
+    - "ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV LED"
+    - "ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV QLED"
+    - "ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV OLED"
     - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV LED | TV LED"
     - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV AMBILIGHT | TV AMBILIGHT"
     - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV QLED | TV QLED"
     - "ELECTROMENAGER | ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV LED | TV LED"
   E.Leclerc FR:
+    - "HIGH TECH | HIGH-TECH > MARQUES HIGH-TECH > BOUTIQUE SAMSUNG HIGH-TECH > BOUTIQUE SAMSUNG TV & AUDIO > SMART TV SAMSUNG | MARQUES HIGH-TECH | BOUTIQUE SAMSUNG HIGH-TECH"
     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV PHILIPS | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
     - "HIGH TECH | HIGH-TECH > MARQUES HIGH-TECH > SAMSUNG HIGH-TECH > SAMSUNG TV & AUDIO > SMART TV SAMSUNG | MARQUES HIGH-TECH | SAMSUNG HIGH-TECH"
     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV LG | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
     - "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>TV TCL | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV"
+  # Added GOU-2031: the keys above for these merchants used legacy datasource codes (darty.com, cdiscount.com...),
+  # while the feeds now report the names below, so recent televisions (2026 models) stayed without vertical.
+  Darty FR:
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TELEVISEUR | TV LED"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TELEVISEUR | TV OLED"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED"
+    - "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED"
+  Cdiscount FR:
+    - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED"
+    - "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD | TELEVISEUR | TELEVISEUR LCD"
+  Villatech:
+    - "TV - IMAGE & SON/TELEVISEUR/TV LED"
+    - "TV - IMAGE & SON/TELEVISEUR/TV OLED"
+  Carrefour:
+    - "IMAGE ET SON > TELEVISEURS"
+  RueDuCommerce FR:
+    - "TV"
+  MDA Electromenager:
+    - "TV LED"
+    - "TV OLED"
+  Référentiel produits Electro Depot:
+    - "ELECTRO DEPOT | TELEVISION | TV DE 147 A 178 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV DE 108 A 146 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV < 108 CM"
+    - "ELECTRO DEPOT | TELEVISION | TV DE PLUS DE 179 CM"

@@ -73,6 +73,17 @@ Any code exposing offers, prices or `/contrib/` links must read them through
 `OfferFreshnessService`, never `Product.bestPrice()`, `getOffersCount()` or
 `getPrice().getOffers()` directly (see README "Offer freshness").
 
+Google CSS preparation is configured via `front.css.*` mapped by `CssProperties` (disabled by default; dry run
+by default; the Google client exists only with `front.css.sync.enabled=true` (GOU-2081, README "Google CSS
+synchronisation"), never in CI/beta: use `SimulatedCssProductsClient`). The eligibility reads offers
+through `OfferFreshnessService` and merchant domains through `MerchantDomainsService.domainResolver()` (see README
+"Google CSS dry run"); never send `rating`/`reviewCount`.
+
+Global search relevance is configured via `front.global-search.*` mapped by
+`GlobalSearchProperties` (accessory terms, ranking weights, long tail filter).
+It only applies to `SearchService.globalSearch`; never route `search()` through
+`GlobalSearchRelevance` (see README "Global search relevance").
+
 ### Local profile (offline startup)
 
 `application-local.yml` holds the offline defaults for the `local` profile (the module's
