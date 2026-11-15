@@ -80,11 +80,14 @@ public class OpenDataConfig {
     /**
      * Public object names of the zips (R2 keys, {@code data.nudger.fr/{name}}), written in the manifests.
      */
+<<<<<<< HEAD
     /**
      * Public site the product URLs of the impact datasets point to (canonical path appended).
      */
     private String siteBaseUrl = "https://nudger.fr";
 
+=======
+>>>>>>> origin/main
     private String gtinPublicFilename = "gtin-open-data.zip";
     private String isbnPublicFilename = "isbn-open-data.zip";
 
@@ -374,6 +377,7 @@ public class OpenDataConfig {
         return openDataDirectory().resolve(manifestFilename).toFile();
     }
 
+<<<<<<< HEAD
     /**
      * @param vertical vertical identifier
      * @return published zip of the impact dataset of this vertical
@@ -414,6 +418,8 @@ public class OpenDataConfig {
         this.siteBaseUrl = siteBaseUrl;
     }
 
+=======
+>>>>>>> origin/main
     public File gtinManifestFile() {
         return openDataDirectory().resolve(gtinManifestFilename).toFile();
     }

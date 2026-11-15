@@ -1,12 +1,14 @@
 package org.open4goods.model.vertical;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
@@ -14,6 +16,16 @@ import org.open4goods.model.attribute.SourcedAttribute;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;
 
+/**
+ * Attribute configurations of a vertical, with the lookup indexes derived from them.
+ * <p>
+ * A vertical config is shared by the fragment worker and the completion threads. The indexes (by key, by synonym,
+ * by Icecat feature id) are built once from {@link #getConfigs()}, on the first lookup and under a lock, then
+ * published as unmodifiable maps in a single volatile write: a reader sees either no index or a complete one.
+ * {@link #setConfigs(List)} drops the index, so the next lookup rebuilds it from the new list. Changing the list
+ * returned by {@link #getConfigs()}, or an {@link AttributeConfig} in it, after the first lookup is not reflected:
+ * replace the list with the setter instead.
+ */
 public class AttributesConfig {
 
 
@@ -37,27 +49,19 @@ public class AttributesConfig {
 	private Set<String> exclusions = new HashSet<>();
 
 
-
-	// Internal map
+	/**
+	 * Lookup indexes derived from {@link #configs}, built on the first lookup. Ignored by Jackson: the YAML mapper
+	 * reads private fields, and a copy made through YAML must rebuild its own index.
+	 */
 	@JsonIgnore
-	private Map<String, AttributeConfig> hashedAttributesByKey;
-
-
-	// Local cache
-	private Map<String, Map<String, String>> cacheHashedSynonyms;
-
-	private Map<String, String> valueKeyMap = new HashMap<String, String>();
+	private volatile Index index;
 
 	/**
-	 * icecat Attributes config by feature groups
+	 * Guards the build of {@link #index} and its reset by {@link #setConfigs(List)}. A lock rather than
+	 * {@code synchronized}, so that virtual threads waiting for the build do not pin their carrier.
 	 */
-	private Map<Integer, AttributeConfig> byIcecatFeatureGroup = new HashMap<Integer, AttributeConfig>();
-
-
-	/**
-	 * eprel attributes  config by feature name
-	 */
-	private Map<String, AttributeConfig> byEprelFeatureGroup = new HashMap<String, AttributeConfig>();
+	@JsonIgnore
+	private final ReentrantLock indexLock = new ReentrantLock();
 
 
 	public AttributesConfig(List<AttributeConfig> configs) {
@@ -76,104 +80,51 @@ public class AttributesConfig {
 	 * @return
 	 */
 	public String getKeyForValue(final String value) {
-
-		if (cacheHashedSynonyms == null) {
-			synonyms();
-		}
-        return valueKeyMap.get(value);
-    }
-
-
-
+		return index().keyByValue().get(value);
+	}
 
 
 	/**
 	 * Get all configs synonyms by provider
 	 *
-	 * @return A map-ProviderKey,Synonym, Translated Key
+	 * @return an unmodifiable map ProviderKey, Synonym, Translated Key
 	 */
-	// Spring cache ineffectiv on internal calls
-//	@Cacheable(cacheNames = CacheConstants.FOREVER_LOCAL_CACHE_NAME)
 	public Map<String, Map<String, String>> synonyms() {
-
-		if (cacheHashedSynonyms == null) {
-
-			final Map<String, Map<String, String>> hashedSynonyms = new HashMap<>();
-
-			if (null != configs) {
-				for (final AttributeConfig ac : configs) {
-
-					for (Integer id : ac.icecatFeatureIds()) {
-						byIcecatFeatureGroup.put(id, ac);
-					}
-
-					for (String id : ac.eprelFeatureNames()) {
-						byEprelFeatureGroup.put(id, ac);
-					}
-
-					for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
-						if (!hashedSynonyms.containsKey(entry.getKey())) {
-							hashedSynonyms.put(entry.getKey(), new HashMap<>());
-
-						}
-						valueKeyMap.put(ac.getKey(), ac.getKey());
-						for (final String val : entry.getValue()) {
-							hashedSynonyms.get(entry.getKey()).put(val, ac.getKey());
-							// Also build a reverse map
-							valueKeyMap.put(val, ac.getKey());
-						}
-					}
-				}
-
-			}
-			cacheHashedSynonyms = hashedSynonyms;
-		}
-		return cacheHashedSynonyms;
+		return index().synonymsByProvider();
 	}
 
 
 	/**
-	 * Resolve a product attribute against icecat taxonomy or faalback on attributes config
-	 * @param attr
-	 * @return
+	 * Resolve a product attribute against the Icecat feature ids, then the synonyms of its datasources, then the
+	 * synonyms shared by all datasources.
+	 *
+	 * @param attr the product attribute to resolve
+	 * @return the matching attribute config, or {@code null}
 	 */
 	public AttributeConfig resolveFromProductAttribute(ProductAttribute attr) {
 
+		final Index idx = index();
 		AttributeConfig ret = null;
 
-
-		// 1 - Checking from epred taxonomy
+		// 1 - Checking from icecat taxonomy
 		for (SourcedAttribute source : attr.getSource()) {
 
 			if (null != source.getIcecatTaxonomyId()) {
-				ret = byIcecatFeatureGroup.get(source.getIcecatTaxonomyId());
+				ret = idx.byIcecatFeatureId().get(source.getIcecatTaxonomyId());
 			}
 
 			if (null != ret) {
 				break;
 			}
 		}
-
-		// 2 - Checking from icecat forced taxonomy
-		for (SourcedAttribute source : attr.getSource()) {
-
-			if (null != source.getIcecatTaxonomyId()) {
-				ret = byIcecatFeatureGroup.get(source.getIcecatTaxonomyId());
-			}
-
-			if (null != ret) {
-				break;
-			}
-		}
-
 
 		// 2 - Looking by specific datasource name
 		if (null == ret) {
 			for (SourcedAttribute source : attr.getSource()) {
-				Map<String, String> specSynonyms = synonyms().get(source.getDataSourcename());
+				Map<String, String> specSynonyms = idx.synonymsByProvider().get(source.getDataSourcename());
 
 				if (null != specSynonyms) {
-					ret =  getAttributeConfigByKey(specSynonyms.get(attr.getName()));
+					ret = idx.byKey().get(specSynonyms.get(attr.getName()));
 					if (null != ret) {
 						break;
 					}
@@ -183,10 +134,10 @@ public class AttributesConfig {
 
 		// 3 - Looking in the all attributes
 		if (null == ret) {
-				Map<String, String> specSynonyms = synonyms().get("all");
+				Map<String, String> specSynonyms = idx.synonymsByProvider().get("all");
 
 				if (null != specSynonyms) {
-					ret =  getAttributeConfigByKey(specSynonyms.get(attr.getName()));
+					ret = idx.byKey().get(specSynonyms.get(attr.getName()));
 				}
 		}
 
@@ -203,9 +154,7 @@ public class AttributesConfig {
 	 * @return
 	 */
 	public AttributeConfig getAttributeConfigByKey(final String key) {
-		singletonHashAttrs();
-		final AttributeConfig ac = hashedAttributesByKey.get(key);
-		return ac;
+		return index().byKey().get(key);
 	}
 
 	/**
@@ -218,23 +167,27 @@ public class AttributesConfig {
 		return getAttributeConfigByKey(indexedName);
 	}
 
-	private void singletonHashAttrs() {
-
-		// Caching if needed
-		if (null == hashedAttributesByKey) {
-			hashedAttributesByKey = new HashMap<>();
-			if (null == configs) {
-				return;
-			}
-			for (final AttributeConfig a : configs) {
-				hashedAttributesByKey.put(a.getKey(), a);
-
+	/**
+	 * Returns the lookup indexes, building them on the first call (double-checked locking on a volatile field).
+	 *
+	 * @return the complete indexes of the current {@link #configs}
+	 */
+	private Index index() {
+		Index current = index;
+		if (current == null) {
+			indexLock.lock();
+			try {
+				current = index;
+				if (current == null) {
+					current = Index.of(configs);
+					index = current;
+				}
+			} finally {
+				indexLock.unlock();
 			}
 		}
+		return current;
 	}
-
-
-
 
 
 	public List<AttributeConfig> getConfigs() {
@@ -242,8 +195,19 @@ public class AttributesConfig {
 	}
 
 
+	/**
+	 * Replaces the attribute configs. The lookup indexes are rebuilt from this list on the next lookup.
+	 *
+	 * @param configs the new attribute configs
+	 */
 	public void setConfigs(List<AttributeConfig> configs) {
-		this.configs = configs;
+		indexLock.lock();
+		try {
+			this.configs = configs;
+			this.index = null;
+		} finally {
+			indexLock.unlock();
+		}
 	}
 
 
@@ -267,15 +231,60 @@ public class AttributesConfig {
 	}
 
 
-	public Map<String, AttributeConfig> getByEprelFeatureGroup() {
-		return byEprelFeatureGroup;
+	/**
+	 * Immutable lookup indexes of the attribute configs. The maps are unmodifiable views of {@link HashMap}s, so a
+	 * {@code null} lookup key returns {@code null} instead of throwing. When two configs share a synonym or an Icecat
+	 * feature id, the last one in the list wins.
+	 *
+	 * @param byKey              attribute configs by key
+	 * @param synonymsByProvider synonym to key, by datasource name ({@code all} for every datasource)
+	 * @param keyByValue         key for each synonym, and for the key of each config that declares synonyms
+	 * @param byIcecatFeatureId  attribute configs by Icecat feature id
+	 */
+	private record Index(Map<String, AttributeConfig> byKey, Map<String, Map<String, String>> synonymsByProvider,
+			Map<String, String> keyByValue, Map<Integer, AttributeConfig> byIcecatFeatureId) {
+
+		private static Index of(List<AttributeConfig> configs) {
+			final Map<String, AttributeConfig> byKey = new HashMap<>();
+			final Map<String, Map<String, String>> synonymsByProvider = new HashMap<>();
+			final Map<String, String> keyByValue = new HashMap<>();
+			final Map<Integer, AttributeConfig> byIcecatFeatureId = new HashMap<>();
+
+			if (null != configs) {
+				for (final AttributeConfig ac : configs) {
+					if (null == ac) {
+						continue;
+					}
+					byKey.put(ac.getKey(), ac);
+
+					for (Integer id : ac.icecatFeatureIds()) {
+						byIcecatFeatureId.put(id, ac);
+					}
+
+					// A config without synonyms must not prevent the lookups by key of the whole vertical.
+					if (null == ac.getSynonyms()) {
+						continue;
+					}
+					for (final Entry<String, Set<String>> entry : ac.getSynonyms().entrySet()) {
+						Map<String, String> providerSynonyms = synonymsByProvider.computeIfAbsent(entry.getKey(),
+								k -> new HashMap<>());
+						keyByValue.put(ac.getKey(), ac.getKey());
+						if (null == entry.getValue()) {
+							continue;
+						}
+						for (final String val : entry.getValue()) {
+							providerSynonyms.put(val, ac.getKey());
+							// Also build a reverse map
+							keyByValue.put(val, ac.getKey());
+						}
+					}
+				}
+			}
+
+			synonymsByProvider.replaceAll((provider, values) -> Collections.unmodifiableMap(values));
+			return new Index(Collections.unmodifiableMap(byKey), Collections.unmodifiableMap(synonymsByProvider),
+					Collections.unmodifiableMap(keyByValue), Collections.unmodifiableMap(byIcecatFeatureId));
+		}
 	}
-
-
-	public void setByEprelFeatureGroup(Map<String, AttributeConfig> byEprelFeatureGroup) {
-		this.byEprelFeatureGroup = byEprelFeatureGroup;
-	}
-
-
 
 }

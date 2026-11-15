@@ -1,12 +1,15 @@
 package org.open4goods.api.services.aggregation.services.realtime;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
@@ -21,6 +24,7 @@ import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ReferentielKey;
+import org.open4goods.model.attribute.SourcableAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
@@ -72,6 +76,23 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 	private static final Pattern NUMERIC_EXTRACT_PATTERN =
 			Pattern.compile("[-+]?\\d+(?:[.,]\\d+)?");
+	/**
+	 * Space-grouped thousands as written in the raw value: a group of 1 to 3 digits, not preceded by a digit or a
+	 * decimal separator, followed by groups of exactly 3 digits, each after a space, a no-break space, a thin space
+	 * or a narrow no-break space. Same rule as {@code WeightParser}.
+	 */
+	private static final Pattern THOUSANDS_PATTERN =
+			Pattern.compile("(?<![\\d.,])\\d{1,3}(?:[ \u00a0\u2009\u202f]\\d{3})+(?!\\d)");
+	private static final Pattern THOUSANDS_SEPARATOR_PATTERN = Pattern.compile("[ \u00a0\u2009\u202f]");
+	/**
+	 * Order in which merged sources are handed to a custom parser: trusted datasources first, as in
+	 * {@link SourcableAttribute#bestValue()}, then by datasource name and value, so that a parser breaking ties by
+	 * iteration order elects the same value whatever the order the raw attributes were visited in.
+	 */
+	private static final Comparator<SourcedAttribute> MERGED_SOURCE_ORDER = Comparator
+			.comparingInt((SourcedAttribute source) -> SourcableAttribute.trustedSourcePriority(source.getDataSourcename()))
+			.thenComparing(SourcedAttribute::getDataSourcename, Comparator.nullsLast(Comparator.naturalOrder()))
+			.thenComparing(SourcedAttribute::getValue, Comparator.nullsLast(Comparator.naturalOrder()));
 	/**
 	 * A power written with its unit: number (space-grouped thousands such as "1 200", comma or point decimal,
 	 * optionally spaced as in "0, 3") followed by W, kW or mW.
@@ -131,8 +152,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String actualBrand = data.brand();
 		Map<String, String> akaBrands = new HashMap<>(data.getAkaBrands());
 
+		// The stored map is cleared, not Product.akaBrands() which is a filtered copy: every alternate
+		// brand is then re-offered below with the current exclusions and aliases.
 		data.getAttributes().getReferentielAttributes().remove(ReferentielKey.BRAND);
-		data.akaBrands().clear();
+		data.getAkaBrands().clear();
 
 		// EPREL is the most trusted brand evidence, so it is offered first and takes the
 		// referentiel slot when present. It is contributed through addBrand like every
@@ -249,6 +272,12 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * Adds all sources from one raw attribute to the indexed attribute and elects a
 	 * stable value from the cleaned source values.
 	 *
+	 * <p>Several raw attributes can resolve to the same indexed key (a merchant
+	 * "POIDS" and an Icecat "WEIGHT"). A custom parser therefore elects over every
+	 * source merged so far under the key, not over the raw attribute alone: the
+	 * elected value does not depend on the order in which raw attributes are
+	 * visited.
+	 *
 	 * @param indexedAttr indexed attribute being built for the product
 	 * @param attr        raw product attribute whose sources should be merged
 	 * @param attrConf    vertical attribute parsing configuration
@@ -273,7 +302,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String bestValue = null;
 		if (attrConf.getParser() != null && !StringUtils.isEmpty(attrConf.getParser().getClazz())) {
 			try {
-				bestValue = attrConf.getParserInstance().parse(attr, attrConf, vConf);
+				bestValue = attrConf.getParserInstance().parse(mergedSources(indexedAttr, attrConf), attrConf, vConf);
 			} catch (Exception e) {
 				dedicatedLogger.error("Error parsing attribute with custom parser", e);
 			}
@@ -309,6 +338,27 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		}
 
 		attr.setValue(bestValue);
+	}
+
+	/**
+	 * Builds the raw attribute handed to a custom parser: every source merged
+	 * under the indexed key, in {@link #MERGED_SOURCE_ORDER}.
+	 *
+	 * <p>The sources are set directly because they may carry different raw names
+	 * ("POIDS", "WEIGHT"), which {@link ProductAttribute#addSourceAttribute}
+	 * rejects.
+	 *
+	 * @param indexedAttr indexed attribute holding the merged sources
+	 * @param attrConf    configuration of the indexed key
+	 * @return a detached attribute named after the key
+	 */
+	private static ProductAttribute mergedSources(IndexedAttribute indexedAttr, AttributeConfig attrConf) {
+		ProductAttribute merged = new ProductAttribute();
+		merged.setName(attrConf.getKey());
+		merged.setSource(indexedAttr.getSource().stream()
+				.sorted(MERGED_SOURCE_ORDER)
+				.collect(Collectors.toCollection(LinkedHashSet::new)));
+		return merged;
 	}
 
 	/**
@@ -578,7 +628,14 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			throw new ValidationException("Null rawValue in attribute " + attrConf.getKey());
 		}
 
-		String string = isWattAttribute(attrConf) ? powerToWatts(rawValue) : rawValue;
+		String string = rawValue;
+		// Thousands are joined on the value as received, before tokens, quote marks or spaces are removed: only a
+		// space that really sits between two digit groups is dropped ("1 400 tr/min" gives 1400, while 55" 140 cm
+		// stays 55).
+		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+			string = joinThousands(string);
+		}
+		string = isWattAttribute(attrConf) ? powerToWatts(string) : string;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
@@ -628,12 +685,10 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			string = string.trim();
 		}
 
-		if (isKnownEmptyAttributeValue(string)) {
-			return "";
-		}
-
 		/////////////////////////////////
 		// FIXED TEXT MAPPING
+		// Applied before the empty-placeholder test, so that a mapping such as "FALSE": "NON" wins over the
+		// placeholder list, which also holds "false", "nc" or "na".
 		/////////////////////////////////
 		if (!attrConf.getMappings().isEmpty() && attrConf.getMappings().containsKey(string)) {
 
@@ -721,6 +776,20 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			watts = watts.movePointLeft(3);
 		}
 		return watts.stripTrailingZeros().toPlainString();
+	}
+
+	/**
+	 * Joins the space-grouped thousands of a raw value: "1 400 tr/min" gives
+	 * "1400 tr/min" and "1 200,5" gives "1200,5". A space that does not sit
+	 * between a group of 1 to 3 digits and a group of exactly 3 digits is kept, so
+	 * "1400 120" and "52 kWh 100 cycles" are unchanged.
+	 *
+	 * @param value raw datasource value
+	 * @return the value without its thousands separators
+	 */
+	static String joinThousands(String value) {
+		return THOUSANDS_PATTERN.matcher(value)
+				.replaceAll(match -> THOUSANDS_SEPARATOR_PATTERN.matcher(match.group()).replaceAll(""));
 	}
 
 	/**

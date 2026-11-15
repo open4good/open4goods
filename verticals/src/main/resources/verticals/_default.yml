@@ -249,8 +249,8 @@ globalTechnicalFilters:
   - "COLOR"
 
 # Filters surfaced in the "Les sous" (money) group, appended after price/offers count.
-moneyFilters:
-  - "USAGE_COST_YEAR"
+# Empty by default: a vertical opts in (e.g. tv with USAGE_COST_YEAR) only when it can compute the value.
+moneyFilters: []
 
 ####################################################################################
 # Aggregation configuration shared by every vertical.

@@ -1,5 +1,6 @@
 package org.open4goods.services.opendata.model;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
@@ -28,4 +29,13 @@ public record ColumnManifest(String name, double fillRate, String unit, String d
     public ColumnManifest withFillRate(double rate) {
         return new ColumnManifest(name, rate, unit, description, source);
     }
+=======
+/**
+ * Column of a dataset in its manifest.
+ *
+ * @param name     CSV header of the column
+ * @param fillRate share of data rows with a non-empty value, from 0 to 1 (0 when the dataset has no row)
+ */
+public record ColumnManifest(String name, double fillRate) {
+>>>>>>> origin/main
 }

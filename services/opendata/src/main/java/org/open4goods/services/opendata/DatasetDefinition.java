@@ -1,4 +1,11 @@
 package org.open4goods.services.opendata;
+<<<<<<< HEAD
+=======
+
+import java.io.File;
+import java.util.Set;
+import java.util.function.Function;
+>>>>>>> origin/main
 
 import java.io.File;
 import java.util.List;
@@ -19,9 +26,13 @@ import org.open4goods.model.product.Product;
  * @param manifestFile   published manifest of this dataset
  * @param publicFilename public object name of the zip ({@code data.nudger.fr/{name}})
  * @param header         CSV header
+<<<<<<< HEAD
  * @param selector       tells whether a product is a row of this dataset (a product may belong to several datasets)
  * @param indexCount     products this dataset should hold in the index, counted at the start of the pass
  * @param columnDocs     unit, label and source of the columns, empty when the dataset does not describe them
+=======
+ * @param barcodeTypes   barcode types routed to this dataset
+>>>>>>> origin/main
  * @param rowMapper      conversion of a product into a CSV row of {@code header.length} cells
  */
 public record DatasetDefinition(
@@ -32,8 +43,12 @@ public record DatasetDefinition(
             File manifestFile,
             String publicFilename,
             String[] header,
+<<<<<<< HEAD
             Predicate<Product> selector,
             LongSupplier indexCount,
             List<ColumnManifest> columnDocs,
+=======
+            Set<BarcodeType> barcodeTypes,
+>>>>>>> origin/main
             Function<Product, String[]> rowMapper) {
     }

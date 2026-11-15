@@ -44,6 +44,14 @@ order: 1
 #https://www.culture.gouv.fr/Media/medias-creation-rapide/chiffres-cles-2024_deps_television_fiche.pdf
 averageHoursPerDay: 3.19
 
+# Power attributes (W) used by UsageCostAggregationService to compute USAGE_COST_YEAR
+usagePowerAttribute: "POWER_CONSUMPTION_SDR"
+standbyPowerAttribute: "POWER_CONSUMPTION_STANDBY"
+
+# Filters surfaced in the "Les sous" (money) group
+moneyFilters:
+  - "USAGE_COST_YEAR"
+
 # The associated google taxonomyID. (Ex : FR - https://ww.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
 googleTaxonomyId: 404

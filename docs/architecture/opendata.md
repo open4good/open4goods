@@ -44,8 +44,11 @@ flowchart LR
 | `isbn.zip` | `isbn-open-data.zip` | `open4goods-isbn-dataset.csv` (UTF-8) |
 | `gtin-manifest.json`, `isbn-manifest.json` | idem | manifest d'un jeu (GOU-2239) |
 | `manifest.json` | `manifest.json` | tous les jeux (contrat du plan GOU-2237) |
+<<<<<<< HEAD
 | `impact-{vertical}.zip` | idem | `impact-{vertical}.csv` : critères bruts d'une verticale (GOU-2250) |
 | `impact-{vertical}-manifest.json` | idem | manifest d'un jeu impact |
+=======
+>>>>>>> origin/main
 
 ## Contrat des manifests (`schemaVersion` 1)
 
@@ -99,6 +102,7 @@ Journal des modifications du schéma (à compléter par la version 2) :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,
   `classification_decitre_2`, `classification_decitre_3` ne figurent plus dans les fichiers. `nb_page` reste dans le
   jeu ISBN, sans changement de nom.
+<<<<<<< HEAD
 
 ## Datasets impact (lot 2, GOU-2250)
 
@@ -117,3 +121,5 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
 - **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
 - Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
 - Non fait : le ZIP global de la spécification GOU-2240 et la date de la source par critère (absente de l'index).
+=======
+>>>>>>> origin/main
