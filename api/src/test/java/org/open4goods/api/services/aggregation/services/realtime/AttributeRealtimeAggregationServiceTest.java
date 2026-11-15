@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,16 +35,28 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.services.serialisation.service.SerialisationService;
+import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 class AttributeRealtimeAggregationServiceTest {
+
+        /** Verticals and attributes as shipped in the {@code verticals} module. */
+        private static VerticalsConfigService realVerticals;
 
         private AttributeRealtimeAggregationService service;
         private VerticalConfig verticalConfig;
         private IcecatFeatureResolver icecatFeatureResolver;
         private BrandService brandService;
+
+        @BeforeAll
+        static void loadRealVerticals() {
+                realVerticals = new VerticalsConfigService(new SerialisationService(),
+                                Mockito.mock(GoogleTaxonomyService.class), new PathMatchingResourcePatternResolver());
+        }
 
         @BeforeEach
         void setUp() {
@@ -593,6 +607,119 @@ class AttributeRealtimeAggregationServiceTest {
 				.contains("HG32EJ690WE");
 		// Canonical must not have changed
 		assertThat(product.model()).isEqualTo("ModelX");
+	}
+
+	/**
+	 * GOU-2276: the numeric extraction stopped at the first space, so "1 400 tr/min" read 1 for SPIN_SPEED.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "1 400 tr/min|1400", "1\u00a0400 tr/min|1400", "1\u202f400 TR/MIN|1400",
+			"1400 tr/min|1400", "1 200,5|1200.5", "12 345 678|12345678", "7,2|7.2", "12 34|12" })
+	void numericValuesKeepSpaceGroupedThousands(String raw, String expected) throws Exception {
+		AttributeConfig spinSpeed = realAttribute("washing-machine", "SPIN_SPEED");
+
+		assertThat(service.parseValue(raw, spinSpeed, verticalConfig)).isEqualTo(expected);
+	}
+
+	@Test
+	void onProductIndexesTheSpinSpeedWithItsThousands() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "SPIN_SPEED")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "VITESSE D'ESSORAGE", "1 400 tr/min", "some-merchant.com");
+
+		service.onProduct(product, verticalConfig);
+
+		IndexedAttribute spinSpeed = product.getAttributes().getIndexed().get("SPIN_SPEED");
+		assertThat(spinSpeed.getValue()).isEqualTo("1400");
+		assertThat(spinSpeed.getNumericValue()).isEqualTo(1400.0);
+	}
+
+	/**
+	 * GOU-2276: the empty-placeholder test ran before the mappings and its list holds "false", so the
+	 * {@code "FALSE": "NON"} mapping of BATTERY_USER_REPLACEABLE never applied and only "OUI" was indexed.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "false|NON", "true|OUI" })
+	void onProductMapsTheEprelBooleanOfBatteryUserReplaceable(String eprelValue, String expected) throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("smartphones", "BATTERY_USER_REPLACEABLE")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "BATTERYUSERREPLACEABLE", eprelValue, EprelCompletionService.EPREL_DS_NAME);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("BATTERY_USER_REPLACEABLE").getValue())
+				.isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2276: with a custom parser, the value of a key fed by two raw attributes was the parse of whichever raw
+	 * attribute the HashMap returned last, instead of an election over all the sources merged under the key.
+	 */
+	@Test
+	void onProductElectsTheSameWeightWhicheverRawAttributeComesFirst() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "WEIGHT")));
+
+		Product merchantFirst = productWithAttributesInOrder(
+				new String[] { "POIDS", "72 kg", "some-merchant.com" },
+				new String[] { "WEIGHT", "70.5 kg", IcecatConstants.DATASOURCE_NAME });
+		Product icecatFirst = productWithAttributesInOrder(
+				new String[] { "WEIGHT", "70.5 kg", IcecatConstants.DATASOURCE_NAME },
+				new String[] { "POIDS", "72 kg", "some-merchant.com" });
+
+		service.onProduct(merchantFirst, verticalConfig);
+		service.onProduct(icecatFirst, verticalConfig);
+
+		IndexedAttribute weightMerchantFirst = merchantFirst.getAttributes().getIndexed().get("WEIGHT");
+		IndexedAttribute weightIcecatFirst = icecatFirst.getAttributes().getIndexed().get("WEIGHT");
+		assertThat(weightMerchantFirst.sourcesCount()).isEqualTo(2);
+		assertThat(weightIcecatFirst.sourcesCount()).isEqualTo(2);
+		assertThat(weightMerchantFirst.getValue()).isEqualTo(weightIcecatFirst.getValue());
+		assertThat(weightMerchantFirst.getNumericValue()).isEqualTo(weightIcecatFirst.getNumericValue());
+		// Both readings are equally confident: the trusted Icecat source is offered first and wins the tie
+		assertThat(weightMerchantFirst.getNumericValue()).isEqualTo(70.5);
+	}
+
+	/**
+	 * GOU-2276: {@code Product.akaBrands()} returns a filtered copy, so clearing it left the stored alternate brands
+	 * untouched and a brand excluded after ingestion stayed in akaBrands.
+	 */
+	@Test
+	void onProductDropsANewlyExcludedBrandFromAkaBrands() throws Exception {
+		Product product = new Product(123L);
+		product.addBrand("first-merchant.com", "Brand", null, null);
+		product.addBrand("old-merchant.com", "Old brand", null, null);
+		product.addBrand("other-merchant.com", "Other brand", null, null);
+		assertThat(product.getAkaBrands()).containsEntry("old-merchant.com", "OLD BRAND");
+		verticalConfig.setBrandsExclusion(Set.of("OLD BRAND"));
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.brand()).isEqualTo("BRAND");
+		assertThat(product.getAkaBrands()).containsExactly(Map.entry("other-merchant.com", "OTHER BRAND"));
+	}
+
+	/**
+	 * Builds a product whose raw attributes are visited in the given order, each one being
+	 * {@code {name, value, datasource}}.
+	 */
+	private Product productWithAttributesInOrder(String[]... attributes) {
+		Product product = new Product(123L);
+		product.getAttributes().setAll(new LinkedHashMap<>());
+		for (String[] attribute : attributes) {
+			addSourcedAttribute(product, attribute[0], attribute[1], attribute[2]);
+		}
+		return product;
+	}
+
+	/**
+	 * Returns the attribute configuration shipped for a vertical, with its real synonyms, parser and mappings.
+	 */
+	private static AttributeConfig realAttribute(String verticalId, String key) {
+		VerticalConfig vertical = realVerticals.getConfigById(verticalId);
+		AttributeConfig attribute = vertical.getAttributesConfig().getAttributeConfigByKey(key);
+		assertThat(attribute).as("%s in %s", key, verticalId).isNotNull();
+		return attribute;
 	}
 
 	private void addSourcedAttribute(Product product, String name, String value, String datasourceName) {
