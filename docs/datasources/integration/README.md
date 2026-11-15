@@ -44,7 +44,7 @@ Recouvrements avec les lots d'agrégation en cours (GOU-2272) :
 
 | Prérequis | Lot qui touche les mêmes fichiers | Ordre |
 |---|---|---|
-| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | possible dès maintenant |
+| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | **livrés** par GOU-2295 (PR en revue) ; aucun attribut YAML n'utilise encore `preferredSources` |
 | P0-5, projection (chaîne d'agrégation) | S1 (GOU-2280) | après S1 |
 
 ## 1. Sommaire des plans

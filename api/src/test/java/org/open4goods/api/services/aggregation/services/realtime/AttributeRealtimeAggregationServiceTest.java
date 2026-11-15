@@ -763,6 +763,51 @@ class AttributeRealtimeAggregationServiceTest {
 	}
 
 	/**
+	 * GOU-2295: three merchants vote X, one source votes Y. X wins by votes unless the attribute lists Y's source
+	 * in {@code preferredSources}; without the field, eprel and icecat.biz keep their rank.
+	 */
+	@Test
+	void onProductElectsTheValueOfAPreferredSourceOverTheVotes() throws Exception {
+		Product byVotes = productWithRegulatorAndThreeMerchants();
+		Product preferred = productWithRegulatorAndThreeMerchants();
+
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(null)));
+		service.onProduct(byVotes, verticalConfig);
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(List.of("regulator"))));
+		service.onProduct(preferred, verticalConfig);
+
+		assertThat(byVotes.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("5");
+		assertThat(preferred.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("8");
+	}
+
+	@Test
+	void onProductKeepsEprelFirstWithoutPreferredSources() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(null)));
+		Product product = productWithRegulatorAndThreeMerchants();
+		addSourcedAttribute(product, "D", "9", EprelCompletionService.EPREL_DS_NAME);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("9");
+	}
+
+	private static AttributeConfig indexAttribute(List<String> preferredSources) {
+		AttributeConfig config = new AttributeConfig();
+		config.setKey("INDEX");
+		config.setSynonyms(Map.of("all", Set.of("A", "B", "C", "D")));
+		config.setPreferredSources(preferredSources);
+		return config;
+	}
+
+	private Product productWithRegulatorAndThreeMerchants() {
+		return productWithAttributesInOrder(
+				new String[] { "A", "5", "shop-a.com" },
+				new String[] { "B", "5", "shop-b.com" },
+				new String[] { "C", "5", "shop-c.com" },
+				new String[] { "D", "8", "regulator" });
+	}
+
+	/**
 	 * Builds a product whose raw attributes are visited in the given order, each one being
 	 * {@code {name, value, datasource}}.
 	 */

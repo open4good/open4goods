@@ -230,6 +230,31 @@ class AttributesConfigTest {
         assertThat(nullLookups).hasValue(0);
     }
 
+    @Test
+    void accentedSynonymMatchesTheNormalizedAttributeName() {
+        AttributesConfig config = new AttributesConfig(List.of(attribute("REPAIRABILITY_INDEX", null,
+                Map.of("all", Set.of("INDICE DE RÉPARABILITÉ (NOTE SUR 10)")))));
+
+        // DataFragment names incoming attributes with IdHelper.normalizeAttributeName: accents removed.
+        AttributeConfig resolved = config.resolveFromProductAttribute(
+                productAttribute("INDICE DE REPARABILITE (NOTE SUR 10)", "any", null));
+
+        assertThat(resolved).isNotNull();
+        assertThat(resolved.getKey()).isEqualTo("REPAIRABILITY_INDEX");
+        // Old records keep accented names: the searched name is normalized too.
+        assertThat(config.getKeyForValue("Indice de réparabilité (note sur 10)")).isEqualTo("REPAIRABILITY_INDEX");
+        assertThat(config.getKeyForValue("INDICE DE REPARABILITE (NOTE SUR 10)")).isEqualTo("REPAIRABILITY_INDEX");
+    }
+
+    @Test
+    void accentedAndPlainSynonymsOfOneKeyMerge() {
+        AttributesConfig config = new AttributesConfig(List.of(attribute("YEAR", null,
+                Map.of("all", Set.of("ANNÉE DE MODÈLE", "ANNEE DE MODELE")))));
+
+        assertThat(config.synonyms().get("all")).containsOnlyKeys("ANNEE DE MODELE");
+        assertThat(config.getKeyForValue("ANNÉE DE MODÈLE")).isEqualTo("YEAR");
+    }
+
     private static AttributeConfig attribute(String key, Integer icecatFeatureId, Map<String, Set<String>> synonyms) {
         AttributeConfig config = new AttributeConfig();
         config.setKey(key);

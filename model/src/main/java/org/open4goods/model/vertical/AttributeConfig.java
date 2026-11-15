@@ -359,6 +359,20 @@ public class AttributeConfig {
 
 
 
+	/**
+	 * Ordered datasource names, most trusted first. When set, replaces the default order
+	 * ({@code eprel}, {@code icecat.biz}) for this attribute; a source not listed ranks after the listed ones.
+	 */
+	private List<String> preferredSources;
+
+	public List<String> getPreferredSources() {
+		return preferredSources;
+	}
+
+	public void setPreferredSources(final List<String> preferredSources) {
+		this.preferredSources = preferredSources;
+	}
+
 	public Map<String, Set<String>> getSynonyms() {
 		return synonyms;
 	}

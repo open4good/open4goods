@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.referential.EprelFeatureReferential;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -33,6 +34,8 @@ class AttributeCatalogCollisionTest {
             "oven: 'PUISSANCE (W)' (all) -> POWER_CONSUMPTION_TYPICAL and OVEN_POWER",
             "oven: 'COULEUR' (all) -> COLOR and COULEUR_EXTERIEURE");
 
+    private static final Set<String> KNOWN_NORMALIZATION_COLLISIONS = Set.of();
+
     private static List<VerticalConfig> verticals() throws Exception {
         VerticalsConfigService service = new VerticalsConfigService(new SerialisationService(),
                 mock(GoogleTaxonomyService.class), new PathMatchingResourcePatternResolver());
@@ -55,6 +58,31 @@ class AttributeCatalogCollisionTest {
             }
         }
         assertThat(collisions).as("synonym collisions").isSubsetOf(KNOWN_COLLISIONS);
+    }
+
+    /**
+     * GOU-2295: synonyms are indexed in their {@code IdHelper.normalizeAttributeName} form. Lists the labels that
+     * only collide once accents and case are removed; the last attribute of the list wins, as for any shared synonym.
+     */
+    @Test
+    void listsCollisionsAppearingAfterNormalization() throws Exception {
+        List<String> collisions = new ArrayList<>();
+        for (VerticalConfig vertical : verticals()) {
+            Map<String, String> owners = new HashMap<>();
+            Map<String, String> rawLabels = new HashMap<>();
+            for (AttributeConfig attribute : vertical.getAttributesConfig().getConfigs()) {
+                attribute.getSynonyms().forEach((source, labels) -> labels.forEach(label -> {
+                    String id = source + "|" + IdHelper.normalizeAttributeName(label);
+                    String previous = owners.putIfAbsent(id, attribute.getKey());
+                    rawLabels.putIfAbsent(id, label);
+                    if (previous != null && !previous.equals(attribute.getKey()) && !label.equals(rawLabels.get(id))) {
+                        collisions.add(vertical.getId() + ": '" + id + "' -> " + previous + " and " + attribute.getKey());
+                    }
+                }));
+            }
+        }
+        System.out.println("NORMALIZATION_COLLISIONS " + collisions);
+        assertThat(collisions).isSubsetOf(KNOWN_NORMALIZATION_COLLISIONS);
     }
 
     @Test

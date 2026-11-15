@@ -131,7 +131,7 @@ public class UnitAwareNumericParser extends AttributeParser
             return null;
         }
 
-        Candidate elected = candidates.stream().min(CANDIDATE_ORDER).orElseThrow();
+        Candidate elected = candidates.stream().min(candidateOrder(attributeConfig.getPreferredSources())).orElseThrow();
 
         long distinctValues = candidates.stream().map(candidate -> candidate.baseValue).distinct().count();
         if (distinctValues > 1)
@@ -159,15 +159,18 @@ public class UnitAwareNumericParser extends AttributeParser
     }
 
     /**
-     * Election order between conflicting sources: the legacy trusted-source rank
-     * decides first, then the datasource name and finally the value itself, so that
+     * Election order between conflicting sources: the trusted-source rank (the attribute's
+     * {@code preferredSources}, else the legacy order) decides first, then the datasource name and finally the value itself, so that
      * the same set of contributions always elects the same value whatever order the
      * sources arrived in.
      */
-    private static final Comparator<Candidate> CANDIDATE_ORDER = Comparator
-            .comparingInt((Candidate candidate) -> SourcableAttribute.trustedSourcePriority(candidate.datasource))
-            .thenComparing(candidate -> candidate.datasource, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparingDouble(candidate -> candidate.baseValue);
+    private static Comparator<Candidate> candidateOrder(List<String> priority)
+    {
+        return Comparator
+                .comparingInt((Candidate candidate) -> SourcableAttribute.trustedSourcePriority(candidate.datasource, priority))
+                .thenComparing(candidate -> candidate.datasource, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparingDouble(candidate -> candidate.baseValue);
+    }
 
     /**
      * Single-value entry point used by tests and direct callers.
