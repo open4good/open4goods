@@ -17,7 +17,7 @@
       "env": {
         "PLAUSIBLE_BASE_URL": "https://plausible.nudger.fr",
         "PLAUSIBLE_DEFAULT_SITE": "nudger.fr",
-        "PLAUSIBLE_API_KEY": "$PLAUSIBLE_API_KEY"
+        "PLAUSIBLE_API_KEY": "${PLAUSIBLE_API_KEY:-}"
       }
     },
     "javalens": {
