@@ -144,6 +144,8 @@ jobs:
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
           GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
+          OPEN_DATA_PUBLIC_BASE_URL: ${{ vars.OPEN_DATA_PUBLIC_BASE_URL }}
+          OPEN_DATA_REDIRECT_BASE_URL: ${{ vars.OPEN_DATA_REDIRECT_BASE_URL }}
         run: |
           set -eu
           for svc in admin api front-api ui frontend; do
@@ -527,6 +529,8 @@ jobs:
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
           GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
+          OPEN_DATA_PUBLIC_BASE_URL: ${{ vars.OPEN_DATA_PUBLIC_BASE_URL }}
+          OPEN_DATA_REDIRECT_BASE_URL: ${{ vars.OPEN_DATA_REDIRECT_BASE_URL }}
         run: |
           set -eu
           for svc in admin api front-api ui; do
