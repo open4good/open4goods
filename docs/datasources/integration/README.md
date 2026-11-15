@@ -36,7 +36,7 @@ lang: fr
 |---|---|
 | Plan 05 (EPREL smartphones) | avancé par le programme ImpactScore : hypothèse `productGroup` infirmée (GOU-2042), champs EPREL mappés dont les cycles de batterie x100 (GOU-1891, #3596), table Apple (#3606). Appariement au 2026-11-12 : 939 smartphones sur 14 589 (6,4 %), Apple 27 sur 1 689, Samsung 382 sur 3 668 ; mesure complète après le batch du 2026-11-17 (GOU-2048). Restent : règle Samsung `/DS`, filtre `deviceType`, attribution (P0-4), colonnes d'export. |
 | Plan 01 (indice de durabilité) | lecture marchande seulement : attribut `DURABILITY_INDEX` (GOU-1892), critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (GOU-2041). L'import du fichier data.gouv n'est pas commencé. |
-| P0-1 | livré (GOU-2296) : `BatchService.clean()` supprimé, `POST /batch/tweak` n'appelle plus que `cleanAiData()`. |
+| P0-1 | livré (GOU-2296) : `BatchService.clean()` supprimé ; `POST /batch/tweak` et `cleanAiData()` supprimés ensuite. |
 | P0-2 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
 | Plans 02 à 04, 06 à 15 | non démarrés ; 09 et 10 en attente (Q2). |
 

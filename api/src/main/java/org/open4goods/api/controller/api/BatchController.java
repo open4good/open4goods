@@ -58,17 +58,6 @@ public class BatchController {
         this.datasourcePurgeService = datasourcePurgeService;
     }
 
-    @PostMapping("/batch/tweak")
-    @Operation(
-            summary = "Run the data-cleanup (tweak) routine",
-            description = "Removes, in every vertical, the attribute sources whose datasource name contains "
-                    + "\"ai\" (case-insensitive), then recomputes the affected attribute values. "
-                    + "No product is deleted.")
-    @ApiResponse(responseCode = "200", description = "Cleanup routine completed")
-    public void batchCleanup() throws InvalidParameterException, IOException, InterruptedException {
-        batchService.cleanAiData();
-    }
-
     @PostMapping("/batch/clean-resources")
     @Operation(
             summary = "Run resource garbage collection",

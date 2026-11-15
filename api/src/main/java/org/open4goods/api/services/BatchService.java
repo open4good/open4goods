@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.open4goods.model.attribute.IndexedAttribute;
-import org.open4goods.model.attribute.ProductAttribute;
 
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -33,7 +31,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -1128,81 +1125,4 @@ public class BatchService {
         }
         return result;
     }
-
-
-	/**
-	 * Clean AI data from all verticals
-	 */
-	public void cleanAiData() {
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-			cleanAiData(vertical);
-		}
-	}
-
-	/**
-	 * Clean AI data from a specific vertical
-	 * @param vertical
-	 */
-	public void cleanAiData(VerticalConfig vertical) {
-		logger.info("Cleaning AI data for vertical {}", vertical);
-		try (java.util.stream.Stream<Product> stream = dataRepository.getProductsMatchingVerticalId(vertical)) {
-			stream.forEach(p -> {
-				boolean changed = false;
-
-			// Delete attribute sources having "ai" as datasourcename
-			// Check Indexed Attributes
-			Iterator<IndexedAttribute> itIndexed = p.getAttributes().getIndexed().values().iterator();
-			while (itIndexed.hasNext()) {
-				IndexedAttribute attr = itIndexed.next();
-				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
-				if (attrChanged) {
-					if (attr.getSource().isEmpty()) {
-						itIndexed.remove();
-					} else {
-						// Recompute value
-						String best = attr.bestValue();
-						attr.setValue(best);
-						attr.setNumericValue(parseNumericOrNull(best));
-					}
-					changed = true;
-				}
-			}
-
-			// Check All Attributes (ProductAttribute)
-			Iterator<ProductAttribute> itAll = p.getAttributes().getAll().values().iterator();
-			while (itAll.hasNext()) {
-				ProductAttribute attr = itAll.next();
-				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
-				if (attrChanged) {
-					if (attr.getSource().isEmpty()) {
-						itAll.remove();
-					} else {
-						// Recompute value
-						String best = attr.bestValue();
-						attr.setValue(best);
-					}
-					changed = true;
-				}
-			}
-
-			if (changed) {
-				dataRepository.index(p);
-			}
-		});
-		}
-	}
-
-	private Double parseNumericOrNull(String rawValue) {
-		if (rawValue == null) {
-			return null;
-		}
-		try {
-			return Double.valueOf(rawValue.trim().replace(",", "."));
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-
-
 }

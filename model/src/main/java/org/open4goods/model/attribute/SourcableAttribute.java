@@ -41,8 +41,8 @@ public abstract class SourcableAttribute {
 
 	/**
 	 * Same election as {@link #bestValue()}, with an explicit ordered list of trusted datasources.
-	 * Callers without the attribute configuration (for instance {@code Product.removeDatasourceData},
-	 * {@code BatchService.cleanAiData} and {@code ProductAttribute}) use {@link #bestValue()} and so keep the
+	 * Callers without the attribute configuration (for instance {@code Product.removeDatasourceData}
+	 * and {@code ProductAttribute}) use {@link #bestValue()} and so keep the
 	 * default order.
 	 *
 	 * @param priority ordered datasource names, most trusted first; {@code null} or empty falls back to the default
