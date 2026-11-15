@@ -15,7 +15,6 @@ import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductNameResolver;
 import org.open4goods.model.product.ProductTexts;
-import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -105,10 +104,9 @@ public class NamesAggregationService extends AbstractAggregationService {
 			);
 		}
 
-		// Getting the config for the category/vertical (fallback to defaults handled by service)
-		final VerticalConfig resolvedVertical = verticalService.getConfigByIdOrDefault(data.getVertical());
-		final Map<String, ProductI18nElements> i18nConfs =
-				(resolvedVertical != null) ? resolvedVertical.getI18n() : null;
+		// vConf is already the configuration of the product vertical, or the default one: the aggregator resolves it
+		// with getConfigByIdOrDefault(data.getVertical()) before each service.
+		final Map<String, ProductI18nElements> i18nConfs = (vConf != null) ? vConf.getI18n() : null;
 
 		// If no i18n config exists, skip name generation safely.
 		if (i18nConfs != null && !i18nConfs.isEmpty()) {
@@ -328,18 +326,6 @@ public class NamesAggregationService extends AbstractAggregationService {
 		}
 
 		return sb.toString();
-	}
-
-	private String resolveAttributeSuffix(final VerticalConfig vConf, final String attr, final String lang) {
-		if (vConf == null || vConf.getAttributesConfig() == null) {
-			return "";
-		}
-		AttributeConfig attributeConfig = vConf.getAttributesConfig().getAttributeConfigByKey(attr);
-		if (attributeConfig == null || attributeConfig.getSuffix() == null) {
-			return "";
-		}
-		String suffix = attributeConfig.getSuffix().i18n(lang);
-		return StringUtils.defaultString(suffix);
 	}
 
 	/**

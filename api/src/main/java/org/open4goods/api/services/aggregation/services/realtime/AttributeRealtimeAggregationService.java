@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.api.services.aggregation.services.realtime.parser.EmptyValuePlaceholders;
 import org.open4goods.api.services.completion.EprelCompletionService;
 import org.open4goods.brand.model.Brand;
 import org.open4goods.brand.service.BrandService;
@@ -101,6 +102,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			"(?i)([-+]?\\d+(?:[\\s\u00a0\u202f]\\d{3}(?!\\d))*(?:\\s*[.,]\\s*\\d+)?)\\s*(kilowatts?|kw|milliwatts?|mw|watts?|w)(?![\\p{L}\\d])");
 	private static final Pattern EMPTY_VALUE_SEPARATOR_PATTERN =
 			Pattern.compile("[()_./-]+");
+	/** Values meaning that the attribute is absent, compared after {@link #EMPTY_VALUE_SEPARATOR_PATTERN}. */
+	private static final Set<String> EMPTY_VALUES = EmptyValuePlaceholders.with("false", "null");
 	private static final Pattern PARENTHESIS_CONTENT_PATTERN =
 			Pattern.compile("\\(.*?\\)");
 	private static final Pattern QUOTE_MARK_PATTERN =
@@ -322,7 +325,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		indexedAttr.setValue(bestValue);
 
-		String cleanVal = bestValue == null ? null : bestValue.trim().replace(',', '.');
+		// A NUMERIC value has been through sanitizeNumericValue, so it always passes isPureDouble. The catch is
+		// only reached by other types: isPureDouble accepts ".", "-." or "E5", which Double.valueOf rejects.
+		String cleanVal = bestValue.trim().replace(',', '.');
 		if (IdHelper.isPureDouble(cleanVal)) {
 			try {
 				indexedAttr.setNumericValue(indexedAttr.numericOrNull(bestValue));
@@ -330,11 +335,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				indexedAttr.setNumericValue(null);
 			}
 		} else {
-			if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
-				throw new NumberFormatException("For input string: \"" + bestValue + "\"");
-			} else {
-				indexedAttr.setNumericValue(null);
-			}
+			indexedAttr.setNumericValue(null);
 		}
 
 		attr.setValue(bestValue);
@@ -375,8 +376,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		String normalized = StringUtils.stripAccents(value).toLowerCase(Locale.ROOT);
 		normalized = EMPTY_VALUE_SEPARATOR_PATTERN.matcher(normalized).replaceAll(" ");
 		normalized = StringUtils.normalizeSpace(normalized);
-		return Set.of("donnee non specifiee", "donnees non specifiees", "non specifie", "non specifiee", "false", "n a",
-				"na", "nc", "null", "-").contains(normalized);
+		return EMPTY_VALUES.contains(normalized);
 	}
 
 	/**
