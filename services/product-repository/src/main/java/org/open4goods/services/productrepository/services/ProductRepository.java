@@ -1227,6 +1227,7 @@ public class ProductRepository {
 	public void store(Collection<Product> data) {
 	    logger.info("Indexing {} products", data.size());
 
+	    data.forEach(Product::refreshSources);
 	    List<IndexQuery> indexQueries = data.stream()
 	        .map(p -> new IndexQueryBuilder()
 	            .withId(String.valueOf(p.getId()))
@@ -1246,6 +1247,7 @@ public class ProductRepository {
 	public void store(Collection<Product> data, String indexName) {
 	    logger.info("Indexing {} products into {}", data.size(), indexName);
 
+	    data.forEach(Product::refreshSources);
 	    List<IndexQuery> indexQueries = data.stream()
 	        .map(p -> new IndexQueryBuilder()
 	            .withId(String.valueOf(p.getId()))
@@ -1285,6 +1287,7 @@ public class ProductRepository {
 
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
+		data.refreshSources();
 
 //		executor.submit(() -> {
 			elasticsearchOperations.save(data, CURRENT_INDEX);

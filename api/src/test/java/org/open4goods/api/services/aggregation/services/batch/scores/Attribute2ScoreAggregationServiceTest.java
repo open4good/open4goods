@@ -142,6 +142,24 @@ class Attribute2ScoreAggregationServiceTest {
         assertThat(heavierScore.getRelativ().getValue()).isCloseTo(1.25, offset(1e-9));
     }
 
+    @Test
+    void scoreRecordsTheDatasourcesOfTheRetainedValue() {
+        VerticalConfig verticalConfig = buildVerticalConfig(false);
+        Product product = productWithAttribute(1L, "REPAIR", "8.0");
+        org.open4goods.model.attribute.SourcedAttribute eprel = new org.open4goods.model.attribute.SourcedAttribute();
+        eprel.setDataSourcename("eprel");
+        eprel.setValue("8.0");
+        org.open4goods.model.attribute.SourcedAttribute other = new org.open4goods.model.attribute.SourcedAttribute();
+        other.setDataSourcename("rakuten.com");
+        other.setValue("3.0");
+        product.getAttributes().getIndexed().get("REPAIR").setSource(new java.util.HashSet<>(List.of(eprel, other)));
+
+        aggregate(List.of(product), verticalConfig);
+
+        assertThat(product.getScores().get("REPAIR").getMetadatas())
+                .containsEntry(Attribute2ScoreAggregationService.SCORE_SOURCE_METADATA, "eprel");
+    }
+
     private void aggregate(List<Product> products, VerticalConfig verticalConfig) {
         service.init(products);
         products.forEach(product -> service.onProduct(product, verticalConfig));

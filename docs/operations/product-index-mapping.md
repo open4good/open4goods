@@ -26,7 +26,7 @@ that proxy and never wrote this mapping.
 A new field of `product-mappings.json` therefore reaches the production index
 when the `api` restarts, not when `ui` restarts.
 
-### Deploy order for a new field (GOU-1882, `impactScoreMeta`; GOU-2233, `nature`)
+### Deploy order for a new field (GOU-1882, `impactScoreMeta`; GOU-2233, `nature`; GOU-2301, `sources`)
 
 The root of the mapping is `strict`: a document carrying a field the index
 mapping does not know yet is **rejected**. When a release adds a field that
@@ -39,7 +39,7 @@ the batch writes (for example `impactScoreMeta`, ImpactScore V2 design 1.3):
 3. Check the mapping, read only, with the Ops account:
    `GET products-moustik/_mapping/field/impactScoreMeta.*` must list the new
    properties (`GET products-moustik/_mapping/field/nature` for the
-   `nature` keyword).
+   `nature` keyword, `.../_mapping/field/sources` for the `sources` keyword).
 4. Only then let the batch run. On beta first, then production.
 
 If step 2 fails, the batch rejects every product it scores until the next
@@ -82,3 +82,9 @@ grep -A60 'Products index mapping' /opt/open4goods/logs/nohup-api.log
 3. Once Elasticsearch is healthy, restart the `api` through the usual release
    procedure: the next startup puts the mapping again. Nothing else depends on
    it; `ui` and `front-api` do not need a restart.
+
+`sources` (GOU-2301) is derived from `datasourceCodes` and written by the
+repository on each full write. Existing products get it when the batch
+rewrites them, which covers the verticals only: the other products have no
+`sources` (so no "datasource" filter hit, empty `sources` column in the open
+data export) until a feed or a purge rewrites them.

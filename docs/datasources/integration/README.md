@@ -322,7 +322,17 @@ Deux constats du 2026-11-15, à confirmer sur le `_mapping` réel :
 
 Détail :
 
-- **Produit** (à créer) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par
+- **Livré par GOU-2301 (P0-4, 1/2)** : confirmé le 2026-11-15 sur `products-moustik`, `datasourceCodes`
+  est `disabled` (lisible dans `_source` seulement) : le filtre "datasource" et les agrégations de
+  `DatavizStatsService` ne renvoyaient rien. Le champ `Product.sources` (`keyword`, liste) en
+  est la correction : clés de `datasourceCodes` moins `Product.TECHNICAL_DATASOURCE_CODES`, recalculé par
+  `ProductRepository` avant toute écriture complète (`store`, `forceIndex`). Le filtre, `DatavizStatsService`
+  et la colonne `sources` de l'export ouvert (`|`) le lisent. `DataSourceProperties` porte `license`,
+  `licenseUrl`, `attribution` (vides tant que la source ne les renseigne pas) ; `Score.metadatas.source`
+  nomme les datasources de la valeur retenue.
+- **`sourceAttributions` est reporté à P0-5** : la projection est la seule à l'écrire, et il n'y a pas de
+  champ sans écrivain. La description ci-dessous reste la cible.
+- **Produit** (à créer, P0-5) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par
   identifiant de source.
 
   ```java
@@ -337,10 +347,10 @@ Détail :
   seuls sous-champs filtrables mappés explicitement (`recalls.active`, `recalls.source`).
   À confirmer sur l'index réel avec `GET products-moustik/_mapping` avant le premier
   déploiement.
-- **Source** (à créer, dans `DataSourceProperties`) : `license`, `licenseUrl`, `attribution`
-  (texte affiché, par exemple "Producteurs, via data.gouv.fr"), `dataPortalUrl`.
+- **Source** (`DataSourceProperties`, livré) : `license`, `licenseUrl`, `attribution`
+  (texte affiché, par exemple "Producteurs, via data.gouv.fr").
 - **Scores** : `Attribute2ScoreAggregationService` recopie la source gagnante de l'attribut dans
-  `Score.metadatas` (`source`, `sourceUpdatedAt`).
+  `Score.metadatas` (`source` livré ; `sourceUpdatedAt` reporté à P0-5 avec `sourceAttributions`).
 - **Front** : front-api expose déjà `ProductDatasourcesDto` et `ProductSourcedAttributeDto`
   (`ProductMappingService`). On y ajoute l'attribution. L'infobulle existante par attribut
   montre la licence et le lien ; la fiche produit liste les sources : nom, lien vers
@@ -648,8 +658,8 @@ Trouvées en préparant ces plans, et indépendantes des nouvelles sources :
   juste : `"0"` donne `0L`, `"17"` donne `17L` (vérifié en exécutant le service le 2026-11-15,
   P0-9).
 - `gtinInfos.gs1Class` est calculé et indexé, mais jamais utilisé pour décider (P0-9).
-- `datasourceCodes` est mappé `"enabled": false`, alors qu'un filtre de recherche et
-  `DatavizStatsService` l'interrogent (P0-4, à confirmer sur le `_mapping` réel).
+- ~~`datasourceCodes` est mappé `"enabled": false`~~ : confirmé le 2026-11-15, corrigé par le champ
+  `sources` (GOU-2301).
 - Le drapeau `referentiel` des datasources est recopié dans `DataFragment` mais jamais lu
   (P0-10).
 - `ProductEprelDto.from` met à `null` `categorySpecificAttributes`, que lisent

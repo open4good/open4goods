@@ -52,7 +52,7 @@ public class WikidataCompletionService extends AbstractCompletionService {
     public static final String DATASOURCE_NAME = "wikidata.org";
 
     /** Key of {@code datasourceCodes} dating the last search that found no entity (negative cache, GOU-2099). */
-    public static final String MISS_CODE = DATASOURCE_NAME + ".miss";
+    public static final String MISS_CODE = Product.WIKIDATA_MISS_CODE;
 
     private final Logger LOGGER = logger;
 
