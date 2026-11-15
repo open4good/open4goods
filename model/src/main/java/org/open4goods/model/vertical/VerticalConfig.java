@@ -1323,7 +1323,6 @@ public class VerticalConfig {
 	public static class WeightParserConfig {
 		private Double minKg;
 		private Double maxKg;
-		private String defaultUnit;
 
 		public Double getMinKg() {
 			return minKg;
@@ -1339,14 +1338,6 @@ public class VerticalConfig {
 
 		public void setMaxKg(Double maxKg) {
 			this.maxKg = maxKg;
-		}
-
-		public String getDefaultUnit() {
-			return defaultUnit;
-		}
-
-		public void setDefaultUnit(String defaultUnit) {
-			this.defaultUnit = defaultUnit;
 		}
 	}
 
