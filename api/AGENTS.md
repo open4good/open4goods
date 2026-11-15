@@ -187,7 +187,7 @@ Une opération doit être idempotente : un produit déjà traité ne reçoit plu
     disque **avant** l'envoi du bulk ;
   - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
   - un produit qui n'a plus besoin du changement donne un `noop`, compté dans `unchangedProducts` et non dans
-    `writtenProducts`.
+    `writtenProducts`. Un produit supprimé depuis la lecture (404) compte aussi dans `unchangedProducts`.
 - **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
   les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
   clé), et donne 20 ids d'exemple.
@@ -274,8 +274,9 @@ copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut
 - Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
 - Le script ne touche pas un produit qui a reçu une verticale entre-temps, ni un produit dont les
   `datasourceCategories` ont changé depuis la lecture : l'agrégation a alors calculé sa nature sur les nouvelles.
-- Si plus de la moitié d'un bulk échoue sans 429 (mapping absent, erreur de script), le run passe à `FAILED` avec son
-  curseur. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
+- Si au moins 10 mises à jour d'un bulk échouent sans 429, et plus de la moitié du bulk (mapping absent, erreur de
+  script), le run passe à `FAILED` avec son curseur. Un produit supprimé depuis la lecture (404) n'est pas un échec :
+  il compte dans `unchangedProducts`. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
 - La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
 - `sanitizeAll()` n'est pas utilisé.
 

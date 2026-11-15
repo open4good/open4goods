@@ -66,6 +66,12 @@ public class BackfillEngine {
 	/** Number of product ids reported as examples. */
 	static final int SAMPLE_SIZE = 20;
 
+	/**
+	 * A bulk fails the run when at least this many of its updates failed, and more than half of them: a single conflict
+	 * in a small bulk is not a systematic failure.
+	 */
+	static final int MIN_FAILURES_TO_STOP = 10;
+
 	/** Failed updates logged one by one per bulk; the others are only counted by status and type. */
 	static final int LOGGED_FAILURES_PER_BULK = 5;
 
@@ -333,6 +339,9 @@ public class BackfillEngine {
 				} else {
 					counters.written++;
 				}
+			} else if (item.status() == 404) {
+				// Product deleted since the snapshot read it: nothing left to change
+				counters.unchanged++;
 			} else {
 				counters.failed++;
 				failures++;
@@ -352,7 +361,7 @@ public class BackfillEngine {
 			logger.warn("Backfill {}: Elasticsearch rejected updates with a 429, stopping", operation.name());
 			return true;
 		}
-		if (failures * 2 > changes.size()) {
+		if (failures >= MIN_FAILURES_TO_STOP && failures * 2 > changes.size()) {
 			// Systematic failure (missing mapping, script error...): stop before failing millions of updates
 			throw new IllegalStateException("Backfill " + operation.name() + ": " + failures + " of " + changes.size()
 					+ " updates failed, stopping: " + failuresByType);

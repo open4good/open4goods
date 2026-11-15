@@ -13,8 +13,8 @@ import java.util.Map;
  * @param matchedProducts products that needed the change (would be or were written); equals the scanned lines in a
  *                        restore
  * @param writtenProducts updates applied by Elasticsearch, always 0 in dry run
- * @param unchangedProducts updates Elasticsearch found already done ({@code noop}: the product changed since it was
- *                        read)
+ * @param unchangedProducts updates with nothing left to do: {@code noop} (the product changed since it was read) or
+ *                        404 (the product was deleted since)
  * @param failedProducts  updates rejected by Elasticsearch, see the logs
  * @param labelCounts     occurrences of each {@link BackfillChange#labels() label} among the matched products, for
  *                        instance the removed keys
