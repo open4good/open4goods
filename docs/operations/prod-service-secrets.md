@@ -223,6 +223,14 @@ a rendered override, set it to `none`, render, then it may be emptied. A
 malformed value, an unknown vertical, or version 2 on a vertical without `v2`
 block fails the startup of the three services.
 
+`OPEN_DATA_PUBLIC_BASE_URL` (front-api, `open-data-config.public-base-url`) and
+`OPEN_DATA_REDIRECT_BASE_URL` (ui, `open-data-config.redirect-base-url`) are GitHub
+Environment variables too (GOU-2247, lot 0c). Set both to `https://data.nudger.fr` in `prod` only, once the
+zips are on R2 and the resume is checked; `beta` leaves them empty (it does not serve the files). Then run
+`serviceSecrets.yml` for `front-api` and `ui`, or ship a release. Rollback: an empty variable is not rendered
+(the previous render stays), so delete the file `/etc/open4goods/secrets/<service>/open-data-config.<key>` on the
+host and restart the service; `downloadUrl` and the ui answer go back to the local files.
+
 ### Paired secrets
 
 admin receives `GOOGLE_SSO_CLIENT_ID` and `GOOGLE_SSO_CLIENT_SECRET` together
