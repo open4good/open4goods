@@ -1,7 +1,6 @@
 
 package org.open4goods.model.vertical;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -10,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.Localisable;
@@ -37,7 +37,11 @@ public class AttributeConfig {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AttributeConfig.class);
 
-	private static final Map<String,AttributeParser> parserInstances = new HashMap<>();
+	/**
+	 * Parser instances shared by every attribute config, by parser class name. Concurrent: the fragment worker and
+	 * the completion threads ask for parsers at the same time.
+	 */
+	private static final Map<String,AttributeParser> parserInstances = new ConcurrentHashMap<>();
 
 
 	/**
@@ -180,9 +184,10 @@ public class AttributeConfig {
 
 
 	/**
+	 * Returns the shared instance of the defined parser, instantiated once per parser class.
 	 *
 	 * @return the instance of the defined parser, if set.
-	 * @throws ResourceNotFoundException
+	 * @throws ResourceNotFoundException when no parser class is defined or the class cannot be instantiated
 	 */
 	@JsonIgnore
 	public AttributeParser getParserInstance() throws ResourceNotFoundException{
@@ -193,19 +198,41 @@ public class AttributeConfig {
 			throw new ResourceNotFoundException("No parser class defined for " + getKey());
 		}
 
-		AttributeParser parser = null;
-		// Instanciating / caching the parser
-		if (null == parserInstances.get(clazz)) {
-			try {
-				parser = (AttributeParser) Class.forName(clazz).getDeclaredConstructor().newInstance();
-				LOGGER.info("{} parser has been placed in uidMap");
-				parserInstances.put(clazz, parser);
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-				throw new ResourceNotFoundException("Cannot instanciate type : " + clazz,e);
-			}
-        }
+		try {
+			return parserInstances.computeIfAbsent(clazz, AttributeConfig::instantiateParser);
+		} catch (ParserInstantiationException e) {
+			throw new ResourceNotFoundException("Cannot instanciate type : " + clazz, e.getCause());
+		}
+	}
 
-		return parserInstances.get(clazz);
+	/**
+	 * Instantiates a parser through its no-arg constructor. Called by {@link ConcurrentHashMap#computeIfAbsent}, which
+	 * does not accept checked exceptions.
+	 *
+	 * @param clazz the parser class name
+	 * @return the new parser
+	 * @throws ParserInstantiationException wrapping the reflective failure
+	 */
+	private static AttributeParser instantiateParser(final String clazz) {
+		try {
+			AttributeParser instance = (AttributeParser) Class.forName(clazz).getDeclaredConstructor().newInstance();
+			LOGGER.info("{} parser has been placed in uidMap", clazz);
+			return instance;
+		} catch (ReflectiveOperationException e) {
+			throw new ParserInstantiationException(e);
+		}
+	}
+
+	/**
+	 * Carries a reflective failure out of {@link #instantiateParser(String)}.
+	 */
+	private static final class ParserInstantiationException extends RuntimeException {
+
+		private static final long serialVersionUID = 1L;
+
+		private ParserInstantiationException(final ReflectiveOperationException cause) {
+			super(cause);
+		}
 	}
 
 	/**
