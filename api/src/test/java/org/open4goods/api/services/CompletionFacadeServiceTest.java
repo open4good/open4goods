@@ -2,8 +2,8 @@ package org.open4goods.api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,19 +49,28 @@ class CompletionFacadeServiceTest {
 		assertThat(timings.summary()).contains(eprelName + ": processed 1 (failed 0");
 	}
 
+	/**
+	 * GOU-2273: an Icecat failure used to skip EPREL, Wikidata and Amazon for the product.
+	 */
 	@ParameterizedTest
 	@ValueSource(ints = { 1, 4 })
-	void aFailingCompletionStopsTheFollowingOnesOfTheProduct(int concurrency) {
+	void aFailingCompletionDoesNotStopTheFollowingOnesOfTheProduct(int concurrency) {
 		Set<Product> products = products(1);
-		when(eprel.process(any(), any())).thenThrow(new IllegalStateException("boom"));
+		Product product = products.iterator().next();
+		when(icecat.process(any(), any())).thenThrow(new IllegalStateException("boom"));
+		when(eprel.process(any(), any())).thenReturn(true);
 
 		CompletionTimings timings = facade(concurrency).processAll(products, vertical());
 
+		String icecatName = icecat.getClass().getSimpleName();
+		String eprelName = eprel.getClass().getSimpleName();
 		assertThat(timings.products()).isEqualTo(1);
-		assertThat(timings.processed(eprel.getClass().getSimpleName())).isEqualTo(1);
-		assertThat(timings.summary()).contains("failed 1");
-		verify(wikidata, never()).process(any(), any());
-		verify(amazon, never()).process(any(), any());
+		assertThat(timings.processed(icecatName)).isEqualTo(1);
+		assertThat(timings.summary()).contains(icecatName + ": processed 1 (failed 1")
+				.contains(eprelName + ": processed 1 (failed 0");
+		verify(eprel).process(any(), eq(product));
+		verify(wikidata).process(any(), eq(product));
+		verify(amazon).process(any(), eq(product));
 	}
 
 	private CompletionFacadeService facade(int concurrency) {

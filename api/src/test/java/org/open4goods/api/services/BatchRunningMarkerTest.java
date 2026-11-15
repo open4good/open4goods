@@ -105,9 +105,15 @@ class BatchRunningMarkerTest {
 		assertThat(presentDuringVertical).containsExactly(true);
 		assertThat(file).doesNotExist();
 
+		// A failing vertical is logged and skipped (GOU-2273): the batch ends normally
 		doAnswer(invocation -> {
 			throw new IllegalStateException("vertical failed");
 		}).when(service).batch(any(VerticalConfig.class));
+
+		service.batch();
+		assertThat(file).doesNotExist();
+
+		when(verticals.getConfigsWithoutDefault()).thenThrow(new IllegalStateException("config failed"));
 
 		assertThatThrownBy(service::batch).isInstanceOf(IllegalStateException.class);
 		assertThat(file).doesNotExist();

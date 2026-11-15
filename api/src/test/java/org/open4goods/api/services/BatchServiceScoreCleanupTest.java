@@ -144,4 +144,24 @@ class BatchServiceScoreCleanupTest {
 
 		verify(repository).countScoredOutsideVerticals(Set.of("tv"));
 	}
+
+	/**
+	 * GOU-2273: a vertical that fails (here an Elasticsearch error while loading it) is logged and skipped. It no
+	 * longer stops the next verticals nor the cleanup.
+	 */
+	@Test
+	void aFailingVerticalStopsNeitherTheNextOnesNorTheCleanup() {
+		VerticalConfig tv = new VerticalConfig();
+		tv.setId("tv");
+		VerticalConfig oven = new VerticalConfig();
+		oven.setId("oven");
+		when(verticals.getConfigsWithoutDefault()).thenReturn(List.of(tv, oven));
+		when(repository.getProductsMatchingVerticalId(tv)).thenThrow(new IllegalStateException("es timeout"));
+		when(repository.getProductsMatchingVerticalId(oven)).thenAnswer(call -> Stream.empty());
+
+		batch.batch();
+
+		verify(repository).getProductsMatchingVerticalId(oven);
+		verify(repository).countScoredOutsideVerticals(Set.of("tv", "oven"));
+	}
 }
