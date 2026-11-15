@@ -27,7 +27,7 @@ Prérequis dans l'environnement GitHub `prod` :
 2. **`mode: apply`** : envoie `/opt/open4goods/opendata/{gtin,isbn}.zip` d'abord vers la clé temporaire
    `s3://nudger-opendata/.staging/{gtin,isbn}-open-data.zip`, avec `Content-Type: application/zip`,
    `Content-Disposition: attachment`, `Cache-Control: public, max-age=86400` et la métadonnée `sha256`
-   (`--header-upload "X-Amz-Meta-Sha256: …"` ; les métadonnées système du fichier de prod, uid, gid, mode et dates,
+   (`--header-upload "X-Amz-Meta-Sha256: {sha256}"` ; les métadonnées système du fichier de prod, uid, gid, mode et dates,
    ne sont jamais copiées). Le processus tourne en `nice -n 19` / `ionice -c3`, débit montant limité par `upload_limit`
    (défaut 2 Mio/s).
 3. **Vérification puis renommage** : l'objet temporaire est relu en entier (sans limite de débit) et son sha256
