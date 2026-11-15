@@ -92,7 +92,6 @@
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
 # | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | ui        | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
-# | ui        | OPEN_DATA_REDIRECT_BASE_URL     | tree    | open-data-config.redirect-base-url (GitHub variable, not a secret)             | optional |
 # | front-api | GOOGLE_SSO_CLIENT_ID            | env     | FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID (front.security.google-sso.client-id)      | required |
 # | front-api | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | front-api | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -105,7 +104,6 @@
 # | front-api | FRONT_API_GITHUB_TOKEN          | tree    | feedback.github.access-token                                                   | optional |
 # | front-api | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | front-api | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
-# | front-api | OPEN_DATA_PUBLIC_BASE_URL       | tree    | open-data-config.public-base-url (GitHub variable, not a secret)               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
@@ -195,7 +193,6 @@ ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
 ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 ui IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
-ui OPEN_DATA_REDIRECT_BASE_URL tree open-data-config.redirect-base-url optional
 front-api GOOGLE_SSO_CLIENT_ID env FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID required
 front-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 front-api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -208,7 +205,6 @@ front-api O4G_CAPTCHA_SECRET tree captcha.secret-key optional
 front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
 front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 front-api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
-front-api OPEN_DATA_PUBLIC_BASE_URL tree open-data-config.public-base-url optional
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
