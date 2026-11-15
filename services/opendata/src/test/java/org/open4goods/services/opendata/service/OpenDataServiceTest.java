@@ -330,6 +330,17 @@ class OpenDataServiceTest {
     }
 
     @Test
+    void corruptedOfferNamesShouldBeSkippedInExports() throws Exception {
+        Product product = buildProduct("1234567890123", BarcodeType.GTIN_13);
+        product.setOfferNames(new HashSet<>(Set.of("P\u00BF\u00BAcheur", "bad \uFFFD", "Chapeau de p\u00EAcheur")));
+        assertThat(invokeMapper("toGtinEntry", product)[3]).isEqualTo("Chapeau de p\u00EAcheur");
+        assertThat(invokeMapper("toIsbnEntry", product)[1]).isEqualTo("Chapeau de p\u00EAcheur");
+
+        product.setOfferNames(new HashSet<>(Set.of("V\u00BF\u00BFlo")));
+        assertThat(invokeMapper("toGtinEntry", product)[3]).isEmpty();
+    }
+
+    @Test
     void csvMappersShouldHandleMissingData() throws Exception {
         Product product = Mockito.mock(Product.class);
         when(product.getAttributes()).thenReturn(null);
