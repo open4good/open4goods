@@ -41,17 +41,8 @@ public class WarrantyParser extends AttributeParser {
     // Matches explicit units
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(ans?|years?|yrs?|a|y)\\b");
     private static final Pattern MONTH_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(mois?|months?|m)\\b");
-    private static final Set<String> IGNORED_VALUES = Set.of(
-            "donnee non specifiee",
-            "donnees non specifiees",
-            "non specifie",
-            "non specifiee",
-            "n a",
-            "na",
-            "nc",
-            "eur",
-            "-"
-    );
+    // Placeholders that carry no warranty, compared after normalize(). "eur" is specific to this parser.
+    private static final Set<String> IGNORED_VALUES = EmptyValuePlaceholders.with("eur");
 
     @Override
     public String parse(ProductAttribute attribute, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
