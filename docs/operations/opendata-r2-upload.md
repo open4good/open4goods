@@ -29,8 +29,9 @@ Prérequis dans l'environnement GitHub `prod` :
 3. **Vérification** : l'objet distant est relu en entier et son sha256 est comparé au sha256 local ; un écart fait
    échouer le job.
 
-Les identifiants passent en variables d'environnement (configuration rclone `RCLONE_CONFIG_R2_*`) : ils ne sont ni
-écrits sur disque ni affichés (secrets masqués par GitHub).
+Les identifiants passent en variables d'environnement (configuration rclone `RCLONE_CONFIG_R2_*`), envoyés par l'entrée
+standard SSH (`bash -s`, script `scripts/deploy/opendata-r2-upload.sh`) : ils n'apparaissent dans aucune ligne de
+commande (ni runner ni hôte), ne sont pas écrits sur disque et sont masqués dans les logs par GitHub.
 
 ## Coût
 
