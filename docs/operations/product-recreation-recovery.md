@@ -92,7 +92,11 @@ Expected among them: `7333394145372` (Electrolux E62LB200S) and
    `curl -X POST "$API/aggregate/verticals/washing-machine"`, then `oven`,
    and so on. It reloads the products whose categories match the vertical,
    restores the vertical when the EPREL group confirms it and regenerates the
-   slug. Check `8059019130255` (Hoover) and `8690842382758` (Leisure).
+   slug. It neither completes nor scores (step 4). Products are queued by
+   pages of 500, each page taking the newest realtime offers first, so offers
+   updated during the run are kept (GOU-2274). The call returns once the
+   products are queued. Check `8059019130255` (Hoover) and `8690842382758`
+   (Leisure).
 2. A product still without vertical after step 1 has no category matching its
    vertical any more. Read its categories with
    `curl "$ES/products-moustik/_doc/{gtin}?_source_includes=categoriesByDatasources"`

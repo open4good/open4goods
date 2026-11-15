@@ -31,13 +31,13 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Admin endpoints for batch operations (full-scan reprocessing, cleanup, AI batch job status).
- * Scoring and aggregation are in {@link ScoreController} and {@link AggregationController}.
+ * Scoring runs only within the batch; on-demand aggregation without scoring is in {@link AggregationController}.
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Tag(name = "Batch", description = "Trigger the full scoring and aggregation batch pipeline, data-cleanup routines, "
         + "and monitor AI (OpenAI) batch job status. "
-        + "Scoring-only and aggregation-only endpoints are in the Scoring and Aggregation groups respectively.")
+        + "Aggregation without scoring is in the Aggregation group.")
 public class BatchController {
 
     private final VerticalsConfigService verticalConfigService;
@@ -166,9 +166,11 @@ public class BatchController {
     @PostMapping("/batch/{vertical}")
     @Operation(
             summary = "Run the full batch pipeline for a specific vertical",
-            description = "Executes the complete batch pipeline (feed fetch, scoring, aggregation, AI completion) "
-                    + "scoped to the named vertical only. Faster than a global /batch run when only one category "
-                    + "needs to be refreshed.")
+            description = "Runs the 13:00 batch for the named vertical only: loads the products assigned to it, "
+                    + "completes (resources, Icecat, EPREL, Wikidata, Amazon), aggregates and scores them, runs the "
+                    + "ImpactScore checks, then queues them for full indexation with the newest realtime offers. "
+                    + "No feed is fetched. This is the on-demand way to recompute the scores of a vertical; do not "
+                    + "run it while the 13:00 batch runs.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Batch pipeline completed for the vertical"),
             @ApiResponse(responseCode = "404", description = "Vertical not found")

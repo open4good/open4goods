@@ -278,7 +278,6 @@ copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut
   script), le run passe à `FAILED` avec son curseur. Un produit supprimé depuis la lecture (404) n'est pas un échec :
   il compte dans `unchangedProducts`. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
 - La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
-- `sanitizeAll()` n'est pas utilisé.
 
 **Rapport du dry-run** (mesure 7.4 de GOU-2226). `report.labelCounts` donne les écritures prévues par valeur
 (`nature=SPARE_PART`, `nature=ACCESSORY`, `nature=absent`). `report.details` donne :
@@ -392,3 +391,24 @@ Rétention : 10 Mo par fichier, 10 archives `.gz` au plus, 100 Mo au total. `noh
 redémarrage, ce fichier survit aux redémarrages.
 Une complétion qui ne trouve rien a sa propre fenêtre : `api.eprelMissRefreshDays` (7 jours, ou recherche immédiate
 si le GTIN ou les modèles changent) pour EPREL, `wikidata.miss-refresh-in-days` (7 jours) pour Wikidata.
+
+## Agrégation à la demande d'une verticale
+
+`POST /aggregate/verticals/{vertical}`, et `POST /aggregate/verticals` pour toutes les verticales l'une après l'autre,
+appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
+[product-recreation-recovery](../docs/operations/product-recreation-recovery.md) s'en sert pour rendre leur verticale
+à des produits qui l'ont perdue.
+
+- **Chargement** (scroll) : les produits dont une `datasourceCategories` figure dans les `matchingCategories` de la
+  verticale, ou dont la verticale est déjà celle-ci. `BatchService.batch(vertical)` ne charge que les seconds.
+- **Traitement** : la chaîne d'agrégation standard seule (`StandardAggregator.onProduct`), qui rattache ou détache la
+  verticale. Ni complétion ni notation : les scores sont recalculés par le batch de 13 h ou par `POST /batch/{vertical}`,
+  seule notation à la demande.
+- **Écriture**, comme le batch (GOU-1709) : par pages de `BatchService.INDEXATION_PAGE_SIZE` (500),
+  `applyNewerOfferStates(page)` puis `addToFullindexationQueue(page)`. Une offre indexée ou mise en file pendant le run
+  n'est donc pas recouverte par celle lue au départ. Cela suppose que `onProduct` ne touche jamais `lastChange` (seul
+  un fragment le fait). La fenêtre restante est celle du batch.
+- Un produit qui lève `AggregationSkipException` est journalisé et n'est pas réécrit.
+- L'appel rend la main une fois les produits mis en file, pas une fois indexés. À lancer hors du batch de 13 h.
+
+Preuve : `AggregationFacadeServiceSanitizeVerticalTest`.
