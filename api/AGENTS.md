@@ -95,6 +95,10 @@ le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauveg
 on garde le prix le plus bas, et à prix égal l'offre la plus récente : une offre renvoyée au même prix rafraîchit sa
 date (GOU-1699). Avant de retirer les offres expirées, on enregistre par état la date de la dernière offre vue
 (`price.lastOfferSeen`, qui ne recule jamais). front-api s'en sert pour dater le dernier prix d'une fiche sans offre.
+Un état (neuf, occasion) qui n'a plus d'offre perd sa tendance (clé retirée de `price.trends`, comme pour une fiche
+qui n'en a jamais eu), et son historique est quand même nettoyé : un prix par jour, sans prix à 0 ni entrée de plus
+de 2 ans. Une entrée d'historique sans date ou sans prix (données anciennes) est écartée au lieu de faire échouer
+l'agrégation (GOU-2277).
 
 Diagnostic en lecture seule des fiches qui ont perdu leurs offres : `scripts/diagnostics/stale_offers_report.py`
 (`product <gtin>`, `lost --days N`).
