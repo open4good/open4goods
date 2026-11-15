@@ -93,6 +93,33 @@ class ProductMappingServiceTest {
     }
 
     @Test
+    void attributesExcludedByDefaultConfigAreNotExposed() throws Exception {
+        long gtin = 9782017148654L;
+        Product product = new Product(gtin);
+        org.open4goods.model.attribute.ProductAttribute decitre = new org.open4goods.model.attribute.ProductAttribute();
+        decitre.setName("CLASSIFICATION DECITRE 1");
+        decitre.setValue("Romans");
+        org.open4goods.model.attribute.ProductAttribute editeur = new org.open4goods.model.attribute.ProductAttribute();
+        editeur.setName("EDITEUR");
+        editeur.setValue("Hachette");
+        Map<String, org.open4goods.model.attribute.ProductAttribute> all = new HashMap<>();
+        all.put("CLASSIFICATION DECITRE 1", decitre);
+        all.put("EDITEUR", editeur);
+        product.getAttributes().setAll(all);
+
+        VerticalConfig defaultConfig = new VerticalConfig();
+        org.open4goods.model.vertical.AttributesConfig attrsConfig = new org.open4goods.model.vertical.AttributesConfig();
+        attrsConfig.setExclusions(Set.of("CLASSIFICATION DECITRE 1"));
+        defaultConfig.setAttributesConfig(attrsConfig);
+        when(verticalsConfigService.getDefaultConfig()).thenReturn(defaultConfig);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = service.getProduct(gtin, Locale.FRENCH, Set.of("attributes"), DomainLanguage.fr);
+
+        assertThat(dto.attributes().allAttributes()).containsOnlyKeys("EDITEUR");
+    }
+
+    @Test
     void getProductReturnsDtoWithBase() throws Exception {
         long gtin = 321L;
         Product product = new Product(gtin);
