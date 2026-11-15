@@ -45,4 +45,21 @@ class OpenDataMappingServiceTest {
         assertThat(dto.recordCountValue()).isEqualTo(9_876L);
         assertThat(dto.downloadUrl()).isEqualTo("https://static.example/opendata/gtin-open-data.zip");
     }
+
+    @Test
+    void downloadUrlUsesPublicBaseUrlWhenConfigured() throws Exception {
+        OpenDataService openDataService = mock(OpenDataService.class);
+        OpenDataConfig openDataConfig = mock(OpenDataConfig.class);
+        ApiProperties apiProperties = mock(ApiProperties.class);
+
+        given(openDataConfig.gtinZipFile()).willReturn(new File("missing-gtin.zip"));
+        given(openDataConfig.isbnZipFile()).willReturn(new File("missing-isbn.zip"));
+        given(openDataConfig.getPublicBaseUrl()).willReturn("https://data.nudger.fr/");
+        given(apiProperties.getResourceRootPath()).willReturn("https://static.example");
+
+        OpenDataMappingService service = new OpenDataMappingService(openDataService, openDataConfig, apiProperties);
+
+        assertThat(service.gtin(DomainLanguage.en).downloadUrl()).isEqualTo("https://data.nudger.fr/gtin-open-data.zip");
+        assertThat(service.isbn(DomainLanguage.en).downloadUrl()).isEqualTo("https://data.nudger.fr/isbn-open-data.zip");
+    }
 }

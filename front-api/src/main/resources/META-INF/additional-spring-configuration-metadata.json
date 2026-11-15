@@ -682,6 +682,12 @@
       "defaultValue": false
     },
     {
+      "name": "open-data-config.public-base-url",
+      "type": "java.lang.String",
+      "description": "Public base URL of the dataset downloads (for example https://data.nudger.fr). Empty keeps the api.resource-root-path based links.",
+      "defaultValue": ""
+    },
+    {
       "name": "price-config.events",
       "type": "java.util.Map<java.lang.String,java.util.List<org.open4goods.model.priceevents.Event>>",
       "description": "Commercial events indexed by language code."

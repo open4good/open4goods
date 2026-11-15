@@ -36,6 +36,18 @@ public class OpenDataConfig {
     private Boolean generationEnabled = false;
 
     /**
+     * Public base URL (for example {@code https://data.nudger.fr}) used by front-api to build dataset download
+     * links. Empty keeps the legacy {@code api.resource-root-path} based links.
+     */
+    private String publicBaseUrl = "";
+
+    /**
+     * Base URL the ui application redirects (HTTP 301) dataset downloads to. Empty keeps the throttled local
+     * stream.
+     */
+    private String redirectBaseUrl = "";
+
+    /**
      * Root folder where OpenData assets are stored.
      */
     private String rootFolder = File.separator + "opt" + File.separator + "open4goods" + File.separator;
@@ -88,6 +100,22 @@ public class OpenDataConfig {
 
 	public boolean isGenerationEnabled() {
         return Boolean.TRUE.equals(generationEnabled);
+    }
+
+    public String getPublicBaseUrl() {
+        return publicBaseUrl;
+    }
+
+    public void setPublicBaseUrl(String publicBaseUrl) {
+        this.publicBaseUrl = publicBaseUrl;
+    }
+
+    public String getRedirectBaseUrl() {
+        return redirectBaseUrl;
+    }
+
+    public void setRedirectBaseUrl(String redirectBaseUrl) {
+        this.redirectBaseUrl = redirectBaseUrl;
     }
 
     public String getRootFolder() {
