@@ -66,6 +66,9 @@ public class BackfillEngine {
 	/** Number of product ids reported as examples. */
 	static final int SAMPLE_SIZE = 20;
 
+	/** Failed updates logged one by one per bulk; the others are only counted by status and type. */
+	static final int LOGGED_FAILURES_PER_BULK = 5;
+
 	/** Conflicts with a concurrent update of the same product (ingestion) are retried this many times. */
 	static final int RETRY_ON_CONFLICT = 3;
 
@@ -321,6 +324,8 @@ public class BackfillEngine {
 			throw e;
 		}
 		boolean backpressure = false;
+		int failures = 0;
+		Map<String, Integer> failuresByType = new LinkedHashMap<>();
 		for (BulkResponseItem item : response.items()) {
 			if (item.error() == null) {
 				if ("noop".equals(item.result())) {
@@ -330,15 +335,29 @@ public class BackfillEngine {
 				}
 			} else {
 				counters.failed++;
+				failures++;
 				backpressure |= item.status() == 429;
-				logger.error("Backfill {}: update of product {} failed ({}): {}", operation.name(), item.id(),
-						item.status(), item.error().reason());
+				failuresByType.merge(item.status() + " " + item.error().type(), 1, Integer::sum);
+				if (failures <= LOGGED_FAILURES_PER_BULK) {
+					logger.error("Backfill {}: update of product {} failed ({}): {}", operation.name(), item.id(),
+							item.status(), item.error().reason());
+				}
 			}
+		}
+		if (failures > 0) {
+			logger.error("Backfill {}: {} of {} updates failed in this bulk, by status and type: {}", operation.name(),
+					failures, changes.size(), failuresByType);
 		}
 		if (backpressure) {
 			logger.warn("Backfill {}: Elasticsearch rejected updates with a 429, stopping", operation.name());
+			return true;
 		}
-		return backpressure;
+		if (failures * 2 > changes.size()) {
+			// Systematic failure (missing mapping, script error...): stop before failing millions of updates
+			throw new IllegalStateException("Backfill " + operation.name() + ": " + failures + " of " + changes.size()
+					+ " updates failed, stopping: " + failuresByType);
+		}
+		return false;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

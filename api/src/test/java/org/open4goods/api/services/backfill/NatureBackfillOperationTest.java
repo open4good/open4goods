@@ -39,7 +39,7 @@ class NatureBackfillOperationTest {
 		BackfillChange change = operation(0).plan("1", Map.of("datasourceCategories", List.of(SPARE))).orElseThrow();
 
 		assertThat(change.script()).isEqualTo(NatureBackfillOperation.NATURE_SCRIPT);
-		assertThat(change.params()).containsEntry("nature", "SPARE_PART");
+		assertThat(change.params()).containsEntry("nature", "SPARE_PART").containsEntry("categories", List.of(SPARE));
 		assertThat(change.backup()).isNull();
 		assertThat(change.labels()).containsExactly("nature=SPARE_PART");
 	}
@@ -94,8 +94,8 @@ class NatureBackfillOperationTest {
 	void scopeIsTheLiveProductsWithoutVertical() {
 		String query = operation(0).query().toString();
 
-		assertThat(query).contains("lastChange").contains("now-2d").contains("offersCount").contains("datasourceCategories")
-				.contains("must_not").contains("vertical");
+		assertThat(query).contains("lastChange").contains("offersCount").contains("datasourceCategories")
+				.contains("must_not").contains("vertical").as("one fixed window for the whole run").doesNotContain("now");
 	}
 
 	@Test
@@ -105,6 +105,8 @@ class NatureBackfillOperationTest {
 		assertThatThrownBy(() -> new NatureBackfillOperation(verticals, 0, List.of(-0.1), 2))
 				.isInstanceOf(IllegalArgumentException.class);
 		assertThatThrownBy(() -> new NatureBackfillOperation(verticals, 0, null, 0))
+				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() -> new NatureBackfillOperation(verticals, Double.NaN, null, 2))
 				.isInstanceOf(IllegalArgumentException.class);
 	}
 }

@@ -261,15 +261,21 @@ des verticales. Sans cette reprise, les produits sans verticale n'auraient jamai
 l'agrégation (GOU-2233).
 
 **Périmètre.** Pas de `vertical`, `lastChange` dans les `lastChangeDays` derniers jours (défaut 2), `offersCount` > 0,
-et `datasourceCategories` présent. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
+et `datasourceCategories` présent. La borne de `lastChange` est fixée au lancement et sert à tout le run ; une reprise
+la recalcule. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
 
 **Calcul.** C'est celui de l'agrégation, `VerticalsConfigService.getNatureForCategories(categories, threshold)`, sans
-copie. `threshold` est le `natureMinMarkedCategoryShare` de la nature écrite ; sa valeur par défaut est celle de
-`_default.yml`.
+copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut est celle de `_default.yml`.
+- Un autre seuil n'est accepté qu'en dry-run.
+- En écriture, il est refusé (400) : l'agrégation recalcule la nature avec la valeur de `_default.yml`, et les natures
+  écrites avec un autre seuil changeraient de nouveau à l'agrégation suivante.
 
 **Écriture.**
 - Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
-- Le script ne touche pas un produit qui a reçu une verticale entre-temps.
+- Le script ne touche pas un produit qui a reçu une verticale entre-temps, ni un produit dont les
+  `datasourceCategories` ont changé depuis la lecture : l'agrégation a alors calculé sa nature sur les nouvelles.
+- Si plus de la moitié d'un bulk échoue sans 429 (mapping absent, erreur de script), le run passe à `FAILED` avec son
+  curseur. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
 - La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
 - `sanitizeAll()` n'est pas utilisé.
 
@@ -281,18 +287,26 @@ copie. `threshold` est le `natureMinMarkedCategoryShare` de la nature écrite ; 
 
 Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
 
-**Exécution en prod** (Ops). D'abord le dry-run, dont le résultat est publié sur GOU-2234. Ensuite l'écriture, avec le
-seuil fixé par le CTO, après le premier batch de 13 h qui suit le déploiement de #3649, hors des fenêtres de 13 h et de
-23 h :
+**Exécution en prod** (Ops), dans l'ordre :
+
+1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
+2. Lancer le dry-run et publier son résultat sur GOU-2234.
+3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
+   fenêtres de 13 h et de 23 h.
 
 ```bash
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature"
 curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
-curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false&threshold=0.5"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false"
 ```
 
-`NatureBackfillIT` (Testcontainers, hors CI) couvre le dry-run (comptes par seuil et exemple), l'écriture (seul
-`nature` change, et seulement sur les produits du périmètre), le second passage qui n'écrit rien, et le seuil 0,5.
+`NatureBackfillIT` (Testcontainers, hors CI) couvre :
+- le dry-run (comptes par seuil et exemple) ;
+- l'écriture (seul `nature` change, et seulement sur les produits du périmètre) ;
+- le second passage, qui n'écrit rien ;
+- le seuil 0,5 ;
+- les gardes du script (verticale reçue, catégories changées).
 
 ## Date de la dernière offre par datasource
 

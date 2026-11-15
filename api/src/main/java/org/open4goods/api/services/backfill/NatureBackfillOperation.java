@@ -22,8 +22,8 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
  * <p>A feed row that did not change only triggers a partial update, and the nightly batch only loads the products of
  * the verticals: without this backfill, the products without vertical never get the {@code nature} computed by
  * {@code TaxonomyRealTimeAggregationService} (GOU-2233). The scope is the live products without vertical: no
- * {@code vertical}, {@code lastChange} within {@code lastChangeDays}, {@code offersCount} above 0, and
- * {@code datasourceCategories} present.
+ * {@code vertical}, {@code lastChange} within {@code lastChangeDays} of the moment the operation is built (one fixed
+ * window for the whole run), {@code offersCount} above 0, and {@code datasourceCategories} present.
  *
  * <p>The nature comes from the same computation as the aggregation,
  * {@link VerticalsConfigService#getNatureForCategories(Collection, double)}, with the threshold
@@ -50,10 +50,11 @@ public class NatureBackfillOperation implements BackfillOperation {
 	static final int EXAMPLES_SIZE = 20;
 
 	/**
-	 * Sets or removes {@code nature}, unless the product got a vertical (it never has a nature then) or already holds
-	 * the value.
+	 * Sets or removes {@code nature}, unless the product got a vertical (it never has a nature then), its categories
+	 * changed since the scan read them (the aggregation has then computed its nature from the new ones), or it already
+	 * holds the value.
 	 */
-	static final String NATURE_SCRIPT = "if (ctx._source.vertical != null) { ctx.op = 'noop'; } "
+	static final String NATURE_SCRIPT = "if (ctx._source.vertical != null || ctx._source.datasourceCategories != params.categories) { ctx.op = 'noop'; } "
 			+ "else if (params.nature == null) { if (ctx._source.containsKey('nature')) { ctx._source.remove('nature'); } else { ctx.op = 'noop'; } } "
 			+ "else if (params.nature == ctx._source.nature) { ctx.op = 'noop'; } "
 			+ "else { ctx._source.nature = params.nature; }";
@@ -62,6 +63,9 @@ public class NatureBackfillOperation implements BackfillOperation {
 	private final double threshold;
 	private final List<Double> reportThresholds;
 	private final int lastChangeDays;
+
+	/** Lower bound of {@code lastChange}, fixed when the operation is built so that every page uses the same window. */
+	private final long lastChangeFrom;
 
 	/** Marked products per report threshold, then per nature value. */
 	private final Map<Double, Map<String, Long>> markedByThreshold = new TreeMap<>();
@@ -87,6 +91,7 @@ public class NatureBackfillOperation implements BackfillOperation {
 		this.threshold = threshold;
 		this.reportThresholds = thresholds;
 		this.lastChangeDays = lastChangeDays;
+		this.lastChangeFrom = System.currentTimeMillis() - java.time.Duration.ofDays(lastChangeDays).toMillis();
 		thresholds.forEach(t -> markedByThreshold.put(t, new TreeMap<>()));
 	}
 
@@ -98,7 +103,7 @@ public class NatureBackfillOperation implements BackfillOperation {
 	@Override
 	public Query query() {
 		return Query.of(q -> q.bool(b -> b
-				.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gte("now-" + lastChangeDays + "d"))))
+				.filter(f -> f.range(r -> r.date(d -> d.field("lastChange").gte(String.valueOf(lastChangeFrom)))))
 				.filter(f -> f.range(r -> r.number(n -> n.field("offersCount").gt(0d))))
 				.filter(f -> f.exists(e -> e.field("datasourceCategories")))
 				.mustNot(m -> m.exists(e -> e.field("vertical")))));
@@ -143,6 +148,8 @@ public class NatureBackfillOperation implements BackfillOperation {
 		}
 		Map<String, Object> params = new LinkedHashMap<>();
 		params.put("nature", targetValue);
+		// The categories as read: the script leaves the product alone when they changed since
+		params.put("categories", source.get("datasourceCategories"));
 		return Optional.of(new BackfillChange(NATURE_SCRIPT, params, null,
 				List.of("nature=" + (targetValue == null ? "absent" : targetValue))));
 	}
@@ -186,7 +193,7 @@ public class NatureBackfillOperation implements BackfillOperation {
 	}
 
 	private static void requireShare(double share) {
-		if (share < 0 || share > 1) {
+		if (!(share >= 0 && share <= 1)) {
 			throw new IllegalArgumentException("thresholds must be between 0 and 1");
 		}
 	}

@@ -104,16 +104,22 @@ public class BackfillController {
 			@RequestParam(defaultValue = "2000") int maxProductsPerSecond,
 			@Parameter(description = "Continue the last stopped, interrupted or failed run of the same mode from its cursor")
 			@RequestParam(defaultValue = "false") boolean resume,
-			@Parameter(description = "natureMinMarkedCategoryShare of the written nature (0 to 1); defaults to the value "
-					+ "of _default.yml")
+			@Parameter(description = "natureMinMarkedCategoryShare (0 to 1) of the nature; defaults to the value of "
+					+ "_default.yml, the only one accepted with dryRun=false (the aggregation uses it too)")
 			@RequestParam(required = false) Double threshold,
 			@Parameter(description = "Thresholds counted in the report (0 to 1), default 0 and 0.5")
 			@RequestParam(required = false) List<Double> reportThresholds,
 			@Parameter(description = "lastChange window, in days: the live products")
 			@RequestParam(defaultValue = "2") int lastChangeDays) {
 		try {
-			double share = threshold != null ? threshold
-					: verticalsConfigService.getConfigByIdOrDefault(null).getNatureMinMarkedCategoryShare();
+			double configured = verticalsConfigService.getConfigByIdOrDefault(null).getNatureMinMarkedCategoryShare();
+			if (!dryRun && threshold != null && Double.compare(threshold, configured) != 0) {
+				// The aggregation recomputes the nature with the configured threshold: writing with another one would
+				// make natures flip back on the next aggregation of each product
+				throw new IllegalArgumentException("threshold " + threshold + " differs from natureMinMarkedCategoryShare "
+						+ configured + " of _default.yml: set it there and deploy before writing");
+			}
+			double share = threshold != null ? threshold : configured;
 			NatureBackfillOperation operation = new NatureBackfillOperation(verticalsConfigService, share,
 					reportThresholds, lastChangeDays);
 			BackfillOptions options = new BackfillOptions(dryRun, batchSize, maxProductsPerSecond, resume);

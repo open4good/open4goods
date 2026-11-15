@@ -151,6 +151,26 @@ class NatureBackfillIT {
 		assertThat(source("1")).containsEntry("nature", "SPARE_PART");
 	}
 
+	/** The script re-checks, on the live document, what the scan read from its snapshot. */
+	@Test
+	void scriptLeavesAloneAProductThatChangedSinceItWasRead() throws IOException {
+		// Read without vertical with a spare part category, then aggregated again before the write
+		client.update(r -> r.index(INDEX).id("1").doc(Map.of("vertical", "washing-machine")), Map.class);
+		client.update(r -> r.index(INDEX).id("2").doc(Map.of("datasourceCategories", List.of("MAISON > DIVERS"))),
+				Map.class);
+
+		for (String id : List.of("1", "2")) {
+			String result = client.update(r -> r.index(INDEX).id(id).script(sc -> sc
+					.source(src -> src.scriptString(NatureBackfillOperation.NATURE_SCRIPT)).lang("painless")
+					.params("nature", co.elastic.clients.json.JsonData.of("SPARE_PART"))
+					.params("categories", co.elastic.clients.json.JsonData.of(originals.get(id).get("datasourceCategories")))),
+					Map.class).result().jsonValue();
+			assertThat(result).as(id).isEqualTo("noop");
+		}
+		assertThat(source("1")).doesNotContainKey("nature");
+		assertThat(source("2")).doesNotContainKey("nature");
+	}
+
 	private static NatureBackfillOperation operation(double threshold) {
 		return new NatureBackfillOperation(verticals, threshold, null, 2);
 	}

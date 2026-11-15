@@ -149,6 +149,21 @@ class BackfillEngineBackpressureTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void systematicItemFailuresFailTheRun() throws IOException {
+		when(client.search(any(Function.class), eq(Map.class))).thenReturn(page(hit("1", 10L), hit("2", 11L)));
+		when(client.bulk(any(Function.class))).thenReturn(BulkResponse.of(b -> b.took(1).errors(true).items(
+				BulkResponseItem.of(i -> i.operationType(OperationType.Update).index("products").id("1").status(400)
+						.error(e -> e.type("strict_dynamic_mapping_exception").reason("nature not allowed"))),
+				BulkResponseItem.of(i -> i.operationType(OperationType.Update).index("products").id("2").status(400)
+						.error(e -> e.type("strict_dynamic_mapping_exception").reason("nature not allowed"))))));
+
+		assertThatThrownBy(() -> engine().run(new DecitrePurgeOperation(), new BackfillOptions(false, 2, 0, false),
+				tmp.resolve("backup.jsonl"), null, () -> false, r -> { }))
+				.isInstanceOf(IllegalStateException.class).hasMessageContaining("strict_dynamic_mapping_exception");
+	}
+
+	@Test
 	void paceThatOutlivesThePointInTimeIsRefused() {
 		assertThatThrownBy(() -> engine().requirePaceWithinKeepAlive(5000, 1))
 				.isInstanceOf(IllegalArgumentException.class);
