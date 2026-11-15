@@ -81,10 +81,13 @@ for entry in "${entries[@]}"; do
   staging=".staging/${key}"
   # The overall budget bounds every transfer: `timeout` kills rclone (and the stage is deleted by the trap).
   left="$(remaining)" || exit 1
+  # Manifests are small and must follow a new pass quickly (same 300 s as the manifests of the publisher).
+  cache="public, max-age=86400"
+  if [ "${ctype}" = "application/json" ]; then cache="public, max-age=300"; fi
   hdrs=(
     --header-upload "Content-Type: ${ctype}"
     --header-upload "Content-Disposition: attachment; filename=\"${key}\""
-    --header-upload "Cache-Control: public, max-age=86400"
+    --header-upload "Cache-Control: ${cache}"
     --header-upload "X-Amz-Meta-Sha256: ${local_sha}"
   )
   # No --metadata: the prod file's system metadata (uid, gid, mode, dates) must not reach the object.
