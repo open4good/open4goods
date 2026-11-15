@@ -82,7 +82,7 @@ garde le verrou de génération pendant la publication : `POST /opendata/generat
 ### Bascule en échec (étape 4 ou 5)
 
 Un zip peut être le nouveau alors que `manifest.json` décrit encore l'ancien : le sha256 annoncé ne correspond plus au
-zip téléchargé. Réponse retenue pour le lot 1, sans déclencheur « publier seulement » :
+zip téléchargé. Réponse retenue pour le lot 1, sans déclencheur "publier seulement" :
 
 1. Le health `openData` passe DOWN (`publication: FAILED`) et un log ERROR `Switch to the new version failed` est écrit.
 2. Relancer un passage de génération à la main (`POST /opendata/generate`, 409 si un passage tourne) : il régénère,
