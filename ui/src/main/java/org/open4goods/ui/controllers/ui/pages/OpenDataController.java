@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.ui.controllers.ui.UiService;
 import org.open4goods.services.opendata.config.OpenDataConfig;
@@ -17,10 +16,8 @@ import org.open4goods.services.opendata.service.OpenDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -100,12 +97,6 @@ public class OpenDataController {
 		String message = exception.getMessage();
 		return message != null && (message.contains("Broken pipe") || message.contains("ClientAbortException")
 				|| message.contains("Connection reset by peer"));
-	}
-
-	@GetMapping(path = "/opendata/generate")
-	@PreAuthorize("hasAuthority('"+RolesConstants.ROLE_ADMIN+"')")
-	public void generate(final HttpServletResponse response) throws IOException {
-		openDataService.generateOpendata();
 	}
 
 }

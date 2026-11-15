@@ -3,6 +3,7 @@ package org.open4goods.services.opendata.config;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +63,61 @@ public class OpenDataConfig {
     private String tmpIsbnFilename = "isbn-tmp.zip";
     private String gtinFilename = "gtin.zip";
     private String tmpGtinFilename = "gtin-tmp.zip";
+
+    /**
+     * Sub-folder of {@link #openDataFolder} where a generation pass writes its files before the atomic rename. It is
+     * on the same file system as the published files and is deleted after each pass, successful or not.
+     */
+    private String tmpFolder = "tmp";
+
+    /**
+     * Manifest listing every dataset, written last: it is the validation point of a pass (GOU-2237 plan).
+     */
+    private String manifestFilename = "manifest.json";
+    private String gtinManifestFilename = "gtin-manifest.json";
+    private String isbnManifestFilename = "isbn-manifest.json";
+
+    /**
+     * Public object names of the zips (R2 keys, {@code data.nudger.fr/{name}}), written in the manifests.
+     */
+    private String gtinPublicFilename = "gtin-open-data.zip";
+    private String isbnPublicFilename = "isbn-open-data.zip";
+
+    /**
+     * Cron of the weekly generation, run by the api only (GOU-2248): Sunday 01:30, outside the batch window (from
+     * 12:30 server time) and the release window. {@code -} disables the schedule, the manual trigger stays.
+     */
+    private String generationCron = "0 30 1 * * SUN";
+
+    /**
+     * Time zone of {@link #generationCron}.
+     */
+    private String generationZone = "Europe/Paris";
+
+    /**
+     * Products per Elasticsearch page. A projected product weighs about 0.7 KB (1.6 KB max on a production sample of
+     * 200, 15/11/2026), so 2000 per page is about 1.5 MB, far below the 100 MB response buffer of the client
+     * (GOU-1134, GOU-1203, GOU-2249). Never raise the buffer instead.
+     */
+    private int exportPageSize = 2000;
+
+    /**
+     * Pause after each page, to leave Elasticsearch to the site search. Zero disables it. Must stay well below the
+     * scroll keep-alive.
+     */
+    private Duration pagePause = Duration.ofMillis(50);
+
+    /**
+     * Free space required before a pass, as a multiple of the size of the files currently published (GOU-823).
+     */
+    private double minFreeSpaceRatio = 1.5;
+
+    /**
+     * Minimum ratio of rows of a new dataset compared with the previous manifest and with the index count taken at the
+     * start of the pass. Below it, the pass fails and the published files stay (as {@code min-rows-ratio} in
+     * {@code IcecatIndexVersionManager}).
+     */
+    private double minRowsRatio = 0.9;
 
     public OpenDataConfig() {
 		super();
@@ -174,6 +230,102 @@ public class OpenDataConfig {
         this.tmpGtinFilename = tmpGtinFilename;
     }
 
+    public String getTmpFolder() {
+        return tmpFolder;
+    }
+
+    public void setTmpFolder(String tmpFolder) {
+        this.tmpFolder = tmpFolder;
+    }
+
+    public String getManifestFilename() {
+        return manifestFilename;
+    }
+
+    public void setManifestFilename(String manifestFilename) {
+        this.manifestFilename = manifestFilename;
+    }
+
+    public String getGtinManifestFilename() {
+        return gtinManifestFilename;
+    }
+
+    public void setGtinManifestFilename(String gtinManifestFilename) {
+        this.gtinManifestFilename = gtinManifestFilename;
+    }
+
+    public String getIsbnManifestFilename() {
+        return isbnManifestFilename;
+    }
+
+    public void setIsbnManifestFilename(String isbnManifestFilename) {
+        this.isbnManifestFilename = isbnManifestFilename;
+    }
+
+    public String getGtinPublicFilename() {
+        return gtinPublicFilename;
+    }
+
+    public void setGtinPublicFilename(String gtinPublicFilename) {
+        this.gtinPublicFilename = gtinPublicFilename;
+    }
+
+    public String getIsbnPublicFilename() {
+        return isbnPublicFilename;
+    }
+
+    public void setIsbnPublicFilename(String isbnPublicFilename) {
+        this.isbnPublicFilename = isbnPublicFilename;
+    }
+
+    public String getGenerationCron() {
+        return generationCron;
+    }
+
+    public void setGenerationCron(String generationCron) {
+        this.generationCron = generationCron;
+    }
+
+    public String getGenerationZone() {
+        return generationZone;
+    }
+
+    public void setGenerationZone(String generationZone) {
+        this.generationZone = generationZone;
+    }
+
+    public int getExportPageSize() {
+        return exportPageSize;
+    }
+
+    public void setExportPageSize(int exportPageSize) {
+        this.exportPageSize = exportPageSize;
+    }
+
+    public Duration getPagePause() {
+        return pagePause;
+    }
+
+    public void setPagePause(Duration pagePause) {
+        this.pagePause = pagePause;
+    }
+
+    public double getMinFreeSpaceRatio() {
+        return minFreeSpaceRatio;
+    }
+
+    public void setMinFreeSpaceRatio(double minFreeSpaceRatio) {
+        this.minFreeSpaceRatio = minFreeSpaceRatio;
+    }
+
+    public double getMinRowsRatio() {
+        return minRowsRatio;
+    }
+
+    public void setMinRowsRatio(double minRowsRatio) {
+        this.minRowsRatio = minRowsRatio;
+    }
+
     public Localisable<String, String> getBaseUrls() {
         return baseUrls;
     }
@@ -194,8 +346,15 @@ public class OpenDataConfig {
         return openDataDirectory().resolve(isbnFilename).toFile();
     }
 
+    /**
+     * @return the folder where a pass writes its files before the atomic rename
+     */
+    public Path tmpDirectory() {
+        return openDataDirectory().resolve(tmpFolder);
+    }
+
     public File tmpIsbnZipFile() {
-        return openDataDirectory().resolve(tmpIsbnFilename).toFile();
+        return tmpDirectory().resolve(tmpIsbnFilename).toFile();
     }
 
     public File gtinZipFile() {
@@ -203,7 +362,19 @@ public class OpenDataConfig {
     }
 
     public File tmpGtinZipFile() {
-        return openDataDirectory().resolve(tmpGtinFilename).toFile();
+        return tmpDirectory().resolve(tmpGtinFilename).toFile();
+    }
+
+    public File manifestFile() {
+        return openDataDirectory().resolve(manifestFilename).toFile();
+    }
+
+    public File gtinManifestFile() {
+        return openDataDirectory().resolve(gtinManifestFilename).toFile();
+    }
+
+    public File isbnManifestFile() {
+        return openDataDirectory().resolve(isbnManifestFilename).toFile();
     }
 
     /**
