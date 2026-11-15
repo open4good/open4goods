@@ -2,6 +2,7 @@ package org.open4goods.api.controller.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,7 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * Routes of {@link AggregationController} (GOU-2274): the vertical runs are kept and delegate to the paged
- * sanitisation of the facade, and the single-product run is unchanged.
+ * sanitisation of the facade, and the single-product run is unchanged. An unknown vertical is a 404 (GOU-2280).
  */
 @ExtendWith(MockitoExtension.class)
 class AggregationControllerTest {
@@ -41,7 +42,7 @@ class AggregationControllerTest {
 	void setUp() {
 		AggregationController controller = new AggregationController(aggregationFacadeService, verticalsConfigService,
 				repository);
-		mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(new ApiExceptionHandler()).build();
 	}
 
 	@Test
@@ -53,6 +54,13 @@ class AggregationControllerTest {
 		mockMvc.perform(post("/aggregate/verticals/washing-machine")).andExpect(status().isOk());
 
 		verify(aggregationFacadeService).sanitizeVertical(washingMachine);
+	}
+
+	@Test
+	void unknownVerticalIsNotFound() throws Exception {
+		mockMvc.perform(post("/aggregate/verticals/unknown-vertical")).andExpect(status().isNotFound());
+
+		verifyNoInteractions(aggregationFacadeService);
 	}
 
 	@Test

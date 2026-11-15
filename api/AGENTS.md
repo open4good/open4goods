@@ -452,5 +452,34 @@ appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
 - Un produit qui lève `AggregationSkipException` est journalisé et n'est pas réécrit.
 - L'appel rend la main une fois les produits mis en file, pas une fois indexés : attendre que la file se vide avant
   de vérifier ou d'enchaîner sur `POST /batch/{vertical}` (voir le runbook). À lancer hors du batch de 13 h.
+- Un id de verticale inconnu donne un 404 (`ResourceNotFoundException`), ici comme sur `POST /batch/{vertical}`
+  (GOU-2280).
+- `POST /aggregate/verticals` isole les verticales comme le batch : une verticale qui lève une exception est journalisée
+  en `ERROR` (`Sanitisation of vertical <id> failed`), les suivantes passent, et une dernière ligne `ERROR` liste les
+  verticales en échec (GOU-2280).
 
-Preuve : `AggregationFacadeServiceSanitizeVerticalTest`.
+Preuve : `AggregationFacadeServiceSanitizeVerticalTest`, `AggregationControllerTest`,
+`BatchControllerBatchVerticalTest`.
+
+## Chaîne d'agrégation standard partagée
+
+GOU-2280. `AggregationFacadeService` construit **une seule** `StandardAggregator` avec les 7 services temps réel
+(identité, taxonomie, attributs, coût d'usage, noms, prix, médias), et une chaîne réduite identité + taxonomie pour la
+classification du batch. `getStandardAggregator()` renvoie cette instance à l'ingestion temps réel (`updateOne`), aux
+4 complétions (Icecat, EPREL, Wikidata, Amazon), au batch (`aggregateProducts`) et à `sanitizeVertical`.
+
+- Elle est appelée en parallèle (worker de fragments, `api.completion-concurrency` threads de complétion, batch) :
+  un service de cette chaîne ne doit garder **aucun état modifiable** (champs `final` vers des collaborateurs
+  singletons sûrs entre threads, constantes immuables). Un état propre à un run va dans la chaîne de notation.
+- La chaîne de notation (`getScoringAggregator()`) reste construite à chaque run : ses services gardent un état
+  (`init`, `done`). Une exception dans `init` ou `done` arrête la notation, et le log nomme le service et la verticale.
+- Ni injection Spring ni cycle de vie dans les agrégateurs : chaque service reçoit ses collaborateurs par son
+  constructeur (pas d'`autowireBean`, pas de `close`).
+- Journaux dédiés (`<logs>/aggregation/`) : la chaîne partagée écrit dans `realtime.log`, quel que soit l'appelant
+  (`sanitisation.log` et les `*-aggregation.log` des complétions ne sont plus écrits), la classification dans
+  `categores_classif.log`, la notation dans `score.log`.
+- `IcecatFeatureResolver` et `IcecatIndexService` gardent leurs caches LRU bornés (`BoundedLruCache`), mais la requête
+  Elasticsearch d'un défaut de cache se fait hors du verrou : les threads de complétion ne s'attendent plus les uns les
+  autres. Deux défauts simultanés sur le même nom font deux lectures, et la première valeur stockée gagne.
+
+Conception : [ADR 0004](../docs/adr/0004-aggregation-service-design.md).

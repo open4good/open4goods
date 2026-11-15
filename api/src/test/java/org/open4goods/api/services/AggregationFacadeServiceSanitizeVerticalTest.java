@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -33,23 +34,17 @@ import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
-import org.open4goods.icecat.services.IcecatService;
-import org.open4goods.model.StandardiserService;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.product.ProductPartialUpdateField;
 import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.config.IndexationConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -60,7 +55,8 @@ import org.springframework.data.elasticsearch.core.query.Query;
  * {@code POST /aggregate/verticals/{vertical}}, reads the products of a vertical through a scroll and writes them
  * back after aggregation. Like the batch (GOU-1709), it queues them by pages, each page getting the newest realtime
  * offers just before being queued: an offer update indexed or queued during the run is never overwritten by the
- * offers the product was read with.
+ * offers the product was read with. {@code POST /aggregate/verticals} runs every vertical, and a failing one does
+ * not stop the next ones (GOU-2280).
  */
 class AggregationFacadeServiceSanitizeVerticalTest {
 
@@ -73,6 +69,7 @@ class AggregationFacadeServiceSanitizeVerticalTest {
 	Path logs;
 
 	private final VerticalConfig vertical = new VerticalConfig();
+	private final VerticalsConfigService verticalsConfigService = mock(VerticalsConfigService.class);
 	private ElasticsearchOperations elasticsearchOperations;
 	private ProductRepository repository;
 	private StandardAggregator aggregator;
@@ -103,12 +100,9 @@ class AggregationFacadeServiceSanitizeVerticalTest {
 
 		ApiProperties apiProperties = new ApiProperties();
 		apiProperties.setRootFolder(logs + "/");
-		facade = spy(new AggregationFacadeService(mock(EvaluationService.class), mock(StandardiserService.class),
-				mock(AutowireCapableBeanFactory.class), repository, apiProperties, mock(Gs1PrefixService.class),
-				mock(DataSourceConfigService.class), mock(VerticalsConfigService.class),
-				mock(BarcodeValidationService.class), mock(BrandService.class), mock(BlablaService.class),
-				mock(IcecatService.class), mock(IcecatFeatureResolver.class), mock(SerialisationService.class),
-				mock(BarcodeForensicsService.class)));
+		facade = spy(new AggregationFacadeService(repository, apiProperties, mock(Gs1PrefixService.class),
+				verticalsConfigService, mock(BarcodeValidationService.class), mock(BrandService.class),
+				mock(BlablaService.class), mock(IcecatFeatureResolver.class), mock(BarcodeForensicsService.class)));
 		aggregator = mock(StandardAggregator.class);
 		doReturn(aggregator).when(facade).getStandardAggregator();
 	}
@@ -279,5 +273,20 @@ class AggregationFacadeServiceSanitizeVerticalTest {
 		verify(repository, never()).applyNewerOfferStates(anyCollection());
 		verify(repository, never()).addToFullindexationQueue(anyCollection());
 		assertThat(streamClosed).isTrue();
+	}
+
+	@Test
+	void failingVerticalDoesNotStopTheNextOnes() {
+		VerticalConfig failing = new VerticalConfig();
+		failing.setId("tv");
+		VerticalConfig next = new VerticalConfig();
+		next.setId("oven");
+		when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(failing, next));
+		doThrow(new IllegalStateException("Elasticsearch timeout")).when(facade).sanitizeVertical(failing);
+		doNothing().when(facade).sanitizeVertical(next);
+
+		facade.sanitizeAllVerticals();
+
+		verify(facade).sanitizeVertical(next);
 	}
 }

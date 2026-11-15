@@ -18,7 +18,6 @@ import org.open4goods.model.product.ProductTexts;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +41,10 @@ public class NamesAggregationService extends AbstractAggregationService {
 	/** Pattern for template placeholders like {@code {BRAND}}, {@code {DIAGONALE_POUCES}}. */
 	private static final Pattern TEMPLATE_PLACEHOLDER = Pattern.compile("\\{([A-Z0-9_]+)\\}");
 
-	private final VerticalsConfigService verticalService;
 	private final BlablaService blablaService;
 
-	public NamesAggregationService(final Logger logger,
-			final VerticalsConfigService verticalService,
-			final BlablaService blablaService) {
+	public NamesAggregationService(final Logger logger, final BlablaService blablaService) {
 		super(logger);
-		this.verticalService = verticalService;
 		this.blablaService = blablaService;
 	}
 

@@ -32,6 +32,10 @@ import org.slf4j.LoggerFactory;
  * configuration is re-resolved as soon as a service changes the product's vertical:
  * every later service then parses, indexes and scores against the vertical the
  * product actually belongs to rather than the one it had on entry.
+ *
+ * <p>One instance of the full chain is shared by the realtime ingestion, the completion
+ * services (up to {@code api.completion-concurrency} threads) and the batch (GOU-2280): the
+ * aggregator and its services hold no mutable state.
  */
 public class StandardAggregator extends AbstractAggregator {
 
@@ -63,9 +67,34 @@ public class StandardAggregator extends AbstractAggregator {
 	 * @throws AggregationSkipException if a service requests that this product be skipped
 	 */
 	public Product onDatafragment(final DataFragment fragment, final Product data) throws AggregationSkipException {
-
 		logger.debug("Incrementing Product with {} DataFragment and using {} services", fragment, services.size());
+		return runChain(data, (service, vConf) -> service.onDataFragment(fragment, data, vConf));
+	}
 
+	/**
+	 * Re-derives computed product fields without a fragment input, running every
+	 * registered service's {@code onProduct} hook in sequence.
+	 *
+	 * <p>Used during batch sanitisation to re-apply aggregation logic to products
+	 * already stored in Elasticsearch. Same error handling as
+	 * {@link #onDatafragment(DataFragment, Product)}.
+	 *
+	 * @param data product to update; modified in-place
+	 * @return {@code data} for chaining convenience
+	 * @throws AggregationSkipException if a service requests that this product be skipped
+	 */
+	public Product onProduct(final Product data) throws AggregationSkipException {
+		logger.debug("Updating product using {} services", services.size());
+		return runChain(data, (service, vConf) -> service.onProduct(data, vConf));
+	}
+
+	/**
+	 * Runs {@code call} for every service, in order, with the configuration of the product's
+	 * current vertical, re-resolved before a service when an earlier one changed the vertical.
+	 * An {@link AggregationSkipException} stops the chain and is re-thrown; any other exception
+	 * is logged and the next service runs.
+	 */
+	private Product runChain(final Product data, final ServiceCall call) throws AggregationSkipException {
 		String verticalId = data.getVertical();
 		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
 		for (final AbstractAggregationService service : services) {
@@ -75,7 +104,7 @@ public class StandardAggregator extends AbstractAggregator {
 					vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
 					logger.debug("Vertical changed to {} during aggregation, re-resolved its configuration", verticalId);
 				}
-				service.onDataFragment(fragment, data, vConf);
+				call.apply(service, vConf);
 			} catch (AggregationSkipException e) {
 				throw e;
 			} catch (final Exception e) {
@@ -86,38 +115,9 @@ public class StandardAggregator extends AbstractAggregator {
 		return data;
 	}
 
-	/**
-	 * Re-derives computed product fields without a fragment input, running every
-	 * registered service's {@code onProduct} hook in sequence.
-	 *
-	 * <p>Used during batch sanitisation to re-apply aggregation logic to products
-	 * already stored in Elasticsearch.
-	 *
-	 * @param data product to update; modified in-place
-	 * @return {@code data} for chaining convenience
-	 * @throws AggregationSkipException if a service requests that this product be skipped
-	 */
-	public Product onProduct(final Product data) throws AggregationSkipException {
-
-		logger.debug("Updating product using {} services", services.size());
-
-		String verticalId = data.getVertical();
-		VerticalConfig vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
-		for (final AbstractAggregationService service : services) {
-			try {
-				if (!Objects.equals(verticalId, data.getVertical())) {
-					verticalId = data.getVertical();
-					vConf = verticalConfigService.getConfigByIdOrDefault(verticalId);
-					logger.debug("Vertical changed to {} during aggregation, re-resolved its configuration", verticalId);
-				}
-				service.onProduct(data, vConf);
-			} catch (AggregationSkipException e) {
-				throw e;
-			} catch (final Exception e) {
-				logger.error("Aggregation service {} threw an exception while processing data {}",
-						service.getClass().getName(), data, e);
-			}
-		}
-		return data;
+	/** One hook of an aggregation service, called with the configuration of the product's current vertical. */
+	@FunctionalInterface
+	private interface ServiceCall {
+		void apply(AbstractAggregationService service, VerticalConfig vConf) throws AggregationSkipException;
 	}
 }

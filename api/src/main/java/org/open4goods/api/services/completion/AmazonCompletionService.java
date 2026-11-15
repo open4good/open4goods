@@ -116,7 +116,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
      * @param verticalConfigService vertical configuration service
      * @param apiProperties global API properties
      * @param dataSourceConfigService datasource configuration registry
-     * @param aggregationFacadeService aggregation facade used to build a realtime aggregator
+     * @param aggregationFacadeService aggregation facade providing the shared standard aggregator
      */
     public AmazonCompletionService(ProductRepository dataRepository, VerticalsConfigService verticalConfigService,
             ApiProperties apiProperties, DataSourceConfigService dataSourceConfigService,
@@ -133,8 +133,7 @@ public class AmazonCompletionService extends AbstractCompletionService {
         super(dataRepository, verticalConfigService, apiProperties.logsFolder(), apiProperties.aggLogLevel());
         this.amazonConfig = apiProperties.getAmazonConfig();
         this.amazonDatasource = resolveAmazonDatasource(dataSourceConfigService, amazonConfig);
-        this.aggregator = aggregationFacadeService.getStandardAggregator("amazon-aggregation");
-        this.aggregator.beforeStart();
+        this.aggregator = aggregationFacadeService.getStandardAggregator();
         this.paapiClient = paapiClient;
     }
 

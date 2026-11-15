@@ -65,9 +65,8 @@ class AttributeRealtimeAggregationServiceTest {
                 brandService = Mockito.mock(BrandService.class);
                 Mockito.when(brandService.resolve(Mockito.anyString(), Mockito.anyMap()))
                                 .thenAnswer(invocation -> new Brand(invocation.getArgument(0, String.class).toUpperCase()));
-                VerticalsConfigService verticalConfigService = Mockito.mock(VerticalsConfigService.class);
                 icecatFeatureResolver = Mockito.mock(IcecatFeatureResolver.class);
-                service = new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatFeatureResolver);
+                service = new AttributeRealtimeAggregationService(brandService, logger, icecatFeatureResolver);
 
                 verticalConfig = new VerticalConfig();
                 verticalConfig.setRequiredAttributes(Set.of("required_attr"));
