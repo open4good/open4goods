@@ -87,6 +87,16 @@ public class IcecatIndexServiceTest {
     }
 
     @Test
+    public void testSyncFromLoadersNotifiesTheReimportListeners() {
+        Runnable listener = Mockito.mock(Runnable.class);
+        indexService.addReimportListener(listener);
+
+        indexService.syncFromLoaders();
+
+        Mockito.verify(listener).run();
+    }
+
+    @Test
     public void testToFeatureDocumentMapsNameAndType() throws Exception {
         Name nameEn = new Name();
         nameEn.setLangid(BigInteger.valueOf(1));

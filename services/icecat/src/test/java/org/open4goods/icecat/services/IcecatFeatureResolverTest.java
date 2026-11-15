@@ -109,4 +109,25 @@ class IcecatFeatureResolverTest {
         assertThat(sizes[0]).isEqualTo(1);
         assertThat(sizes[1]).isEqualTo(1);
     }
+
+    /** GOU-2306: a reimport of the Icecat features empties both caches, so the next lookups read the new index. */
+    @Test
+    void reimportEmptiesTheCaches() {
+        IcecatIndexService indexService = mock(IcecatIndexService.class);
+        IcecatFeatureDocument document = new IcecatFeatureDocument();
+        document.setId(46);
+        when(indexService.findFeaturesByNormalizedName("COULEUR")).thenReturn(List.of(document));
+        org.mockito.ArgumentCaptor<Runnable> listener = org.mockito.ArgumentCaptor.forClass(Runnable.class);
+
+        IcecatFeatureResolver resolver = new IcecatFeatureResolver(indexService);
+        verify(indexService).addReimportListener(listener.capture());
+        resolver.resolveFeatureName("Couleur");
+        assertThat(resolver.cacheSizes()).containsExactly(1, 1);
+
+        listener.getValue().run();
+
+        assertThat(resolver.cacheSizes()).containsExactly(0, 0);
+        resolver.resolveFeatureName("Couleur");
+        verify(indexService, times(2)).findFeaturesByNormalizedName("COULEUR");
+    }
 }

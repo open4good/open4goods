@@ -66,6 +66,9 @@ public class IcecatIndexService {
     /** Lookups by normalized name, bounded; emptied when the feature index is reimported. */
     private final BoundedLruCache<String, List<IcecatFeatureDocument>> featureCache = new BoundedLruCache<>(10000);
 
+    /** Callbacks run when a reimport ends, so the caches built on this index can be emptied (GOU-2306). */
+    private final List<Runnable> reimportListeners = new java.util.concurrent.CopyOnWriteArrayList<>();
+
     public IcecatIndexService(
             IcecatConfiguration iceCatConfig,
             FeatureLoader featureLoader,
@@ -93,6 +96,25 @@ public class IcecatIndexService {
      * {@code /icecat/index/sync}); it is never called automatically at startup.
      */
     public void syncFromLoaders() {
+        try {
+            doSyncFromLoaders();
+        } finally {
+            // Also after a partial failure: an index may already have switched to its new version
+            reimportListeners.forEach(Runnable::run);
+        }
+    }
+
+    /**
+     * Registers a callback run at the end of every reimport (success or failure), for the caches that mirror
+     * this index (GOU-2306).
+     *
+     * @param listener callback, must not throw
+     */
+    public void addReimportListener(Runnable listener) {
+        reimportListeners.add(listener);
+    }
+
+    private void doSyncFromLoaders() {
         LOGGER.info("Syncing Icecat reference data to Elasticsearch");
         try {
             featureLoader.loadFeatureGroups();

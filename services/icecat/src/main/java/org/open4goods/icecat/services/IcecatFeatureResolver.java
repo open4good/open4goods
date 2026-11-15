@@ -40,6 +40,14 @@ public class IcecatFeatureResolver {
 
     public IcecatFeatureResolver(IcecatIndexService indexService) {
         this.indexService = indexService;
+        // A reimport of the Icecat features makes both caches stale (GOU-2306)
+        indexService.addReimportListener(this::clearCaches);
+    }
+
+    /** Empties both caches; a lookup in flight when this runs is not cached (generation of {@link BoundedLruCache}). */
+    void clearCaches() {
+        featureIdsByNormalizedName.clear();
+        featuresById.clear();
     }
 
     /**

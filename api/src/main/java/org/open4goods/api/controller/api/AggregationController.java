@@ -71,7 +71,7 @@ public class AggregationController {
     public void aggregateVertical(
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @PathVariable String vertical) throws InvalidParameterException, IOException, ResourceNotFoundException {
-        aggregationFacadeService.sanitizeVertical(knownVertical(vertical));
+        aggregationFacadeService.sanitizeVertical(KnownVertical.of(verticalConfigService, vertical));
     }
 
     @PostMapping("/aggregate/gtin/{gtin}")
@@ -90,18 +90,5 @@ public class AggregationController {
             @PathVariable Long gtin)
             throws InvalidParameterException, IOException, ResourceNotFoundException, AggregationSkipException {
         aggregationFacadeService.sanitizeAndSave(repository.getById(gtin));
-    }
-
-    /**
-     * @param vertical vertical identifier from the path
-     * @return the configuration of that vertical
-     * @throws ResourceNotFoundException when no vertical has this identifier (404, GOU-2280)
-     */
-    private VerticalConfig knownVertical(String vertical) throws ResourceNotFoundException {
-        VerticalConfig config = verticalConfigService.getConfigById(vertical);
-        if (config == null) {
-            throw new ResourceNotFoundException("Unknown vertical: " + vertical);
-        }
-        return config;
     }
 }
