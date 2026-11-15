@@ -182,6 +182,32 @@ networks, merchants without an active offer and duplicate domains.
   feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
   whose last offer predates it are missing and a warning is logged.
 
+## Source attribution
+
+`datasources.sources` of a product (GOU-2302) lists each source once: `name`,
+`portalUrl`, `license`, `licenseUrl` and `attribution`, sorted by name. The
+attribute sourcing (`ProductSourcedAttributeDto.datasourceName`) references it
+by name; the frontend sourcing tooltip and the "Sources" block of the product
+page read it.
+
+- **Sources**: the keys of `datasourceCodes` without
+  `Product.TECHNICAL_DATASOURCE_CODES`, read on the product itself
+  (`Product.sources` is only written on full indexation).
+- **Licence fields**: stated in the datasource configurations
+  (`DataSourceProperties`, open4goods-config `datasources/*.yml`), which only the
+  api loads. `DatasourceAttributionService` reads `GET /datasources` with the
+  `front.affiliation-partners` base URL and API key, keeps these five fields,
+  re-keys them by `name` (the api keys them by file name) and never logs the
+  response body.
+- **Portal URL**: the configured one, else the portal URL of the affiliation
+  partner of the same name (merchant feeds have no datasource file). Only
+  absolute `http(s)` URLs are exposed.
+- **Never guessed**: a blank or missing field is `null`; the frontend shows
+  nothing for it (no "unknown licence").
+- **When**: at startup then hourly, never in a user request. On failure the
+  previous snapshot is kept; until the first success the sources are listed
+  without licence.
+
 ## Google CSS dry run
 
 `front.css.*` (`CssProperties`, disabled by default) prepares the product pages sent to Google by the CSS API

@@ -47,13 +47,6 @@ import com.google.common.collect.Sets;
 
 public class IcecatCompletionService extends AbstractCompletionService {
 
-	/**
-	 * Suffix appended to {@link #getDatasourceName()} to record the negative-cache timestamp
-	 * (NOT_FOUND / RESTRICTED / ERROR outcomes), kept distinct from the success timestamp so
-	 * that {@link #shouldProcess(VerticalConfig, Product)} can gate each independently.
-	 */
-	private static final String MISS_SUFFIX = ".miss";
-
     private final IcecatCompletionConfig icecatConfig;
     private final StandardAggregator aggregator;
     private final IcecatLiveClient liveClient;
@@ -111,8 +104,15 @@ public class IcecatCompletionService extends AbstractCompletionService {
 		return "icecat.biz";
 	}
 
+	/**
+	 * Key of the negative-cache timestamp (NOT_FOUND / RESTRICTED / ERROR outcomes), kept distinct from the success
+	 * timestamp so that {@link #shouldProcess(VerticalConfig, Product)} can gate each independently. Declared in
+	 * {@link Product#TECHNICAL_DATASOURCE_CODES}, so it is never listed as a product source.
+	 *
+	 * @return {@link Product#ICECAT_MISS_CODE}
+	 */
 	private String missDatasourceName() {
-		return getDatasourceName() + MISS_SUFFIX;
+		return Product.ICECAT_MISS_CODE;
 	}
 
 	/**

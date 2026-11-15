@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime'
+import type { ProductSourceDto } from './ProductSourceDto'
+import {
+  ProductSourceDtoFromJSON,
+  ProductSourceDtoFromJSONTyped,
+  ProductSourceDtoToJSON,
+  ProductSourceDtoToJSONTyped,
+} from './ProductSourceDto'
+
 /**
  *
  * @export
@@ -37,6 +45,12 @@ export interface ProductDatasourcesDto {
    * @memberof ProductDatasourcesDto
    */
   favicons?: { [key: string]: string }
+  /**
+   * Sources contributing to the product (the keys of datasourceCodes), sorted by name, with their portal URL and the licence and attribution they state. The attribute sourcing references them by datasourceName.
+   * @type {Array<ProductSourceDto>}
+   * @memberof ProductDatasourcesDto
+   */
+  sources?: Array<ProductSourceDto>
 }
 
 /**
@@ -67,6 +81,10 @@ export function ProductDatasourcesDtoFromJSONTyped(
     descriptions:
       json['descriptions'] == null ? undefined : json['descriptions'],
     favicons: json['favicons'] == null ? undefined : json['favicons'],
+    sources:
+      json['sources'] == null
+        ? undefined
+        : (json['sources'] as Array<any>).map(ProductSourceDtoFromJSON),
   }
 }
 
@@ -86,5 +104,9 @@ export function ProductDatasourcesDtoToJSONTyped(
     datasourceCodes: value['datasourceCodes'],
     descriptions: value['descriptions'],
     favicons: value['favicons'],
+    sources:
+      value['sources'] == null
+        ? undefined
+        : (value['sources'] as Array<any>).map(ProductSourceDtoToJSON),
   }
 }

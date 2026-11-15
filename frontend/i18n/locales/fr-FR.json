@@ -2503,7 +2503,8 @@
           "conflicts": "Conflits détectés",
           "noConflicts": "Aucun conflit détecté"
         },
-        "tooltipAriaLabel": "Afficher les détails de sourcing"
+        "tooltipAriaLabel": "Afficher les détails de sourcing",
+        "license": "Licence : {license}"
       },
       "audit": {
         "title": "Audit des attributs indexés",
@@ -2547,6 +2548,11 @@
         "scrollLeft": "Faire défiler vers la gauche",
         "scrollRight": "Faire défiler vers la droite"
       }
+    },
+    "sources": {
+      "title": "Sources des données",
+      "subtitle": "Les informations de cette fiche proviennent de ces sources. Leur licence et leur mention d'attribution sont indiquées quand elles les précisent.",
+      "license": "Licence : {license}"
     },
     "hero": {
       "aiSummary": {

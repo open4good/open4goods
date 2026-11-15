@@ -195,6 +195,16 @@
             <ProductDocumentationSection :pdfs="product.resources.pdfs" />
           </section>
 
+          <!-- Last public section, rendered from the SSR payload: it never
+               pushes content already displayed (CLS, GOU-2302). -->
+          <section
+            v-if="product.datasources?.sources?.length"
+            :id="sectionIds.sources"
+            class="product-page__section"
+          >
+            <ProductSourcesSection :sources="product.datasources.sources" />
+          </section>
+
           <section
             v-if="showAdminSection"
             :id="sectionIds.adminPanel"
@@ -269,6 +279,7 @@ import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
+import { provideProductSources } from '~/composables/useProductSources'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
@@ -295,6 +306,9 @@ const ProductAlternatives = defineAsyncComponent(
 )
 const ProductDocumentationSection = defineAsyncComponent(
   () => import('~/components/product/ProductDocumentationSection.vue')
+)
+const ProductSourcesSection = defineAsyncComponent(
+  () => import('~/components/product/ProductSourcesSection.vue')
 )
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
@@ -337,6 +351,8 @@ const PRODUCT_COMPONENTS = [
   'eprel',
   'attributes',
   'timeline',
+  // Sources with their licence and attribution (GOU-2302).
+  'datasources',
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
@@ -428,6 +444,9 @@ if (error.value?.statusCode === 404) {
 }
 
 const product = computed(() => productData.value)
+
+// Licence and portal of each source, read by every sourcing tooltip (GOU-2302).
+provideProductSources(() => product.value?.datasources?.sources)
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
@@ -1758,6 +1777,7 @@ const sectionIds = {
   attributes: 'caracteristiques',
   vigilance: 'vigilance',
   docs: 'documentation',
+  sources: 'sources',
   adminPanel: 'admin-panel',
   adminJson: 'admin-json',
   adminDatasources: 'admin-datasources',

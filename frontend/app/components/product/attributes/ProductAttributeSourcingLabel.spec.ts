@@ -3,20 +3,36 @@ import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 import { defineComponent, h, reactive, ref } from 'vue'
 import ProductAttributeSourcingLabel from './ProductAttributeSourcingLabel.vue'
+import {
+  indexProductSources,
+  productSourcesKey,
+} from '~/composables/useProductSources'
 import type {
   ProductAttributeSourceDto,
+  ProductSourceDto,
   ProductSourcedAttributeDto,
 } from '~~/shared/api-client'
 
 const VTooltipStub = defineComponent({
   name: 'VTooltipStub',
-  props: { text: { type: String, default: '' } },
+  props: {
+    text: { type: String, default: '' },
+    interactive: { type: Boolean, default: false },
+  },
   setup(props, { slots }) {
     return () =>
-      h('div', { class: 'v-tooltip-stub', 'data-text': props.text }, [
-        slots.activator?.({ props: {} }),
-        h('div', { class: 'v-tooltip-stub__content' }, slots.default?.()),
-      ])
+      h(
+        'div',
+        {
+          class: 'v-tooltip-stub',
+          'data-text': props.text,
+          'data-interactive': String(props.interactive),
+        },
+        [
+          slots.activator?.({ props: {} }),
+          h('div', { class: 'v-tooltip-stub__content' }, slots.default?.()),
+        ]
+      )
   },
 })
 
@@ -108,6 +124,7 @@ const i18n = createI18n({
               noConflicts: 'No conflicts detected',
             },
             tooltipAriaLabel: 'Show sourcing details',
+            license: 'License: {license}',
           },
         },
       },
@@ -119,12 +136,20 @@ describe('ProductAttributeSourcingLabel', () => {
   const mountComponent = (
     sourcing?: ProductAttributeSourceDto | null,
     value = 'Fallback',
-    extraProps: Record<string, unknown> = {}
+    extraProps: Record<string, unknown> = {},
+    productSources?: ProductSourceDto[]
   ) =>
     mount(ProductAttributeSourcingLabel, {
       props: { sourcing, value, ...extraProps },
       global: {
         plugins: [i18n],
+        provide: productSources
+          ? {
+              [productSourcesKey as symbol]: ref(
+                indexProductSources(productSources)
+              ),
+            }
+          : {},
         stubs: {
           VTooltip: VTooltipStub,
           VBtn: VBtnStub,
@@ -247,5 +272,86 @@ describe('ProductAttributeSourcingLabel', () => {
       '.product-attribute-sourcing__tooltip-count'
     )
     expect(countLabel.text()).toContain('1 source')
+  })
+
+  describe('licence and link of the sources (GOU-2302)', () => {
+    const sourcing: ProductAttributeSourceDto = {
+      bestValue: '7.9',
+      conflicts: false,
+      sources: [
+        { datasourceName: 'fr-indice-durabilite', value: '7.9' },
+        { datasourceName: 'rakuten.com', value: '7.9' },
+      ],
+    }
+
+    it('shows the licence and the link of a source that states them', () => {
+      const wrapper = mountComponent(sourcing, '7.9', {}, [
+        {
+          name: 'fr-indice-durabilite',
+          portalUrl: 'https://www.data.gouv.fr/fr/datasets/indice/',
+          license: 'Licence Ouverte 2.0',
+          licenseUrl:
+            'https://www.etalab.gouv.fr/licence-ouverte-open-licence/',
+          attribution: 'Producteurs, via data.gouv.fr',
+        },
+        { name: 'rakuten.com' },
+      ])
+
+      const rows = wrapper.findAll('.v-table-stub tbody tr')
+      expect(rows).toHaveLength(2)
+
+      const sourceLink = rows[0].find(
+        'a.product-attribute-sourcing__source-link'
+      )
+      expect(sourceLink.attributes('href')).toBe(
+        'https://www.data.gouv.fr/fr/datasets/indice/'
+      )
+      expect(sourceLink.attributes('rel')).toContain('noopener')
+      expect(sourceLink.text()).toBe('fr-indice-durabilite')
+
+      const license = rows[0].find(
+        '.product-attribute-sourcing__source-license'
+      )
+      expect(license.text()).toBe('License: Licence Ouverte 2.0')
+      expect(license.find('a').attributes('href')).toBe(
+        'https://www.etalab.gouv.fr/licence-ouverte-open-licence/'
+      )
+
+      expect(
+        rows[1].find('.product-attribute-sourcing__source-license').exists()
+      ).toBe(false)
+      expect(
+        wrapper.find('.v-tooltip-stub').attributes('data-interactive')
+      ).toBe('true')
+    })
+
+    it('shows no licence when the source states none', () => {
+      const wrapper = mountComponent(sourcing, '7.9', {}, [
+        { name: 'fr-indice-durabilite', license: null, licenseUrl: null },
+        { name: 'rakuten.com' },
+      ])
+
+      const rows = wrapper.findAll('.v-table-stub tbody tr')
+      expect(rows).toHaveLength(2)
+      expect(rows[0].text()).toContain('fr-indice-durabilite')
+      expect(
+        wrapper.find('.product-attribute-sourcing__source-license').exists()
+      ).toBe(false)
+      expect(
+        wrapper.find('.product-attribute-sourcing__source-link').exists()
+      ).toBe(false)
+      expect(wrapper.text()).not.toMatch(/license/i)
+      expect(
+        wrapper.find('.v-tooltip-stub').attributes('data-interactive')
+      ).toBe('false')
+    })
+
+    it('keeps the plain source names outside a product page', () => {
+      const wrapper = mountComponent(sourcing, '7.9')
+
+      const rows = wrapper.findAll('.v-table-stub tbody tr')
+      expect(rows[0].text()).toContain('fr-indice-durabilite')
+      expect(wrapper.find('a').exists()).toBe(false)
+    })
   })
 })

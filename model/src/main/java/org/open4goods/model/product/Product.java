@@ -156,11 +156,19 @@ public class Product implements Standardisable {
 	public static final String WIKIDATA_MISS_CODE = "wikidata.org.miss";
 
 	/**
-	 * Technical keys written in {@link #datasourceCodes} by the api completions, which are not datasources:
-	 * the EPREL search signature and the Wikidata negative cache (GOU-2099). Single list, shared by the completions,
-	 * {@link #refreshSources()} and the front-api.
+	 * Key of {@link #datasourceCodes} dating the last Icecat call that found nothing usable (not found, restricted
+	 * or error), kept apart from the {@code icecat.biz} success timestamp. Written by the Icecat completion.
 	 */
-	public static final Set<String> TECHNICAL_DATASOURCE_CODES = Set.of(EPREL_SEARCH_SIGNATURE_CODE, WIKIDATA_MISS_CODE);
+	public static final String ICECAT_MISS_CODE = "icecat.biz.miss";
+
+	/**
+	 * Technical keys written in {@link #datasourceCodes} by the api completions, which are not datasources:
+	 * the EPREL search signature, the Wikidata negative cache (GOU-2099) and the Icecat negative cache. Single list,
+	 * shared by the completions, {@link #refreshSources()} and the front-api, which lists the product sources
+	 * publicly (GOU-2302).
+	 */
+	public static final Set<String> TECHNICAL_DATASOURCE_CODES = Set.of(EPREL_SEARCH_SIGNATURE_CODE, WIKIDATA_MISS_CODE,
+			ICECAT_MISS_CODE);
 
 	/**
 	 * The sources contributing to this product: the keys of {@link #datasourceCodes} minus
