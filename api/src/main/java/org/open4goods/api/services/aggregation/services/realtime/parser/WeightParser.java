@@ -243,9 +243,9 @@ public class WeightParser extends AttributeParser {
                 }
                 // Lower plausibility bound, symmetric to the 5x max check: below minKg / 5 the value is a misread.
                 final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
-                if (weight.kilograms() < range.getMinKg() / LOWER_BOUND_DIVISOR) {
+                if (weight.kilograms() < range.minKg() / LOWER_BOUND_DIVISOR) {
                         LOGGER.debug("Rejected weight '{}' (datasource={}): {}kg is below min/{} ({}kg)", rawValue, datasource,
-                                        formatKg(weight.kilograms()), LOWER_BOUND_DIVISOR, range.getMinKg());
+                                        formatKg(weight.kilograms()), LOWER_BOUND_DIVISOR, range.minKg());
                         return null;
                 }
                 return weight;
