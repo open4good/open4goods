@@ -230,11 +230,11 @@ complément, `GET /eprel/search?gtin=0&model=A3094` (`EprelController`) montre l
 
 Le mapping se fait par synonymes. `AttributesConfig.resolveFromProductAttribute` consulte les
 identifiants Icecat, puis `synonyms[<datasourceName>]`, puis `synonyms.all`. Les blocs
-`referentials.eprel.featureName` alimentent `byEprelFeatureGroup`, qui n'est lu nulle part dans la
-résolution (vérifié par grep) : ils documentent sans mapper. Les noms entrants passent par
-`IdHelper.normalizeAttributeName` (majuscules, sans accent, séparateurs conservés). Les
-synonymes vont sous `synonyms.eprel`, pas sous `all`, pour éviter les collisions avec les
-marchands.
+`referentials.eprel.featureName` ne sont pas lus par la résolution : ils documentent sans mapper
+(l'index `byEprelFeatureGroup`, construit mais jamais lu, a été supprimé par GOU-2279). Les noms
+entrants passent par `IdHelper.normalizeAttributeName` (majuscules, sans accent, séparateurs
+conservés). Les synonymes vont sous `synonyms.eprel`, pas sous `all`, pour éviter les collisions
+avec les marchands.
 
 Nouveaux attributs dans `verticals/src/main/resources/attributes/` :
 

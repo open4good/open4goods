@@ -104,22 +104,20 @@ public class CompletionFacadeService {
 	}
 
 	/**
-	 * Runs every completion service on a product, in order. A service that throws stops the following ones for
-	 * this product, as before the timings were recorded.
+	 * Runs every completion service on a product, in order. A service that throws is logged and counted as
+	 * failed, and the following ones still run for this product (GOU-2273).
 	 */
 	private void complete(VerticalConfig vertical, Product product, CompletionTimings timings, int total, long start) {
-		String current = null;
-		long callStart = 0;
-		try {
-			for (AbstractCompletionService service : completionServices()) {
-				current = service.getClass().getSimpleName();
-				callStart = System.nanoTime();
+		for (AbstractCompletionService service : completionServices()) {
+			String name = service.getClass().getSimpleName();
+			long callStart = System.nanoTime();
+			try {
 				boolean processed = service.process(vertical, product);
-				timings.record(current, processed, System.nanoTime() - callStart);
+				timings.record(name, processed, System.nanoTime() - callStart);
+			} catch (Exception e) {
+				timings.recordFailure(name, System.nanoTime() - callStart);
+				logger.error("Error completing product {} with {}", product.getId(), name, e);
 			}
-		} catch (Exception e) {
-			timings.recordFailure(current, System.nanoTime() - callStart);
-			logger.error("Error completing product {}", product.getId(), e);
 		}
 		long done = timings.productDone();
 		if (done % PROGRESS_INTERVAL == 0) {

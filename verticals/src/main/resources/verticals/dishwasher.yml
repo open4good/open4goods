@@ -621,9 +621,6 @@ aggregationConfiguration:
   "attributes.indexed.WEIGHT":
     interval: 2
     buckets: 12
-  "attributes.indexed.USAGE_COST_YEAR.numericValue":
-    interval: 10
-    buckets: 12
 
   "price.minPrice.price":
     interval: 50

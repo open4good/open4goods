@@ -525,7 +525,7 @@ Trouvées en préparant ces plans, et indépendantes des nouvelles sources :
 - `EprelSearchService` filtre sur `productGroup`, que l'import ne renseigne pas lui-même et qui
   est déclaré `index = false` : hypothèse d'un appariement smartphone impossible (plan 05,
   section 3.3), à vérifier sur l'ES de prod.
-- `AttributesConfig.byEprelFeatureGroup` est construit mais jamais lu.
+- `AttributesConfig.byEprelFeatureGroup` était construit mais jamais lu (supprimé par GOU-2279).
 - Les endpoints de dry-run EPREL décrits par ADR 0003 n'existent pas sur `main`.
 - `ProductCondition` ne connaît pas l'état reconditionné, et `min_price` mélange neuf et
   occasion (P0-8).

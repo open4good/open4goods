@@ -95,6 +95,10 @@ le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauveg
 on garde le prix le plus bas, et à prix égal l'offre la plus récente : une offre renvoyée au même prix rafraîchit sa
 date (GOU-1699). Avant de retirer les offres expirées, on enregistre par état la date de la dernière offre vue
 (`price.lastOfferSeen`, qui ne recule jamais). front-api s'en sert pour dater le dernier prix d'une fiche sans offre.
+Un état (neuf, occasion) qui n'a plus d'offre perd sa tendance (clé retirée de `price.trends`, comme pour une fiche
+qui n'en a jamais eu), et son historique est quand même nettoyé : un prix par jour, sans prix à 0 ni entrée de plus
+de 2 ans. Une entrée d'historique sans date ou sans prix (données anciennes) est écartée au lieu de faire échouer
+l'agrégation (GOU-2277).
 
 Diagnostic en lecture seule des fiches qui ont perdu leurs offres : `scripts/diagnostics/stale_offers_report.py`
 (`product <gtin>`, `lost --days N`).
@@ -308,6 +312,23 @@ curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/ba
 - le seuil 0,5 ;
 - les gardes du script (verticale reçue, catégories changées).
 
+## Génération open data
+
+GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services/opendata`) : `ui` et `front-api` gardent
+`open-data-config.generation-enabled: false`, et `OpenDataService` n'a pas de `@Scheduled`.
+
+- `OpenDataGenerationScheduler` : cron `open-data-config.generation-cron` (dimanche 01:30 Europe/Paris par défaut). Ne
+  le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
+- `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
+  est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
+- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size`, avec `page-pause`.
+  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+  ES (GOU-2249).
+- Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
+  `opendata_generation_failed`.
+
+Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
+
 ## Date de la dernière offre par datasource
 
 GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir
@@ -378,6 +399,18 @@ les met en file d'indexation complète. L'indexation temps réel continue pendan
 - Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
   vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
   l'indexation de la page peut recouvrir les champs calculés par le batch.
+
+Cohorte et isolation (GOU-2273) :
+
+- Seuls les produits avec offres encore dans la verticale après la classification sont complétés, et seuls ceux qui y
+  sont encore après l'agrégation (qui rejoue la taxonomie après EPREL) sont notés avec sa configuration et sa cohorte.
+  Un produit reclassé ailleurs est indexé sans être noté ni nettoyé : le batch de sa nouvelle verticale le notera.
+- Une verticale qui lève une exception (chargement, complétion, agrégation) est journalisée en `ERROR` et par une
+  ligne `Batch of vertical <id> : failed` ; les verticales suivantes et `clearScoresOutsideVerticals()` passent
+  quand même.
+- Une exception de notation sur un produit arrête la notation de toute la verticale (rien n'est indexé, les scores
+  ont été vidés au début) ; le log donne le produit et le service. En complétion, un service qui échoue n'empêche
+  plus les suivants pour ce produit.
 
 Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings`, à INFO dans `application.yml` malgré
 le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
