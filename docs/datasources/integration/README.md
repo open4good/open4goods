@@ -21,6 +21,31 @@ lang: fr
 > par défaut) ; ADR 0010 est remplacé par [ADR 0021](../../adr/0021-reference-datasets-and-projection.md) ;
 > les livres sont en attente ; l'ordre de priorité de Q4 est validé ; pas de carte Paperclip par
 > plan.
+>
+> **Décisions du 2026-11-15** (section 6, Q6 à Q8) : lecture en flux par défaut, index
+> `ref-<id>` seulement si une recherche à grande échelle l'exige (amendement d'ADR 0021) ;
+> filtre d'identifiants à deux niveaux dans `BarcodeValidationService` (P0-9) ; les mesures de
+> la section 9 sont confiées à Ops.
+> Les plans 01 à 15 décrivent encore un "import dans `ref-<id>`". Depuis le 2026-11-15, lire
+> "lecture en flux et instantané d'état" (section 3), sauf si le plan justifie un index. Chaque
+> plan est corrigé au démarrage de son lot.
+
+## 0. État d'avancement (2026-11-15)
+
+| Élément | État |
+|---|---|
+| Plan 05 (EPREL smartphones) | avancé par le programme ImpactScore : hypothèse `productGroup` infirmée (GOU-2042), champs EPREL mappés dont les cycles de batterie x100 (GOU-1891, #3596), table Apple (#3606). Appariement au 2026-11-12 : 939 smartphones sur 14 589 (6,4 %), Apple 27 sur 1 689, Samsung 382 sur 3 668 ; mesure complète après le batch du 2026-11-17 (GOU-2048). Restent : règle Samsung `/DS`, filtre `deviceType`, attribution (P0-4), colonnes d'export. |
+| Plan 01 (indice de durabilité) | lecture marchande seulement : attribut `DURABILITY_INDEX` (GOU-1892), critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (GOU-2041). L'import du fichier data.gouv n'est pas commencé. |
+| P0-1 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
+| Plans 02 à 04, 06 à 15 | non démarrés ; 09 et 10 en attente (Q2). |
+
+Recouvrements avec les lots d'agrégation en cours (GOU-2272) :
+
+| Prérequis | Lot qui touche les mêmes fichiers | Ordre |
+|---|---|---|
+| P0-1 (`BatchService`) | lot A (GOU-2273, #3665, fusionné le 2026-11-15) | possible dès maintenant |
+| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | possible dès maintenant |
+| P0-5, projection (chaîne d'agrégation) | S1 (GOU-2280) | après S1 |
 
 ## 1. Sommaire des plans
 
@@ -93,18 +118,28 @@ est donc accepté par cette voie. Le socle ci-dessous s'appuie sur ce fait.
 
 ## 3. Socle proposé : un mécanisme unique, plusieurs modes
 
-L'idée centrale : **chaque source est d'abord agrégée en entier dans son propre index de
-référence `ref-<id>`**. C'est là que se fait l'agrégation maximale, indépendamment de nos
-produits. La projection sur `Product` est une seconde étape, configurable par source. Elle
-peut seulement enrichir les produits existants, ou en créer : la création est le mode par
-défaut depuis le 2026-11-09 (Q1, section 6).
+L'idée centrale : **chaque source est lue en entier, en flux, à chaque passage**, depuis le
+fichier téléchargé (`RemoteFileCachingService`) ou l'API de la source. Chaque enregistrement
+part directement vers la projection sur `Product`, configurable par source. Elle peut
+seulement enrichir les produits existants, ou en créer : la création est le mode par défaut
+depuis le 2026-11-09 (Q1, section 6).
+
+Un petit **instantané d'état** par source, sur disque, garde pour chaque enregistrement son
+identifiant, son hash de contenu et son état (projeté, en attente, terminé), plus le nombre de
+lignes. Le passage suivant calcule le diff contre cet instantané : seuls les enregistrements
+nouveaux, modifiés ou disparus sont projetés.
+
+**Un index Elasticsearch `ref-<id>` n'est créé que si la source doit être interrogée à grande
+échelle**, comme EPREL (`eprel-products` : recherche par marque et modèle dans un gros
+catalogue). Le plan de la source le justifie. Décidé le 2026-11-15 (Q6), amendement d'ADR 0021.
+Aucun des plans 01 à 15 n'en a besoin à ce jour.
 
 ### 3.1 Modes d'intégration
 
 | Mode | Usage | Étapes |
 |---|---|---|
-| **R** (référentiel compact, moins de 1 M lignes) | data.gouv, RappelConso, Safety Gate, Ecolabel, ENERGY STAR, Open Products Facts, Open Prices | import complet dans `ref-<id>`, puis projection en **itérant le jeu de données**, par lots de GTIN |
-| **R+** (référentiel volumineux) | Open Library, data.bnf.fr (moisson SPARQL), Web Data Commons | export de notre ensemble de GTIN, filtrage du dump en flux contre cet ensemble, import des seules lignes utiles (ou de tout, en mode `CREATE`), projection comme R |
+| **R** (référentiel compact, moins de 1 M lignes) | data.gouv, RappelConso, Safety Gate, Ecolabel, ENERGY STAR, Open Products Facts, Open Prices | lecture en flux, diff contre l'instantané, puis projection en **itérant le jeu de données**, par lots de GTIN |
+| **R+** (référentiel volumineux) | Open Library, data.bnf.fr (moisson SPARQL), Web Data Commons | export de notre ensemble de GTIN, filtrage du dump en flux contre cet ensemble, projection des seules lignes utiles (ou de tout, en mode `CREATE`, sous plafond `max-created-per-run`), comme R |
 | **C** (completion par appel API) | eBay, Verified by GS1 | `AbstractCompletionService` existant, quotas, sélection des produits prioritaires |
 | **E** (extension d'un pipeline existant) | EPREL smartphones | configuration et mapping dans le pipeline EPREL |
 | **F** (flux marchand) | reconditionné via affiliation | chaîne des flux existante, avec l'état `productState` |
@@ -120,7 +155,7 @@ complet de l'index produits.
 Nouveau module `services/reference-datasets`, package
 `org.open4goods.services.referencedatasets`. Il est détecté automatiquement par l'api
 (`scanBasePackages="org.open4goods.services"`). Il suit la frontière d'ADR 0007 : le module
-possède le téléchargement, le parsing et les index ; il ne dépend jamais de `api`.
+possède le téléchargement, le parsing et l'instantané d'état ; il ne dépend jamais de `api`.
 
 ```text
 services/reference-datasets
@@ -129,13 +164,15 @@ services/reference-datasets
 │    Stream<ReferenceRecord> read(Path)  parse le fichier téléchargé
 │    List<URI> resolveDownloadUrls()     ex. via l'API data.gouv
 ├─ ReferenceRecord              record neutre (voir ci-dessous)
-├─ ReferenceIndexService        import dans ref-<id>-<horodatage>, contrôle, bascule d'alias ref-<id>
-│                               (même logique qu'IcecatIndexVersionManager), calcul du diff
-├─ ReferenceImportReport        lignes lues, rejetées, GTIN valides, disparus depuis l'import précédent
+├─ ReferenceSnapshotService     instantané d'état par source (identifiant, hash, état), diff,
+│                               garde min-rows-ratio avant toute écriture
+├─ ReferenceImportReport        lignes lues, rejetées, GTIN valides, créés, disparus depuis le passage précédent
 └─ config.yml.ReferenceDatasetsProperties   préfixe reference-datasets.<id>.*
+   (index ref-<id> optionnel, seulement si le plan le justifie : même logique
+   qu'IcecatIndexVersionManager)
 
 api
-├─ services/reference/ReferenceProjectionService   itère ref-<id>, multiGet par lots de 500,
+├─ services/reference/ReferenceProjectionService   lit le flux du provider, multiGet par lots de 500,
 │                                                  DataFragment synthétique, StandardAggregator,
 │                                                  attribution, réindexation
 ├─ services/reference/ReferenceMatcher             GTIN exact, puis marque (BrandService) + modèle,
@@ -166,10 +203,13 @@ Déroulé de la projection pour un produit trouvé :
 1. Construire un `DataFragment` avec `datasourceName = <id>`, `datasourceConfigName = <id>`, le
    GTIN en `referentielAttributes`, les `attributes` de l'enregistrement et des dates. Gabarit :
    `EprelCompletionService.initDataFragment`.
-2. Si `datasourceCodes[<id>]` vaut déjà le hash de contenu de l'enregistrement, ne rien faire.
+2. Si l'instantané porte déjà le même hash de contenu pour cet enregistrement, et qu'il est
+   projeté, ne rien lire ni écrire. Ce saut est **obligatoire** : une projection réécrit le
+   document produit entier (section 9). Seule exception : un rappel dont l'état `active` change
+   avec la date du jour (P0-6).
 3. Sinon, appeler `StandardAggregator.onDatafragment(df, product)`, écrire l'attribution
-   (section 4.4) et le hash, puis réindexer par lots.
-4. Pour un GTIN présent dans la version précédente de `ref-<id>` et absent de la nouvelle, ou
+   (P0-4) et le hash, puis réindexer par lots.
+4. Pour un enregistrement présent dans l'instantané précédent et absent du nouveau passage, ou
    passé à `ENDED` : `product.removeDatasourceData(<id>)`, retrait de l'attribution, réindexation.
    Exception : les rappels terminés restent en historique (P0-6).
 
@@ -189,9 +229,14 @@ Les deux consolidations data.gouv (01 et 02) partagent environ 160 colonnes. Une
 `AbstractDataGouvConsolidationProvider` **(à créer)** résout la ressource et lit le CSV.
 
 En mode `CREATE`, un GTIN inconnu part par `DataFragmentStoreService.queueDataFragment`, avec
-`url = recordUrl`, ce qui crée le produit par la voie standard. En mode `ENRICH_EXISTING`, il
-reste dans `ref-<id>` et sera projeté dès qu'un flux marchand créera le produit : la projection
-quotidienne le rattrape.
+`url = recordUrl`, ce qui crée le produit par la voie standard et le soumet au filtre
+d'identifiants (P0-9). En mode `ENRICH_EXISTING`, l'instantané le marque "en attente" ; chaque
+passage retente les enregistrements en attente, et la projection le rattrape dès qu'un flux
+marchand a créé le produit.
+
+Les enregistrements sans identifiant exploitable (marque et modèle seuls : 57 % des lignes TV
+de l'indice de durabilité) sont chargés en mémoire à chaque passage et appariés aux produits de
+la verticale, comme le font les completions.
 
 Les scores ne sont pas recalculés par la projection. Le batch quotidien
 (`BatchService.batch()`, 13 h) les recalcule, ou `POST /batch/{vertical}` à la demande.
@@ -205,8 +250,10 @@ reference-datasets:
     enabled: true
     cron: "0 30 4 * * *"          # après la consolidation data.gouv du matin
     projection: CREATE            # défaut décidé le 2026-11-09 (Q1) ; ENRICH_EXISTING par source
-    min-rows-ratio: 0.8           # refuse la bascule si la nouvelle version perd plus de 20 % des lignes
+    min-rows-ratio: 0.8           # arrête le passage, avant toute écriture, s'il perd plus de 20 % des lignes
     match: GTIN_THEN_BRAND_MODEL  # ou GTIN_ONLY
+    max-created-per-run: 5000     # plafond de créations par passage (P0-11)
+    search-index: false           # true seulement si le plan justifie un index ref-<id>
 ```
 
 Chaque source a aussi un fichier `open4goods-config/datasources/<id>.yml` sans bloc
@@ -224,7 +271,7 @@ chaîne `openfoodfacts` (prérequis P0-1). Liste : `fr-indice-durabilite`,
 
 ### P0-1 Supprimer le nettoyage "openfoodfacts" de `BatchService.clean()`
 
-`BatchService.clean()` (`api/.../services/BatchService.java:865`, marqué `TODO(p3,design) :
+`BatchService.clean()` (`api/.../services/BatchService.java`, marqué `TODO(p3,design) :
 remove`) sérialise chaque produit et **supprime tout produit dont le JSON contient
 "openfoodfacts"**. Il est déclenché par `POST /batch/tweak`. Mesuré le 2026-11-08 : les URL d'images Open Products
 Facts (`images.openproductsfacts.org`) ne contiennent pas la chaîne, mais 45 % des fiches OPF la
@@ -235,8 +282,9 @@ plans 07 et 08.
 ### P0-2 Corriger l'appariement des synonymes accentués
 
 `DataFragment` normalise les noms d'attributs entrants avec `IdHelper.normalizeAttributeName`
-(accents retirés, majuscules ; `DataFragment.java:618`). `AttributesConfig.synonyms()`
-enregistre en revanche les synonymes bruts (`AttributesConfig.java:121`). Un synonyme accentué,
+(accents retirés, majuscules). `AttributesConfig.synonyms()` enregistre en revanche les
+synonymes bruts ; la PR #3666 (lot G de GOU-2272, fusionnée le 2026-11-15) a réécrit cet
+index sans les normaliser. Un synonyme accentué,
 comme `"INDICE DE RÉPARABILITÉ"` dans `REPAIRABILITY_INDEX.yml`, ne peut donc jamais
 correspondre (constat par lecture du code). Correctif : normaliser **les deux côtés** de la comparaison avec
 la même fonction (les synonymes au chargement, et le nom de l'attribut au moment de la
@@ -252,8 +300,27 @@ perdrait contre trois marchands qui recopient une ancienne valeur. Proposition :
 
 ### P0-4 Attribution de source (sourcing transparent)
 
-Aujourd'hui, la provenance n'existe qu'au niveau des attributs (`SourcedAttribute.dataSourcename`)
-et d'un hash ou horodatage dans `Product.datasourceCodes`. Les scores n'en portent aucune.
+Revu le 2026-11-15 : **P0-4 étend trois couches existantes** ; seule l'information propre à
+un enregistrement est nouvelle.
+
+| Couche | Existant | Ajout |
+|---|---|---|
+| Attribut | `SourcedAttribute` (source, valeur, nom, langue), exposé par `ProductAttributeSourceDto` et affiché par l'infobulle `ProductAttributeSourcingLabel.vue` | rien côté modèle ; l'infobulle montre en plus la licence et le lien de l'enregistrement |
+| Source | `DataSourceProperties` (`name`, `favico`, `logo`, `portalUrl`), fichiers YAML de datasource | `license`, `licenseUrl`, `attribution` |
+| Score | `Score.metadatas` | la source et la date de l'attribut gagnant |
+| Produit | `datasourceCodes` (`Map<String, Long>`) : horodatage ou hash par source, mais aussi clés techniques (signature de recherche EPREL, cache négatif Wikidata) | `sourceAttributions`, pour l'enregistrement seulement ; `datasourceCodes` n'est pas surchargé |
+
+Deux constats du 2026-11-15, à confirmer sur le `_mapping` réel :
+
+- `datasourceCodes` est mappé `"enabled": false`, alors que `FilterRequestDto` expose un filtre
+  "datasource" dessus et que `DatavizStatsService` l'agrège : ces deux usages ne renvoient
+  probablement rien. Un champ `sources` (`keyword`, liste des sources d'un produit) sert trois
+  fois : ce filtre, la colonne `sources` de l'export, et la recherche des produits qui portent
+  une source (retrait d'une source, contrôle des disparitions).
+- Le drapeau `referentiel` de `DataSourceProperties` est recopié dans
+  `DataFragment.referentielData` mais jamais lu : il marque les sources non marchandes (P0-10).
+
+Détail :
 
 - **Produit** (à créer) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par
   identifiant de source.
@@ -275,10 +342,12 @@ et d'un hash ou horodatage dans `Product.datasourceCodes`. Les scores n'en porte
 - **Scores** : `Attribute2ScoreAggregationService` recopie la source gagnante de l'attribut dans
   `Score.metadatas` (`source`, `sourceUpdatedAt`).
 - **Front** : front-api expose déjà `ProductDatasourcesDto` et `ProductSourcedAttributeDto`
-  (`ProductMappingService`). On y ajoute l'attribution. La fiche produit affiche un bloc
-  "Sources" : nom, lien vers l'enregistrement, date de mise à jour, licence.
+  (`ProductMappingService`). On y ajoute l'attribution. L'infobulle existante par attribut
+  montre la licence et le lien ; la fiche produit liste les sources : nom, lien vers
+  l'enregistrement, date de mise à jour, licence.
+- **Recherche** : le champ `sources` (`keyword`) ci-dessus.
 - **Export ouvert** : une colonne `sources` (identifiants séparés par `|`) dans `GTIN_HEADER`
-  et `ISBN_HEADER`.
+  et `ISBN_HEADER`, alimentée par le même champ.
 
 ### P0-5 Module `services/reference-datasets` et projection (section 3.2)
 
@@ -312,8 +381,9 @@ Définition unique, qui fusionne les besoins des plans 03 et 04. Ces deux plans 
 - Cycle de vie : un rappel terminé **reste** sur le produit avec `active = false` (historique).
   Seule une fiche retirée par la source supprime l'entrée. L'exception à l'étape 4 de la
   section 3.2 est donc voulue.
-- `active` dépend de la date du jour. La projection le recalcule à chaque passage, même quand
-  le hash de contenu n'a pas changé.
+- `active` dépend de la date du jour. La projection le recalcule à chaque passage à partir des
+  dates de l'instantané, même quand le hash de contenu n'a pas changé, et ne réécrit que les
+  produits dont l'état change.
 - Règles propres à chaque source : 90 jours sans date de fin pour RappelConso (plan 03, à
   valider), à décider pour Safety Gate, qui n'a jamais de date de fin (plan 04).
 - Export ouvert, pour toutes les sources : `recall_active` (au moins un rappel actif) et
@@ -337,16 +407,54 @@ que `recalls`. Un attribut dérivé peut rester utile pour les filtres.
   agrégée. Ces offres sont exclues du prix minimum, de l'historique et du nombre d'offres, et
   filtrées à la lecture (`ProductMappingService`). Le TTL actuel de 2 jours ne convient pas.
 
-### P0-9 Filtre GTIN partagé
+### P0-9 Filtre GTIN : renforcer `BarcodeValidationService`
 
 Constaté sur plusieurs sources : GTIN `0`, codes de moins de 8 chiffres, suites factices
 (`1234567890128`), codes internes de magasin (préfixes 20-29), GTIN tronqués par Excel
 (`4711640000000`), colonnes typées entières qui perdent les zéros de tête (RappelConso).
 
-- Un filtre unique dans le socle, appliqué par tous les providers.
-- Bug probable dans l'existant : `BarcodeValidationService.toProductId("0")` renvoie `0L`. Tout
-  flux avec un GTIN "0" peut atterrir sur un produit d'identifiant 0. À vérifier avec
-  `GET products-moustik/_doc/0`.
+Décidé le 2026-11-15 (Q7) : **pas de filtre à part dans les providers**. Le filtre est le
+service existant, renforcé. Toutes les voies d'entrée passent déjà par lui :
+
+| Étape | Code | Comportement actuel |
+|---|---|---|
+| Lecture | `DataFragment.addReferentielAttribute` | chiffres seuls, suffixe `.00` retiré |
+| Mise en file | `DataFragmentStoreService` | `toProductId` renvoie `null` : fragment ignoré, offres comprises |
+| Identité | `IdentityAggregationService.onProduct` | `sanitize` renvoie `UNKNOWN` : produit ignoré (`AggregationSkipException`) |
+| Classification | `BarcodeForensicsService` | calcule `gtinInfos.gs1Class` (`RESTRICTED_INTERNAL` pour les préfixes 20-29, 040-049, 200-299 ; `COUPON` ; `ISSN`...), mappé en `keyword`, jamais utilisé pour décider |
+
+Les zéros de tête perdus sont déjà gérés : `sanitize` complète le code à 13 chiffres.
+
+**Le trou, vérifié en exécutant le service le 2026-11-15.** Le complément à 13 chiffres a lieu
+avant la somme de contrôle, donc la garde `length() < 8` de `isValidGtinCheckDigit` ne voit
+jamais un code court : `"0"` et `"00000000"` donnent le produit 0, `"17"` donne le produit 17
+(`0000000000017`, somme de contrôle juste), `1234567890128` est accepté. Tout nombre court dont
+le dernier chiffre tombe juste devient un produit.
+
+Correctif, dans `BarcodeValidationService` :
+
+1. Rejeter les codes dégénérés : moins de N chiffres significatifs une fois les zéros de tête
+   retirés (N = 8 proposé, fixé après la mesure de la section 9), un seul chiffre répété, liste
+   configurable de codes factices connus.
+2. Rapatrier le calcul de `Gs1Class` (arithmétique de préfixe) dans ce service ;
+   `BarcodeForensicsService` lui délègue.
+3. Rendre un verdict à deux niveaux :
+   - **invalide** (somme de contrôle fausse, code dégénéré, code factice) : rejeté partout,
+     comme `UNKNOWN` aujourd'hui ;
+   - **restreint** (`RESTRICTED_INTERNAL`, `COUPON`) : aucune création de produit, mais un
+     produit existant continue d'être agrégé. Sans ce second niveau, un rejet dans
+     `onProduct` gèlerait la fiche : elle resterait indexée sans plus jamais être mise à jour.
+4. GTIN tronqués par Excel (zéros de fin) : pas de règle fiable, la somme de contrôle en
+   attrape 9 sur 10. Ils restent au provider, avec un log.
+5. Test qui échoue d'abord : `"0"`, `"00000000"`, `"17"`, `1234567890128`, un code 2xx, un
+   GTIN-8 valide ; garder les tests UPC-A et ISBN-10 existants.
+
+Hors de ce lot : front-api a deux autres contrôles de somme (`CssEligibilityService.isValidGtin`,
+`AmazonSearchLinkService.hasValidCheckDigit`), faute de dépendre de `commons`. À unifier plus
+tard.
+
+Avant d'activer le rejet, la mesure de la section 9 dit quoi faire des produits existants
+dans ces classes (garder, exclure, purger).
 
 ### P0-10 Liste blanche de projection par source
 
@@ -356,6 +464,8 @@ Ce que chaque source a le droit d'écrire sur `Product` se déclare dans
 
 - `price` pour toute source non marchande. Une observation projetée deviendrait une offre dans
   `PriceAggregationService` et fausserait `offersCount`, le prix minimum et l'export (plan 08).
+  Une source non marchande se déclare avec le drapeau existant `referentiel: true` de
+  `DataSourceProperties`, recopié dans `DataFragment.referentielData` et jamais lu aujourd'hui.
 - `category`. `excludingTokensFromCategoriesMatching` (CABLE, ACCESSOIRE...) s'applique aux
   catégories de toutes les sources : une catégorie externe peut sortir un produit de sa
   verticale, changer son URL et déclencher une redirection 301. 65 fiches Open Products Facts
@@ -471,9 +581,10 @@ agrégation, completion). Proposition : passer ADR 0010 en `superseded` et écri
 1. P0-1, P0-2, P0-3, P0-9, puis P0-4 et P0-5, livrés avec le plan 01. Le plan 01 complète la
    carte Paperclip GOU-1892 (attribut `DURABILITY_INDEX` lu dans les flux marchands).
 2. Plan 05 (EPREL smartphones). C'est le plus rentable : sans `eprelDatas`, un smartphone est
-   exclu de l'ImpactScore V1 (`missing_eprel`) et du sitemap. Il faut d'abord vérifier
-   l'hypothèse `productGroup` (plan 05, section 3.3). Ce plan sert de spécification à la carte
-   GOU-1891 ; GOU-1875 et GOU-1893 mesurent l'appariement EPREL.
+   exclu de l'ImpactScore V1 (`missing_eprel`) et du sitemap. L'hypothèse `productGroup`
+   (plan 05, section 3.3) a été infirmée le 2026-11-10 (GOU-2042) : le faible appariement vient
+   des identifiants. Ce plan sert de spécification à la carte GOU-1891 ; GOU-1875, GOU-1893 et
+   GOU-2048 mesurent l'appariement EPREL.
 3. Plan 02.
 4. Mesure go/no-go du plan 03, et mesure état x stock x GTIN du plan 12.
 5. Le reste, avec P0-11 avant la première création. Les plans 09 et 10 attendent la décision
@@ -482,6 +593,17 @@ agrégation, completion). Proposition : passer ADR 0010 en `superseded` et écri
 **Q5. Suivi.** Décidé le 2026-11-09 : pas de carte Paperclip par plan ni par prérequis. Ces
 documents restent la source ; le travail est découpé au moment où un lot démarre, pour ce lot
 seulement.
+
+**Q6. Index de référence par source ?** Décidé le 2026-11-15 : lecture en flux par défaut,
+avec un instantané d'état par source ; un index `ref-<id>` seulement si une recherche à grande
+échelle l'exige, justifié dans le plan (section 3). ADR 0021 est amendé en conséquence.
+
+**Q7. Filtre d'identifiants.** Décidé le 2026-11-15 : renforcer `BarcodeValidationService`,
+avec un verdict à deux niveaux, invalide (rejeté partout) ou restreint (jamais créé, conservé
+s'il existe). Seuil de chiffres significatifs fixé après la mesure de la section 9 (P0-9).
+
+**Q8. Mesures.** Décidé le 2026-11-15 : Ops lance les mesures de la section 9 (taille des
+index et identifiants).
 
 ## 7. Constats qui corrigent le document candidat
 
@@ -518,13 +640,19 @@ Trouvées en préparant ces plans, et indépendantes des nouvelles sources :
 
 - Synonymes accentués jamais appariés (P0-2).
 - `BatchService.clean()` supprime tout produit contenant "openfoodfacts" (P0-1).
-- `BarcodeValidationService.toProductId("0")` renvoie `0L` (P0-9).
+- `BarcodeValidationService.toProductId` accepte tout code court dont le dernier chiffre tombe
+  juste : `"0"` donne `0L`, `"17"` donne `17L` (vérifié en exécutant le service le 2026-11-15,
+  P0-9).
+- `gtinInfos.gs1Class` est calculé et indexé, mais jamais utilisé pour décider (P0-9).
+- `datasourceCodes` est mappé `"enabled": false`, alors qu'un filtre de recherche et
+  `DatavizStatsService` l'interrogent (P0-4, à confirmer sur le `_mapping` réel).
+- Le drapeau `referentiel` des datasources est recopié dans `DataFragment` mais jamais lu
+  (P0-10).
 - `ProductEprelDto.from` met à `null` `categorySpecificAttributes`, que lisent
   `EprelDetailsTable.vue` et `ProductPage.vue` : ces valeurs sont probablement toujours vides en
-  front (plan 05).
-- `EprelSearchService` filtre sur `productGroup`, que l'import ne renseigne pas lui-même et qui
-  est déclaré `index = false` : hypothèse d'un appariement smartphone impossible (plan 05,
-  section 3.3), à vérifier sur l'ES de prod.
+  front (plan 05, non revérifié le 2026-11-15).
+- ~~`EprelSearchService` filtre sur `productGroup`~~ : hypothèse infirmée le 2026-11-10
+  (GOU-2042), le champ est porté et cherchable.
 - `AttributesConfig.byEprelFeatureGroup` était construit mais jamais lu (supprimé par GOU-2279).
 - Les endpoints de dry-run EPREL décrits par ADR 0003 n'existent pas sur `main`.
 - `ProductCondition` ne connaît pas l'état reconditionné, et `min_price` mélange neuf et
@@ -534,3 +662,69 @@ Trouvées en préparant ces plans, et indépendantes des nouvelles sources :
   régénéré chaque semaine, et sa colonne `souscategorie` est toujours vide (plan 09).
 - `ProductMappingService.toWebpUrl` réécrit les URL d'images externes en `.webp`, ce qui donne
   une 404 (couvertures Open Library, plan 10).
+
+## 9. Taille des index et mesures confiées à Ops (2026-11-15)
+
+### 9.1 Où est le risque
+
+Avec la lecture en flux (Q6), les sources compactes n'ajoutent aucun index. Même avec un index
+par source, elles ne pesaient qu'environ 200 000 documents (indice de durabilité 2,8 k,
+réparabilité 4,9 k, RappelConso environ 14 k, Safety Gate environ 23 k, Open Products Facts
+49 k, Ecolabel 91 k). Le risque de taille est ailleurs :
+
+1. **L'index produits grossit avec `CREATE`.** Sources compactes : jusqu'à environ 100 000
+   fiches (Ecolabel 28 k GTIN valides, Open Products Facts 44 k, RappelConso 13,6 k dont
+   environ 10 k alimentaires, Safety Gate). Sources volumineuses : BnF 3,4 M ISBN, Open Library
+   38 M éditions, Web Data Commons environ 51 M entités à GTIN. D'où `max-created-per-run`
+   (P0-11) et l'attente sur les livres (Q2).
+2. **Chaque produit s'alourdit et se réécrit.** Une source ajoute des valeurs d'attributs,
+   une attribution, des rappels ; la projection réécrit le document entier. Le saut par hash de
+   contenu (section 3.2, étape 2) est donc obligatoire.
+3. **Le budget de champs.** `product-settings.json` limite l'index produits à 1 500 champs, et
+   `attributes.indexed` est dynamique : chaque attribut configuré en consomme plusieurs.
+4. **`eprel-products` existe déjà et grossit.** La prod importe tous les groupes EPREL (pas de
+   `groups-to-index`) et ne supprime jamais une fiche. Nos verticales n'utilisent que 15
+   groupes : `ovens`, `smartphonestablets20231669`, `airconditioners`, `dishwashers2019`,
+   `dishwashers`, `washingmachines2019`, `washingmachines`, `washerdriers2019`, `washerdriers`,
+   `refrigeratingappliances`, `refrigeratingappliances2019`,
+   `professionalrefrigeratedstoragecabinets`, `televisions`, `Televisions`,
+   `electronicdisplays`. Restreindre l'import à ces groupes est un levier direct.
+
+### 9.2 Mesures (Ops, lecture seule, prod)
+
+A. Taille des index :
+
+```text
+GET _cat/indices?v&s=store.size:desc&h=index,docs.count,store.size,pri.store.size
+GET _cat/allocation?v
+GET products-moustik/_settings/index.mapping.total_fields.limit?include_defaults=true
+GET products-moustik/_mapping      -> nombre de champs feuilles (avec un "type"), à comparer à 1 500
+GET eprel-products/_search
+{ "size": 0, "track_total_hits": true,
+  "aggs": { "g": { "terms": { "field": "productGroup", "size": 200 } } } }
+```
+
+Attendu : le classement des index par taille, la taille moyenne d'un document produit
+(`pri.store.size` / `docs.count`), la marge de champs restante, la part d'`eprel-products`
+hors des 15 groupes de la section 9.1.
+
+B. Identifiants (P0-9) :
+
+```text
+GET products-moustik/_doc/0
+GET products-moustik/_mget  { "ids": ["0", "17", "1234567890128"] }
+GET products-moustik/_search
+{ "size": 0, "track_total_hits": true,
+  "aggs": { "cls": { "terms": { "field": "gtinInfos.gs1Class", "missing": "NONE", "size": 20 },
+    "aggs": {
+      "withOffers": { "filter": { "range": { "offersCount": { "gt": 0 } } } },
+      "inVertical": { "filter": { "exists": { "field": "vertical" } } } } } } }
+```
+
+Codes courts : l'`id` n'est pas indexé. Parcourir (scroll, `_source: false`) les produits dont
+`gtinInfos.gs1Prefix` vaut `000`, puis compter les identifiants par nombre de chiffres
+significatifs (moins de 8, 8 à 10, 11 et plus), avec et sans offre, et en donner 20 exemples.
+
+Attendu : le nombre de produits par classe GS1, avec offres et dans une verticale ; l'existence
+du produit 0 ; la distribution des codes courts. Ces chiffres fixent le seuil de P0-9 et le
+sort des produits existants (garder, exclure, purger).
