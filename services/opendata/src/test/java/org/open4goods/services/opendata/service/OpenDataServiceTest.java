@@ -391,8 +391,19 @@ class OpenDataServiceTest {
 
         OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
         assertThat(all.datasets()).extracting(DatasetManifest::id)
-                .containsExactly("gtin", "isbn", "impact-oven", "impact-tv");
+                .containsExactly("gtin", "isbn", "impact-oven", "impact-tv", "impact-all");
         assertThat(all.datasets().get(3).rows()).isEqualTo(1);
+
+        // Global zip (GOU-2240): the CSV of every impact dataset, rows and sha256 in its own manifest entry.
+        DatasetManifest global = all.datasets().get(4);
+        assertThat(global.file()).isEqualTo("impact-all.zip");
+        assertThat(global.rows()).isEqualTo(3);
+        assertThat(global.sha256()).isEqualTo(sha256(openDataConfig.impactZipFile("all")));
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("all"))).isPresent();
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(openDataConfig.impactZipFile("all"))) {
+            assertThat(java.util.Collections.list(zip.entries())).extracting(java.util.zip.ZipEntry::getName)
+                    .containsExactly("impact-oven.csv", "impact-tv.csv");
+        }
 
         // No aggregated score, no sub-score, no percentile, no rank, no DATA_QUALITY in any impact file.
         for (String vertical : List.of("oven", "tv")) {
@@ -425,6 +436,7 @@ class OpenDataServiceTest {
         List<String> produced = new ArrayList<>(readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv"));
         produced.add(Files.readString(openDataConfig.impactManifestFile("oven").toPath()));
         produced.add(Files.readString(openDataConfig.manifestFile().toPath()));
+        produced.add(Files.readString(openDataConfig.impactManifestFile("all").toPath()));
         assertThat(produced).allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
         ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
         verify(productRepository).exportAll(fields.capture(), anyInt());

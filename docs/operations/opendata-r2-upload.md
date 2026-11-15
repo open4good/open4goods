@@ -52,3 +52,8 @@ commande (ni runner ni hôte), ne sont pas écrits sur disque et sont masqués d
 R2 : 10 Go-mois de stockage et 1 M d'opérations de classe A / 10 M de classe B gratuits par mois, sortie réseau
 gratuite. Les deux zips tiennent largement sous 10 Go : coût 0 €. Surveiller la taille cumulée dans le tableau de bord
 Cloudflare si les fichiers grossissent.
+
+## Jeux impact (GOU-2250)
+
+Le choix `impact` du workflow envoie tous les `impact-*.zip` (7 verticales et `impact-all.zip`) et les
+`impact-*-manifest.json` du dossier source, sous le même nom. `all` envoie GTIN, ISBN et impact.

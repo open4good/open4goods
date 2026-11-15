@@ -18,7 +18,7 @@ Ce dictionnaire est dérivé des YAML `verticals/` et `attributes/` ; le manifes
 | `offers_count` | Nombre d'offres marchandes |
 | `last_updated` | Dernière modification, ISO 8601 UTC |
 
-Pour chaque critère : une colonne de valeur `{critere}` (suffixée de l'unité quand elle existe, ex. `warranty_year`) et une colonne `{critere}_source` (sources qui portent la valeur publiée, séparées par ` | `). La date de la source n'est pas conservée dans l'index : elle n'est pas publiée.
+Pour chaque critère : une colonne de valeur `{critere}` (suffixée de l'unité quand elle existe, ex. `warranty_year`) et une colonne `{critere}_source` (sources qui portent la valeur publiée, séparées par ` | `). Date de la source : non disponible dans l'index, voir `last_updated`.
 
 ## air-conditioner (`impact-air-conditioner.zip`)
 

@@ -116,4 +116,8 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
   `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
 - **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
 - Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
-- Non fait : le ZIP global de la spécification GOU-2240 et la date de la source par critère (absente de l'index).
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
+  (`impact-all`, lignes = somme des jeux).
+- **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
+- **Publication R2** : le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
+  `impact-*-manifest.json`.

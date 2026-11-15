@@ -14,7 +14,16 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HexFormat;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -420,11 +429,64 @@ public class OpenDataService implements HealthIndicator {
             checkRows(manifests.get(i), datasets.get(i));
         }
 
+        datasets = new ArrayList<>(datasets);
+        addGlobalImpactDataset(datasets, manifests);
         publish(datasets, manifests);
 
         Map<String, Long> rows = new LinkedHashMap<>();
         manifests.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
         return rows;
+    }
+
+    /**
+     * Adds the global impact zip ({@code impact-all.zip}, GOU-2240): the CSV of every impact dataset of the pass in one
+     * archive, with its own manifest entry. Nothing is added when the pass has no impact dataset.
+     */
+    private void addGlobalImpactDataset(List<DatasetDefinition> datasets, List<DatasetManifest> manifests)
+            throws IOException {
+        List<DatasetDefinition> impacts = datasets.stream().filter(d -> d.id().startsWith("impact-")).toList();
+        if (impacts.isEmpty()) {
+            return;
+        }
+        String id = "impact-all";
+        File tmpZip = openDataConfig.tmpImpactZipFile("all");
+        MessageDigest digest = newSha256();
+        try (OutputStream out = new DigestOutputStream(new FileOutputStream(tmpZip), digest);
+                ZipOutputStream zip = new ZipOutputStream(out)) {
+            for (DatasetDefinition impact : impacts) {
+                try (ZipFile source = new ZipFile(impact.zipFile())) {
+                    zip.putNextEntry(new ZipEntry(impact.filename()));
+                    try (InputStream in = source.getInputStream(source.getEntry(impact.filename()))) {
+                        in.transferTo(zip);
+                    }
+                    zip.closeEntry();
+                }
+            }
+        }
+        long rows = 0;
+        long indexCount = 0;
+        for (DatasetManifest manifest : manifests) {
+            if (manifest.id().startsWith("impact-")) {
+                rows += manifest.rows();
+                indexCount += manifest.indexCount();
+            }
+        }
+        String publicFilename = openDataConfig.impactPublicFilename("all");
+        datasets.add(new DatasetDefinition(id, null, tmpZip, openDataConfig.impactZipFile("all"),
+                openDataConfig.impactManifestFile("all"), publicFilename, new String[0], product -> false,
+                () -> 0L, List.of(), product -> new String[0]));
+        manifests.add(new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, publicFilename, publicUrl(publicFilename),
+                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, Files.size(tmpZip.toPath()),
+                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of()));
+        LOGGER.info("{} rows exported in {} ({} datasets).", rows, publicFilename, impacts.size());
+    }
+
+    private static MessageDigest newSha256() {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
