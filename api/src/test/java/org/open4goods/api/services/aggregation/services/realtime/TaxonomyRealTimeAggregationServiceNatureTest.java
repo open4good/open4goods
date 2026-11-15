@@ -3,6 +3,8 @@ package org.open4goods.api.services.aggregation.services.realtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.open4goods.model.eprel.EprelProduct;
@@ -169,5 +171,62 @@ class TaxonomyRealTimeAggregationServiceNatureTest {
 		p.getCategoriesByDatasources().put("darty.com", IdHelper.getCategoryName("DIVERS > AUTRES"));
 
 		assertThat(natureOf(p)).isNull();
+	}
+
+	/**
+	 * Motorbike helmets and gloves sit under a "spare parts" branch at the
+	 * marketplace (about 2.2 M products, measure 7 of GOU-2226): the neutral
+	 * fragment {@code PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES}
+	 * keeps them unmarked, while real helmet spare parts stay marked.
+	 */
+	@Test
+	void motorbikeSafetyEquipmentIsNotASparePart() throws Exception {
+		assertThat(natureOf(product("cdiscount.com",
+				"VEHICULES ET ACCESSOIRES > PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES > EQUIPEMENTS DE PROTECTION MOTO > CASQUES DE MOTO")))
+				.as("helmet").isNull();
+		assertThat(natureOf(product("cdiscount.com",
+				"VEHICULES ET ACCESSOIRES > PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES > EQUIPEMENTS DE PROTECTION MOTO > PIECES DETACHEES ET ACCESSOIRES POUR CASQUES DE MOTO")))
+				.as("helmet spare part").isEqualTo(ProductNature.SPARE_PART);
+	}
+
+	/** Shoes under a "shoes - accessories" feed category (about 224 K products) are not accessories. */
+	@Test
+	void shoesAreNotAccessories() throws Exception {
+		assertThat(natureOf(product("zalando.fr", "139 | SHOES | CHAUSSURES - ACCESSOIRES | CHAUSSURES > BASKET")))
+				.isNull();
+	}
+
+	/**
+	 * {@code natureMinMarkedCategoryShare}: the share of distinct normalised
+	 * categories carrying a marker must reach the threshold (measure 7 of GOU-2226).
+	 */
+	@Test
+	void markedShareBelowTheThresholdGivesNoNature() {
+		final List<String> oneOfFour = List.of("PIECES DETACHEES LAVE-LINGE > JOINT HUBLOT", "MAISON > DIVERS",
+				"GROS ELECTROMENAGER > LAVAGE", "BRICOLAGE > OUTILLAGE");
+		final List<String> twoOfThree = List.of("ACCESSOIRES LAVE-LINGE", "HOUSSE DE PROTECTION", "MAISON > DIVERS");
+
+		assertThat(verticalService.getNatureForCategories(oneOfFour, 0.5)).as("1 of 4 at 0.5").isNull();
+		assertThat(verticalService.getNatureForCategories(twoOfThree, 0.5)).as("2 of 3 at 0.5")
+				.isEqualTo(ProductNature.ACCESSORY);
+		assertThat(verticalService.getNatureForCategories(oneOfFour, 0)).as("1 of 4 at 0")
+				.isEqualTo(ProductNature.SPARE_PART);
+	}
+
+	/** The share counts distinct categories once normalised, so a category repeated by two feeds counts once. */
+	@Test
+	void markedShareCountsDistinctNormalisedCategories() {
+		final List<String> categories = List.of("ACCESSOIRES LAVE-LINGE", "accessoires lave-linge", "MAISON > DIVERS",
+				"BRICOLAGE > OUTILLAGE");
+
+		assertThat(verticalService.getNatureForCategories(categories, 0.5)).isNull();
+	}
+
+	/** The default threshold of {@code _default.yml} is 0: one marked category is enough, as before. */
+	@Test
+	void defaultThresholdKeepsOneMarkedCategoryEnough() throws Exception {
+		assertThat(natureOf(product("darty.com", "PIECES DETACHEES LAVE-LINGE > JOINT HUBLOT", "cdiscount.com",
+				"MAISON > DIVERS", "leroymerlin.fr", "BRICOLAGE > OUTILLAGE", "fnac.com", "LIVRES > ROMANS")))
+				.isEqualTo(ProductNature.SPARE_PART);
 	}
 }

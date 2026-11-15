@@ -999,20 +999,40 @@ public class VerticalsConfigService {
 	}
 
 	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233), with
+	 * the {@code natureMinMarkedCategoryShare} of {@code _default.yml}.
+	 *
+	 * @param categories merchant categories of the product, may be null
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker or too few do
+	 * @see #getNatureForCategories(Collection, double)
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories) {
+		return getNatureForCategories(categories,
+				defaultConfig == null ? 0d : defaultConfig.getNatureMinMarkedCategoryShare());
+	}
+
+	/**
 	 * Reads the nature of a product from its merchant categories (GOU-2233).
 	 *
 	 * <p>Each category is normalised ({@link IdHelper#getCategoryName(String)}), the
 	 * {@code natureNeutralCategoryFragments} of {@code _default.yml} are removed from
 	 * it, then the remainder is searched for the {@code sparePartCategoryMarkers} and
-	 * {@code accessoryCategoryMarkers}. A spare part marker in any category wins
-	 * over an accessory marker. The caller only applies it to a product without
-	 * vertical.
+	 * {@code accessoryCategoryMarkers}. A category carrying either is "marked".
 	 *
-	 * @param categories merchant categories of the product, may be null
+	 * <p>The nature is set only when at least one distinct normalised category is
+	 * marked and the marked share of the distinct categories reaches
+	 * {@code minMarkedShare}. It is then {@link ProductNature#SPARE_PART} when a
+	 * category carries a spare part marker, {@link ProductNature#ACCESSORY}
+	 * otherwise. The caller only applies it to a product without vertical.
+	 *
+	 * @param categories     merchant categories of the product, may be null
+	 * @param minMarkedShare minimum share (0 to 1) of the distinct categories that
+	 *                       must carry a marker; 0 means one marked category is enough
 	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
-	 *         null when no category carries a marker
+	 *         null when no category carries a marker or too few do
 	 */
-	public ProductNature getNatureForCategories(Collection<String> categories) {
+	public ProductNature getNatureForCategories(Collection<String> categories, double minMarkedShare) {
 		if (categories == null || categories.isEmpty() || defaultConfig == null) {
 			return null;
 		}
@@ -1024,23 +1044,32 @@ public class VerticalsConfigService {
 						.sorted(Comparator.comparingInt(String::length).reversed())
 						.toList();
 
-		ProductNature nature = null;
+		Set<String> distinctCategories = new LinkedHashSet<>();
 		for (String rawCategory : categories) {
 			String category = IdHelper.getCategoryName(rawCategory);
-			if (category == null) {
-				continue;
+			if (category != null) {
+				distinctCategories.add(category);
 			}
+		}
+
+		int marked = 0;
+		boolean sparePart = false;
+		for (String normalised : distinctCategories) {
+			String category = normalised;
 			for (String fragment : neutralFragments) {
 				category = category.replace(fragment, " ");
 			}
-			if (containsAny(category, defaultConfig.getSparePartCategoryMarkers())) {
-				return ProductNature.SPARE_PART;
-			}
-			if (containsAny(category, defaultConfig.getAccessoryCategoryMarkers())) {
-				nature = ProductNature.ACCESSORY;
+			boolean spare = containsAny(category, defaultConfig.getSparePartCategoryMarkers());
+			if (spare || containsAny(category, defaultConfig.getAccessoryCategoryMarkers())) {
+				marked++;
+				sparePart |= spare;
 			}
 		}
-		return nature;
+
+		if (marked == 0 || (double) marked / distinctCategories.size() < minMarkedShare) {
+			return null;
+		}
+		return sparePart ? ProductNature.SPARE_PART : ProductNature.ACCESSORY;
 	}
 
 	private static boolean containsAny(String category, Set<String> markers) {
