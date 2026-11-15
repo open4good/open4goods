@@ -24,13 +24,21 @@ Prérequis dans l'environnement GitHub `prod` :
 1. **`mode: test`** : liste chaque zip, affiche taille et sha256 locaux et l'objet distant actuel. Rien n'est écrit.
    Le job échoue si le bucket ne peut pas être lu (identifiants, endpoint, réseau) : un objet absent n'est pas une
    erreur.
-2. **`mode: apply`** : envoie `/opt/open4goods/opendata/{gtin,isbn}.zip` vers `s3://nudger-opendata/{gtin,isbn}-open-data.zip`
-   avec `Content-Type: application/zip`, `Content-Disposition: attachment`, `Cache-Control: public, max-age=86400` et
-   la métadonnée `sha256`. Le processus tourne en `nice -n 19` / `ionice -c3`, débit montant limité par `upload_limit`
+2. **`mode: apply`** : envoie `/opt/open4goods/opendata/{gtin,isbn}.zip` d'abord vers la clé temporaire
+   `s3://nudger-opendata/.staging/{gtin,isbn}-open-data.zip`, avec `Content-Type: application/zip`,
+   `Content-Disposition: attachment`, `Cache-Control: public, max-age=86400` et la métadonnée `sha256`
+   (`--header-upload "X-Amz-Meta-Sha256: {sha256}"` ; les métadonnées système du fichier de prod, uid, gid, mode et dates,
+   ne sont jamais copiées). Le processus tourne en `nice -n 19` / `ionice -c3`, débit montant limité par `upload_limit`
    (défaut 2 Mio/s).
-3. **Vérification** : l'objet distant est relu en entier et son sha256 est comparé au sha256 local ; un écart fait
-   échouer le job. L'objet public est alors déjà remplacé : relance `apply` avant d'activer le lot 0c (ou tout de
-   suite s'il est déjà actif).
+3. **Vérification puis renommage** : l'objet temporaire est relu en entier (sans limite de débit) et son sha256
+   comparé au sha256 local. Écart : l'objet temporaire est supprimé, le job échoue, **l'objet public n'a pas été
+   touché**. Sinon `rclone moveto` (copie serveur R2) vers la clé publique, avec les mêmes en-têtes reposés ; un dernier
+   `lsjson --metadata` contrôle `sha256` et le type MIME sur l'objet public.
+4. **Délai** : chaque envoi et chaque relecture sont sous `timeout`, avec un budget global de 165 min
+   (`TOTAL_TIMEOUT_S`, 9900 s) sous les 180 min du job : un job annulé ne laisse pas d'envoi orphelin sur la prod. Un
+   délai dépassé échoue sans toucher l'objet public ; l'objet temporaire est supprimé.
+
+Test du script distant (faux `rclone`, sans réseau) : `bash scripts/deploy/tests/opendata-r2-upload.test.sh`.
 
 Durée : environ 51 min pour 6 Gio à 2 Mio/s, plus le calcul des sommes et la relecture. Le job s'arrête à 180 min :
 avec `dataset: all`, ne descends pas sous `2M`.
