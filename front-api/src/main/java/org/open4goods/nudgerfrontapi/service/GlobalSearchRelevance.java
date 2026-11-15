@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.open4goods.model.product.Product;
 import org.open4goods.model.resource.Resource;
@@ -15,6 +16,7 @@ import org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties;
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter;
 import org.springframework.util.StringUtils;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.FieldValueFactorModifier;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreMode;
@@ -33,6 +35,9 @@ final class GlobalSearchRelevance {
 
 	/** Indexed text field holding the merchant offer names. */
 	static final String OFFER_NAMES_FIELD = "offerNames";
+	/** Keyword field marking accessories and spare parts (GOU-2235). */
+	static final String NATURE_FIELD = "nature";
+	private static final List<String> NATURES = List.of("ACCESSORY", "SPARE_PART");
 	private static final String OFFERS_COUNT_FIELD = "offersCount";
 	private static final Pattern NON_ALPHANUMERIC = Pattern.compile("[^\\p{IsAlphabetic}\\p{IsDigit}]+");
 	/** Words that open the "of the requested object" clause: {@code de}, {@code du}, {@code des}, {@code d'}. */
@@ -61,6 +66,8 @@ final class GlobalSearchRelevance {
 	private final List<List<String>> accessoryTerms;
 	/** Words and expressions searched at the head of the offer names (folded terms and their plural). */
 	private final List<String> accessoryVariants;
+	/** Accessory expressions searched anywhere in the offer names, folded, each as its list of words. */
+	private final List<List<String>> accessoryPhrases;
 
 	GlobalSearchRelevance(GlobalSearchProperties properties, OfferFreshnessService offerFreshnessService) {
 		this.properties = properties == null ? new GlobalSearchProperties() : properties;
@@ -78,6 +85,14 @@ final class GlobalSearchRelevance {
 		}
 		this.accessoryTerms = List.copyOf(terms);
 		this.accessoryVariants = List.copyOf(variants);
+		List<List<String>> phrases = new ArrayList<>();
+		for (String phrase : this.properties.getAccessoryPhrases()) {
+			List<String> words = words(phrase);
+			if (!words.isEmpty()) {
+				phrases.add(words);
+			}
+		}
+		this.accessoryPhrases = List.copyOf(phrases);
 	}
 
 	/**
@@ -91,7 +106,7 @@ final class GlobalSearchRelevance {
 		if (queryWords.isEmpty()) {
 			return false;
 		}
-		for (List<String> term : accessoryTerms) {
+		for (List<String> term : Stream.concat(accessoryTerms.stream(), accessoryPhrases.stream()).toList()) {
 			for (int start = 0; start + term.size() <= queryWords.size(); start++) {
 				boolean matched = true;
 				for (int i = 0; i < term.size() && matched; i++) {
@@ -118,7 +133,7 @@ final class GlobalSearchRelevance {
 	 * @return the accessory query, or {@code null} when no term is configured or the query asks for an accessory
 	 */
 	Query accessoryQuery(String query) {
-		if (accessoryVariants.isEmpty() || queryMentionsAccessory(query)) {
+		if ((accessoryVariants.isEmpty() && accessoryPhrases.isEmpty()) || queryMentionsAccessory(query)) {
 			return null;
 		}
 		List<Intervals> matches = accessoryVariants.stream().map(GlobalSearchRelevance::phrase).toList();
@@ -126,7 +141,10 @@ final class GlobalSearchRelevance {
 		Intervals head = Intervals.of(i -> i.anyOf(a -> a.intervals(matches)
 				.filter(f -> f.script(s -> s.source(src -> src.scriptString(headFilter))))));
 		List<Intervals> clauses = new ArrayList<>();
-		clauses.add(head);
+		if (!accessoryVariants.isEmpty()) {
+			clauses.add(head);
+		}
+		accessoryPhrases.forEach(words -> clauses.add(phrase(String.join(" ", words))));
 		List<String> queryWords = words(query);
 		List<String> objectTerms = objectTerms(queryWords);
 		if (!queryWords.contains("pour")) {
@@ -149,6 +167,27 @@ final class GlobalSearchRelevance {
 	}
 
 	/**
+	 * Accessory query of the long tail (products without a vertical): the name rules of
+	 * {@link #accessoryQuery(String)} or a marked {@code nature} (GOU-2235). The {@code nature} clause is kept out of
+	 * {@link #accessoryQuery(String)} so that a product of a vertical is never demoted in its own group because of it.
+	 *
+	 * @param query sanitized user query
+	 * @return the long tail accessory query, or {@code null} when the query asks for an accessory
+	 */
+	Query longTailAccessoryQuery(String query) {
+		if (queryMentionsAccessory(query)) {
+			return null;
+		}
+		Query nature = Query.of(q -> q.terms(t -> t.field(NATURE_FIELD)
+				.terms(v -> v.value(NATURES.stream().map(FieldValue::of).toList()))));
+		Query names = accessoryQuery(query);
+		if (names == null) {
+			return nature;
+		}
+		return Query.of(q -> q.bool(b -> b.should(names).should(nature).minimumShouldMatch("1")));
+	}
+
+	/**
 	 * Java statement of the accessory rules held by {@link #accessoryQuery(String)}, applied to one offer name:
 	 * an accessory term at the head of the name, {@code pour <object>}, {@code <part> de <object>} or the word
 	 * {@code compatible}, the last two only when the query does not use those words itself. Accents, case and
@@ -163,6 +202,11 @@ final class GlobalSearchRelevance {
 		List<String> queryWords = words(query);
 		if (name.isEmpty() || queryMentionsAccessory(query)) {
 			return false;
+		}
+		for (List<String> phrase : accessoryPhrases) {
+			if (indexOf(name, phrase, 0, false) >= 0) {
+				return true;
+			}
 		}
 		int headLimit = Math.max(1, properties.getAccessoryHeadWords());
 		for (List<String> term : accessoryTerms) {

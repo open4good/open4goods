@@ -547,6 +547,7 @@ class SearchServiceTest {
         NativeQuery verticalQuery = queries.stream().filter(q -> isVerticalQuery(q)).findFirst().orElseThrow();
         assertThat(verticalQuery.getQuery().isBoosting()).isTrue();
         assertThat(verticalQuery.getQuery().boosting().negative().isIntervals()).isTrue();
+        assertThat(verticalQuery.getQuery().toString()).doesNotContain("nature");
         assertThat(verticalQuery.getQuery().boosting().positive().isFunctionScore()).isTrue();
         assertThat(queries.stream().filter(SearchServiceTest::isLongTailQuery)).hasSize(1);
         assertThat(queries.stream().filter(SearchServiceTest::isAccessoryQuery)).hasSize(1);
@@ -674,7 +675,7 @@ class SearchServiceTest {
     }
 
     private static boolean isAccessoryQuery(NativeQuery query) {
-        return !isVerticalQuery(query) && query.getQuery().toString().contains("\"filter\":[{\"intervals\"");
+        return !isVerticalQuery(query) && query.getQuery().toString().contains("\"filter\":[{\"bool\":{\"minimum_should_match\":\"1\",\"should\":[{\"intervals\"");
     }
 
     private static boolean isLongTailQuery(NativeQuery query) {

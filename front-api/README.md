@@ -86,7 +86,13 @@ configured under `front.global-search` (GOU-2029). They never reach
   the whole query and each word of 4 letters or more, accents, case and
   hyphens ignored (`lave-linge` = `lave linge`). `thermostat` only counts
   followed by `pour` or an appliance name, and "Lave-linge pour petits
-  espaces" stays a product. Otherwise accessories are demoted in the category groups
+  espaces" stays a product. `accessory-phrases` hold expressions that count
+  anywhere in the name (`meuble tv`, `kit calfeutrage`...), for products
+  without a category whose object comes after the 3rd word (GOU-2235). The
+  long tail also sets apart the products whose `nature` is `ACCESSORY` or
+  `SPARE_PART` (`longTailAccessoryQuery`); that clause is not used for the
+  demotion in the category groups, so a product of a vertical is never
+  demoted because of `nature`. Otherwise accessories are demoted in the category groups
   (`boosting`, `accessory-negative-boost`) and leave the long tail for the
   additive `accessoryResults` field (at most `accessory-results-limit`).
 - **Long tail** (`missingVerticalResults`, products without a vertical): only
