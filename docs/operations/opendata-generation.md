@@ -27,10 +27,17 @@ renvoie `state` (`IDLE`, `RUNNING`, `SUCCEEDED`, `FAILED`), `startedAt`, `finish
 
 L'ancien `GET /opendata/generate` de `ui` est retiré.
 
+## Redéploiement bêta différé (GOU-2298)
+
+Un passage (~3 h) pose le même marqueur que le batch, `api-batch.marker` (propriété `batch-running-marker`), du
+début à la fin du passage, publication R2 comprise, échec ou interruption compris. Tant qu'il désigne une api vivante,
+le Beta Build ne redémarre pas l'api (`DEFERRED: api restart deferred`). Le marqueur est partagé avec le batch : le
+fichier ne disparaît qu'à la fin du dernier des deux. Voir `ci-workflows-status.md`.
+
 ## Surveillance
 
 - Log `ERROR` `Open data generation failed, the published files and manifests are unchanged`, avec la cause.
-- Health `openData` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`),
+- Health `openDataService` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`),
   UNKNOWN si un zip publié manque, UP sinon.
 - Métriques Micrometer (noms Prometheus) :
   - `opendata_generation_runs_total{outcome="success|failure"}` ;
@@ -46,7 +53,7 @@ L'ancien `GET /opendata/generate` de `ui` est retiré.
   - `opendata_publication_last_success_timestamp_seconds` ;
   - `opendata_publication_bucket_size_bytes` (taille du bucket après la dernière publication réussie) ;
   - `opendata_publication_enabled`.
-  La health `openData` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
+  La health `openDataService` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
   `ERROR` `Open data publication on R2 failed`, avec la cause.
 - Âge des fichiers publiés (`opendata_dataset_age_seconds`, seuil de 8 jours) : front-api, lecture du manifest (lot 1,
   PR suivante).

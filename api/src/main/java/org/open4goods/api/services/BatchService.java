@@ -96,7 +96,7 @@ public class BatchService {
 	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
 
 	/** File present while a full batch runs, read by the beta deployment (GOU-2106). */
-	private final BatchRunningMarker batchRunningMarker;
+	private BatchRunningMarker batchRunningMarker;
 
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
@@ -113,6 +113,16 @@ public class BatchService {
 		this.apiProperties = apiProperties;
 		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
 		this.batchRunningMarker = new BatchRunningMarker(apiProperties == null ? null : apiProperties.getBatchRunningMarker());
+	}
+
+	/**
+	 * Replaces the marker with the instance shared with the open data pass (two instances on one file would delete
+	 * each other's marker).
+	 *
+	 * @param batchRunningMarker the shared marker
+	 */
+	public void setBatchRunningMarker(BatchRunningMarker batchRunningMarker) {
+		this.batchRunningMarker = batchRunningMarker;
 	}
 
 	/**

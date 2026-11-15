@@ -86,6 +86,9 @@ l'état de `main`.
 Un déploiement bêta ne coupe plus un batch complet de l'api (`BatchService.batch()`,
 plus de 12 h) :
 
+- le passage de génération open data (`OpenDataService`, ~3 h, GOU-2298) pose et
+  supprime le même marqueur : il diffère aussi le redémarrage. Le fichier, partagé
+  avec le batch, ne disparaît qu'à la fin du dernier des deux ;
 - l'api écrit `/opt/open4goods/run/api-batch.marker` (`pid=`, `started=`) au
   début du batch et le supprime à la fin, échec compris (propriété
   `batch-running-marker`, posée dans la configuration bêta d'open4goods-config) ;

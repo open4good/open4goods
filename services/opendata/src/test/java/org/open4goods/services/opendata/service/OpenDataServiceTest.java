@@ -340,6 +340,20 @@ class OpenDataServiceTest {
     }
 
     @Test
+    void passHooksShouldWrapASuccessfulPassAndAFailedOne() {
+        java.util.List<String> events = new java.util.ArrayList<>();
+        service.setPassHooks(() -> events.add("start"), () -> events.add("end"));
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+        assertThat(service.generateOpendata()).isTrue();
+        assertThat(events).containsExactly("start", "end");
+
+        events.clear();
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenThrow(new IllegalStateException("ES down"));
+        assertThat(service.generateOpendata()).isFalse();
+        assertThat(events).containsExactly("start", "end");
+    }
+
+    @Test
     void failedPassShouldNotPublish() {
         OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
         lenient().when(publisher.isEnabled()).thenReturn(true);
