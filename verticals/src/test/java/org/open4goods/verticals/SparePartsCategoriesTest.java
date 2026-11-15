@@ -57,12 +57,14 @@ class SparePartsCategoriesTest {
     }
 
     @Test
-    void singularSparePartCategoryRemovesTheVertical() {
+    void singularSparePartCategoryKeepsTheVertical() {
+        // Merchants also file real appliances under the singular form (30 products measured, about ten of them
+        // phones and TVs, GOU-2236): only the plural "PIECES DETACHEE" is an excluding token.
         Map<String, String> categories = new LinkedHashMap<>();
         categories.put("Cdiscount FR",
                 "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE");
         categories.put("ManoMano FR", "ELECTROMENAGER > PIECE DETACHEE LAVE-VAISSELLE > PANIER");
-        assertThat(classify(categories, null)).isNull();
+        assertThat(classify(categories, null)).isEqualTo("dishwasher");
     }
 
     @Test
@@ -77,7 +79,8 @@ class SparePartsCategoriesTest {
                 .isNotEmpty()
                 .allSatisfy(vertical -> assertThat(vertical.getExcludingTokensFromCategoriesMatching())
                         .as("excluding tokens of %s", vertical.getId())
-                        .contains("PIECE DETACHEE", "PIECES DETACHEE"));
+                        .contains("PIECES DETACHEE")
+                        .doesNotContain("PIECE DETACHEE"));
     }
 
     @Test
@@ -89,7 +92,7 @@ class SparePartsCategoriesTest {
                     .flatMap(categories -> categories.stream())
                     .forEach(category -> assertThat(category)
                             .as("matching category of %s", vertical.getId())
-                            .doesNotContain("PIECE DETACHEE", "PIECES DETACHEE"));
+                            .doesNotContain("PIECES DETACHEE"));
         }
     }
 }
