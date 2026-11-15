@@ -86,6 +86,14 @@ natureNeutralCategoryFragments:
   - ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS
   - ET ACCESSOIRES
   - ACCESSOIRES ENFANT
+  # Motorbike helmets and gloves (about 2.2 M products), not spare parts
+  - PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES
+  # Shoes (about 224 K products), not accessories
+  - CHAUSSURES - ACCESSOIRES
+
+# Minimum share (0 to 1) of a product's distinct categories that must carry a marker for the nature
+# to be set. 0: one marked category is enough. Set after the dry-run of the recovery (GOU-2234).
+natureMinMarkedCategoryShare: 0
 
 # The global scores that are available to build the impact score
 availableImpactScoreCriterias:
