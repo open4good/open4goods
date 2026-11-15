@@ -57,6 +57,7 @@ import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
+import org.open4goods.services.opendata.model.OpenDataPublicationStatus;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.springframework.boot.health.contributor.Status;
 
@@ -316,6 +317,58 @@ class OpenDataServiceTest {
 
         verify(productRepository, never()).exportAll(any(String[].class), anyInt());
         assertThat(disabled.status().state()).isEqualTo(State.IDLE);
+    }
+
+    @Test
+    void publicationShouldReceiveTheLocalFilesOfASuccessfulPass() throws Exception {
+        OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
+        when(publisher.isEnabled()).thenReturn(true);
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher);
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<OpenDataPublisher.Dataset>> datasets = ArgumentCaptor.forClass(List.class);
+        verify(publisher).publish(datasets.capture(), Mockito.eq(openDataConfig.manifestFile().toPath()));
+        assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::zipFile)
+                .containsExactly(openDataConfig.gtinZipFile().toPath(), openDataConfig.isbnZipFile().toPath());
+        assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::manifestFile)
+                .containsExactly(openDataConfig.gtinManifestFile().toPath(), openDataConfig.isbnManifestFile().toPath());
+        assertThat(datasets.getValue().get(0).manifest())
+                .isEqualTo(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow());
+    }
+
+    @Test
+    void failedPassShouldNotPublish() {
+        OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
+        lenient().when(publisher.isEnabled()).thenReturn(true);
+        lenient().when(publisher.status()).thenReturn(OpenDataPublicationStatus.idle());
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher);
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenThrow(new IllegalStateException("ES down"));
+
+        assertThat(publishing.generateOpendata()).isFalse();
+
+        verify(publisher, never()).publish(any(), any());
+    }
+
+    @Test
+    void failedPublicationShouldTurnHealthDownAndKeepTheGenerationSucceeded() {
+        openDataConfig.getPublication().setEnabled(true);
+        OpenDataPublisher publisher = new OpenDataPublisher(openDataConfig, meterRegistry, publication -> {
+            throw new IllegalStateException("R2 unreachable");
+        });
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher);
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        assertThat(publishing.status().state()).isEqualTo(State.SUCCEEDED);
+        assertThat(publisher.status().state()).isEqualTo(State.FAILED);
+        assertThat(publishing.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(publishing.health().getDetails()).containsEntry("publication", "FAILED")
+                .containsEntry("publicationError", "IllegalStateException: R2 unreachable");
+        assertThat(meterRegistry.get("opendata.publication.runs").tag("outcome", "failure").counter().count()).isEqualTo(1);
     }
 
     @Test

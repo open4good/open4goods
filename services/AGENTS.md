@@ -250,6 +250,8 @@ or a provider/feed name; see the
 - Write the zips in a temporary folder, check disk space and the row guard, then publish atomically
 - Write `gtin-manifest.json`, `isbn-manifest.json` and `manifest.json` last (rows, bytes, sha256, fill rates)
 - Expose the generation status, health and metrics; generation runs in the api only (GOU-2248)
+- Publish the zips and manifests on R2 through its S3 API after a successful pass, disabled by default
+  (`OpenDataPublisher`, GOU-2289): temporary key, read back and sha256, copy, `manifest.json` last, budget guard
 
 See [docs/architecture/opendata.md](../docs/architecture/opendata.md).
 

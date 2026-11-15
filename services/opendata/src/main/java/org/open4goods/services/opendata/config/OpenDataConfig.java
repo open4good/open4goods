@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.Localisable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.unit.DataSize;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.NotNull;
@@ -118,6 +119,11 @@ public class OpenDataConfig {
      * {@code IcecatIndexVersionManager}).
      */
     private double minRowsRatio = 0.9;
+
+    /**
+     * Publication of the zips and manifests on Cloudflare R2 after a successful pass (GOU-2289). Disabled by default.
+     */
+    private Publication publication = new Publication();
 
     public OpenDataConfig() {
 		super();
@@ -334,6 +340,14 @@ public class OpenDataConfig {
         this.baseUrls = baseUrls;
     }
 
+    public Publication getPublication() {
+        return publication;
+    }
+
+    public void setPublication(Publication publication) {
+        this.publication = publication;
+    }
+
     public Path openDataDirectory() {
         return Paths.get(rootFolder).resolve(openDataFolder);
     }
@@ -393,5 +407,211 @@ public class OpenDataConfig {
             url = baseUrls.get("default");
         }
         return url;
+    }
+
+    /**
+     * Publication on the R2 bucket through its S3 API (GOU-2289, {@code open-data-config.publication}). The account id
+     * and the key pair are rendered by {@code scripts/deploy/render-service-secrets.sh} from the {@code prod} GitHub
+     * Environment ({@code R2_ACCOUNT_ID}, {@code R2_ACCESS_KEY_ID}, {@code R2_SECRET_ACCESS_KEY}); never in a YAML
+     * file.
+     */
+    public static class Publication {
+
+        /**
+         * Publishes after each successful generation pass. False by default and in beta; enabled in prod by a
+         * dedicated change.
+         */
+        private boolean enabled = false;
+
+        /**
+         * Cloudflare account id: the endpoint is {@code https://{account-id}.r2.cloudflarestorage.com}.
+         */
+        private String accountId = "";
+
+        /**
+         * Access key id of the R2 token, limited to the bucket.
+         */
+        private String accessKeyId = "";
+
+        /**
+         * Secret access key of the R2 token.
+         */
+        private String secretAccessKey = "";
+
+        /**
+         * S3 endpoint, overriding the one built from {@link #accountId} (tests, another bucket provider).
+         */
+        private String endpoint = "";
+
+        /**
+         * Bucket served by {@code data.nudger.fr}; its object names are the {@code file} of the manifests.
+         */
+        private String bucket = "nudger-opendata";
+
+        /**
+         * Prefix of the temporary keys: a zip is sent there, read back and checked, then copied to its public key
+         * (as {@code scripts/deploy/opendata-r2-upload.sh}, GOU-2285). Must end with {@code /}.
+         */
+        private String stagingPrefix = ".staging/";
+
+        /**
+         * Budget guard: the publication is refused, before any upload, when the bucket would exceed this size after
+         * it (R2 is free under 10 GB-month). Binary units: 9GB is 9 x 1024^3 bytes.
+         */
+        private DataSize maxBucketSize = DataSize.ofGigabytes(9);
+
+        /**
+         * Size of a part of the multipart upload. R2: 5 MB to 5 GB, every part but the last of the same size, 10 000
+         * parts at most.
+         */
+        private DataSize partSize = DataSize.ofMegabytes(64);
+
+        /**
+         * Size of a part of the server-side copy from the temporary key; an object up to this size is copied in one
+         * request (a single copy is limited to 5 GB).
+         */
+        private DataSize copyPartSize = DataSize.ofGigabytes(1);
+
+        /**
+         * Upload bandwidth per second, so that the upload does not take the outbound bandwidth of the site (as the
+         * {@code upload_limit} of the R2 upload workflow, 2 MB/s). Zero disables the limit. The read back of the
+         * temporary object is not limited.
+         */
+        private DataSize uploadBandwidth = DataSize.ofMegabytes(2);
+
+        /**
+         * {@code Cache-Control} of the zips.
+         */
+        private String zipCacheControl = "public, max-age=86400";
+
+        /**
+         * {@code Cache-Control} of the manifests, short so that a new manifest is seen soon after the new zips.
+         */
+        private String manifestCacheControl = "public, max-age=300";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public void setAccountId(String accountId) {
+            this.accountId = accountId;
+        }
+
+        public String getAccessKeyId() {
+            return accessKeyId;
+        }
+
+        public void setAccessKeyId(String accessKeyId) {
+            this.accessKeyId = accessKeyId;
+        }
+
+        public String getSecretAccessKey() {
+            return secretAccessKey;
+        }
+
+        public void setSecretAccessKey(String secretAccessKey) {
+            this.secretAccessKey = secretAccessKey;
+        }
+
+        public String getEndpoint() {
+            return endpoint;
+        }
+
+        public void setEndpoint(String endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        public String getBucket() {
+            return bucket;
+        }
+
+        public void setBucket(String bucket) {
+            this.bucket = bucket;
+        }
+
+        public String getStagingPrefix() {
+            return stagingPrefix;
+        }
+
+        public void setStagingPrefix(String stagingPrefix) {
+            this.stagingPrefix = stagingPrefix;
+        }
+
+        public DataSize getMaxBucketSize() {
+            return maxBucketSize;
+        }
+
+        public void setMaxBucketSize(DataSize maxBucketSize) {
+            this.maxBucketSize = maxBucketSize;
+        }
+
+        public DataSize getPartSize() {
+            return partSize;
+        }
+
+        public void setPartSize(DataSize partSize) {
+            this.partSize = partSize;
+        }
+
+        public DataSize getCopyPartSize() {
+            return copyPartSize;
+        }
+
+        public void setCopyPartSize(DataSize copyPartSize) {
+            this.copyPartSize = copyPartSize;
+        }
+
+        public DataSize getUploadBandwidth() {
+            return uploadBandwidth;
+        }
+
+        public void setUploadBandwidth(DataSize uploadBandwidth) {
+            this.uploadBandwidth = uploadBandwidth;
+        }
+
+        public String getZipCacheControl() {
+            return zipCacheControl;
+        }
+
+        public void setZipCacheControl(String zipCacheControl) {
+            this.zipCacheControl = zipCacheControl;
+        }
+
+        public String getManifestCacheControl() {
+            return manifestCacheControl;
+        }
+
+        public void setManifestCacheControl(String manifestCacheControl) {
+            this.manifestCacheControl = manifestCacheControl;
+        }
+
+        /**
+         * @return the configured endpoint, or the R2 endpoint of the account; empty when neither is set
+         */
+        public String resolvedEndpoint() {
+            if (StringUtils.isNotBlank(endpoint)) {
+                return endpoint.trim();
+            }
+            if (StringUtils.isBlank(accountId)) {
+                return "";
+            }
+            return "https://" + accountId.trim() + ".r2.cloudflarestorage.com";
+        }
+
+        /**
+         * Never prints the credentials.
+         */
+        @Override
+        public String toString() {
+            return "Publication[enabled=" + enabled + ", bucket=" + bucket + ", endpoint=" + resolvedEndpoint() + "]";
+        }
     }
 }

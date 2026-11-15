@@ -84,6 +84,9 @@
 # | api       | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | api       | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
+# | api       | R2_ACCOUNT_ID                   | tree    | open-data-config.publication.account-id (GitHub variable, not a secret)        | optional |
+# | api       | R2_ACCESS_KEY_ID                | tree    | open-data-config.publication.access-key-id                                     | optional |
+# | api       | R2_SECRET_ACCESS_KEY            | tree    | open-data-config.publication.secret-access-key                                 | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
@@ -145,6 +148,8 @@
 # --if-present, before anything is written), so that it never mixes two OAuth clients:
 #   admin  GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (the site's SSO client, GOU-1091; its
 #          redirect URIs must list the admin's /login/oauth2/code/google).
+#   api    R2_ACCESS_KEY_ID + R2_SECRET_ACCESS_KEY (the R2 token of the open data bucket, prod only,
+#          GOU-2244; read by the publication on R2, GOU-2289).
 #   api    GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (same client, GOU-1393; its redirect
 #          URIs must list the api's /login/oauth2/code/google).
 #
@@ -180,6 +185,9 @@ api GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.
 api GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
+api R2_ACCOUNT_ID tree open-data-config.publication.account-id optional
+api R2_ACCESS_KEY_ID tree open-data-config.publication.access-key-id optional
+api R2_SECRET_ACCESS_KEY tree open-data-config.publication.secret-access-key optional
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
@@ -220,6 +228,7 @@ infra INFRA_GOOGLE_CLIENT_SECRET env GOOGLE_CLIENT_SECRET source
 PAIRS_TABLE='
 admin GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
 api GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
+api R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY
 '
 
 if_present=false
