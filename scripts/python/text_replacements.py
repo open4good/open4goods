@@ -22,6 +22,7 @@ REPLACEMENTS = {
 }
 
 EXCLUDED_DIRS = {
+    ".claude",
     ".git",
     ".husky",
     ".idea",

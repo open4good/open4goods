@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.open4goods.model.attribute.IndexedAttribute;
-import org.open4goods.model.attribute.ProductAttribute;
 
 import org.open4goods.services.feedservice.service.FeedService;
 import org.open4goods.commons.config.yml.datasource.DataSourceProperties;
@@ -33,7 +31,6 @@ import org.open4goods.model.product.Product;
 import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.slf4j.Logger;
@@ -96,7 +93,7 @@ public class BatchService {
 	private ImpactScoreSnapshotRepository impactScoreSnapshotRepository;
 
 	/** File present while a full batch runs, read by the beta deployment (GOU-2106). */
-	private final BatchRunningMarker batchRunningMarker;
+	private BatchRunningMarker batchRunningMarker;
 
 
 	public BatchService(AggregationFacadeService aggregationFacadeService,
@@ -113,6 +110,16 @@ public class BatchService {
 		this.apiProperties = apiProperties;
 		this.impactScoreGuard = new ImpactScoreBatchGuard(apiProperties == null ? null : apiProperties.getImpactScoreGuard(), null, null);
 		this.batchRunningMarker = new BatchRunningMarker(apiProperties == null ? null : apiProperties.getBatchRunningMarker());
+	}
+
+	/**
+	 * Replaces the marker with the instance shared with the open data pass (two instances on one file would delete
+	 * each other's marker).
+	 *
+	 * @param batchRunningMarker the shared marker
+	 */
+	public void setBatchRunningMarker(BatchRunningMarker batchRunningMarker) {
+		this.batchRunningMarker = batchRunningMarker;
 	}
 
 	/**
@@ -1118,116 +1125,4 @@ public class BatchService {
         }
         return result;
     }
-
-
-    // TODO(p3,design) : remove
-	public void clean() {
-
-		// Cleaning data
-		cleanAiData();
-
-
-
-
-		AtomicInteger counter = new AtomicInteger();
-		try (java.util.stream.Stream<Product> stream = dataRepository.exportAll()) {
-			stream.forEach(p -> {
-				int i = counter.incrementAndGet();
-				if (i % 1000 == 0) {
-					logger.warn("Batched items : {}", i);
-				}
-				String textVersion = null;
-				try {
-					textVersion = serialisationService.toJson(p);
-					if (textVersion.contains("openfoodfacts")) {
-						logger.error("Will remove {}", p);
-						dataRepository.delete(p);
-					}
-
-
-				} catch (SerialisationException e) {
-					e.printStackTrace();
-				}
-
-			});
-		}
-
-
-	}
-
-	/**
-	 * Clean AI data from all verticals
-	 */
-	public void cleanAiData() {
-		for (VerticalConfig vertical : verticalsConfigService.getConfigsWithoutDefault()) {
-			cleanAiData(vertical);
-		}
-	}
-
-	/**
-	 * Clean AI data from a specific vertical
-	 * @param vertical
-	 */
-	public void cleanAiData(VerticalConfig vertical) {
-		logger.info("Cleaning AI data for vertical {}", vertical);
-		try (java.util.stream.Stream<Product> stream = dataRepository.getProductsMatchingVerticalId(vertical)) {
-			stream.forEach(p -> {
-				boolean changed = false;
-
-			// Delete attribute sources having "ai" as datasourcename
-			// Check Indexed Attributes
-			Iterator<IndexedAttribute> itIndexed = p.getAttributes().getIndexed().values().iterator();
-			while (itIndexed.hasNext()) {
-				IndexedAttribute attr = itIndexed.next();
-				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
-				if (attrChanged) {
-					if (attr.getSource().isEmpty()) {
-						itIndexed.remove();
-					} else {
-						// Recompute value
-						String best = attr.bestValue();
-						attr.setValue(best);
-						attr.setNumericValue(parseNumericOrNull(best));
-					}
-					changed = true;
-				}
-			}
-
-			// Check All Attributes (ProductAttribute)
-			Iterator<ProductAttribute> itAll = p.getAttributes().getAll().values().iterator();
-			while (itAll.hasNext()) {
-				ProductAttribute attr = itAll.next();
-				boolean attrChanged = attr.getSource().removeIf(s -> s.getDataSourcename() != null && s.getDataSourcename().toLowerCase().contains("ai"));
-				if (attrChanged) {
-					if (attr.getSource().isEmpty()) {
-						itAll.remove();
-					} else {
-						// Recompute value
-						String best = attr.bestValue();
-						attr.setValue(best);
-					}
-					changed = true;
-				}
-			}
-
-			if (changed) {
-				dataRepository.index(p);
-			}
-		});
-		}
-	}
-
-	private Double parseNumericOrNull(String rawValue) {
-		if (rawValue == null) {
-			return null;
-		}
-		try {
-			return Double.valueOf(rawValue.trim().replace(",", "."));
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-
-
 }

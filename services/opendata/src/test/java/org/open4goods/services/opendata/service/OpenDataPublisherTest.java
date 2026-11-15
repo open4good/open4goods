@@ -108,7 +108,7 @@ class OpenDataPublisherTest {
             Stored zip = storage.objects.get(dataset.manifest().file());
             assertThat(zip.content()).isEqualTo(Files.readAllBytes(dataset.zipFile()));
             assertThat(zip.headers()).isEqualTo(new ObjectHeaders("application/zip",
-                    "attachment; filename=\"" + dataset.manifest().file() + "\"", "public, max-age=86400",
+                    "attachment; filename=\"" + dataset.manifest().file() + "\"", "public, max-age=300",
                     dataset.manifest().sha256()));
             assertThat(storage.objects.get(dataset.manifestFile().getFileName().toString()).content())
                     .isEqualTo(Files.readAllBytes(dataset.manifestFile()));

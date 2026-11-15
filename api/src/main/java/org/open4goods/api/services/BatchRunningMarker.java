@@ -11,12 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * File present on disk while a full batch runs (GOU-2106).
+ * File present on disk while a full batch or an open data generation pass runs (GOU-2106, GOU-2298).
  *
  * <p>The beta deployment ({@code publish-jars.sh} of open4goods-config) reads it before restarting the api: while it
  * exists and names a live process, the api restart waits for the end of the batch instead of killing it. The file
- * holds {@code pid=<pid>} and {@code started=<ISO-8601 instant>}; it is written at the start of the batch and deleted
- * at its end, failure included. A batch started while another one runs keeps the file until the last one ends.
+ * holds {@code pid=<pid>} and {@code started=<ISO-8601 instant>}; it is written at the start of the batch or pass and
+ * deleted at its end, failure included. A holder started while another one runs keeps the file until the last one ends.
+ * A single instance, shared by {@code BatchService} and the open data pass, owns the file.
  *
  * <p>Writing or deleting the file never fails the batch: an error is only logged. A blank path disables the marker.
  */
@@ -52,9 +53,9 @@ public class BatchRunningMarker {
 			Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
 			Files.writeString(tmp, content, StandardCharsets.UTF_8);
 			Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-			logger.warn("Batch running marker written: {}", file);
+			logger.warn("Batch or open data running marker written: {}", file);
 		} catch (IOException | RuntimeException e) {
-			logger.error("Cannot write the batch running marker {}: a deployment may restart the api during this batch",
+			logger.error("Cannot write the batch running marker {}: a deployment may restart the api during this batch or open data pass",
 					file, e);
 		}
 	}
@@ -71,7 +72,7 @@ public class BatchRunningMarker {
 		}
 		try {
 			Files.deleteIfExists(file);
-			logger.warn("Batch running marker removed: {}", file);
+			logger.warn("Batch or open data running marker removed: {}", file);
 		} catch (IOException | RuntimeException e) {
 			logger.error("Cannot delete the batch running marker {}: deployments will wait until it is stale", file, e);
 		}

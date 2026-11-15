@@ -39,6 +39,33 @@ class SourcableAttributeTest {
                                 .hasMessageContaining("expected COLOR");
         }
 
+        @Test
+        void preferredSourcesOverrideTheVoteCount() {
+                ProductAttribute attribute = buildAttribute("INDEX",
+                                sourced("INDEX", "5", "shopA"),
+                                sourced("INDEX", "5", "shopB"),
+                                sourced("INDEX", "5", "shopC"),
+                                sourced("INDEX", "8", "regulator"));
+
+                assertThat(attribute.bestValue()).isEqualTo("5");
+                assertThat(attribute.bestValue(List.of("regulator"))).isEqualTo("8");
+                assertThat(attribute.bestValue(List.of())).isEqualTo("5");
+                assertThat(SourcableAttribute.trustedSourcePriority("regulator", List.of("x", "regulator"))).isEqualTo(1);
+        }
+
+        @Test
+        void defaultOrderKeepsEprelThenIcecat() {
+                ProductAttribute attribute = buildAttribute("INDEX",
+                                sourced("INDEX", "5", "shopA"),
+                                sourced("INDEX", "5", "shopB"),
+                                sourced("INDEX", "7", "icecat.biz"),
+                                sourced("INDEX", "9", "eprel"));
+
+                assertThat(attribute.bestValue()).isEqualTo("9");
+                assertThat(SourcableAttribute.trustedSourcePriority("eprel")).isZero();
+                assertThat(SourcableAttribute.trustedSourcePriority("icecat.biz")).isEqualTo(1);
+        }
+
         private ProductAttribute buildAttribute(String name, SourcedAttribute... sourcedAttributes) {
                 ProductAttribute attribute = new ProductAttribute();
                 attribute.setName(name);

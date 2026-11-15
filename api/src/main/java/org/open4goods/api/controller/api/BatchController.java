@@ -11,6 +11,8 @@ import org.open4goods.api.services.ResourceCleanupMode;
 import org.open4goods.api.services.ResourceCleanupStatus;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
+import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.prompt.dto.openai.BatchJobResponse;
 import org.open4goods.services.prompt.service.BatchPromptService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -56,18 +58,6 @@ public class BatchController {
         this.batchService = batchService;
         this.batchPromptService = batchPromptService;
         this.datasourcePurgeService = datasourcePurgeService;
-    }
-
-    @PostMapping("/batch/tweak")
-    @Operation(
-            summary = "Run the data-cleanup (tweak) routine",
-            description = "Executes the ad-hoc data-cleanup routine implemented in BatchService.clean(). "
-                    + "The exact operations performed depend on the current implementation and are typically "
-                    + "one-shot fixes, deduplication passes or orphan-record removals. "
-                    + "Check the BatchService source for the current behaviour.")
-    @ApiResponse(responseCode = "200", description = "Cleanup routine completed")
-    public void batchCleanup() throws InvalidParameterException, IOException, InterruptedException {
-        batchService.clean();
     }
 
     @PostMapping("/batch/clean-resources")
@@ -178,8 +168,8 @@ public class BatchController {
     public void batchVertical(
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @PathVariable @NotBlank final String vertical)
-            throws InvalidParameterException, IOException, InterruptedException {
-        batchService.batch(verticalConfigService.getConfigById(vertical));
+            throws InvalidParameterException, IOException, InterruptedException, ResourceNotFoundException {
+        batchService.batch(knownVertical(vertical));
     }
 
     @GetMapping("/batch/ai-job/{jobId}/status")
@@ -196,5 +186,18 @@ public class BatchController {
             @Parameter(description = "AI provider batch job identifier as returned by the review or scoring batch submission endpoint", required = true)
             @PathVariable String jobId) {
         return batchPromptService.checkStatus(jobId);
+    }
+
+    /**
+     * @param vertical vertical identifier from the path
+     * @return the configuration of that vertical
+     * @throws ResourceNotFoundException when no vertical has this identifier (404, GOU-2280)
+     */
+    private VerticalConfig knownVertical(String vertical) throws ResourceNotFoundException {
+        VerticalConfig config = verticalConfigService.getConfigById(vertical);
+        if (config == null) {
+            throw new ResourceNotFoundException("Unknown vertical: " + vertical);
+        }
+        return config;
     }
 }

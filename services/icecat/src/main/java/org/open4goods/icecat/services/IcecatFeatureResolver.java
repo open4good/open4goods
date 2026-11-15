@@ -1,8 +1,6 @@
 package org.open4goods.icecat.services;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +19,8 @@ import org.slf4j.LoggerFactory;
  * <p>This service deliberately uses Elasticsearch as the source of truth instead of
  * a startup-loaded reference map. Lookups are cached by normalized attribute name and
  * by feature ID, bounded to avoid an unbounded in-memory mirror of the full feature set.
+ * The Elasticsearch queries run outside the cache locks: the completion threads resolve
+ * names in parallel (GOU-2280).
  */
 public class IcecatFeatureResolver {
 
@@ -35,21 +35,11 @@ public class IcecatFeatureResolver {
             "fr", 3);
 
     private final IcecatIndexService indexService;
-    private final Map<String, Set<Integer>> featureIdsByNormalizedName = boundedCache();
-    private final Map<Integer, IcecatFeatureDocument> featuresById = boundedCache();
+    private final BoundedLruCache<String, Set<Integer>> featureIdsByNormalizedName = new BoundedLruCache<>(MAX_CACHE_SIZE);
+    private final BoundedLruCache<Integer, IcecatFeatureDocument> featuresById = new BoundedLruCache<>(MAX_CACHE_SIZE);
 
     public IcecatFeatureResolver(IcecatIndexService indexService) {
         this.indexService = indexService;
-    }
-
-    private static <K, V> Map<K, V> boundedCache() {
-        return Collections.synchronizedMap(new LinkedHashMap<K, V>(256, 0.75f, true) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-                return size() > MAX_CACHE_SIZE;
-            }
-        });
     }
 
     /**
@@ -64,7 +54,8 @@ public class IcecatFeatureResolver {
         if (normalizedName == null || normalizedName.isBlank()) {
             return Set.of();
         }
-        return featureIdsByNormalizedName.computeIfAbsent(normalizedName, this::resolveNormalizedName);
+        // The Elasticsearch query of a miss runs outside the cache lock (GOU-2280)
+        return featureIdsByNormalizedName.getOrLoad(normalizedName, this::resolveNormalizedName);
     }
 
     /**

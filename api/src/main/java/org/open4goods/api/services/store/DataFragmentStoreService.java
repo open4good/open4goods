@@ -241,6 +241,10 @@ public class DataFragmentStoreService {
 				}
 				Product data = aggDatas.get(id);
 				if (null == data) {
+					if (BarcodeValidationService.Verdict.RESTRICTED.equals(barcodeValidationService.verdict(df.gtin()))) {
+						logger.info("Skipping datafragment {} from {} : restricted barcode class, no product creation", df.gtin(), df.getDatasourceName());
+						continue;
+					}
 					// This is a first product
 					logger.info("Creating product {} from {}", id, df.getDatasourceName());
 					data = new Product();

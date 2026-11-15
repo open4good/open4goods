@@ -73,8 +73,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 
 		this.apiProperties = apiProperties;
 		this.eprelSearchService = eprelSearchService;
-		this.aggregator = aggregationFacade.getStandardAggregator("eprel-aggregation");
-		this.aggregator.beforeStart();
+		this.aggregator = aggregationFacade.getStandardAggregator();
 	}
 
 	/**

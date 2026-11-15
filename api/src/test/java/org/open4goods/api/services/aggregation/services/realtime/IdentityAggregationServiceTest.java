@@ -85,4 +85,28 @@ class IdentityAggregationServiceTest
         assertThat(product.getGtinInfos().getUpcType()).isEqualTo(BarcodeType.ISBN_13);
         assertThat(validationService.toProductId(fragment.gtin())).isEqualTo(product.getId());
     }
+
+    /** A restricted code is not rejected by onProduct: an existing product must stay updatable. */
+    @Test
+    void restrictedBarcodeProductIsStillAggregated() throws Exception
+    {
+        BarcodeValidationService validationService = new BarcodeValidationService();
+        BarcodeForensicsService forensicsService = Mockito.mock(BarcodeForensicsService.class);
+        Mockito.when(forensicsService.analyze(Mockito.anyString()))
+                .thenReturn(new BarcodeForensics(false, BarcodeType.UNKNOWN, null, null, null, null, null, null, null, 0));
+        IdentityAggregationService service = new IdentityAggregationService(
+                LoggerFactory.getLogger(IdentityAggregationServiceTest.class),
+                Mockito.mock(Gs1PrefixService.class),
+                validationService,
+                forensicsService
+        );
+        String gtin = "2001234567893";
+        Product product = new Product(Long.valueOf(gtin));
+        product.getAttributes().getReferentielAttributes().put(ReferentielKey.GTIN, gtin);
+
+        service.onProduct(product, new VerticalConfig());
+
+        assertThat(product.getId()).isEqualTo(Long.valueOf(gtin));
+        assertThat(product.getGtinInfos().getUpcType()).isEqualTo(BarcodeType.GTIN_13);
+    }
 }

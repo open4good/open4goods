@@ -24,6 +24,9 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Services are executed sequentially; each service's {@code done()} output is visible
  * to the next service's {@code init()}.
+ *
+ * <p>Scoring services hold run-scoped state ({@code init} resets it): a new aggregator and new
+ * services are built for each scoring run, unlike the shared {@link StandardAggregator}.
  */
 public class ScoringBatchedAggregator extends AbstractAggregator {
 
@@ -49,7 +52,8 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 	 * {@code CleanScoreAggregationService} clear the scores in {@code init}, so going on would
 	 * leave products without scores. The id of the product and the name of the service are
 	 * logged, then the exception is rethrown; {@code BatchService} then indexes nothing for the
-	 * vertical (GOU-2273).
+	 * vertical (GOU-2273). An exception in the {@code init} or {@code done} of a service stops the
+	 * run the same way, and the log names the service and the vertical (GOU-2280).
 	 *
 	 * @param datas products to score; modified in-place
 	 * @param vConf vertical configuration driving score definitions and weights
@@ -58,30 +62,46 @@ public class ScoringBatchedAggregator extends AbstractAggregator {
 
 		int count = datas.size();
 		for (final AbstractAggregationService service : services) {
+			String name = service.getClass().getSimpleName();
 
-			logger.info("Batching {} products using {} service", count, service.getClass().getSimpleName());
+			logger.info("Batching {} products using {} service", count, name);
 
-			service.init(datas);
+			runStep("Initialisation", name, vConf, () -> service.init(datas));
 
-			logger.info("Processing {} products using {} service", count, service.getClass().getSimpleName());
+			logger.info("Processing {} products using {} service", count, name);
 
 			for (Product p : datas) {
 				try {
 					service.onProduct(p, vConf);
 				} catch (AggregationSkipException e) {
-					logger.info("Product {} skipped during batch scoring by {}: {}",
-							p.getId(), service.getClass().getSimpleName(), e.getMessage());
+					logger.info("Product {} skipped during batch scoring by {}: {}", p.getId(), name, e.getMessage());
 				} catch (RuntimeException e) {
 					// Callers log the stack trace
 					logger.error("Scoring of product {} failed in {}, the scoring run stops: {}",
-							p.getId(), service.getClass().getSimpleName(), e.toString());
+							p.getId(), name, e.toString());
 					throw e;
 				}
 			}
 
-			logger.info("Post computing {} products using {} service", count, service.getClass().getSimpleName());
+			logger.info("Post computing {} products using {} service", count, name);
 
-			service.done(datas, vConf);
+			runStep("Post computing", name, vConf, () -> service.done(datas, vConf));
+		}
+	}
+
+	/**
+	 * Runs the {@code init} or {@code done} step of a scoring service. A failure is logged with the
+	 * name of the service and the vertical, then rethrown: the scoring run stops.
+	 */
+	private static void runStep(final String step, final String serviceName, final VerticalConfig vConf,
+			final Runnable call) {
+		try {
+			call.run();
+		} catch (RuntimeException e) {
+			// Callers log the stack trace
+			logger.error("{} of the scoring service {} failed for vertical {}, the scoring run stops: {}", step,
+					serviceName, vConf == null ? null : vConf.getId(), e.toString());
+			throw e;
 		}
 	}
 

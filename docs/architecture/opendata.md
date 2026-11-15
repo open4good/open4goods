@@ -41,7 +41,7 @@ flowchart LR
 
 `OpenDataPublisher`, appelé par `api` après un passage réussi, publie les fichiers locaux sur le bucket R2 par son API
 S3 (`S3OpenDataStorage`, AWS SDK for Java v2, client synchrone Apache). Désactivée par défaut et en bêta
-(`open-data-config.publication.enabled: false`) ; l'activation en prod passe par une PR dédiée. Un passage en échec
+(`open-data-config.publication.enabled: false`) ; activée en prod par `application-prod.yml` (GOU-2300). Un passage en échec
 ne publie rien.
 
 Les clés publiques sont les mêmes à chaque passage. Un zip n'est donc jamais écrit sur sa clé publique : il passe
@@ -54,7 +54,7 @@ par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
    pendant quelques heures : l'effet sur les Go-mois facturés est négligeable.
 3. **Envoi multipart** de chaque zip vers `staging-prefix` + clé (`.staging/gtin-open-data.zip`), en parts de
    `part-size` (64 Mo), débit limité à `upload-bandwidth` (2 Mo/s). En-têtes : `Content-Type: application/zip`,
-   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control`, métadonnée `sha256`. Un envoi en échec est
+   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control` (`public, max-age=300`, comme les manifests : avec des clés fixes, un cache long ferait servir l'ancien zip alors que `manifest.json` annonce déjà le nouveau sha256), métadonnée `sha256`. Un envoi en échec est
    abandonné (`AbortMultipartUpload`).
 4. **Relecture** : chaque objet temporaire est relu en entier ; son sha256 et sa taille sont comparés au manifest.
    L'ETag d'un envoi multipart n'est pas un condensé du fichier : seule la relecture prouve le contenu.
@@ -83,6 +83,8 @@ les a pas.
 | `isbn.zip` | `isbn-open-data.zip` | `open4goods-isbn-dataset.csv` (UTF-8) |
 | `gtin-manifest.json`, `isbn-manifest.json` | idem | manifest d'un jeu (GOU-2239) |
 | `manifest.json` | `manifest.json` | tous les jeux (contrat du plan GOU-2237) |
+| `impact-{vertical}.zip` | idem | `impact-{vertical}.csv` : critères bruts d'une verticale (GOU-2250) |
+| `impact-{vertical}-manifest.json` | idem | manifest d'un jeu impact |
 
 ## Contrat des manifests (`schemaVersion` 1)
 
@@ -136,3 +138,25 @@ Journal des modifications du schéma (à compléter par la version 2) :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,
   `classification_decitre_2`, `classification_decitre_3` ne figurent plus dans les fichiers. `nb_page` reste dans le
   jeu ISBN, sans changement de nom.
+
+## Datasets impact (lot 2, GOU-2250)
+
+Un CSV zippé par verticale activée de `verticals/`, `impact-{vertical}.zip`, produit dans le même passage que GTIN et
+ISBN (une seule lecture de l'index, un produit va dans chaque jeu dont il relève) et listé dans `manifest.json` avec
+l'identifiant `impact-{vertical}`. La liste des verticales et des critères vient de `VerticalsConfigService` et de
+`availableImpactScoreCriterias` : une nouvelle verticale donne un nouveau jeu, sans liste en dur. `DATA_QUALITY` est
+exclu ; une verticale sans autre critère n'a pas de jeu.
+
+- **Critères bruts uniquement** (décision du 15/11) : valeur de `attributes.indexed.{CRITERE}` telle quelle, jamais de
+  score agrégé, sous-score, percentile ni rang. Valeur absente : cellule vide, jamais de défaut.
+- **Lignes** : tous les produits de la verticale (`vertical` dans l'index), exclus compris ; `indexCount` du manifest
+  est `countItemsByVertical` au début du passage et le garde-fou de lignes (0,9) s'applique.
+- **Projection** : les champs ci-dessus plus `vertical`, `names.url`, `externalIds.eprel` et un champ
+  `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
+- **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
+- Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
+  (`impact-all`, lignes = somme des jeux).
+- **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
+- **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
+  `impact-*-manifest.json`.

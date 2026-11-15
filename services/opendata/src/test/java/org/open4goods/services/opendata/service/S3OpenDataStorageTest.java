@@ -46,7 +46,7 @@ class S3OpenDataStorageTest {
 
     private static final long MB = 1024 * 1024;
     private static final ObjectHeaders HEADERS = new ObjectHeaders("application/zip",
-            "attachment; filename=\"gtin-open-data.zip\"", "public, max-age=86400", "ab".repeat(32));
+            "attachment; filename=\"gtin-open-data.zip\"", "public, max-age=300", "ab".repeat(32));
 
     @TempDir
     Path tempDir;
@@ -87,7 +87,7 @@ class S3OpenDataStorageTest {
         assertThat(created.getValue().key()).isEqualTo(".staging/gtin-open-data.zip");
         assertThat(created.getValue().contentType()).isEqualTo("application/zip");
         assertThat(created.getValue().contentDisposition()).isEqualTo("attachment; filename=\"gtin-open-data.zip\"");
-        assertThat(created.getValue().cacheControl()).isEqualTo("public, max-age=86400");
+        assertThat(created.getValue().cacheControl()).isEqualTo("public, max-age=300");
         assertThat(created.getValue().metadata()).containsExactly(java.util.Map.entry("sha256", "ab".repeat(32)));
 
         assertThat(sent).extracting(part -> part.length).containsExactly((int) (5 * MB), (int) (5 * MB), (int) MB + 3);
