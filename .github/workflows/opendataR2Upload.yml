@@ -50,12 +50,20 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
         run: |
           set -euo pipefail
-          [[ "${UPLOAD_LIMIT}" =~ ^[0-9]+[kKMG]?$ ]] || { echo "::error::upload_limit invalide"; exit 1; }
+          # 0 would mean "no limit" for rclone: refused.
+          [[ "${UPLOAD_LIMIT}" =~ ^[1-9][0-9]*[kKMG]?$ ]] || { echo "::error::upload_limit invalide"; exit 1; }
           [[ "${R2_ACCOUNT_ID}" =~ ^[0-9a-f]{32}$ ]] || { echo "::error::variable R2_ACCOUNT_ID absente ou invalide dans l'environnement prod"; exit 1; }
           if [ -z "${R2_ACCESS_KEY_ID}" ] || [ -z "${R2_SECRET_ACCESS_KEY}" ]; then
             echo "::error::secrets R2 absents de l'environnement prod"
             exit 1
           fi
+
+      - name: 📥 Checkout the remote script (this workflow's commit)
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          sparse-checkout: scripts/deploy
+          persist-credentials: false
 
       - name: 📤 Upload on the prod host
         shell: bash
@@ -86,6 +94,8 @@ jobs:
             cat scripts/deploy/opendata-r2-upload.sh
           } | ssh -i "${work}/id" \
             -o BatchMode=yes \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=6 \
             -o StrictHostKeyChecking=accept-new \
             -o UserKnownHostsFile="${work}/known_hosts" \
             "${SSH_USER}@${SSH_HOST}" 'bash -s'
