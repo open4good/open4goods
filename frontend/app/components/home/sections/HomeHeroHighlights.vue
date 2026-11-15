@@ -100,13 +100,13 @@ const heroHighlightItems = computed<HeroHighlightItem[]>(() => {
       title: t('home.hero.highlights.impact.title'),
       icon: 'mdi-leaf',
       segments: [
-        { text: 'Acheter moins pire pour la planète. ' },
-        { text: 'évaluation environnementale', to: '/impact-score' },
-        { text: ' innovante pour ' },
+        { text: t('home.hero.impactHighlight.lead') + ' ' },
+        { text: t('home.hero.impactHighlight.link'), to: '/impact-score' },
+        { text: ` ${t('home.hero.impactHighlight.forProducts')} ` },
         { text: impactProducts, to: localePath({ name: 'search' }) },
-        { text: ' produits dans ' },
+        { text: ` ${t('home.hero.impactHighlight.inCategories')} ` },
         { text: impactCategories, to: '/categories' },
-        { text: ' catégories' },
+        { text: ` ${t('home.hero.impactHighlight.categories')}` },
       ],
     },
     {

@@ -2,9 +2,18 @@
 
 This document details the computation of the **Impact Score** (often referred to as `ECOSCORE` in the codebase), explaining the steps from raw attribute data to the final aggregated score.
 
-> This page describes the current method (V1). The versioned V2 method
+> This page describes the V1 method. The versioned V2 method
 > (real coverage, no imputation, per-vertical switch) is designed in
 > [impactscore/v2-design.md](impactscore/v2-design.md).
+>
+> **V2 coverage (wave 1, GOU-1889, gate no. 3):** refrigerators and
+> dishwashers use `methodologyVersion: 2` (merge date 2026-11-14; production
+> follows with the next release train). All other verticals stay in V1.
+> EPREL filter per vertical: `v2.eprelRequired: false` for refrigerators,
+> `true` for dishwashers (kept; lifting it needs a separate decision).
+> Rollback: set `IMPACTSCORE_METHODOLOGY_OVERRIDES=<vertical>:1`
+> (for example `dishwasher:1`). Re-evaluation happens in the 13:00 batch after
+> the release. Waves 2 and 3: GOU-2186.
 
 ## Overview
 
@@ -133,11 +142,99 @@ scores the products that have offers and are not excluded. After scoring:
 
 - excluded products and products unmatched from the vertical lose all their
   scores and their ranking;
-- products without offers keep their last score (they stay in the sitemap,
-  GOU-1744). If their Impact Score is a composite, which only the defect above
-  produces, it is recomputed from the sub-scores they hold, with the ranking of
-  `EcoScoreRanking`; it is removed only when it cannot be recomputed;
-- if scoring throws, nothing is indexed for that vertical.
+- products without offers keep their last score, without rank (they stay in the
+  sitemap, GOU-1744). Their `EcoScoreRanking` is reset and every score's
+  `ranking`, `lowestScoreId` and `highestScoreId` are cleared (GOU-2071): the
+  ranks of an earlier cohort would contradict today's cohort. If their Impact
+  Score is a composite, which only the defect above produces, it is recomputed
+  from the sub-scores they hold, then its rank is cleared too; it is removed only
+  when it cannot be recomputed;
+- if scoring throws, nothing is indexed for that vertical;
+- if an automatic check below is blocking, nothing is indexed for that vertical either.
+
+Products outside the batched verticals (no `vertical`, or a vertical id the
+batch does not run) are never loaded by `batch(vertical)`, so the rule above
+cannot reach them: in November 2026, about 31,000 such products, most of them
+excluded, still showed an old Impact Score on their page, in the global search
+and in the comparator (GOU-2133). After the last vertical, `BatchService.batch()`
+runs `clearScoresOutsideVerticals()`:
+
+- it targets the products holding `scores` or `impactScoreMeta` whose `vertical`
+  is not a batched vertical (`ProductRepository.countScoredOutsideVerticals`);
+- `score-cleanup.enabled` is `false` in the code and `true` in the API
+  `application.yml` since GOU-2134; when it is `false`, the batch only logs
+  `Score cleanup outside verticals : disabled, N products would be cleared`;
+- when enabled, it clears, by partial bulk updates of `score-cleanup.bulk-size`
+  products (default 500), at most `score-cleanup.max-products` products per run
+  (default 100,000): `scores` and `ranking` become empty objects and
+  `impactScoreMeta` is removed, the same result as above for an excluded product.
+  The script leaves a product that joined a batched vertical since it was read.
+  It logs `Score cleanup outside verticals : X products cleared, Y failed, of N
+  targeted, in S s`;
+- a cleared product no longer matches, so the next run touches nothing; a
+  failure is logged and never stops the batch. Both lines go to the
+  `BatchService.timings` logger, which stays at INFO in beta and prod.
+
+Check after a run (should be 0):
+`{"bool":{"filter":[{"term":{"excluded":true}},{"exists":{"field":"scores.ECOSCORE.value"}}]}}`
+on `products-moustik` (`_count`).
+
+### 6. Automatic checks after each batch (GOU-1895)
+
+`ImpactScoreBatchGuard` runs after scoring and before indexation, per vertical, and compares with the previous
+accepted batch of the same vertical (the accepted snapshot is persisted as `<rootFolder>/impactscore-guard/<verticalId>.json`, written atomically and
+reloaded after a restart; a missing or unreadable file means no reference, so only the absolute checks run; a blocked batch never becomes the baseline). Thresholds live under `impactScoreGuard` in
+`application.yml` (`ApiProperties`), with `defaults` and per-vertical overrides in `verticals.<id>`.
+
+| Rule | Severity | Condition | Property (default) |
+|------|----------|-----------|--------------------|
+| `BOUNDS` | blocking | ImpactScore outside [0, 20] | fixed |
+| `RELATIV` | blocking | `relativ` != `value / 4` | fixed |
+| `COMPOSITE` | blocking | `aggregates` not empty (cannot happen since lot 0) | fixed |
+| `SPREAD` | blocking | p95 - p5 under the floor (compressed scale, defect B1), if at least `minProductsForDistribution` rated | `minSpread` (1.0 point) |
+| `MEDIAN_SHIFT` | warning | median moves by more than X points | `maxMedianShift` (2.0) |
+| `COVERAGE_SHIFT` | warning | mean real-weight coverage (`1 - imputed share`, V1 and V2) moves by more than Y | `maxCoverageShift` (0.10) |
+| `RATED_DROP` / `SCORED_DROP` | warning | rated or scored count drops by more than Z | `maxCountDrop` (0.20) |
+| `EPREL_DROP` | warning | EPREL-matched count drops by more than Z | `maxEprelDrop` (0.20) |
+
+Starting values are conservative and to be tuned per vertical from the GOU-1876 distributions;
+`impactScoreGuard.enabled=false` switches the checks off.
+
+Alert: one structured `ERROR` log line per violation (`impactscore_guard vertical=... severity=... rule=... message=...
+action=indexation_blocked|none`), Micrometer gauge `impactscore.guard.violations{vertical,severity}`, and the
+`impactScoreGuard` health component (`/actuator/health/impactScoreGuard`, status `ALERT` when blocking, `WARN`
+otherwise, never `DOWN`, so the aggregate health and the probes are unchanged). A failure of the guard itself is
+logged and does not block the indexation.
+
+### 7. EPREL match metrics and update cycle (GOU-1893)
+
+**Metrics.** After scoring, `EprelMatchMetrics` measures each vertical on the products with a brand, a model and at
+least one offer: how many carry EPREL data, split into matched by GTIN (EPREL GTIN = product GTIN) and matched by
+brand and model, the rate, and its variation since the previous batch of the same vertical (kept in memory: the first
+batch after a restart has no variation). One log line per vertical:
+`eprel_match vertical=... eligible=... matched=... byGtin=... byModel=... rate=...% variationPts=...`, and gauges
+`eprel.match.{eligible,matched,matched.gtin,matched.model,rate.bp,rate.variation.bp}{vertical}` on
+`/actuator/metrics` (rates in basis points, 1 % = 100).
+
+**Withdrawn entries.** At the end of a group refresh that succeeded (download, parse and indexing without error),
+`EprelCatalogueService` flags `withdrawn=true` and `withdrawnAt` on the documents of that group absent from the new
+catalogue. They are flagged, not deleted, so the withdrawal is dated and reversible (indexing the entry again clears
+the flag). A failed group, or an empty catalogue, marks nothing. `EprelSearchService` ignores withdrawn documents:
+at the next EPREL completion of a product (throttled by `api.eprelRefreshDays`) its `eprelDatas` and
+`externalIds.eprel` are cleared.
+
+**Completion throttle (GOU-2099).** A product associated with an EPREL record is searched again after
+`api.eprelRefreshDays` (1 day). A product left without association is searched again after
+`api.eprelMissRefreshDays` (7 days), or at the next batch when its GTIN, its model candidates or the EPREL groups of
+its vertical changed (signature `datasourceCodes."eprel.searchSignature"`). An unsuccessful search runs every model
+strategy on every candidate; most smartphones and ovens have no EPREL record, and searching them again every day made
+the batch last about 12 hours. Excluded products follow the same rule: `missing_eprel` depends on that search.
+
+**Cycle.** EPREL refresh at 03:00 every odd day (`eprel.refresh-cron`, `0 0 3 */2 * *`), batch at 13:00 every day
+(`BatchService`). A new or changed EPREL entry is in the index from 03:00 and reaches the score at the 13:00 batch of
+the same day if the product is completed in this batch; the maximum delay is the refresh period plus the completion
+throttle: 2 days for the EPREL index plus `api.eprelRefreshDays` for an associated product, or
+`api.eprelMissRefreshDays` for a product without association whose identifiers did not change.
 
 ## Source Code pointers
 

@@ -40,6 +40,8 @@ synonyms:
   all:
     - "MINAVAILABILITYSOFTWAREUPDATESYEARS"
     - "SOFTWARE_UPDATES_YEARS"
+  eprel:
+    - "MINYEARSSOFTWAREUPDATES"
 parser:
   normalize: true
   trim: false

@@ -21,6 +21,9 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.attribute.AttributeType;
+import org.open4goods.model.eprel.EprelModelAliasTable;
+import org.open4goods.model.helper.IdHelper;
+import org.open4goods.model.product.ProductNature;
 import org.open4goods.model.vertical.AttributeComparisonRule;
 
 import org.open4goods.model.vertical.AttributeConfig;
@@ -57,6 +60,13 @@ public class VerticalsConfigService {
 
 	public static final Logger logger = LoggerFactory.getLogger(VerticalsConfigService.class);
 
+	/**
+	 * Property forcing the ImpactScore methodology version per vertical, for example {@code tv:2} (beta pilot) or
+	 * {@code tv:1} (production rollback). Rendered from the GitHub Environment variable
+	 * {@code IMPACTSCORE_METHODOLOGY_OVERRIDES} for api, front-api and ui together.
+	 */
+	public static final String METHODOLOGY_VERSION_OVERRIDES_PROPERTY = "impactscore.methodology-version-overrides";
+
 	private static final String DEFAULT_CONFIG_FILENAME = "_default.yml";
 
 	private final List<String> configPaths = new ArrayList<>();
@@ -66,6 +76,7 @@ public class VerticalsConfigService {
 	private static final String CLASSPATH_ATTRIBUTES = "classpath*:attributes/*.yml";
 	private static final String CLASSPATH_CATEGORIES = "classpath*:categories/*/*.yml";
 	private static final String CLASSPATH_GUIDES = "classpath*:guides/*/*.md";
+	private static final String CLASSPATH_EPREL_MODEL_ALIASES = "classpath*:eprel-model-aliases/*/*.yml";
 	private static final String CLASSPATH_IMPACT_SCORES_DEFAULT = "classpath:/verticals/impactscores/_default.yml";
 	private static final String CLASSPATH_ASSISTANTS = "classpath:/assistant/*.yml";
 
@@ -101,12 +112,34 @@ public class VerticalsConfigService {
 	// The default config
 	private VerticalConfig defaultConfig;
 
+	/** ImpactScore methodology version forced per vertical id (impactscore.methodology-version-overrides). */
+	private final Map<String, Integer> methodologyVersionOverrides;
+
 	public VerticalsConfigService(SerialisationService serialisationService,
 			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver) {
+		this(serialisationService, googleTaxonomyService, resourceResolver, null);
+	}
+
+	/**
+	 * Builds the service and loads the configurations.
+	 *
+	 * @param serialisationService        YAML reader
+	 * @param googleTaxonomyService       taxonomy updated with the loaded verticals
+	 * @param resourceResolver            classpath resolver
+	 * @param methodologyVersionOverrides value of {@code impactscore.methodology-version-overrides}, for example
+	 *                                    {@code tv:2}; blank or {@code none} forces nothing. api, front-api and ui
+	 *                                    must receive the same value.
+	 * @throws IllegalStateException when the override is malformed or a vertical's effective ImpactScore
+	 *                               methodology is unusable: the service does not start
+	 */
+	public VerticalsConfigService(SerialisationService serialisationService,
+			GoogleTaxonomyService googleTaxonomyService, ResourcePatternResolver resourceResolver,
+			String methodologyVersionOverrides) {
 		super();
 		this.serialisationService = serialisationService;
 		this.googleTaxonomyService = googleTaxonomyService;
 		this.resourceResolver = resourceResolver;
+		this.methodologyVersionOverrides = ImpactScoreMethodology.parseOverrides(methodologyVersionOverrides);
 
 		// Default paths
 		this.configPaths.add("classpath:/verticals/*.yml");
@@ -165,6 +198,7 @@ public class VerticalsConfigService {
 			logger.info("Adding config {} from classpath", uc.getId());
 			vConfs.put(uc.getId(), uc);
 		}
+		applyImpactScoreMethodologies(vConfs);
 		// Switching confs
 		synchronized (configs) {
 			configs.clear();
@@ -204,6 +238,49 @@ public class VerticalsConfigService {
 			}
 		}));
 
+	}
+
+	/**
+	 * Applies the environment override of the ImpactScore methodology version, checks that every vertical's
+	 * effective methodology is usable and computes the methodology revisions. Outside {@code try}: an error fails
+	 * the startup instead of leaving a vertical on another methodology than the one requested.
+	 *
+	 * @param vConfs the loaded verticals, by id
+	 * @throws IllegalStateException when an override names an unknown vertical or a vertical without ImpactScore,
+	 *                               or when an effective methodology is unusable
+	 */
+	private void applyImpactScoreMethodologies(Map<String, VerticalConfig> vConfs) {
+		for (Entry<String, Integer> override : methodologyVersionOverrides.entrySet()) {
+			VerticalConfig vertical = vConfs.get(override.getKey());
+			if (vertical == null || vertical.getImpactScoreConfig() == null) {
+				throw new IllegalStateException("impactscore.methodology-version-overrides: " + override.getKey()
+						+ " is not a vertical with an ImpactScore configuration");
+			}
+		}
+		for (VerticalConfig vertical : vConfs.values()) {
+			ImpactScoreConfig impactScoreConfig = vertical.getImpactScoreConfig();
+			if (impactScoreConfig == null) {
+				continue;
+			}
+			impactScoreConfig.setMethodologyVersionOverride(methodologyVersionOverrides.get(vertical.getId()));
+			List<String> errors = ImpactScoreMethodology.blockingErrors(impactScoreConfig, vertical);
+			if (!errors.isEmpty()) {
+				throw new IllegalStateException("ImpactScore methodology of vertical " + vertical.getId()
+						+ " is unusable: " + String.join("; ", errors));
+			}
+			List<String> warnings = ImpactScoreMethodology.validate(impactScoreConfig, vertical);
+			if (!warnings.isEmpty()) {
+				logger.warn("ImpactScore v2 block of vertical {} is invalid (not active): {}", vertical.getId(),
+						String.join("; ", warnings));
+			}
+			impactScoreConfig.refreshMethodologyRevision();
+			if (impactScoreConfig.getMethodologyVersionOverride() != null) {
+				logger.warn("ImpactScore methodology of vertical {} forced to version {} by the environment",
+						vertical.getId(), impactScoreConfig.getMethodologyVersionOverride());
+			}
+			logger.info("ImpactScore methodology of vertical {}: version {}, revision {}", vertical.getId(),
+					impactScoreConfig.effectiveMethodologyVersion(), impactScoreConfig.getMethodologyRevision());
+		}
 	}
 
 	/**
@@ -313,7 +390,54 @@ public class VerticalsConfigService {
 		}
 		mergeExternalSubCategories(ret);
 		mergeGuides(ret);
+		mergeEprelModelAliases(ret);
 		return ret;
+	}
+
+	/**
+	 * Attaches the EPREL model alias tables found under {@code classpath*:eprel-model-aliases/{vertical-id}/*.yml}
+	 * to their vertical (for example the Apple table of the smartphones vertical).
+	 *
+	 * @param verticalConfigs vertical configurations already loaded from YAML
+	 */
+	private void mergeEprelModelAliases(List<VerticalConfig> verticalConfigs) {
+		Map<String, VerticalConfig> verticalsById = verticalConfigs.stream()
+				.filter(Objects::nonNull)
+				.filter(config -> config.getId() != null)
+				.collect(java.util.stream.Collectors.toMap(
+						VerticalConfig::getId,
+						Function.identity(),
+						(first, ignored) -> first));
+
+		Resource[] resources;
+		try {
+			resources = resourceResolver.getResources(CLASSPATH_EPREL_MODEL_ALIASES);
+		} catch (IOException e) {
+			logger.error("Cannot load EPREL model aliases from {} : {}", CLASSPATH_EPREL_MODEL_ALIASES, e.getMessage());
+			return;
+		}
+
+		for (Resource resource : resources) {
+			String filename = resource.getFilename();
+			String verticalId = verticalIdFromPathSegment(resource, "/eprel-model-aliases/");
+			VerticalConfig target = verticalId == null ? null : verticalsById.get(verticalId);
+			if (target == null) {
+				logger.warn("EPREL model alias file {} targets unknown vertical id {}. Skipping.", filename, verticalId);
+				continue;
+			}
+			try (InputStream inputStream = resource.getInputStream()) {
+				EprelModelAliasTable table = serialisationService.fromYaml(inputStream, EprelModelAliasTable.class);
+				if (table == null || table.getModels().isEmpty()) {
+					logger.warn("Empty EPREL model alias table in {}", filename);
+					continue;
+				}
+				target.getEprelModelAliases().add(table);
+				logger.info("Loaded {} EPREL model aliases ({}) for {}", table.getModels().size(), table.getBrand(),
+						verticalId);
+			} catch (Exception e) {
+				logger.error("Cannot load EPREL model alias table : {}", filename, e);
+			}
+		}
 	}
 
 	/**
@@ -779,6 +903,7 @@ public class VerticalsConfigService {
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getUserBetterIs())
 				&& AttributeComparisonRule.GREATER.equals(attributeConfig.getImpactBetterIs())
 				&& attributeConfig.getScoring() == null
+				&& !attributeConfig.isDerivedScore()
 				&& (attributeConfig.getFilteringType() == null
 						|| AttributeType.TEXT.equals(attributeConfig.getFilteringType()))
 				&& !attributeConfig.isAsScore()
@@ -871,6 +996,92 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
+	}
+
+	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233), with
+	 * the {@code natureMinMarkedCategoryShare} of {@code _default.yml}.
+	 *
+	 * @param categories merchant categories of the product, may be null
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker or too few do
+	 * @see #getNatureForCategories(Collection, double)
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories) {
+		return getNatureForCategories(categories,
+				defaultConfig == null ? 0d : defaultConfig.getNatureMinMarkedCategoryShare());
+	}
+
+	/**
+	 * Reads the nature of a product from its merchant categories (GOU-2233).
+	 *
+	 * <p>Each category is normalised ({@link IdHelper#getCategoryName(String)}), the
+	 * {@code natureNeutralCategoryFragments} of {@code _default.yml} are removed from
+	 * it, then the remainder is searched for the {@code sparePartCategoryMarkers} and
+	 * {@code accessoryCategoryMarkers}. A category carrying either is "marked".
+	 *
+	 * <p>The nature is set only when at least one distinct normalised category is
+	 * marked and the marked share of the distinct categories reaches
+	 * {@code minMarkedShare}. It is then {@link ProductNature#SPARE_PART} when a
+	 * category carries a spare part marker, {@link ProductNature#ACCESSORY}
+	 * otherwise. The caller only applies it to a product without vertical.
+	 *
+	 * @param categories     merchant categories of the product, may be null
+	 * @param minMarkedShare minimum share (0 to 1) of the distinct categories that
+	 *                       must carry a marker; 0 means one marked category is enough
+	 * @return {@link ProductNature#SPARE_PART}, {@link ProductNature#ACCESSORY}, or
+	 *         null when no category carries a marker or too few do
+	 */
+	public ProductNature getNatureForCategories(Collection<String> categories, double minMarkedShare) {
+		if (categories == null || categories.isEmpty() || defaultConfig == null) {
+			return null;
+		}
+
+		List<String> neutralFragments = defaultConfig.getNatureNeutralCategoryFragments() == null ? List.of()
+				: defaultConfig.getNatureNeutralCategoryFragments().stream()
+						.filter(StringUtils::isNotBlank)
+						// Longest first, so that a fragment containing another one is removed whole
+						.sorted(Comparator.comparingInt(String::length).reversed())
+						.toList();
+
+		Set<String> distinctCategories = new LinkedHashSet<>();
+		for (String rawCategory : categories) {
+			String category = IdHelper.getCategoryName(rawCategory);
+			if (category != null) {
+				distinctCategories.add(category);
+			}
+		}
+
+		int marked = 0;
+		boolean sparePart = false;
+		for (String normalised : distinctCategories) {
+			String category = normalised;
+			for (String fragment : neutralFragments) {
+				category = category.replace(fragment, " ");
+			}
+			boolean spare = containsAny(category, defaultConfig.getSparePartCategoryMarkers());
+			if (spare || containsAny(category, defaultConfig.getAccessoryCategoryMarkers())) {
+				marked++;
+				sparePart |= spare;
+			}
+		}
+
+		if (marked == 0 || (double) marked / distinctCategories.size() < minMarkedShare) {
+			return null;
+		}
+		return sparePart ? ProductNature.SPARE_PART : ProductNature.ACCESSORY;
+	}
+
+	private static boolean containsAny(String category, Set<String> markers) {
+		if (markers == null) {
+			return false;
+		}
+		for (String marker : markers) {
+			if (StringUtils.isNotBlank(marker) && category.contains(marker)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -137,6 +137,12 @@
           >
             {{ item.scoreOn20.toFixed(1) }} / 20
           </v-chip>
+          <span
+            v-else-if="item.notFilled"
+            class="text-caption text-medium-emphasis"
+          >
+            {{ $t('components.impactScore.v2.criterionNotFilled') }}
+          </span>
           <span v-else class="text-caption text-disabled">—</span>
         </div>
       </template>
@@ -216,6 +222,7 @@ type TableRow = {
   virtual?: boolean
   rowType: 'aggregate' | 'subscore' | 'standalone'
   parentId?: string
+  notFilled?: boolean
 }
 
 const resolveScoreValue = (score: ScoreView | null): number | null => {
@@ -326,7 +333,7 @@ const buildTableRow = (
   displayValue: score.displayValue,
   coefficient: score.coefficient,
   scoreOn20: score.scoreOn20,
-
+  notFilled: score.notFilled ?? false,
   virtual: score.virtual,
   rowType,
   parentId,

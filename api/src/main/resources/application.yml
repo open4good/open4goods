@@ -17,8 +17,12 @@ logging:
     # GOU-1815: beta and prod (open4goods-config application-active.yml) set org.open4goods to warn. This more
     # specific key is merged with theirs and keeps the purge progress and report in nohup-api.log.
     org.open4goods.api.services.DatasourcePurgeService: INFO
+    # GOU-2266: batch counters and the final report of the product index backfill (Decitre purge...).
+    org.open4goods.api.services.backfill: INFO
     # GOU-1835: same for the INFO line giving the products index mapping result at startup.
     org.open4goods.api.services.ProductIndexMappingRunner: INFO
+    # GOU-2099: same for the batch durations, per vertical, per phase and per completion service.
+    org.open4goods.api.services.BatchService.timings: INFO
   file:
     max-history: 5
     max-size: 200MB
@@ -106,6 +110,10 @@ springdoc:
 
 genAiPauseDurationMs: 100
 
+# Clears the scores of the products outside the batched verticals at the end of the batch (GOU-2133, GOU-2134).
+score-cleanup:
+  enabled: true
+
 remote-file-caching:
   connection-timeout: 30000
   read-timeout: 30000
@@ -160,3 +168,37 @@ metriks:
       # No dedicated secret: reuses the TradeTracker feed credentials (API_TRADETRACKER_API_KEY, GOU-1381).
       customer-id: ${affiliation-config.tradetracker-customer-id:}
       passphrase: ${affiliation-config.tradetracker-api-key:}
+
+###############################################
+# Open data export (GOU-2248): weekly generation of the GTIN and ISBN zips and manifests
+# Bound to: OpenDataConfig (prefix="open-data-config"). ui and front-api keep generation-enabled: false.
+###############################################
+open-data-config:
+  generation-enabled: ${OPEN_DATA_GENERATION_ENABLED:true}
+  # Sunday 01:30 Europe/Paris, outside the batch window (from 12:30 server time) and the release window. "-" disables
+  # the schedule; POST /opendata/generate stays available.
+  generation-cron: ${OPEN_DATA_GENERATION_CRON:0 30 1 * * SUN}
+  generation-zone: Europe/Paris
+  # ~0.7 KB per projected product: 2000 per page is ~1.5 MB per Elasticsearch response (100 MB buffer, GOU-2249).
+  export-page-size: 2000
+  # Pause after each page, to leave Elasticsearch to the site search.
+  page-pause: 50ms
+  # Free space required before a pass, as a multiple of the published zips (GOU-823).
+  min-free-space-ratio: 1.5
+  # A dataset with fewer rows than 90 % of the published manifest or of the index count is refused.
+  min-rows-ratio: 0.9
+  # Written in the manifests (url field).
+  public-base-url: https://data.nudger.fr
+  # Publication on R2 after a successful pass (GOU-2289): zips to .staging/, read back and sha256 check, copy to the
+  # public keys, per-dataset manifests, manifest.json last. Disabled here and in beta; prod enables it by a dedicated
+  # change. account-id, access-key-id and secret-access-key come from the prod GitHub Environment (R2_ACCOUNT_ID,
+  # R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY), rendered by scripts/deploy/render-service-secrets.sh: never here.
+  publication:
+    enabled: false
+    bucket: nudger-opendata
+    staging-prefix: .staging/
+    # Budget guard: refused when the bucket would exceed it after the publication (R2 free under 10 GB-month).
+    max-bucket-size: 9GB
+    part-size: 64MB
+    # Upload bandwidth per second (as the upload_limit of opendataR2Upload.yml); 0 disables the limit.
+    upload-bandwidth: 2MB

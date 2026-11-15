@@ -79,6 +79,8 @@ export type ScoreView = {
   scoring?: ScoreScoringConfig | null
   importanceDescription?: string | null
   virtual?: boolean
+  /** V2: criterion of the active matrix with no value on this product. */
+  notFilled?: boolean
   numericMapping?: Record<string, number> | null
 }
 

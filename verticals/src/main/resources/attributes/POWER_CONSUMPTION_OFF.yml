@@ -13,7 +13,7 @@ scoring:
   missingValuePolicy: "NEUTRAL"
   degenerateDistributionPolicy: "FALLBACK"
 scoreTitle:
-  fr: "Consommation électrique (arret)"
+  fr: "Consommation électrique (arrêt)"
 scoreDescription:
   fr: "La consommation électrique à l'arrêt, ou en veille"
 scoreUtility:

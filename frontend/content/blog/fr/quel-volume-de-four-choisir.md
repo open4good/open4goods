@@ -45,6 +45,11 @@ Au-delà, pour une famille nombreuse ou si vous cuisinez beaucoup (batch cooking
 
 👉 L'idée est simple : **adapter le four à votre réalité, pas à un usage occasionnel exceptionnel**.
 
+Les fours les mieux notés par l'Impact Score, avec une offre en ligne :
+
+::guide-product-grid{vertical="oven" top="3"}
+::
+
 
 ## ⚡ Pourquoi un four trop grand peut poser problème ?
 

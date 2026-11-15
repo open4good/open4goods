@@ -28,12 +28,19 @@ class AffiliationClickMetriksTest {
 
     private static final List<String> CLICK_IDS = List.of(
             "affiliation.awin.clicks.7d", "affiliation.awin.clicks.28d",
+            "affiliation.awin.clicks.prev7d", "affiliation.awin.clicks.prev28d",
             "affiliation.effiliation.clicks.7d", "affiliation.effiliation.clicks.28d",
+            "affiliation.effiliation.clicks.prev7d", "affiliation.effiliation.clicks.prev28d",
             "affiliation.kwanko.clicks.7d", "affiliation.kwanko.clicks.28d",
+            "affiliation.kwanko.clicks.prev7d", "affiliation.kwanko.clicks.prev28d",
             "affiliation.tradetracker.clicks.7d", "affiliation.tradetracker.clicks.28d",
+            "affiliation.tradetracker.clicks.prev7d", "affiliation.tradetracker.clicks.prev28d",
             "affiliation.amazon.clicks.7d", "affiliation.amazon.clicks.28d",
+            "affiliation.amazon.clicks.prev7d", "affiliation.amazon.clicks.prev28d",
             "affiliation.other.clicks.7d", "affiliation.other.clicks.28d",
+            "affiliation.other.clicks.prev7d", "affiliation.other.clicks.prev28d",
             "affiliation.total.clicks.7d", "affiliation.total.clicks.28d",
+            "affiliation.total.clicks.prev7d", "affiliation.total.clicks.prev28d",
             "affiliation.clicks.top_merchants.28d",
             "affiliation.clicks.top_origins.28d");
 
@@ -79,7 +86,11 @@ class AffiliationClickMetriksTest {
                 "affiliation.tradetracker.clicks.7d", 0L, "affiliation.tradetracker.clicks.28d", 2L,
                 "affiliation.amazon.clicks.7d", 0L, "affiliation.amazon.clicks.28d", 3L,
                 "affiliation.other.clicks.7d", 1L, "affiliation.other.clicks.28d", 2L,
-                "affiliation.total.clicks.7d", 5L, "affiliation.total.clicks.28d", 26L);
+                "affiliation.total.clicks.7d", 5L, "affiliation.total.clicks.28d", 26L,
+                // Previous windows: half of the fake figures (see FakeClickStats#count).
+                "affiliation.awin.clicks.prev7d", 1L, "affiliation.awin.clicks.prev28d", 5L,
+                "affiliation.kwanko.clicks.prev7d", 0L, "affiliation.kwanko.clicks.prev28d", 2L,
+                "affiliation.total.clicks.prev7d", 2L, "affiliation.total.clicks.prev28d", 13L);
         for (int i = 0; i < values.size(); i += 2) {
             expected.put((String) values.get(i), (Long) values.get(i + 1));
         }
@@ -117,6 +128,18 @@ class AffiliationClickMetriksTest {
         assertThat(Instant.ofEpochMilli(call[2])).isEqualTo(Instant.parse("2026-10-21T22:00:00Z"));
         assertThat(call[3]).isEqualTo(20);
         assertThat(call[4]).isEqualTo(50);
+
+        // Previous windows, one aggregation each, [D-14, D-7) and [D-56, D-28) at Paris midnights.
+        assertThat(clicks.countCalls).hasSize(2);
+        assertThat(Instant.ofEpochMilli(clicks.countCalls.get(0)[0])).isEqualTo(Instant.parse("2026-10-07T22:00:00Z"));
+        assertThat(Instant.ofEpochMilli(clicks.countCalls.get(0)[1])).isEqualTo(Instant.parse("2026-10-14T22:00:00Z"));
+        assertThat(Instant.ofEpochMilli(clicks.countCalls.get(1)[0])).isEqualTo(Instant.parse("2026-08-26T22:00:00Z"));
+        assertThat(Instant.ofEpochMilli(clicks.countCalls.get(1)[1])).isEqualTo(Instant.parse("2026-09-23T22:00:00Z"));
+        assertThat(events.get("affiliation.awin.clicks.prev7d").getParams())
+                .containsEntry("windowStartDate", "2026-10-08").containsEntry("windowEndDate", "2026-10-14");
+        assertThat(events.get("affiliation.awin.clicks.prev28d").getParams())
+                .containsEntry("windowStartDate", "2026-08-27").containsEntry("windowEndDate", "2026-09-23");
+        assertThat(events.get("affiliation.awin.clicks.prev7d").getName()).isEqualTo("Clics sortants Awin (7 j préc.)");
     }
 
     @Test
@@ -207,6 +230,21 @@ class AffiliationClickMetriksTest {
             assertThat(event.getErrorMessage()).as(event.getId())
                     .isEqualTo("Clics indisponibles : index affiliation-clicks absent");
         });
+    }
+
+    @Test
+    void previousWindowFailure_putsEveryClickEventInErrorNotOnlyThePreviousOnes() {
+        Map<String, MetriksEvent> events = clickEvents(new FakeClickStats(STATS, null,
+                new DataAccessResourceFailureException("timeout")));
+
+        assertThat(events.keySet()).containsExactlyElementsOf(CLICK_IDS);
+        events.values().forEach(event -> {
+            assertThat(event.getStatus()).as(event.getId()).isEqualTo("error");
+            assertThat(event.getValue()).as(event.getId()).isNull();
+            assertThat(event.getErrorMessage()).as(event.getId())
+                    .isEqualTo("Clics indisponibles : Elasticsearch en erreur (DataAccessResourceFailureException)");
+        });
+        assertThat(events.get("affiliation.clicks.top_merchants.28d").getParams()).doesNotContainKey("rows");
     }
 
     @Test

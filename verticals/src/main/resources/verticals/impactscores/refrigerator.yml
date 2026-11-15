@@ -369,6 +369,29 @@ criteriasPonderation:
   DATA_QUALITY: 0.15
   WEIGHT: 0.08
   CLASSE_ENERGY: 0.55
+# ImpactScore V2 (GOU-1880), active since wave 1 (methodologyVersion 2, GOU-1889). Design: docs/impactscore/v2-design.md,
+# sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
+# 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
+methodologyVersion: 2
+v2:
+  criteriasPonderation:
+    WARRANTY: 0.1411765
+    NOISE_LEVEL: 0.1176471
+    WEIGHT: 0.0941176
+    CLASSE_ENERGY: 0.6470588
+  minRealWeightCoverage: 0.5
+  eprelRequired: false
+  minRatedForPositionLabel: 100
+  positionLabels:
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.50
+    - level: fair
+      minBetterThan: 0.10
+    - level: poor
+      minBetterThan: 0.0
+  criteriaScoring: {}
 yamlPrompt: "---\naiService: \"GEMINI\"\njsonSchema: \"{\\n  \\\"$schema\\\" : \\\"https://json-schema.org/draft/2020-12/schema\\\
   \",\\n  \\\"type\\\" : \\\"object\\\",\\n  \\\"properties\\\" : {\\n    \\\"available_criterias\\\" : {\\n      \\\"type\\\
   \" : \\\"array\\\",\\n      \\\"items\\\" : {\\n        \\\"type\\\" : \\\"string\\\"\\n      }\\n    },\\n    \\\"criteria_weights\\\

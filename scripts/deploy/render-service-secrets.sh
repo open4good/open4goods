@@ -9,7 +9,7 @@
 #   apply         Run check, then write the service's files on the host. The
 #                 service is not restarted: the caller does it.
 #   <env>         beta or prod: the GitHub Environment the caller's job declares.
-#   <service>     api, ui, front-api, admin, b2b-api, frontend or infra.
+#   <service>     api, ui, front-api, admin, frontend or infra.
 #   --if-present  A missing required secret is a ::warning:: and is not rendered
 #                 (release and beta deploy); without it, it fails. A secret that
 #                 is set but malformed always fails, before anything is written.
@@ -46,7 +46,7 @@
 #   path-sa  A Google service account JSON key written to the file named in the
 #            target (KEY=<file>), plus the line KEY=<file> in the service's env file.
 #
-# Host service and env file: api, ui, front-api and b2b-api are themselves;
+# Host service and env file: api, ui and front-api are themselves;
 # admin runs as `sbadmin` (/etc/open4goods/sbadmin.env); frontend reads
 # /etc/open4goods/frontend.env, the second env_file of open4goods-config's
 # docker-compose.frontend.yml: it beats config/<env>/frontend/.env, which every
@@ -54,7 +54,7 @@
 # (GOU-1694). apply refuses to render it while the host's compose file does not read
 # it (/opt/open4goods/latest/<env>/docker-compose.frontend.yml, copied by
 # publish-frontend.sh): deploy open4goods-config first. infra is
-# the docker compose infrastructure (Kibana, Plausible, b2b Postgres), which reads
+# the docker compose infrastructure (Kibana, Plausible), which reads
 # /etc/open4goods/infra.env as a second --env-file of publish-infra.sh: no
 # open4goods-config deploy writes /etc/open4goods/, and publish-jars.sh does not
 # source that file (docs/operations/infra-secrets-rotation.md).
@@ -71,6 +71,7 @@
 # | api       | API_GOOGLE_SEARCH_API_KEY       | tree    | googlesearch.api-key                                                           | optional |
 # | api       | API_OPENAI_API_KEY              | tree    | spring.ai.openai.api-key                                                       | optional |
 # | api       | API_AWIN_ACCESS_TOKEN           | tree    | affiliation-config.awin-access-token                                           | optional |
+# | api       | API_AWIN_DATAFEED_KEY           | tree    | affiliation-config.awin-datafeed-key                                           | optional |
 # | api       | API_KWANKO_TOKEN                | tree    | affiliation-config.kwanko-token                                                | optional |
 # | api       | API_TRADETRACKER_API_KEY        | tree    | affiliation-config.tradetracker-api-key                                        | optional |
 # | api       | API_EPREL_API_KEY               | tree    | eprel.api-key                                                                  | optional |
@@ -82,10 +83,15 @@
 # | api       | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
 # | api       | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
 # | api       | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | api       | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
+# | api       | R2_ACCOUNT_ID                   | tree    | open-data-config.publication.account-id (GitHub variable, not a secret)        | optional |
+# | api       | R2_ACCESS_KEY_ID                | tree    | open-data-config.publication.access-key-id                                     | optional |
+# | api       | R2_SECRET_ACCESS_KEY            | tree    | open-data-config.publication.secret-access-key                                 | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
 # | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | ui        | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | front-api | GOOGLE_SSO_CLIENT_ID            | env     | FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID (front.security.google-sso.client-id)      | required |
 # | front-api | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | front-api | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -97,14 +103,12 @@
 # | front-api | O4G_CAPTCHA_SECRET              | tree    | captcha.secret-key                                                             | optional |
 # | front-api | FRONT_API_GITHUB_TOKEN          | tree    | feedback.github.access-token                                                   | optional |
 # | front-api | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
+# | front-api | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
 # | admin     | GOOGLE_SSO_CLIENT_ID            | tree    | spring.security.oauth2.client.registration.google.client-id                    | optional |
 # | admin     | GOOGLE_SSO_CLIENT_SECRET        | tree    | spring.security.oauth2.client.registration.google.client-secret                | optional |
-# | b2b-api   | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
-# | b2b-api   | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
-# | b2b-api   | B2B_API_POSTGRES_PASSWORD       | tree    | spring.datasource.password                                                     | source   |
 # | frontend  | GOOGLE_SSO_CLIENT_ID            | env     | NUXT_GOOGLE_OAUTH_CLIENT_ID                                                    | required |
 # | frontend  | GOOGLE_SSO_CLIENT_SECRET        | env     | NUXT_GOOGLE_OAUTH_CLIENT_SECRET                                                | required |
 # | frontend  | O4G_MACHINE_TOKEN               | env     | NUXT_MACHINE_TOKEN (runtimeConfig.machineToken)                                | optional |
@@ -117,12 +121,11 @@
 # | infra     | INFRA_CLICKHOUSE_PASSWORD       | env     | CLICKHOUSE_PASSWORD (plausible_events_db, plausible; beta)                     | source   |
 # | infra     | INFRA_GOOGLE_CLIENT_ID          | env     | GOOGLE_CLIENT_ID (plausible Search Console; overrides config/<env>/infra/.env) | source   |
 # | infra     | INFRA_GOOGLE_CLIENT_SECRET      | env     | GOOGLE_CLIENT_SECRET (plausible Search Console; beta)                          | source   |
-# | infra     | B2B_API_POSTGRES_PASSWORD       | env     | B2B_POSTGRES_PASSWORD (b2b_postgres POSTGRES_PASSWORD)                         | source   |
 #
 # Coupled secrets: every consumer must receive the same value in the same deployment
 # (serviceSecrets.yml service=all, or a full release), otherwise the services stop
 # talking to each other until the next restart:
-#   O4G_SBA_PASSWORD      api, ui, front-api, b2b-api (SBA clients) <-> admin (registration
+#   O4G_SBA_PASSWORD      api, ui, front-api (SBA clients) <-> admin (registration
 #                         and instance-auth); api, ui and front-api actuators <-> admin.
 #   O4G_MACHINE_TOKEN     front-api (X-Shared-Token check) <-> frontend (sends it); it must
 #                         match [A-Za-z0-9/._-] because the frontend reads an env line.
@@ -130,18 +133,23 @@
 #   O4G_INTERNAL_API_KEY  front-api (front.affiliation-partners.api-key, sent to api) <->
 #                         api (admin-key: api's only full-access key besides test-keys; metriks-key,
 #                         API_METRIKS_KEY, opens /api/metriks/** only).
+#   IMPACTSCORE_METHODOLOGY_OVERRIDES  api (batch) <-> front-api (display) <-> ui (sitemap): the
+#                         ImpactScore methodology version forced per vertical (tv:2), a GitHub Environment
+#                         variable, not a secret (docs/impactscore/v2-design.md, 5.2). Empty: not rendered,
+#                         the previous render stays; set it to `none` to clear a rendered override.
 # Coupled with their source (infraSecrets.yml changes the source, then renders and restarts
 # every consumer in the same run; never serviceSecrets.yml nor a deploy):
-#   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api, b2b-api.
+#   O4G_ELASTICSEARCH_PASSWORD    Elasticsearch user `elastic` <-> api, ui, front-api.
 #   INFRA_KIBANA_SYSTEM_PASSWORD  Elasticsearch user `kibana_system` <-> Kibana.
 #   INFRA_PLAUSIBLE_PG_PASSWORD   Postgres user `postgres` of plausible_db <-> Plausible (beta).
 #   INFRA_CLICKHOUSE_PASSWORD     ClickHouse user `default` (set from the compose env at each start) <-> Plausible (beta).
-#   B2B_API_POSTGRES_PASSWORD     Postgres user of b2b_postgres <-> b2b-api.
 #
 # Paired secrets: a service receives both or neither (one set without the other fails, even with
 # --if-present, before anything is written), so that it never mixes two OAuth clients:
 #   admin  GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (the site's SSO client, GOU-1091; its
 #          redirect URIs must list the admin's /login/oauth2/code/google).
+#   api    R2_ACCESS_KEY_ID + R2_SECRET_ACCESS_KEY (the R2 token of the open data bucket, prod only,
+#          GOU-2244; read by the publication on R2, GOU-2289).
 #   api    GOOGLE_SSO_CLIENT_ID + GOOGLE_SSO_CLIENT_SECRET (same client, GOU-1393; its redirect
 #          URIs must list the api's /login/oauth2/code/google).
 #
@@ -164,6 +172,7 @@ api API_VERTEX_BATCH_JSON tree-sa vertex.batch.credentials-json optional
 api API_GOOGLE_SEARCH_API_KEY tree googlesearch.api-key optional
 api API_OPENAI_API_KEY tree spring.ai.openai.api-key optional
 api API_AWIN_ACCESS_TOKEN tree affiliation-config.awin-access-token optional
+api API_AWIN_DATAFEED_KEY tree affiliation-config.awin-datafeed-key optional
 api API_KWANKO_TOKEN tree affiliation-config.kwanko-token optional
 api API_TRADETRACKER_API_KEY tree affiliation-config.tradetracker-api-key optional
 api API_EPREL_API_KEY tree eprel.api-key optional
@@ -175,10 +184,15 @@ api API_METRIKS_KEY tree metriks-key optional
 api GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
 api GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
 api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
+api R2_ACCOUNT_ID tree open-data-config.publication.account-id optional
+api R2_ACCESS_KEY_ID tree open-data-config.publication.access-key-id optional
+api R2_SECRET_ACCESS_KEY tree open-data-config.publication.secret-access-key optional
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
 ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+ui IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 front-api GOOGLE_SSO_CLIENT_ID env FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID required
 front-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 front-api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -190,14 +204,12 @@ front-api O4G_MAIL_PASSWORD tree spring.mail.password optional
 front-api O4G_CAPTCHA_SECRET tree captcha.secret-key optional
 front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
 front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
+front-api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional
 admin GOOGLE_SSO_CLIENT_ID tree spring.security.oauth2.client.registration.google.client-id optional
 admin GOOGLE_SSO_CLIENT_SECRET tree spring.security.oauth2.client.registration.google.client-secret optional
-b2b-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
-b2b-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
-b2b-api B2B_API_POSTGRES_PASSWORD tree spring.datasource.password source
 frontend GOOGLE_SSO_CLIENT_ID env NUXT_GOOGLE_OAUTH_CLIENT_ID required
 frontend GOOGLE_SSO_CLIENT_SECRET env NUXT_GOOGLE_OAUTH_CLIENT_SECRET required
 frontend O4G_MACHINE_TOKEN env NUXT_MACHINE_TOKEN optional
@@ -210,13 +222,13 @@ infra INFRA_PLAUSIBLE_PG_PASSWORD env PLAUSIBLE_PG_PASSWORD source
 infra INFRA_CLICKHOUSE_PASSWORD env CLICKHOUSE_PASSWORD source
 infra INFRA_GOOGLE_CLIENT_ID env GOOGLE_CLIENT_ID source
 infra INFRA_GOOGLE_CLIENT_SECRET env GOOGLE_CLIENT_SECRET source
-infra B2B_API_POSTGRES_PASSWORD env B2B_POSTGRES_PASSWORD source
 '
 
 # <service> <secret> <secret>: see "Paired secrets" above.
 PAIRS_TABLE='
 admin GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
 api GOOGLE_SSO_CLIENT_ID GOOGLE_SSO_CLIENT_SECRET
+api R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY
 '
 
 if_present=false
@@ -242,10 +254,10 @@ case "$env_name" in
   *) fail "Unknown environment: $env_name (beta or prod)" ;;
 esac
 case "$service" in
-  api | ui | front-api | b2b-api) host_service=$service ;;
+  api | ui | front-api) host_service=$service ;;
   admin) host_service=sbadmin ;;
   frontend | infra) host_service=$service ;;
-  *) fail "Unknown service: $service (api, ui, front-api, admin, b2b-api, frontend or infra)" ;;
+  *) fail "Unknown service: $service (api, ui, front-api, admin, frontend or infra)" ;;
 esac
 
 if [ "$service" = frontend ]; then

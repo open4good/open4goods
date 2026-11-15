@@ -158,6 +158,16 @@
               </div>
             </div>
           </div>
+          <v-alert
+            v-if="criteriaSetsDiffer"
+            type="warning"
+            variant="tonal"
+            density="compact"
+            class="compare-grid__criteria-warning"
+            role="status"
+          >
+            {{ t('components.impactScore.v2.differentCriteria') }}
+          </v-alert>
           <div class="compare-grid__header" role="row">
             <div
               class="compare-grid__feature compare-grid__feature--header"
@@ -172,14 +182,25 @@
                 class="compare-grid__product"
                 role="columnheader"
               >
+                <ImpactScoreNotRated
+                  v-if="isNotRated(product)"
+                  :status="impactStatusOf(product)!"
+                  class="compare-grid__product-impact"
+                />
                 <ImpactScore
-                  v-if="product.impactScore !== null"
+                  v-else-if="product.impactScore !== null"
                   :score="product.impactScore"
                   :max="20"
                   size="medium"
                   class="compare-grid__product-impact"
                   flat
                 />
+                <p
+                  v-if="criteriaCountLabel(product)"
+                  class="compare-grid__product-criteria"
+                >
+                  {{ criteriaCountLabel(product) }}
+                </p>
                 <NuxtLink
                   v-if="productLink(product)"
                   :to="productLink(product)"
@@ -242,123 +263,6 @@
                   </template>
                 </dl>
               </article>
-            </div>
-          </div>
-
-          <div
-            v-for="row in textualRows"
-            :key="row.key"
-            class="compare-grid__row"
-            role="row"
-          >
-            <div class="compare-grid__feature" role="rowheader">
-              <v-icon
-                :icon="row.icon"
-                size="20"
-                class="compare-grid__feature-icon"
-              />
-              <span class="compare-grid__feature-label">{{ row.label }}</span>
-            </div>
-            <div class="compare-grid__values" role="cell">
-              <div
-                v-for="(product, columnIndex) in products"
-                :key="`${row.key}-${product.gtin}`"
-                :class="[
-                  'compare-grid__value',
-                  { 'compare-grid__value--has-list': row.type === 'list' },
-                ]"
-              >
-                <div v-if="product" class="compare-grid__value-mobile">
-                  <ClientOnly>
-                    <NuxtLink
-                      v-if="productLink(product)"
-                      :to="productLink(product)"
-                      class="compare-grid__value-mobile-media compare-grid__value-mobile-media--link"
-                      :aria-label="
-                        t('compare.a11y.viewProduct', { name: product.title })
-                      "
-                    >
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
-                      </div>
-                    </NuxtLink>
-                    <div v-else class="compare-grid__value-mobile-media">
-                      <NuxtImg
-                        v-if="product.coverImage"
-                        :src="product.coverImage"
-                        :alt="product.title"
-                        width="88"
-                        height="88"
-                        format="webp"
-                        class="compare-grid__value-mobile-image"
-                      />
-                      <div
-                        v-else
-                        class="compare-grid__value-mobile-placeholder"
-                        aria-hidden="true"
-                      >
-                        {{ productInitials(product.title) }}
-                      </div>
-                    </div>
-                  </ClientOnly>
-                  <div class="compare-grid__value-mobile-details">
-                    <p class="compare-grid__value-mobile-brand">
-                      {{ product.brand ?? '—' }}
-                    </p>
-                    <p class="compare-grid__value-mobile-model">
-                      {{ productModelLabel(product) }}
-                    </p>
-                  </div>
-                </div>
-
-                <div class="compare-grid__value-content">
-                  <template v-if="row.type === 'text'">
-                    <!-- eslint-disable vue/no-v-html -->
-                    <p
-                      v-if="row.values[columnIndex]"
-                      class="compare-grid__value-text"
-                      v-html="row.values[columnIndex]"
-                    />
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
-                  <template v-else>
-                    <!-- eslint-disable vue/no-v-html -->
-                    <ul
-                      v-if="hasListValues(row.values[columnIndex])"
-                      class="compare-grid__list compare-grid__list--pros-cons"
-                      role="list"
-                    >
-                      <li
-                        v-for="item in getListValues(row.values[columnIndex])"
-                        :key="item"
-                        class="compare-grid__list-item"
-                        role="listitem"
-                        v-html="item"
-                      />
-                    </ul>
-                    <!-- eslint-enable vue/no-v-html -->
-                    <p v-else class="compare-grid__value-text">
-                      {{ t('compare.textual.empty') }}
-                    </p>
-                  </template>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -1057,6 +961,13 @@ import { useI18n } from 'vue-i18n'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
+import ImpactScoreNotRated from '~/components/shared/ui/ImpactScoreNotRated.vue'
+import {
+  haveDifferentCriteriaSets,
+  isImpactScoreNotRated,
+  resolveCriteriaCount,
+  resolveImpactScoreV2,
+} from '~/utils/_impact-score-v2'
 import {
   createCompareService,
   type CompareProductEntry,
@@ -1079,14 +990,6 @@ import type {
   ProductScoreDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
-
-interface TextualRow {
-  key: string
-  icon: string
-  label: string
-  type: 'text' | 'list'
-  values: Array<string | string[] | null>
-}
 
 interface AttributeRow {
   key: string
@@ -1270,6 +1173,34 @@ const hasMixedVerticals = computed(() =>
 
 const productEntries = computed(() => products.value)
 
+// V1 products have no V2 status: every helper below then returns nothing.
+const impactStatusOf = (entry: { product: ProductDto }) =>
+  resolveImpactScoreV2(entry.product.scores)
+
+const isNotRated = (entry: { product: ProductDto }) =>
+  isImpactScoreNotRated(impactStatusOf(entry))
+
+const criteriaCountLabel = (entry: { product: ProductDto }): string | null => {
+  // A not rated product already states its counter in its reason.
+  if (isNotRated(entry)) return null
+  const counts = resolveCriteriaCount(impactStatusOf(entry))
+  return counts
+    ? t(
+        'components.impactScore.v2.criteria',
+        { count: counts.count, total: counts.total },
+        counts.count
+      )
+    : null
+}
+
+const criteriaSetsDiffer = computed(() =>
+  haveDifferentCriteriaSets(
+    productEntries.value
+      .filter(entry => !isNotRated(entry))
+      .map(entry => impactStatusOf(entry))
+  )
+)
+
 const attributeConfigs = computed(
   () => verticalConfig.value?.attributesConfig?.configs ?? []
 )
@@ -1360,18 +1291,6 @@ const hasMeaningfulCellValue = (value: unknown): boolean => {
   }
 
   return true
-}
-
-const hasListValues = (value: TextualRow['values'][number]): boolean => {
-  return Array.isArray(value) && value.length > 0
-}
-
-const getListValues = (value: TextualRow['values'][number]): string[] => {
-  return Array.isArray(value) ? value : []
-}
-
-const computeAvailabilityFromValues = (values: unknown[]): boolean[] => {
-  return values.map(value => hasMeaningfulCellValue(value))
 }
 
 const hasEnoughAvailability = (availability: boolean[]): boolean => {
@@ -1532,36 +1451,6 @@ watch(
     await syncHash(next)
   }
 )
-
-const textualRows = computed<TextualRow[]>(() => {
-  const rows: TextualRow[] = [
-    {
-      key: 'description',
-      icon: 'mdi-text-box-outline',
-      label: t('compare.textual.description'),
-      type: 'text',
-      values: productEntries.value.map(entry => entry.review.description),
-    },
-    {
-      key: 'pros',
-      icon: 'mdi-thumb-up-outline',
-      label: t('compare.textual.pros'),
-      type: 'list',
-      values: productEntries.value.map(entry => entry.review.pros),
-    },
-    {
-      key: 'cons',
-      icon: 'mdi-thumb-down-outline',
-      label: t('compare.textual.cons'),
-      type: 'list',
-      values: productEntries.value.map(entry => entry.review.cons),
-    },
-  ]
-
-  return rows.filter(row =>
-    hasEnoughAvailability(computeAvailabilityFromValues(row.values))
-  )
-})
 
 const priceRows = computed<AttributeRow[]>(() => {
   const newPrices = productEntries.value.map(
@@ -2075,6 +1964,14 @@ const productInitials = (title: string) => {
 .compare-grid__product-impact
   margin-top: 0.25rem
 
+.compare-grid__product-criteria
+  margin: 0.25rem 0 0
+  font-size: 0.75rem
+  color: rgba(var(--v-theme-text-neutral-soft), 0.9)
+
+.compare-grid__criteria-warning
+  margin-bottom: 0.75rem
+
 .compare-grid__product-model
   font-weight: 600
   margin: 0
@@ -2229,44 +2126,9 @@ const productInitials = (title: string) => {
   border: 2px solid rgba(var(--v-theme-accent-supporting), 0.6)
   box-shadow: 0 0 0 2px rgba(var(--v-theme-accent-supporting), 0.2)
 
-.compare-grid__value--has-list
-  align-items: stretch
-  text-align: left
-
-.compare-grid__value--has-list .compare-grid__value-content
-  align-items: stretch
-  text-align: left
-
-.compare-grid__value--has-list .compare-grid__list
-  align-items: flex-start
-
 .compare-grid__value-text
   margin: 0
   color: rgb(var(--v-theme-text-neutral-secondary))
-
-.compare-grid__list
-  list-style: none
-  margin: 0
-  padding: 0
-  display: flex
-  flex-direction: column
-  gap: 0.5rem
-  width: 100%
-
-.compare-grid__list-item
-  position: relative
-  padding-inline-start: 1.5rem
-  color: rgb(var(--v-theme-text-neutral-secondary))
-
-.compare-grid__list-item::before
-  content: ''
-  position: absolute
-  inset-inline-start: 0
-  inset-block-start: 0.4rem
-  width: 0.75rem
-  height: 0.75rem
-  border-radius: 50%
-  background: rgba(var(--v-theme-accent-supporting), 0.7)
 
 .compare-grid__values > .compare-grid__value
   min-height: 120px

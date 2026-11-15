@@ -1,0 +1,25 @@
+# ============================================================================
+# BATTERY_ENDURANCE_PER_CYCLE — Battery endurance per cycle (GOU-1891)
+# Source: EPREL, group smartphonestablets20231669 (Reg. (EU) 2023/1669). Decimal hours (batteryEndurancePerCycleInHours); the minutes key is ignored.
+# ============================================================================
+key: "BATTERY_ENDURANCE_PER_CYCLE"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-battery-clock"
+name:
+  default: "Battery endurance per cycle"
+  fr: "Autonomie par cycle"
+suffix:
+  default: "h"
+  fr: "h"
+filteringType: "NUMERIC"
+asScore: false
+synonyms:
+  eprel:
+    - "BATTERYENDURANCEPERCYCLEINHOURS"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false

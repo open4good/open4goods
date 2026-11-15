@@ -22,7 +22,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Parses warranty strings into a standardized duration in YEARS (Double).
- * Supports explicit years ("2 ans", "2 years"), months ("24 months"), and implicit numeric values.
+ * Supports explicit years ("2 ans", "2 years", "1.5 ans", "2,5 ans"), months ("24 months"), and implicit numeric values.
+ * Decimals are kept in the output ("18 mois" gives "1.5", at most 2 decimals).
  * <p>
  * Configuration (bounds) is managed via {@link VerticalConfig.WarrantyParserConfig}.
  */
@@ -40,17 +41,8 @@ public class WarrantyParser extends AttributeParser {
     // Matches explicit units
     private static final Pattern YEAR_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(ans?|years?|yrs?|a|y)\\b");
     private static final Pattern MONTH_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(mois?|months?|m)\\b");
-    private static final Set<String> IGNORED_VALUES = Set.of(
-            "donnee non specifiee",
-            "donnees non specifiees",
-            "non specifie",
-            "non specifiee",
-            "n a",
-            "na",
-            "nc",
-            "eur",
-            "-"
-    );
+    // Placeholders that carry no warranty, compared after normalize(). "eur" is specific to this parser.
+    private static final Set<String> IGNORED_VALUES = EmptyValuePlaceholders.with("eur");
 
     @Override
     public String parse(ProductAttribute attribute, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
@@ -186,13 +178,17 @@ public class WarrantyParser extends AttributeParser {
         return new Range(min, max);
     }
 
+    /**
+     * Lower-cases, strips accents and turns punctuation into spaces ("n/a" becomes "n a"). A point
+     * between two digits is a decimal point and is kept: "1.5 ans" stays 1.5 years.
+     */
     private String normalize(String s) {
         if (s == null) return "";
         s = s.trim();
         s = Normalizer.normalize(s, Normalizer.Form.NFKC);
         s = s.toLowerCase(Locale.ROOT);
         s = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
-        s = s.replaceAll("[()_./]+", " ");
+        s = s.replaceAll("[()_/]+|(?<!\\d)\\.|\\.(?!\\d)", " ");
         s = s.replaceAll("\\s+", " ").trim();
         return s;
     }

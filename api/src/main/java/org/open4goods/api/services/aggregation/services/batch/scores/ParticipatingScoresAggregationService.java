@@ -18,6 +18,10 @@ import org.slf4j.Logger;
  * Aggregates scores based on {@code participateInScores} declarations in
  * attribute configurations. The service computes a weighted sum (scaled to 1.0)
  * of participating scores for each aggregate key defined in the vertical.
+ *
+ * <p>In ImpactScore methodology V2 (design GOU-1878, 2.5) the weights are
+ * redistributed over the real participating scores, without threshold, and the
+ * aggregate is absent when none of them is real.
  */
 public class ParticipatingScoresAggregationService extends AbstractScoreAggregationService {
 
@@ -50,7 +54,9 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 	}
 
 	private void handleAggregate(Product product, String aggregateName, Map<String, Double> participants, VerticalConfig vConf) {
-		Double aggregatedValue = computeAggregatedValue(product, participants);
+		Double aggregatedValue = isMethodologyV2(vConf)
+				? computeV2AggregatedValue(product, participants)
+				: computeAggregatedValue(product, participants);
 		if (aggregatedValue == null) {
 			String logKey = vConf.getId() + ":" + aggregateName;
 			if (loggedSkippedAggregates.add(logKey)) {
@@ -72,6 +78,30 @@ public class ParticipatingScoresAggregationService extends AbstractScoreAggregat
 		score.getAbsolute().setValue(aggregatedValue);
 		score.setAggregates(new HashMap<>(participants));
 		product.getScores().put(aggregateName, score);
+	}
+
+	/**
+	 * V2 aggregate: {@code sum(w x rel) / sum(w)} over the real participating scores (present, not virtual, with a
+	 * readable relative value).
+	 *
+	 * @param product      the product holding the participating scores
+	 * @param participants the participating scores and their weights
+	 * @return the aggregate, or {@code null} when no participating score is real
+	 */
+	private Double computeV2AggregatedValue(Product product, Map<String, Double> participants) {
+		double weightedSum = 0d;
+		double realWeight = 0d;
+		for (Map.Entry<String, Double> entry : participants.entrySet()) {
+			if (entry.getValue() == null || entry.getValue() <= 0d) {
+				continue;
+			}
+			Score score = product.getScores().get(entry.getKey());
+			if (isRealScore(entry.getKey(), score)) {
+				weightedSum += resolveRelativeValue(entry.getKey(), score) * entry.getValue();
+				realWeight += entry.getValue();
+			}
+		}
+		return realWeight > 0d ? weightedSum / realWeight : null;
 	}
 
 	private Double computeAggregatedValue(Product product, Map<String, Double> participants) {

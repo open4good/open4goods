@@ -1,5 +1,6 @@
 package org.open4goods.services.productrepository.services;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,6 +98,21 @@ public class ProductRepository {
         private static final int PROJECTED_EXPORT_PAGE_SIZE = 5000;
 
         /**
+         * Scroll keep-alive of {@link #getProductsMatchingCategoriesOrVerticalId(VerticalConfig)}, the time allowed
+         * between two scroll requests (GOU-2274). Its caller aggregates the products while they stream and queues
+         * them by pages into the full indexation queue, whose {@code put} blocks while the queue is full: with the
+         * 1 minute default of Spring Data Elasticsearch, a slow queue could let the scroll expire and fail the run.
+         */
+        static final Duration CATEGORY_MATCH_SCROLL_KEEP_ALIVE = Duration.ofMinutes(5);
+
+        /**
+         * Complete products per scroll request of {@link #getProductsMatchingCategoriesOrVerticalId(VerticalConfig)}
+         * (about 2 MB): ten times fewer requests than the default of 10, while the time between two requests stays
+         * that of aggregating at most 100 products and queueing at most one page.
+         */
+        static final int CATEGORY_MATCH_SCROLL_PAGE_SIZE = 100;
+
+        /**
          * Shared {@link PageRequest} for exports of complete products.
          */
         private static final PageRequest EXPORT_STREAM_PAGE = PageRequest.of(0, FULL_PRODUCT_PAGE_SIZE);
@@ -115,6 +131,13 @@ public class ProductRepository {
                         "offerNames",
                         "lastChange"
         };
+
+        /**
+         * Field closing an explicit sort so that ties keep a stable order between requests and pages. It holds the
+         * GTIN zero-padded to 14 digits (lexical order = numeric order) and is a keyword with doc values. Never use
+         * {@code id}: it is mapped without doc values and Elasticsearch rejects any sort on it (GOU-1940).
+         */
+        public static final String STABLE_SORT_TIE_BREAK_FIELD = "gtinInfos.normalizedGtin14";
 
         private static final String PRODUCT_EMBEDDING_FIELD = "embedding";
         private static final String IMAGE_EMBEDDING_FIELD = "resources.imageInfo.embedding";
@@ -145,6 +168,17 @@ public class ProductRepository {
          */
         public static FetchSourceFilter productFieldsWithoutEmbeddingSourceFilter() {
                 return sourceFilter(ProductProjection.WITHOUT_VECTORS);
+        }
+
+        /**
+         * Builds the ascending tie-break order on {@link #STABLE_SORT_TIE_BREAK_FIELD}. Products without the field
+         * come last, and an index that does not map it yet still answers instead of failing.
+         *
+         * @return the tie-break order to append as last criterion of an explicit sort
+         */
+        public static Sort.Order stableSortTieBreak() {
+                return new org.springframework.data.elasticsearch.core.query.Order(Sort.Direction.ASC,
+                                STABLE_SORT_TIE_BREAK_FIELD).withUnmappedType("keyword").withMissing("_last");
         }
 
         /**
@@ -575,21 +609,183 @@ public class ProductRepository {
 	 * offer <b>or</b> an impact score (a product without offer but with an impact score
 	 * stays listed, GOU-1744). Ordered by impact score descending, products without score last.
 	 *
-	 * @param vertical vertical id
+	 * <p>Only an impact score of the vertical's current methodology counts (design
+	 * {@code docs/impactscore/v2-design.md}, section 4.2), so that the sitemap keeps no product the site shows as
+	 * not rated: in version 1, a score without {@code impactScoreMeta.methodologyVersion} (legacy) or of version 1;
+	 * from version 2, a score of that version only.
+	 *
+	 * @param vertical                  vertical id
+	 * @param currentMethodologyVersion the vertical's effective ImpactScore methodology version
 	 * @return streaming export, to be closed by the caller
 	 */
-	public Stream<Product> exportVerticalForSitemap(String vertical) {
+	public Stream<Product> exportVerticalForSitemap(String vertical, int currentMethodologyVersion) {
 	    // Native bool query: Criteria cannot express (A AND B) OR C without dropping the AND part.
 	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
 	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
 	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
-	    var hasScore = co.elastic.clients.elasticsearch._types.query_dsl.Query
-	        .of(q -> q.exists(e -> e.field("scores.ECOSCORE.value")));
+	    var hasScore = currentImpactScoreQuery(currentMethodologyVersion);
 	    var query = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
 	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
 	        .must(m -> m.term(t -> t.field("excluded").value(false)))
 	        .must(m -> m.bool(or -> or.should(recentOffer).should(hasScore).minimumShouldMatch("1")))));
 	    return streamOrderedByEcoscore(builder -> builder.withQuery(query), null);
+	}
+
+	/**
+	 * Products holding an impact score of the given methodology version (design section 4.2).
+	 *
+	 * @param methodologyVersion the vertical's effective ImpactScore methodology version
+	 * @return version 1: a score and no recorded version or version 1; otherwise a score of that version
+	 */
+	static co.elastic.clients.elasticsearch._types.query_dsl.Query currentImpactScoreQuery(int methodologyVersion) {
+	    var versionField = "impactScoreMeta.methodologyVersion";
+	    var sameVersion = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field(versionField).value(methodologyVersion)));
+	    var version = methodologyVersion == 1
+	        ? co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .should(sameVersion)
+	            .should(s -> s.bool(none -> none.mustNot(m -> m.exists(e -> e.field(versionField)))))
+	            .minimumShouldMatch("1")))
+	        : sameVersion;
+	    return co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.exists(e -> e.field("scores.ECOSCORE.value")))
+	        .must(version)));
+	}
+
+	/** Width, on the 0 to 20 scale, of a band of the ImpactScore histogram. */
+	private static final int SCORE_BAND_WIDTH = 2;
+
+	/** Maximum of the ImpactScore scale, and number of histogram bands (maximum / band width). */
+	private static final double SCORE_MAX = 20.0;
+	private static final int SCORE_BAND_COUNT = (int) SCORE_MAX / SCORE_BAND_WIDTH;
+
+	/**
+	 * Measured figures of the ImpactScore of a vertical (counts by outcome, coverage per criterion, distribution of
+	 * the scores), computed in one aggregated query over the products of the vertical's current methodology.
+	 *
+	 * <p>Cached one hour: the figures only change with the batch.
+	 *
+	 * @param vertical           vertical id
+	 * @param methodologyVersion the vertical's effective ImpactScore methodology version
+	 * @return the figures, never {@code null}; empty counts when the index cannot be read
+	 */
+	@Cacheable(keyGenerator = CacheConstants.KEY_GENERATOR, cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)
+	public org.open4goods.model.rating.ImpactScoreVerticalStats impactScoreVerticalStats(String vertical, int methodologyVersion) {
+	    var versionField = "impactScoreMeta.methodologyVersion";
+	    var sameVersion = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field(versionField).value(methodologyVersion)));
+	    var current = methodologyVersion == 1
+	        ? co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .should(sameVersion)
+	            .should(s -> s.bool(none -> none.mustNot(m -> m.exists(e -> e.field(versionField)))))
+	            .minimumShouldMatch("1")))
+	        : sameVersion;
+	    var recentOffer = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.range(r -> r.date(d -> d.field("lastChange").gt(String.valueOf(expirationClause())))))
+	        .must(m -> m.range(r -> r.number(n -> n.field("offersCount").gt(0.0))))));
+	    var cohort = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	        .must(m -> m.term(t -> t.field("vertical").value(vertical)))
+	        .must(m -> m.term(t -> t.field("excluded").value(false)))
+	        .must(recentOffer)));
+	    var rated = co.elastic.clients.elasticsearch._types.query_dsl.Query
+	        .of(q -> q.term(t -> t.field("impactScoreMeta.status").value("RATED")));
+	    // scores.ECOSCORE.value is the absolute score on 0 to 20 (relativ.value is the 0 to 5 one): no conversion
+	    var scoreField = "scores.ECOSCORE.value";
+
+	    NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+	        .withQuery(co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b.must(cohort).must(current))))
+	        .withAggregation("reasons", Aggregation.of(a -> a.terms(t -> t.field("impactScoreMeta.notRatedReason").size(10))))
+	        .withAggregation("lastScoredAt", Aggregation.of(a -> a.max(m -> m.field("impactScoreMeta.scoredAt"))))
+	        .withAggregation("rated", Aggregation.of(a -> a.filter(rated)
+	            .aggregations("brands", Aggregation.of(c -> c.cardinality(t -> t.field("attributes.referentielAttributes.BRAND"))))
+            .aggregations("coverage", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteria").size(200))))
+	            .aggregations("criteriaCount", Aggregation.of(c -> c.terms(t -> t.field("impactScoreMeta.realCriteriaCount").size(200))))
+	            .aggregations("histogram", Aggregation.of(c -> c.histogram(h -> h.field(scoreField).interval((double) SCORE_BAND_WIDTH)
+	                .minDocCount(0).extendedBounds(eb -> eb.min(0.0).max(SCORE_MAX - SCORE_BAND_WIDTH)))))
+	            .aggregations("stats", Aggregation.of(c -> c.stats(st -> st.field(scoreField))))
+	            .aggregations("percentiles", Aggregation.of(c -> c.percentiles(p -> p.field(scoreField).percents(5.0, 50.0, 95.0))))))
+	        .withPageable(PageRequest.of(0, 1))
+	        .withSourceFilter(noSourceFilter());
+
+	    long outdated = 0;
+	    long excluded = 0;
+	    try {
+	        var outdatedQuery = co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+	            .must(cohort).mustNot(current)));
+	        outdated = elasticsearchOperations.count(new NativeQueryBuilder().withQuery(outdatedQuery).build(), CURRENT_INDEX);
+	        excluded = countMainIndexExcluded(vertical);
+	    } catch (RuntimeException e) {
+	        logger.warn("Cannot count the outdated or excluded products of vertical {}", vertical, e);
+	    }
+
+	    SearchHits<Product> results = search(queryBuilder.build(), ProductRepository.MAIN_INDEX_NAME);
+	    if (results == null || !(results.getAggregations() instanceof ElasticsearchAggregations aggregations)) {
+	        return new org.open4goods.model.rating.ImpactScoreVerticalStats(0, 0, 0, outdated, excluded, 0, Map.of(), Map.of(),
+	            List.of(), SCORE_BAND_WIDTH, null, null, null, null, null, null);
+	    }
+
+	    long lowCoverage = 0;
+	    long noCriteria = 0;
+	    for (var bucket : aggregations.get("reasons").aggregation().getAggregate().sterms().buckets().array()) {
+	        if ("LOW_COVERAGE".equals(bucket.key().stringValue())) {
+	            lowCoverage = bucket.docCount();
+	        } else if ("NO_REAL_CRITERIA".equals(bucket.key().stringValue())) {
+	            noCriteria = bucket.docCount();
+	        }
+	    }
+	    var maxScoredAt = aggregations.get("lastScoredAt").aggregation().getAggregate().max().value();
+	    Long lastScoredAt = maxScoredAt != null && Double.isFinite(maxScoredAt) ? Long.valueOf(maxScoredAt.longValue()) : null;
+
+	    var ratedAgg = aggregations.get("rated").aggregation().getAggregate().filter();
+	    long ratedCount = ratedAgg.docCount();
+	    long brandCount = ratedAgg.aggregations().get("brands").cardinality().value();
+    Map<String, Long> coverage = new java.util.TreeMap<>();
+	    for (var bucket : ratedAgg.aggregations().get("coverage").sterms().buckets().array()) {
+	        coverage.put(bucket.key().stringValue(), bucket.docCount());
+	    }
+	    Map<Integer, Long> criteriaCount = new java.util.TreeMap<>();
+	    for (LongTermsBucket bucket : ratedAgg.aggregations().get("criteriaCount").lterms().buckets().array()) {
+	        criteriaCount.put((int) bucket.key(), bucket.docCount());
+	    }
+	    List<Long> histogram = List.of();
+	    if (ratedCount > 0) {
+	        // a score of exactly 20 opens a band above the scale: it belongs to the last band
+	        long[] bands = new long[SCORE_BAND_COUNT];
+	        for (var bucket : ratedAgg.aggregations().get("histogram").histogram().buckets().array()) {
+	            int index = (int) Math.min(Math.max(Math.floor(bucket.key() / SCORE_BAND_WIDTH), 0), SCORE_BAND_COUNT - 1);
+	            bands[index] += bucket.docCount();
+	        }
+	        histogram = java.util.Arrays.stream(bands).boxed().toList();
+	    }
+	    Double min = null;
+	    Double max = null;
+	    Double p5 = null;
+	    Double p50 = null;
+	    Double p95 = null;
+	    if (ratedCount > 0) {
+	        var stats = ratedAgg.aggregations().get("stats").stats();
+	        min = round2(stats.min());
+	        max = round2(stats.max());
+	        var values = ratedAgg.aggregations().get("percentiles").tdigestPercentiles().values().keyed();
+	        p5 = round2(percentile(values, "5.0"));
+	        p50 = round2(percentile(values, "50.0"));
+	        p95 = round2(percentile(values, "95.0"));
+	    }
+	    return new org.open4goods.model.rating.ImpactScoreVerticalStats(ratedCount, lowCoverage, noCriteria, outdated, excluded, brandCount,
+	        coverage, criteriaCount, histogram, SCORE_BAND_WIDTH, min, p5, p50, p95, max, lastScoredAt);
+	}
+
+	private static Double round2(Double value) {
+	    return value == null ? null : Math.round(value * 100.0) / 100.0;
+	}
+
+	private static Double percentile(Map<String, String> values, String key) {
+	    String value = values.get(key);
+	    try {
+	        return value == null ? null : Double.valueOf(value);
+	    } catch (NumberFormatException e) {
+	        return null;
+	    }
 	}
 
 	private Stream<Product> streamOrderedByEcoscore(UnaryOperator<NativeQueryBuilder> filter, Integer max) {
@@ -1633,10 +1829,13 @@ public class ProductRepository {
 
 	/**
 	 * Return all products matching the vertical in the config or already having a
-	 * vertical defined
+	 * vertical defined.
 	 *
-	 * @param v
-	 * @return
+	 * <p>Scroll of {@value #CATEGORY_MATCH_SCROLL_PAGE_SIZE} products per request, kept alive
+	 * {@link #CATEGORY_MATCH_SCROLL_KEEP_ALIVE} between two requests. Close the stream to release the scroll.
+	 *
+	 * @param v the vertical
+	 * @return the products, streamed
 	 */
 	// TODO : Could add datasourcename in a virtual "all", then apply the logic filter to batch get all categories matching....
 	public Stream<Product> getProductsMatchingCategoriesOrVerticalId(VerticalConfig v) {
@@ -1652,7 +1851,10 @@ public class ProductRepository {
 		Criteria c = new Criteria("datasourceCategories").in(datasources)
 				.or(new Criteria("vertical").is(v.getId()));
 
-		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c)).build();
+		final NativeQuery initialQuery = new NativeQueryBuilder().withQuery(new CriteriaQuery(c))
+				.withPageable(PageRequest.of(0, CATEGORY_MATCH_SCROLL_PAGE_SIZE))
+				.withScrollTime(CATEGORY_MATCH_SCROLL_KEEP_ALIVE)
+				.build();
 
 		var iterator = getElasticsearchOperations()
 				.searchForStream(initialQuery, Product.class, ProductRepository.CURRENT_INDEX);
@@ -1668,6 +1870,81 @@ public class ProductRepository {
 //				});
 
 
+	}
+
+	/**
+	 * Painless script clearing the scores of a product outside the batched verticals (GOU-2133), as
+	 * {@code BatchService.clearObsoleteScores} does for a product leaving its vertical: no score, an empty ranking,
+	 * no ImpactScore assessment metadata. A product that got one of {@code params.verticals} since it was read is
+	 * left untouched: the vertical batch owns its scores.
+	 */
+	static final String CLEAR_SCORES_SCRIPT = "if (ctx._source.vertical != null && params.verticals.contains(ctx._source.vertical)) { ctx.op = 'noop'; } "
+			+ "else { ctx._source.scores = [:]; ctx._source.ranking = [:]; ctx._source.remove('impactScoreMeta'); }";
+
+	/**
+	 * Products holding scores, a ranking or an ImpactScore assessment while out of the batched verticals: without a
+	 * vertical or of a vertical the batch does not run. The batch never loads them, so it cannot clear their scores
+	 * (GOU-2133). A cleared product holds an empty {@code scores} object, which does not match.
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return the query
+	 */
+	static co.elastic.clients.elasticsearch._types.query_dsl.Query scoredOutsideVerticalsQuery(Collection<String> batchedVerticals) {
+		List<co.elastic.clients.elasticsearch._types.FieldValue> verticals = batchedVerticals.stream()
+				.map(co.elastic.clients.elasticsearch._types.FieldValue::of)
+				.toList();
+		return co.elastic.clients.elasticsearch._types.query_dsl.Query.of(q -> q.bool(b -> b
+				.should(s -> s.exists(e -> e.field("scores")))
+				.should(s -> s.exists(e -> e.field("impactScoreMeta")))
+				.minimumShouldMatch("1")
+				.mustNot(m -> m.terms(t -> t.field("vertical").terms(v -> v.value(verticals))))));
+	}
+
+	/**
+	 * Counts the products holding scores outside the batched verticals (GOU-2133).
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return the number of products whose scores the batch cannot clear
+	 */
+	public long countScoredOutsideVerticals(Collection<String> batchedVerticals) {
+		NativeQuery query = new NativeQueryBuilder().withQuery(scoredOutsideVerticalsQuery(batchedVerticals)).build();
+		return elasticsearchOperations.count(query, CURRENT_INDEX);
+	}
+
+	/**
+	 * Streams the ids of the products holding scores outside the batched verticals (GOU-2133), without their source.
+	 *
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 * @return streaming export of product ids, to be closed by the caller
+	 */
+	public Stream<Long> exportIdsScoredOutsideVerticals(Collection<String> batchedVerticals) {
+		NativeQuery query = new NativeQueryBuilder()
+				.withQuery(scoredOutsideVerticalsQuery(batchedVerticals))
+				.withSourceFilter(noSourceFilter())
+				.withPageable(PageRequest.of(0, FULL_PRODUCT_PAGE_SIZE))
+				.build();
+		var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
+		return iterator.stream().onClose(iterator::close).map(hit -> Long.valueOf(hit.getId()));
+	}
+
+	/**
+	 * Clears, in one bulk, the scores, ranking and ImpactScore assessment metadata of the given products, unless they
+	 * belong to a batched vertical (see {@link #CLEAR_SCORES_SCRIPT}). Only those three fields are written.
+	 *
+	 * @param productIds       ids of the products to clear
+	 * @param batchedVerticals ids of the verticals the batch runs
+	 */
+	public void clearScores(Collection<Long> productIds, Collection<String> batchedVerticals) {
+		Map<String, Object> params = Map.of("verticals", List.copyOf(batchedVerticals));
+		List<UpdateQuery> updateQueries = productIds.stream()
+				.map(id -> UpdateQuery.builder(String.valueOf(id))
+						.withScript(CLEAR_SCORES_SCRIPT)
+						.withLang("painless")
+						.withParams(params)
+						.withIndex(CURRENT_INDEX.getIndexName())
+						.build())
+				.toList();
+		elasticsearchOperations.bulkUpdate(updateQueries, CURRENT_INDEX);
 	}
 
 	/**

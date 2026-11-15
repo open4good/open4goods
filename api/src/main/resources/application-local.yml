@@ -43,3 +43,7 @@ api:
 
 # The key to provide to get ADMIN_ROLE
 adminKey: open4goods
+
+# Open data generation stays off on a developer machine (GOU-2248).
+open-data-config:
+  generation-enabled: false

@@ -77,4 +77,4 @@ Ainsi, la domotique peut clairement être mise au service de vos économies d'é
 
 Chez Nudger, on croit à une consommation plus lucide, plus simple et plus durable. Et la domotique, bien utilisée, va dans ce sens. D'ailleurs, notre Impact Score tient compte de l'équipement et de la performance énergétique des produits connectés pour vous permettre de faire les meilleurs choix !
 
-Alors, prêts à passer à une maison plus futée (et plus verte) ? Utilisez Nudger et trouvez les meilleurs équipements !
+Alors, prêts à équiper votre maison ? Comparez les équipements sur Nudger par prix et par Impact Score (sur 20), et vérifiez la consommation annoncée de chacun avant de choisir.

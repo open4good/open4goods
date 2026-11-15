@@ -13,7 +13,19 @@
     role="img"
     :aria-label="ariaLabel"
   >
-    <v-tooltip v-if="percentile !== null" activator="parent" location="top">
+    <v-tooltip
+      v-if="v2Context && flat"
+      activator="parent"
+      location="top"
+      max-width="320"
+    >
+      {{ v2ContextText }}
+    </v-tooltip>
+    <v-tooltip
+      v-else-if="!v2Context && percentile !== null"
+      activator="parent"
+      location="top"
+    >
       {{
         t('product.verdict.percentileTooltip', {
           percentile,
@@ -33,13 +45,13 @@
           "
           :icon="mdiLeaf"
           size="small"
-          :to="'/impact-score'"
+          :to="methodologyHref"
           flat
           class="impact-score-panel__cta-card"
         />
       </div>
       <div class="impact-score-panel__col-left">
-        <div class="impact-score-panel__score justify-center">
+        <div v-if="!isUnrated" class="impact-score-panel__score justify-center">
           <span class="impact-score-panel__score-value">{{
             formattedScoreValue
           }}</span>
@@ -48,8 +60,8 @@
         <div
           v-if="
             qualitativeLabel &&
-            normalizedSize !== 'xxs' &&
-            normalizedSize !== 'xs'
+            !(v2Status && !v2Level) &&
+            (isUnrated || (normalizedSize !== 'xxs' && normalizedSize !== 'xs'))
           "
           class="impact-score-panel__qualitative text-center font-weight-bold mt-1"
           style="
@@ -114,9 +126,9 @@
           density="compact"
           size="x-small"
           rounded="pill"
-          :to="'./ecoscore'"
+          :to="methodologyHref"
         >
-          Méthodologie
+          {{ t('product.impact.methodologyShort') }}
         </v-btn>
       </div>
     </div>
@@ -134,17 +146,31 @@
       </div>
     </div>
 
+    <div
+      v-if="v2Context && !flat && showV2Context"
+      class="impact-score-panel__context"
+      :aria-label="t('components.impactScore.v2.contextAria')"
+    >
+      <span class="impact-score-panel__context-text">{{ v2ContextText }}</span>
+      <NuxtLink :to="methodologyHref" class="impact-score-panel__context-link">
+        {{ t('components.impactScore.v2.howCalculated') }}
+      </NuxtLink>
+    </div>
+
     <!-- Footer -->
     <div v-if="banner" class="impact-score-panel__footer">
       <!-- Left: Icon + Link -->
       <div class="impact-score-panel__footer-left">
         <v-icon
+          v-if="!v2Status"
           :icon="mdiLeaf"
           size="16"
           class="impact-score-panel__footer-icon"
         />
-        <NuxtLink to="/ecoscore" class="impact-score-panel__footer-link">
-          <div class="impact-score-panel__footer-title">Impact Score</div>
+        <NuxtLink :to="methodologyHref" class="impact-score-panel__footer-link">
+          <div class="impact-score-panel__footer-title">
+            {{ t('product.impact.scoreName') }}
+          </div>
           <div v-if="category" class="impact-score-panel__footer-category">
             {{ category }}
           </div>
@@ -178,8 +204,14 @@ import { mdiLeaf } from '@mdi/js'
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 import CtaCard from '~/components/shared/CtaCard.vue'
 import { getImpactLevel } from '~/utils/_product-verdict'
+import {
+  resolveBetterThanPercent,
+  resolvePositionLevel,
+} from '~/utils/_impact-score-v2'
+import type { ProductImpactScoreStatusDto } from '~~/shared/api-client'
 
 const props = defineProps({
   score: {
@@ -207,6 +239,10 @@ const props = defineProps({
   showMethodology: {
     type: Boolean,
     default: true,
+  },
+  verticalHomeUrl: {
+    type: String,
+    default: null,
   },
   showRange: {
     type: Boolean,
@@ -255,15 +291,101 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  /** `scores.impactScore` of the product, only when the vertical is in
+   * method V2 (see `resolveImpactScoreV2`). Null keeps the V1 rendering. */
+  v2: {
+    type: Object as PropType<ProductImpactScoreStatusDto | null>,
+    default: null,
+  },
+  /** Plural name of the vertical ("téléviseurs"); falls back to "products". */
+  verticalPluralName: {
+    type: String,
+    default: '',
+  },
+  /** Show the V2 context line (position, criteria, date, method). */
+  showV2Context: {
+    type: Boolean,
+    default: true,
+  },
 })
 
+// A product without a score is "not rated", never "weak".
+const isUnrated = computed(
+  () => props.score === null || props.score === undefined
+)
+
+const v2Status = computed(() => props.v2)
+const v2Level = computed(() => resolvePositionLevel(props.v2?.level))
+
 const qualitativeLevel = computed(() => {
-  if (props.score === null) return 'insufficient'
+  if (isUnrated.value) return 'unrated'
   return getImpactLevel(props.score)
 })
 
+// V2: the label is computed on the position by the front-api, never on
+// fixed score thresholds.
 const qualitativeLabel = computed(() => {
+  if (v2Status.value) {
+    return v2Level.value
+      ? t(`components.impactScore.v2.positionLevels.${v2Level.value}`)
+      : ''
+  }
   return t(`product.verdict.levels.${qualitativeLevel.value}`)
+})
+
+const formatScoredAt = (value: number | null | undefined) => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return ''
+  return new Intl.DateTimeFormat(locale.value, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(value))
+}
+
+const v2Context = computed(() => {
+  const status = v2Status.value
+  if (!status || status.status === 'NOT_RATED') return null
+  return status
+})
+
+const v2ContextText = computed(() => {
+  const status = v2Context.value
+  if (!status) return ''
+  const parts: string[] = []
+  const percent = resolveBetterThanPercent(status)
+  if (percent !== null) {
+    parts.push(
+      t('components.impactScore.v2.betterThan', {
+        percent,
+        count: n(status.ratedCount ?? 0),
+        items:
+          props.verticalPluralName.trim() ||
+          t('components.impactScore.v2.productsFallback'),
+      })
+    )
+  } else if (status.ratedCount === 1) {
+    parts.push(t('components.impactScore.v2.onlyRated'))
+  }
+  if (status.totalCriteriaCount != null && status.realCriteriaCount != null) {
+    parts.push(
+      t(
+        'components.impactScore.v2.criteria',
+        { count: status.realCriteriaCount, total: status.totalCriteriaCount },
+        status.realCriteriaCount
+      )
+    )
+  }
+  const date = formatScoredAt(status.scoredAt)
+  if (date) parts.push(t('components.impactScore.v2.scoredAt', { date }))
+  if (status.methodologyVersion != null) {
+    parts.push(
+      t('components.impactScore.v2.method', {
+        version: status.methodologyVersion,
+      })
+    )
+  }
+  return parts.join(' · ')
 })
 
 // The backend ranks scores in ascending order: 0 is the lowest score and
@@ -276,7 +398,14 @@ const percentile = computed(() => {
   return Math.max(0, Math.min(pct, 100))
 })
 
-const { t, n, d } = useI18n()
+const { t, n, d, locale } = useI18n()
+
+const methodologyHref = computed(() => {
+  const slug = props.verticalHomeUrl?.trim().replace(/^\/+|\/+$/g, '')
+  return slug
+    ? `/${slug}/ecoscore`
+    : resolveLocalizedRoutePath('impact-score', locale.value)
+})
 
 const sanitizeNumber = (value: number, fallback: number) =>
   Number.isFinite(value) ? value : fallback
@@ -286,6 +415,7 @@ const rangeMax = computed(() => sanitizeNumber(props.max, 20))
 const displayScore = computed(() => sanitizeNumber(props.score, 0))
 
 const progress = computed(() => {
+  if (isUnrated.value) return 0
   const min = rangeMin.value
   const max = rangeMax.value
 
@@ -299,6 +429,7 @@ const progress = computed(() => {
 
 // Accent step based on progress for color theming (low/mid/high)
 const accentStep = computed(() => {
+  if (isUnrated.value) return 'unrated'
   if (progress.value < 1 / 3) return 'low'
   if (progress.value < 2 / 3) return 'mid'
   return 'high'
@@ -335,7 +466,11 @@ const formattedScoreValue = computed(() =>
 )
 
 const ariaLabel = computed(() =>
-  t('components.impactScore.svgAriaLabel', { score: formattedScoreValue.value })
+  isUnrated.value
+    ? t('product.verdict.levels.unrated')
+    : t('components.impactScore.svgAriaLabel', {
+        score: formattedScoreValue.value,
+      })
 )
 
 const hasMeta = computed(() => props.showMethodology || props.showRange)
@@ -344,7 +479,9 @@ const shouldShowMeta = computed(
   () => normalizedVariant.value === 'default' && hasMeta.value && !props.flat
 )
 
-const shouldShowBar = computed(() => normalizedVariant.value === 'default')
+const shouldShowBar = computed(
+  () => normalizedVariant.value === 'default' && !isUnrated.value
+)
 
 const formattedDate = computed(() => {
   if (!props.date) return ''
@@ -386,6 +523,9 @@ const formattedDate = computed(() => {
 }
 
 /* Accent color variants */
+.impact-score-panel--unrated {
+  --impact-accent: rgb(var(--v-theme-on-surface-variant, 117, 117, 117));
+}
 .impact-score-panel--low {
   --impact-accent: rgb(var(--v-theme-error));
 }
@@ -394,6 +534,24 @@ const formattedDate = computed(() => {
 }
 .impact-score-panel--high {
   --impact-accent: rgb(var(--v-theme-success));
+}
+
+.impact-score-panel__context {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  justify-content: center;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  text-align: center;
+  color: rgba(var(--v-theme-on-surface), 0.75);
+}
+
+.impact-score-panel__context-link {
+  color: rgb(var(--v-theme-primary));
+  text-decoration: underline;
 }
 
 .impact-score-panel--banner {

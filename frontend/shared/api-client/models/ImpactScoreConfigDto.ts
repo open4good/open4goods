@@ -13,6 +13,19 @@
  */
 
 import { mapValues } from '../runtime'
+import type { ImpactScoreAuditDto } from './ImpactScoreAuditDto'
+import {
+  ImpactScoreAuditDtoFromJSON,
+  ImpactScoreAuditDtoToJSON,
+} from './ImpactScoreAuditDto'
+import type { ImpactScorePositionLabelDto } from './ImpactScorePositionLabelDto'
+import {
+  ImpactScorePositionLabelDtoFromJSON,
+  ImpactScorePositionLabelDtoFromJSONTyped,
+  ImpactScorePositionLabelDtoToJSON,
+  ImpactScorePositionLabelDtoToJSONTyped,
+} from './ImpactScorePositionLabelDto'
+
 /**
  *
  * @export
@@ -20,11 +33,41 @@ import { mapValues } from '../runtime'
  */
 export interface ImpactScoreConfigDto {
   /**
-   * Weight applied to each impact score criterion.
+   * Weight applied to each impact score criterion, in the vertical's current methodology.
    * @type {{ [key: string]: number; }}
    * @memberof ImpactScoreConfigDto
    */
   criteriasPonderation?: { [key: string]: number }
+  /**
+   * Current ImpactScore methodology version of the vertical.
+   * @type {number}
+   * @memberof ImpactScoreConfigDto
+   */
+  methodologyVersion?: number
+  /**
+   * Share of the matrix weight the criteria filled in must reach for a product to be rated; null in methodology version 1.
+   * @type {number}
+   * @memberof ImpactScoreConfigDto
+   */
+  minRealWeightCoverage?: number | null
+  /**
+   * Position labels, best first; empty in methodology version 1.
+   * @type {Array<ImpactScorePositionLabelDto>}
+   * @memberof ImpactScoreConfigDto
+   */
+  positionLabels?: Array<ImpactScorePositionLabelDto>
+  /**
+   * Fingerprint of the active matrix (weights, sense, bounds).
+   * @type {string}
+   * @memberof ImpactScoreConfigDto
+   */
+  methodologyRevision?: string | null
+  /**
+   * Useful texts of the stored AI audit; null when the vertical has no audit.
+   * @type {ImpactScoreAuditDto}
+   * @memberof ImpactScoreConfigDto
+   */
+  audit?: ImpactScoreAuditDto | null
   /**
    * Prompt used to produce the YAML configuration.
    * @type {string}
@@ -64,6 +107,28 @@ export function ImpactScoreConfigDtoFromJSONTyped(
       json['criteriasPonderation'] == null
         ? undefined
         : json['criteriasPonderation'],
+    methodologyVersion:
+      json['methodologyVersion'] == null
+        ? undefined
+        : json['methodologyVersion'],
+    minRealWeightCoverage:
+      json['minRealWeightCoverage'] == null
+        ? undefined
+        : json['minRealWeightCoverage'],
+    positionLabels:
+      json['positionLabels'] == null
+        ? undefined
+        : (json['positionLabels'] as Array<any>).map(
+            ImpactScorePositionLabelDtoFromJSON
+          ),
+    methodologyRevision:
+      json['methodologyRevision'] == null
+        ? undefined
+        : json['methodologyRevision'],
+    audit:
+      json['audit'] == null
+        ? undefined
+        : ImpactScoreAuditDtoFromJSON(json['audit']),
     yamlPrompt: json['yamlPrompt'] == null ? undefined : json['yamlPrompt'],
     aiJsonResponse:
       json['aiJsonResponse'] == null ? undefined : json['aiJsonResponse'],
@@ -84,6 +149,16 @@ export function ImpactScoreConfigDtoToJSONTyped(
 
   return {
     criteriasPonderation: value['criteriasPonderation'],
+    methodologyVersion: value['methodologyVersion'],
+    minRealWeightCoverage: value['minRealWeightCoverage'],
+    positionLabels:
+      value['positionLabels'] == null
+        ? undefined
+        : (value['positionLabels'] as Array<any>).map(
+            ImpactScorePositionLabelDtoToJSON
+          ),
+    methodologyRevision: value['methodologyRevision'],
+    audit: ImpactScoreAuditDtoToJSON(value['audit']),
     yamlPrompt: value['yamlPrompt'],
     aiJsonResponse: value['aiJsonResponse'],
   }

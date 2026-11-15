@@ -16,10 +16,12 @@ import org.open4goods.model.product.Score;
 import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeComparisonRule;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.scoring.ScoreNormalizationMethod;
 import org.open4goods.model.vertical.scoring.ScoreScoringConfig;
 import org.slf4j.Logger;
+import org.springframework.beans.BeanUtils;
 
 import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationContext;
 import org.open4goods.api.services.aggregation.services.batch.scores.normalization.NormalizationResult;
@@ -33,9 +35,10 @@ import org.open4goods.api.services.aggregation.services.batch.scores.normalizati
  * <ol>
  *   <li>{@link #init} — clears per-batch cardinality and frequency maps.</li>
  *   <li>{@link #onProduct} — subclass hook; called once per product.</li>
- *   <li>{@link #done} — generates virtual scores for products missing a score,
- *       relativises all scores to the configured scale, ranks products, and
- *       records the best/worst product ids per score.</li>
+ *   <li>{@link #done} — generates virtual scores for products missing a score
+ *       (methodology V1 only, none in V2), relativises all scores to the
+ *       configured scale, ranks products, and records the best/worst product
+ *       ids per score.</li>
  * </ol>
  *
  * <p>Subclasses are responsible for calling {@link #incrementCardinality} for
@@ -79,14 +82,18 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 //////////////////////////
                 // Virtual scores computing
                 // Operated on absolute values
+                // In methodology V2 a missing score stays absent: no imputation (design GOU-1878, 2.1)
                 //////////////////////////
+                boolean imputeMissingScores = !isMethodologyV2(vConf);
                 for (Product p : datas) {
                         for (String scoreName : absoluteCardinalities.keySet()) {
                                 Score s = p.getScores().get(scoreName);
                                 Cardinality source = absoluteCardinalities.get(scoreName);
                                 Cardinality virtual = new Cardinality(source);
                                 if (s == null) {
-
+                                        if (!imputeMissingScores) {
+                                                continue;
+                                        }
 
                                         // Need a virtual score
                                         s = new Score(scoreName, source.getAvg());
@@ -159,6 +166,29 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 		
 	}
 	
+	/**
+	 * Whether the vertical applies ImpactScore methodology V2 ({@link ImpactScoreConfig#isV2Active()}). V2 imputes
+	 * no missing score and redistributes the weights over the real ones; V1 stays unchanged.
+	 *
+	 * @param vConf the vertical configuration, may be {@code null}
+	 * @return {@code true} when the effective methodology version is 2
+	 */
+	protected static boolean isMethodologyV2(VerticalConfig vConf) {
+		return vConf != null && vConf.getImpactScoreConfig() != null && vConf.getImpactScoreConfig().isV2Active();
+	}
+
+	/**
+	 * Whether a score holds a real value: present, not virtual, with a readable relative value
+	 * ({@link #resolveRelativeValue(String, Score)}).
+	 *
+	 * @param scoreName the score identifier
+	 * @param score     the score, may be {@code null}
+	 * @return {@code true} for a real score
+	 */
+	protected boolean isRealScore(String scoreName, Score score) {
+		return score != null && !Boolean.TRUE.equals(score.getVirtual()) && resolveRelativeValue(scoreName, score) != null;
+	}
+
 	/////////////////////////////////////////
 	// Private methods
 	/////////////////////////////////////////
@@ -247,7 +277,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
 
 	protected Double relativizeScoreValue(String scoreName, Double value, Cardinality abs, VerticalConfig vConf)
 			throws ValidationException {
-		AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+		AttributeConfig attributeConfig = effectiveScoring(scoreName, vConf);
 		ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
 		if (method == null) {
 			if (shouldUsePercentileScoring(scoreName, vConf)) {
@@ -412,7 +442,7 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
         }
 
         private boolean shouldTrackFrequencies(String scoreName, VerticalConfig vConf) {
-                AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+                AttributeConfig attributeConfig = effectiveScoring(scoreName, vConf);
                 ScoreNormalizationMethod method = resolveNormalizationMethod(attributeConfig);
                 if (method == null) {
                         if (vConf == null || vConf.getImpactScoreConfig() == null) {
@@ -423,6 +453,41 @@ public abstract class AbstractScoreAggregationService extends AbstractAggregatio
                 }
                 return ScoreNormalizationMethod.PERCENTILE.equals(method)
                         || ScoreNormalizationMethod.MINMAX_QUANTILE.equals(method);
+        }
+
+        /**
+         * Single resolver of the attribute configuration used to normalise a score (design GOU-1878, 2.6). It is the
+         * attribute's own config; in methodology V2 only, a {@code v2.criteriaScoring.<key>} override with a
+         * normalization method replaces the attribute's normalization block (method and params), the scale, the
+         * transform and the policies staying those of the attribute. Used by both {@link #relativizeScoreValue} and
+         * {@link #incrementCardinality}, so that the value frequencies a {@code MINMAX_QUANTILE} needs are tracked.
+         *
+         * @param scoreName the score (criterion) key
+         * @param vConf the vertical configuration
+         * @return the attribute config, a merged copy when a V2 override applies; {@code null} without attribute
+         */
+        protected AttributeConfig effectiveScoring(String scoreName, VerticalConfig vConf) {
+                AttributeConfig attributeConfig = resolveAttributeConfig(scoreName, vConf);
+                if (attributeConfig == null || !isMethodologyV2(vConf)) {
+                        return attributeConfig;
+                }
+                ScoreScoringConfig override = vConf.getImpactScoreConfig().criteriaScoring(scoreName);
+                if (override == null || override.getNormalization() == null || override.getNormalization().getMethod() == null) {
+                        return attributeConfig;
+                }
+                ScoreScoringConfig base = attributeConfig.getScoring();
+                ScoreScoringConfig merged = new ScoreScoringConfig();
+                if (base != null) {
+                        merged.setScale(base.getScale());
+                        merged.setTransform(base.getTransform());
+                        merged.setMissingValuePolicy(base.getMissingValuePolicy());
+                        merged.setDegenerateDistributionPolicy(base.getDegenerateDistributionPolicy());
+                }
+                merged.setNormalization(override.getNormalization());
+                AttributeConfig copy = new AttributeConfig();
+                BeanUtils.copyProperties(attributeConfig, copy);
+                copy.setScoring(merged);
+                return copy;
         }
 
         private AttributeConfig resolveAttributeConfig(String scoreName, VerticalConfig vConf) {

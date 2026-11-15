@@ -95,6 +95,10 @@ le manifest et le `.sha256` ne sont jamais touchés. Pas de reprise d'une sauveg
 on garde le prix le plus bas, et à prix égal l'offre la plus récente : une offre renvoyée au même prix rafraîchit sa
 date (GOU-1699). Avant de retirer les offres expirées, on enregistre par état la date de la dernière offre vue
 (`price.lastOfferSeen`, qui ne recule jamais). front-api s'en sert pour dater le dernier prix d'une fiche sans offre.
+Un état (neuf, occasion) qui n'a plus d'offre perd sa tendance (clé retirée de `price.trends`, comme pour une fiche
+qui n'en a jamais eu), et son historique est quand même nettoyé : un prix par jour, sans prix à 0 ni entrée de plus
+de 2 ans. Une entrée d'historique sans date ou sans prix (données anciennes) est écartée au lieu de faire échouer
+l'agrégation (GOU-2277).
 
 Diagnostic en lecture seule des fiches qui ont perdu leurs offres : `scripts/diagnostics/stale_offers_report.py`
 (`product <gtin>`, `lost --days N`).
@@ -109,27 +113,40 @@ fichier référencé comme orphelin. Si le tas ne suffit pas, le run s'abandonne
 
 ## Purge d'une datasource retirée
 
-`POST /batch/purge-datasource?datasource=<nom>&dryRun=true|false` (GOU-1592, `DatasourcePurgeService`) retire de
-l'index produit toutes les données d'une datasource : offres `price.offers` dont `datasourceName` vaut `<nom>`,
-puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de marque, catégorie, description, sources
-d'attributs ; une catégorie encore portée par une autre datasource reste). Meilleure offre (`price.minPrice`),
-`offersCount` et `price.conditions` sont recalculés sur les offres restantes, sans filtre de fraîcheur : les offres
-des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
+`POST /batch/purge-datasource?datasource=<nom>&scope=OFFERS|ALL&dryRun=true|false` (GOU-1592, GOU-2101,
+`DatasourcePurgeService`) retire de l'index produit les données d'une datasource, selon le `scope` :
+
+- `OFFERS` (défaut, le moins destructif, GOU-2101) : seulement les offres `price.offers` dont `datasourceName` vaut
+  `<nom>`. Les données de fiche de la datasource (sources d'attributs, description, catégories, alias de marque,
+  clé de `datasourceCodes`) restent : elles sont vraies, et les retirer ferait perdre attributs et verticales. Lecture
+  limitée à `price`, `offersCount` et au GTIN référentiel ; écriture par mise à jour partielle
+  (`ProductRepository#bulkUpdateDocument`, champs `price` et `offersCount`) : ni les embeddings ni les autres champs
+  ne sont relus ou réécrits.
+- `ALL` (comportement GOU-1592) : les offres, puis `Product.removeDatasourceData` (clé de `datasourceCodes`, alias de
+  marque, catégorie, description, sources d'attributs ; une catégorie encore portée par une autre datasource reste).
+  Lecture et écriture (`store`) du produit complet, embeddings compris.
+
+Dans les deux cas, meilleure offre (`price.minPrice`), `offersCount` et `price.conditions` sont recalculés sur les
+offres restantes, sans filtre de fraîcheur, y compris quand seul `minPrice` pointait encore vers la datasource : les
+offres des autres datasources ne sont jamais retirées. Historique et tendances de prix ne sont pas touchés.
 
 - `<nom>` est le `name` du YAML de la datasource (valeur exacte de `datasourceName` et des clés de
   `datasourceCodes`), pas le nom du fichier : `rakuten.com` pour `rakuten.com-csv.yml`. `Rakuten FR` est une autre
   datasource.
 - `dryRun=true` par défaut : compte produits et offres touchés, donne jusqu'à 20 GTIN d'exemple, n'écrit rien.
-- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`, produits complets, embeddings compris), écriture
-  par bulks de 200. Un produit sans donnée de la datasource n'est jamais réécrit : un second passage ne touche
-  rien. À lancer hors de la fenêtre du batch nocturne.
+- Parcours complet par scroll (pages de `FULL_PRODUCT_PAGE_SIZE`), écriture par bulks de 200. Un produit sans donnée
+  de la datasource dans le `scope` n'est jamais réécrit : un second passage ne touche rien. Un bulk en échec est
+  compté dans `failedProducts` (documents en échec seulement, par exemple un produit supprimé depuis sa lecture) et
+  n'est pas rejoué. À lancer hors de la fenêtre du batch nocturne : un prix mis à jour pendant le run peut être
+  recouvert par la version lue par le scroll.
 - Asynchrone (un seul run à la fois) : réponse `202` ; `GET /batch/purge-datasource` donne l'état (`IDLE`,
-  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scannedProducts`, `touchedProducts`,
-  `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou `INTERRUPTED`).
+  `RUNNING` avec les compteurs du dernier palier, `COMPLETED` avec le rapport `scope`, `scannedProducts`,
+  `touchedProducts`, `removedOffers`, `savedProducts`, `failedProducts`, `sampleGtins`, `FAILED` avec `error`, ou
+  `INTERRUPTED`). Statut et rapport portent le `scope` ; un fichier d'état écrit avant GOU-2101 est relu en `ALL`.
 - Progression (GOU-1815) : un palier tous les `datasource-purge-progress-interval` produits lus (défaut 50 000) et au
-  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (dryRun=...): N products
-  scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log` (le
-  `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
+  moins toutes les 5 minutes. Chaque palier écrit une ligne `Purge of datasource <nom> (scope=..., dryRun=...): N
+  products scanned, ... touched, ... offers removed, ... saved, ... failed, sample GTINs [...]` dans `nohup-api.log`
+  (le `application.yml` du jar garde `DatasourcePurgeService` en `INFO` alors que la config bêta/prod met
   `org.open4goods` en `warn`).
 - Rapport persistant : l'état est écrit en JSON au lancement, à chaque palier puis à la fin, dans
   `datasource-purge-status-file` (défaut `<root-folder>/batch-reports/datasource-purge-status.json`, soit
@@ -140,14 +157,197 @@ des autres datasources ne sont jamais retirées. Historique et tendances de prix
   `finishedAt`. Le run n'est pas repris : un nouveau `POST` relance un run complet depuis le début. `COMPLETED` et
   `FAILED` restent lisibles après redémarrage.
 
-Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run, état, puis
-run réel une fois le rapport du dry run vérifié :
+Appel Ops (clé `admin-key`, secret `O4G_INTERNAL_API_KEY`, brute dans l'en-tête `Authorization`), dry run (scope
+`OFFERS` par défaut), état, puis run réel une fois le rapport du dry run vérifié :
 
 ```bash
 curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com"
 curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/purge-datasource
-curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&dryRun=false"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/purge-datasource?datasource=rakuten.com&scope=OFFERS&dryRun=false"
 ```
+
+## Reprises de l'index produits par lots (backfill)
+
+GOU-2266. Le paquet `services/backfill` réécrit quelques champs de beaucoup de produits sans relire ni réécrire les
+documents complets. Il sert à la purge Decitre (GOU-2266) et servira à la reprise de `nature` (GOU-2234).
+`BackfillEngine` exécute une `BackfillOperation`, qui fournit :
+
+- la requête des produits ;
+- les champs `_source` à lire ;
+- pour chaque produit, le changement à faire : un script painless, ses paramètres, la sauvegarde et les libellés
+  comptés.
+
+Une opération doit être idempotente : un produit déjà traité ne reçoit plus de changement.
+
+- **Parcours** : point in time (PIT), puis `search_after` sur `_shard_doc`, par pages de `batchSize` (1 à 5 000). Seuls
+  les champs de l'opération sont lus.
+  - Les résultats partiels sont refusés : un shard en échec fait échouer la page au lieu de laisser ses produits de
+    côté.
+  - Le débit est plafonné par `maxProductsPerSecond` (produits lus par seconde, 0 = sans plafond). Chaque page dure au
+    moins `taille / débit`, ce qui évite qu'un retard accumulé ne se rattrape à pleine vitesse. Une page ne peut pas
+    durer plus de la moitié de la durée de vie du PIT : au-delà, le run est refusé (400).
+- **Écriture** (`dryRun=false`) :
+  - la ligne de sauvegarde de chaque changement (`{"id":...,"data":...}`) est ajoutée au fichier JSONL et forcée sur
+    disque **avant** l'envoi du bulk ;
+  - le bulk envoie un script par produit, avec `retry_on_conflict` 3 et sans refresh ;
+  - un produit qui n'a plus besoin du changement donne un `noop`, compté dans `unchangedProducts` et non dans
+    `writtenProducts`. Un produit supprimé depuis la lecture (404) compte aussi dans `unchangedProducts`.
+- **`dryRun=true`** (défaut) : n'écrit rien, pas même la sauvegarde. Il compte les produits lus (`scannedProducts`),
+  les produits concernés (`matchedProducts`) et chaque libellé (`labelCounts`, par exemple les occurrences de chaque
+  clé), et donne 20 ids d'exemple.
+- **Arrêt propre** : il a lieu entre deux pages, sur `POST /batch/backfill/stop` (`stopReason=STOP_REQUESTED`) ou dès
+  qu'Elasticsearch répond 429 (`BACKPRESSURE`), sur la recherche, sur un shard ou sur un élément de bulk. L'état passe à `STOPPED`,
+  avec le `cursor` de la dernière page entièrement traitée. Le PIT reste ouvert 30 minutes après la dernière page
+  (`ApiConfig.BACKFILL_KEEP_ALIVE`). À l'arrêt de l'api (déploiement), le run en cours est arrêté entre deux pages,
+  avec un délai d'attente maximal de 20 s.
+- **Reprise** (`resume=true`) : elle continue le dernier run `STOPPED`, `INTERRUPTED` ou `FAILED` de la même
+  opération, du même mode et des mêmes paramètres (`status.parameters`, par exemple `keys`), depuis son curseur et avec le
+  même fichier de sauvegarde. Les compteurs du statut ne couvrent alors que la partie reprise.
+  - Si le PIT a expiré, le parcours repart du début. Les produits déjà traités ne sont pas réécrits, mais ils sont
+    relus.
+  - Une page dont un élément a été rejeté est relue.
+- **Statut** : `GET /batch/backfill`. Il est écrit en JSON au lancement, après chaque page et à la fin, dans
+  `backfill-status-file` (défaut `<root-folder>/batch-reports/backfill-status.json`). Il est relu au démarrage : un run
+  resté `RUNNING` devient `INTERRUPTED`, avec son curseur.
+- **Journal** : une ligne `INFO` par page dans `nohup-api.log`, de la forme `Backfill <op> (dryRun=...) batch N: ...
+  scanned, ... matched, ... written, ... failed, labels {...}`, puis le rapport final. Le paquet reste en `INFO` dans
+  le `application.yml` du jar.
+- **Sauvegardes** : `backfill-backup-folder` (défaut `<root-folder>/batch-reports/backfill`), un fichier
+  `<opération>-<horodatage UTC>.jsonl` par run d'écriture. Son chemin est dans `report.backupFile`.
+- **Retour arrière** : `POST /batch/backfill/<opération>/restore?backupFile=<nom du fichier>`.
+  - Le nom est relatif au dossier des sauvegardes et doit être une sauvegarde de cette opération
+    (`<opération>-...jsonl`) ; aucun autre chemin n'est accepté.
+  - Le script de restauration de l'opération remet le contenu de `data` de chaque ligne.
+  - Le débit est plafonné par `maxProductsPerSecond`.
+  - Une ligne illisible est sautée et comptée dans `failedProducts` ; les autres sont restaurées.
+  - Une ligne partielle, laissée par un run tué pendant l'écriture, est retirée avant qu'une reprise n'ajoute la
+    suite.
+
+### Purge Decitre (GOU-2266)
+
+`POST /batch/backfill/decitre-purge` parcourt les produits dont `gtinInfos.upcType` vaut `ISBN_13` (environ
+10 M). Pour chacun, il retire de `attributes.all` les clés suivantes, et seulement celles-là :
+`CLASSIFICATION DECITRE 1`, `2`, `3`, `ATTRIBUTS`, `LIVRES ORIGINE`, `PROPRIETAIRE`, `PROPRIÉTAIRE`.
+
+- Ces 7 clés sont celles que GOU-2264 exclut à l'ingestion. `DecitrePurgeOperationTest` vérifie qu'elles figurent dans
+  `attributesConfig.exclusions` de `_default.yml`. Le paramètre `keys` permet d'en donner d'autres.
+- `attributes.all` est `enabled:false` : aucune requête ne compte ces clés, c'est le dry-run qui sert de comptage
+  " avant " et " après " (après = 0 `matchedProducts`).
+- Seules les clés visées sont lues (`attributes.all.<clé>`).
+- Le script ne touche à aucun autre champ, `lastChange` compris : aucun autre traitement ne se déclenche.
+- Chaque attribut retiré est sauvegardé entier. La restauration le remet dans `attributes.all`.
+- Une restauration ne tient que si l'exclusion de GOU-2264 est aussi retirée de `_default.yml`. Sinon, l'ingestion
+  retire de nouveau ces clés au passage suivant, et front-api les masque de toute façon.
+
+Appel Ops, hors de la fenêtre du batch : dry-run, état, écriture une fois le dry-run vérifié, arrêt, reprise et
+retour arrière.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&batchSize=1000&maxProductsPerSecond=2000"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill/stop
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge?dryRun=false&resume=true"
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/decitre-purge/restore?backupFile=decitre-purge-20261116T220000Z.jsonl"
+```
+
+Le test d'intégration `BackfillEngineIT` (Testcontainers, hors CI) se lance avec `mvn -pl api test
+-Dtest=BackfillEngineIT -Dsurefire.failIfNoSpecifiedTests=false`. Il couvre le dry-run, l'écriture (le reste du
+`_source` est identique), la restauration, l'arrêt suivi de la reprise et le PIT expiré.
+
+### Reprise de `nature` (GOU-2234)
+
+`POST /batch/backfill/nature` pose ou retire `nature` (lot CSS 4e.2 de GOU-2226) sur les produits vivants sans
+verticale.
+
+**Pourquoi.** Une ligne de flux inchangée ne fait qu'une mise à jour partielle, et le batch ne charge que les produits
+des verticales. Sans cette reprise, les produits sans verticale n'auraient jamais la `nature` calculée par
+l'agrégation (GOU-2233).
+
+**Périmètre.** Pas de `vertical`, `lastChange` dans les `lastChangeDays` derniers jours (défaut 2), `offersCount` > 0,
+et `datasourceCategories` présent. La borne de `lastChange` est fixée au lancement et sert à tout le run ; une reprise
+la recalcule. Le parcours ne lit que `datasourceCategories`, `nature` et `offerNames`.
+
+**Calcul.** C'est celui de l'agrégation, `VerticalsConfigService.getNatureForCategories(categories, threshold)`, sans
+copie. `threshold` est le `natureMinMarkedCategoryShare` ; sa valeur par défaut est celle de `_default.yml`.
+- Un autre seuil n'est accepté qu'en dry-run.
+- En écriture, il est refusé (400) : l'agrégation recalcule la nature avec la valeur de `_default.yml`, et les natures
+  écrites avec un autre seuil changeraient de nouveau à l'agrégation suivante.
+
+**Écriture.**
+- Seul `nature` est écrit, et seulement quand il diffère : la reprise peut se relancer.
+- Le script ne touche pas un produit qui a reçu une verticale entre-temps, ni un produit dont les
+  `datasourceCategories` ont changé depuis la lecture : l'agrégation a alors calculé sa nature sur les nouvelles.
+- Si au moins 10 mises à jour d'un bulk échouent sans 429, et plus de la moitié du bulk (mapping absent, erreur de
+  script), le run passe à `FAILED` avec son curseur. Un produit supprimé depuis la lecture (404) n'est pas un échec :
+  il compte dans `unchangedProducts`. Seules les 5 premières erreurs d'un bulk sont journalisées une à une, les autres sont comptées par type.
+- La valeur précédente se recalcule : il n'y a ni sauvegarde ni restauration.
+
+**Rapport du dry-run** (mesure 7.4 de GOU-2226). `report.labelCounts` donne les écritures prévues par valeur
+(`nature=SPARE_PART`, `nature=ACCESSORY`, `nature=absent`). `report.details` donne :
+- `markedByThreshold` : les produits marqués par valeur, pour chaque seuil de `reportThresholds` (défaut 0 et 0,5) ;
+- `examplesMarkedOnlyAtLowestThreshold` : 20 exemples (GTIN, nom, `datasourceCategories`) marqués au seuil le plus
+  bas mais pas au plus haut.
+
+Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
+
+**Exécution en prod** (Ops), dans l'ordre :
+
+1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
+2. Lancer le dry-run et publier son résultat sur GOU-2234.
+3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
+   fenêtres de 13 h et de 23 h.
+
+```bash
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature"
+curl -H "Authorization: $O4G_INTERNAL_API_KEY" https://api.nudger.fr/batch/backfill
+curl -X POST -H "Authorization: $O4G_INTERNAL_API_KEY" "https://api.nudger.fr/batch/backfill/nature?dryRun=false"
+```
+
+`NatureBackfillIT` (Testcontainers, hors CI) couvre :
+- le dry-run (comptes par seuil et exemple) ;
+- l'écriture (seul `nature` change, et seulement sur les produits du périmètre) ;
+- le second passage, qui n'écrit rien ;
+- le seuil 0,5 ;
+- les gardes du script (verticale reçue, catégories changées).
+
+## Génération open data
+
+GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services/opendata`) : `ui` et `front-api` gardent
+`open-data-config.generation-enabled: false`, et `OpenDataService` n'a pas de `@Scheduled`.
+
+- `OpenDataGenerationScheduler` : cron `open-data-config.generation-cron` (dimanche 01:30 Europe/Paris par défaut). Ne
+  le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
+- `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
+  est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
+- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size`, avec `page-pause`.
+  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+  ES (GOU-2249).
+- Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
+  `opendata_generation_failed`.
+- Publication sur R2 (GOU-2289, `OpenDataPublisher`) après un passage réussi, si
+  `open-data-config.publication.enabled` (faux par défaut et en bêta ; l'activation en prod est une PR dédiée).
+  N'écris jamais un zip directement sur sa clé publique : clé `.staging/`, relecture et sha256, copie, manifests par jeu,
+  `manifest.json` en dernier, suppression des anciens objets ensuite. Le garde-fou `max-bucket-size` (9 Go) reste sous
+  les 10 Go-mois gratuits. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.
+
+Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
+
+## Date de la dernière offre par datasource
+
+GOU-2037. `price.offers` n'est pas indexé : pour savoir quels marchands ont encore une offre active sans parcourir
+l'index produits, `DataFragmentStoreService` appelle `DatasourceOfferActivityService.record` pour chaque fragment
+agrégé qui devient une offre (`PriceAggregationService.isOffer` : prix non nul, pas en rupture), dans les deux
+chemins (mise à jour partielle et agrégation complète ; rien si l'agrégation est sautée).
+
+- État : date de la dernière offre (timestamp du fragment) par nom de datasource, en mémoire, écrit toutes les
+  5 minutes s'il a bougé et à l'arrêt dans `datasource-offer-activity-file` (défaut
+  `<root-folder>/batch-reports/datasource-offer-activity.json`), par fichier `.tmp` renommé, relu au démarrage.
+- `trackedSince` : début de l'enregistrement qui a écrit le fichier (écrit à la première offre agrégée). Une datasource dont la dernière offre est antérieure n'y figure pas.
+- `GET /merchants/offer-activity` (rôle admin, comme `/partners`) renvoie `{ trackedSince, datasources: [{
+  datasourceName, lastOfferSeen }] }`. front-api le lit toutes les heures pour compter les domaines marchands actifs
+  (`MerchantDomainsService`, voir `front-api/README.md`). Ne pas renommer ce chemin sans mettre à jour ce client.
 
 ## Agrégation temps réel des fragments
 
@@ -166,6 +366,17 @@ reste seulement dans `gtinInfos`.
 porté par une autre datasource, ni une catégorie qui ne correspond plus ne la retirent. EPREL n'attribue jamais seul
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
+
+Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) avec
+`VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
+`verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
+`sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
+marqueur : champ absent. `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
+normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il sera fixé d'après le dry-run de la reprise
+(GOU-2234), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
+catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à
+jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
+à `nature`. Ce champ ne change ni la verticale ni le score.
 
 ### Slug produit figé
 
@@ -193,3 +404,53 @@ les met en file d'indexation complète. L'indexation temps réel continue pendan
 - Fenêtre restante : une mise à jour temps réel écrite entre la mise en file d'une page et son indexation (le temps de
   vider la file, 5 000 produits au plus) peut encore être recouverte, et une mise à jour complète lue avant
   l'indexation de la page peut recouvrir les champs calculés par le batch.
+
+Cohorte et isolation (GOU-2273) :
+
+- Seuls les produits avec offres encore dans la verticale après la classification sont complétés, et seuls ceux qui y
+  sont encore après l'agrégation (qui rejoue la taxonomie après EPREL) sont notés avec sa configuration et sa cohorte.
+  Un produit reclassé ailleurs est indexé sans être noté ni nettoyé : le batch de sa nouvelle verticale le notera.
+- Une verticale qui lève une exception (chargement, complétion, agrégation) est journalisée en `ERROR` et par une
+  ligne `Batch of vertical <id> : failed` ; les verticales suivantes et `clearScoresOutsideVerticals()` passent
+  quand même.
+- Une exception de notation sur un produit arrête la notation de toute la verticale (rien n'est indexé, les scores
+  ont été vidés au début) ; le log donne le produit et le service. En complétion, un service qui échoue n'empêche
+  plus les suivants pour ce produit.
+
+Durées (GOU-2099) : le logger `org.open4goods.api.services.BatchService.timings`, à INFO dans `application.yml` malgré
+le `warn` de la bêta et de la prod, journalise le début et la fin de chaque verticale avec la durée de chaque phase
+(chargement et classification, complétion, agrégation, notation, mise en file), et pour la complétion, tous les
+1 000 produits puis à la fin, le nombre de produits traités et sautés et le temps passé par service de complétion.
+Fichier dédié (GOU-2174) : ces lignes (`Start of batch`, `End of batch in N s`) sont aussi écrites en ajout dans
+`batch-timings.log` (`BatchTimingsLogFile`, appender Logback ajouté au logger, la sortie standard et la configuration
+de logging existante restent inchangées). Chemin : propriété `api.batch.timings-log-file`, sinon `logging.file.path`
+ou le dossier de `logging.file.name`, sinon `/opt/open4goods/logs` s'il existe (bêta/prod) ; absent en dev et tests.
+Rétention : 10 Mo par fichier, 10 archives `.gz` au plus, 100 Mo au total. `nohup-api.log` ne garde qu'un
+redémarrage, ce fichier survit aux redémarrages.
+Une complétion qui ne trouve rien a sa propre fenêtre : `api.eprelMissRefreshDays` (7 jours, ou recherche immédiate
+si le GTIN ou les modèles changent) pour EPREL, `wikidata.miss-refresh-in-days` (7 jours) pour Wikidata.
+
+## Agrégation à la demande d'une verticale
+
+`POST /aggregate/verticals/{vertical}`, et `POST /aggregate/verticals` pour toutes les verticales l'une après l'autre,
+appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
+[product-recreation-recovery](../docs/operations/product-recreation-recovery.md) s'en sert pour rendre leur verticale
+à des produits qui l'ont perdue.
+
+- **Chargement** (scroll) : les produits dont une `datasourceCategories` figure dans les `matchingCategories` de la
+  verticale, ou dont la verticale est déjà celle-ci. `BatchService.batch(vertical)` ne charge que les seconds. Le
+  scroll lit 100 produits par requête et reste ouvert 5 minutes entre deux requêtes
+  (`ProductRepository.CATEGORY_MATCH_SCROLL_*`) : la mise en file d'une page bloque tant que la file complète est
+  pleine, et le défaut d'une minute pouvait expirer.
+- **Traitement** : la chaîne d'agrégation standard seule (`StandardAggregator.onProduct`), qui rattache ou détache la
+  verticale. Ni complétion ni notation : les scores sont recalculés par le batch de 13 h ou par `POST /batch/{vertical}`,
+  seule notation à la demande.
+- **Écriture**, comme le batch (GOU-1709) : par pages de `BatchService.INDEXATION_PAGE_SIZE` (500),
+  `applyNewerOfferStates(page)` puis `addToFullindexationQueue(page)`. Une offre indexée ou mise en file pendant le run
+  n'est donc pas recouverte par celle lue au départ. Cela suppose que `onProduct` ne touche jamais `lastChange` (seul
+  un fragment le fait). La fenêtre restante est celle du batch.
+- Un produit qui lève `AggregationSkipException` est journalisé et n'est pas réécrit.
+- L'appel rend la main une fois les produits mis en file, pas une fois indexés : attendre que la file se vide avant
+  de vérifier ou d'enchaîner sur `POST /batch/{vertical}` (voir le runbook). À lancer hors du batch de 13 h.
+
+Preuve : `AggregationFacadeServiceSanitizeVerticalTest`.

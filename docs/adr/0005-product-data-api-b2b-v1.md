@@ -1,6 +1,11 @@
 # ADR 0005 - Product Data API (B2B) v1
 
-**Status**: Accepted
+Withdrawn on 2026-11-08: the B2B Product Data API (b2b-api, b2b-frontend) was
+removed from the repository. The documents this record linked (the `docs/b2b/`
+corpus, `docs/architecture/product-data-api-*.md` and the local runbook) were
+removed with it and remain in the git history.
+
+**Status**: Withdrawn
 **Date**: 2026-06-09
 **Context**: Productising the nudger product dataset as a freemium B2B API
 
@@ -13,7 +18,7 @@ open4goods/nudger.fr owns a large, differentiated Elasticsearch product index:
 (~45-50K products) carrying data no competitor has - ImpactScore(c),
 EU energy labels (EPREL), repairability index, sourced AI reviews, and
 multi-taxonomy referentials (Google/EPREL/ICECAT/ETIM/Wikidata). The competitive
-study ([`../b2b/business/competition.md`](../b2b/business/competition.md)) shows the
+study (`docs/b2b/business/competition.md`, removed) shows the
 "price data API" market (PriceAPI, SerpApi, Bright Data, Winamaz...) sells
 commodity scraped data at ~30 $/1000 requests and none of them carry the
 proprietary nudger data.
@@ -22,9 +27,9 @@ We want to monetise this via a self-serve B2B API with a contractual edge
 ("No data, no pay"), starting with the commodity price facet as a loyal loss
 leader and reserving margin for proprietary facets later.
 
-The decision set was split across [`master-prompt.md`](../b2b/implementation/master-prompt.md) (newer) and an older planning note;
+The decision set was split across `docs/b2b/implementation/master-prompt.md` (newer, removed) and an older planning note;
 this ADR ratifies the canonical decisions captured in
-[`../b2b/00-canonical-decisions.md`](../b2b/00-canonical-decisions.md).
+`docs/b2b/00-canonical-decisions.md` (removed).
 
 ---
 
@@ -101,13 +106,15 @@ this ADR ratifies the canonical decisions captured in
 
 ## Related
 
-- [Canonical decisions](../b2b/00-canonical-decisions.md)
-- [Data model & DDL](../architecture/product-data-api-data-model.md)
-- [Redis key contract](../architecture/product-data-api-redis-contract.md)
-- [Billing ledger & bucket algorithm](../architecture/product-data-api-billing-ledger.md)
-- [API contract & sanitized DTO](../architecture/product-data-api-contract.md)
-- [Error catalog](../architecture/product-data-api-errors.md)
-- [Auth & OIDC](../architecture/product-data-api-auth.md)
-- [Stripe billing contract](../architecture/product-data-api-stripe-contract.md)
-- [Rate limiting & observability](../architecture/product-data-api-ops.md)
-- [Local runbook](../operations/product-data-api-local-runbook.md)
+Removed with the brick on 2026-11-08, kept in the git history:
+
+- Canonical decisions (`docs/b2b/00-canonical-decisions.md`)
+- Data model & DDL (`docs/architecture/product-data-api-data-model.md`)
+- Redis key contract (`docs/architecture/product-data-api-redis-contract.md`)
+- Billing ledger & bucket algorithm (`docs/architecture/product-data-api-billing-ledger.md`)
+- API contract & sanitized DTO (`docs/architecture/product-data-api-contract.md`)
+- Error catalog (`docs/architecture/product-data-api-errors.md`)
+- Auth & OIDC (`docs/architecture/product-data-api-auth.md`)
+- Stripe billing contract (`docs/architecture/product-data-api-stripe-contract.md`)
+- Rate limiting & observability (`docs/architecture/product-data-api-ops.md`)
+- Local runbook (`docs/operations/product-data-api-local-runbook.md`)

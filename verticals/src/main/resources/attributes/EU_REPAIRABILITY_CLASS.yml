@@ -1,0 +1,56 @@
+# ============================================================================
+# EU_REPAIRABILITY_CLASS — EU repairability class (GOU-1891)
+# Source: EPREL, group smartphonestablets20231669 (Reg. (EU) 2023/1669), key "repairabilityClass".
+# Not mapped to the French REPAIRABILITY_INDEX (scale of 10): different scale and law.
+# Not wired into the V1 impact score matrix; V2 wiring is a CTO decision.
+# ============================================================================
+key: "EU_REPAIRABILITY_CLASS"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-tools"
+name:
+  default: "EU repairability class"
+  fr: "Classe de réparabilité européenne"
+filteringType: "TEXT"
+asScore: true
+scoring:
+  scale:
+    min: 0.0
+    max: 5.0
+  normalization:
+    method: "MINMAX_FIXED"
+    params:
+      fixedMin: 20.0
+      fixedMax: 100.0
+  missingValuePolicy: "NEUTRAL"
+  degenerateDistributionPolicy: "FALLBACK"
+scoreTitle:
+  fr: "Classe de réparabilité européenne"
+  en: "EU repairability class"
+scoreDescription:
+  fr: "Classe de réparabilité A à E de l'étiquette énergie européenne"
+  en: "Repairability class A to E of the EU energy label"
+participateInScores:
+  - REPARABILITY
+attributeValuesOrdering: "MAPPED"
+synonyms:
+  eprel:
+    - "REPAIRABILITYCLASS"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+  tokenMatch:
+    - "A"
+    - "B"
+    - "C"
+    - "D"
+    - "E"
+numericMapping:
+  A: 100.0
+  B: 80.0
+  C: 60.0
+  D: 40.0
+  E: 20.0

@@ -26,7 +26,8 @@ import ch.qos.logback.classic.LoggerContext;
  * The beta and prod config set {@code org.open4goods} to warn, which hid every INFO line of the datasource purge
  * (GOU-1815). Boots Spring with the same config locations and profiles as {@code publish-jars.sh}
  * ({@code classpath:/application.yml}, then the environment file) and checks that the purge logger still logs INFO
- * while the rest of {@code org.open4goods} stays at warn. Same for the products index mapping result line (GOU-1835).
+ * while the rest of {@code org.open4goods} stays at warn. Same for the products index mapping result line (GOU-1835)
+ * and the batch durations (GOU-2099).
  */
 class DatasourcePurgeLoggingConfigTest {
 
@@ -59,11 +60,14 @@ class DatasourcePurgeLoggingConfigTest {
 			Logger purge = (Logger) LoggerFactory.getLogger(DatasourcePurgeService.class);
 			Logger mapping = (Logger) LoggerFactory.getLogger(ProductIndexMappingRunner.class);
 			Logger batch = (Logger) LoggerFactory.getLogger(BatchService.class);
+			Logger batchTimings = (Logger) LoggerFactory.getLogger(BatchService.TIMINGS_LOGGER);
 
 			assertThat(purge.getEffectiveLevel()).isEqualTo(Level.INFO);
 			assertThat(purge.isInfoEnabled()).isTrue();
 			// GOU-1835: the products index mapping result line too
 			assertThat(mapping.getEffectiveLevel()).isEqualTo(Level.INFO);
+			// GOU-2099: the batch durations per vertical, phase and completion service
+			assertThat(batchTimings.getEffectiveLevel()).isEqualTo(Level.INFO);
 			// The prod override is really applied: other services of the package stay at warn
 			assertThat(batch.getEffectiveLevel()).isEqualTo(Level.WARN);
 		}

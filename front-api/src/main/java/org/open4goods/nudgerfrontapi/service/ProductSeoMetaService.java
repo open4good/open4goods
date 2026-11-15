@@ -28,6 +28,7 @@ import org.open4goods.model.product.Score;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.PrefixedAttrText;
 import org.open4goods.model.vertical.ProductI18nElements;
+import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -158,7 +159,10 @@ public class ProductSeoMetaService {
         String separator = fr ? " : " : ": ";
         String closing = fr ? " Comparez les offres sur Nudger." : " Compare offers on Nudger.";
 
-        String score = Optional.ofNullable(product.ecoscore())
+        // Only an ImpactScore of the vertical's current methodology is shown (v2-design.md, 4.2)
+        boolean currentMethodology = ImpactScoreConfig.isCurrentMethodology(
+                vConfig == null ? null : vConfig.getImpactScoreConfig(), product.impactScoreMethodologyVersion());
+        String score = Optional.ofNullable(currentMethodology ? product.ecoscore() : null)
                 .map(Score::getValue)
                 .map(value -> (fr ? "score impact " : "impact score ") + formatScore(value) + "/20")
                 .orElse(null);

@@ -9,7 +9,7 @@
 #             values too (dry run before Access writes them).
 #   source    Changes the password at its source, authenticated with the value currently in service on this host:
 #             Elasticsearch users `elastic` / `kibana_system` (_security/user/<user>/_password), the Postgres
-#             users of Plausible and b2b-api (ALTER USER); ClickHouse takes its new password when restart recreates it. Before any
+#             user of Plausible (ALTER USER); ClickHouse takes its new password when restart recreates it. Before any
 #             change, the value in service is kept in /etc/open4goods/infra-previous.env (mode 600) for
 #             `rollback`. Idempotent: a value already accepted by the source is not changed again.
 #   restart   Restarts the consumers once infra-secrets.sh has rendered the new value, in the order that keeps the
@@ -17,7 +17,7 @@
 #   rollback  Puts the previous value back at the source and in the rendered files, then restarts the consumers.
 #
 # Targets and their secrets (only the target's secrets are set by the caller):
-#   elasticsearch  O4G_ELASTICSEARCH_PASSWORD (user elastic) -> api, ui, front-api, b2b-api (config tree)
+#   elasticsearch  O4G_ELASTICSEARCH_PASSWORD (user elastic) -> api, ui, front-api (config tree)
 #   kibana         INFRA_KIBANA_SYSTEM_PASSWORD (user kibana_system), INFRA_KIBANA_ENCRYPTION_KEY -> Kibana; the
 #                  key in service becomes INFRA_KIBANA_PREVIOUS_ENCRYPTION_KEY (decryptionOnlyKeys), then saved
 #                  objects are re-encrypted (POST /api/encrypted_saved_objects/_rotate_key)
@@ -31,8 +31,6 @@
 #   plausible-google      INFRA_GOOGLE_CLIENT_ID, INFRA_GOOGLE_CLIENT_SECRET (Google OAuth client of the Search
 #                         Console integration, nothing to change at Google) -> Plausible, as GOOGLE_CLIENT_ID and
 #                         GOOGLE_CLIENT_SECRET (beta); restart then checks the client the new Plausible runs with
-#   b2b-postgres          B2B_API_POSTGRES_PASSWORD (Postgres user of b2b_postgres) -> b2b-api (config tree
-#                         spring.datasource.password), compose as B2B_POSTGRES_PASSWORD
 #   es-ops-readonly       INFRA_ES_OPS_READONLY_PASSWORD (Elasticsearch user ops_readonly, role ops_readonly: cluster
 #                         monitor, read + view_index_metadata on the products index and affiliation-clicks only) -> the file
 #                         /etc/open4goods/ops-es-readonly.curlrc (600, one `user = \"ops_readonly:<value>\"` line, for
@@ -70,7 +68,7 @@ case "$target" in
   plausible | plausible-postgres | plausible-clickhouse | plausible-google)
     [ "$env_name" = beta ] || fail "$target: only beta runs Plausible"
     ;;
-  b2b-postgres | es-ops-readonly) ;;
+  es-ops-readonly) ;;
   es-agents-readonly)
     [ "$env_name" = prod ] || fail "$target: prod only"
     ;;
@@ -87,8 +85,8 @@ es_url=${ES_URL:-http://127.0.0.1:9200}
 kibana_url=${KIBANA_URL:-http://127.0.0.1:5601}
 plausible_url=${PLAUSIBLE_URL:-http://127.0.0.1:8000}
 # Spring consumers of the elastic password, in restart order: front-api first (it answers the site; publish-jars.sh
-# only waits for the running api to answer), then api, ui and b2b-api.
-es_services="front-api api ui b2b-api"
+# only waits for the running api to answer), then api and ui.
+es_services="front-api api ui"
 
 umask 077
 work=$(mktemp -d)
@@ -716,7 +714,7 @@ plausible_google_rollback() {
   wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}"
 }
 
-# --- Postgres and ClickHouse (Plausible, b2b-api) -----------------------------------------------------------------
+# --- Postgres and ClickHouse (Plausible) --------------------------------------------------------------------------
 
 # Default of the first `${KEY:-default}` (compose) or `${KEY:default}` (Spring) placeholder of a file; empty if none.
 placeholder_default() {
@@ -1186,117 +1184,6 @@ plausible_clickhouse_rollback() {
   INFRA_SERVICES=plausible sh "$opt/bin/publish-infra.sh" "$env_name"
   wait_http "$plausible_url/api/health" 200 "${PLAUSIBLE_ATTEMPTS:-60}" "$ch_rollback_failed_hint"
   plausible_writes "$since" "$work/previous" "$ch_rollback_failed_hint"
-}
-
-# Files publish-jars.sh sources for b2b-api, in that order (load_service_env).
-b2b_env_files() {
-  echo "$opt/config/$env_name/infra/.env $etc/b2b-api.env $opt/config/$env_name/b2b-api/.env"
-}
-
-b2b_postgres_prerequisites() {
-  runtime=$opt/runtime/b2b-api.jar
-  latest=$opt/latest/b2b-api-latest.jar
-  [ -f "$runtime" ] && [ -f "$latest" ] || fail "$runtime or $latest is missing"
-  cmp -s "$runtime" "$latest" || fail "$runtime differs from $latest: a restart would deploy a JAR that is not running"
-  [ -f "$opt/bin/publish-jars.sh" ] || fail "$opt/bin/publish-jars.sh is missing"
-  # The OS environment beats the config tree: an env line for the property would hide the rendered password.
-  for file in $(b2b_env_files); do
-    [ -z "$(raw_value "$file" SPRING_DATASOURCE_PASSWORD)" ] \
-      || fail "$file sets SPRING_DATASOURCE_PASSWORD, which beats the config tree: remove it first (runbook)"
-  done
-  ok "b2b-api runs its latest JAR and nothing overrides spring.datasource.password"
-}
-
-# User and database of b2b_postgres: those the container was created with (not secret).
-b2b_pg_target() {
-  pg_target b2b_postgres "$(container_env b2b_postgres POSTGRES_USER)" "$(container_env b2b_postgres POSTGRES_DB)"
-}
-
-b2b_pg_candidates() {
-  tree=$etc/secrets/b2b-api/spring.datasource.password
-  : > "$work/candidate-tree"
-  [ -f "$tree" ] && cp "$tree" "$work/candidate-tree"
-  env_value "$infra_env" B2B_POSTGRES_PASSWORD > "$work/candidate-infra-env"
-  i=0
-  for file in $(b2b_env_files); do
-    i=$((i + 1))
-    env_value "$file" B2B_POSTGRES_PASSWORD > "$work/candidate-env-file-$i"
-  done
-  placeholder_default "$opt/config/$env_name/b2b-api/application-active.yml" B2B_POSTGRES_PASSWORD > "$work/candidate-yml"
-  placeholder_default "$opt/bin/docker-compose.infra.yml" B2B_POSTGRES_PASSWORD > "$work/candidate-compose"
-  container_env b2b_postgres POSTGRES_PASSWORD > "$work/candidate-db-container"
-  raw_value "$previous_env" B2B_API_POSTGRES_PASSWORD > "$work/candidate-previous"
-  echo "$work/candidate-tree $work/candidate-infra-env $work/candidate-env-file-1 $work/candidate-env-file-2" \
-    "$work/candidate-env-file-3 $work/candidate-yml $work/candidate-compose $work/candidate-db-container" \
-    "$work/candidate-previous"
-}
-
-working_b2b_pg() {
-  # shellcheck disable=SC2046 # file names without spaces, split on purpose.
-  find_accepted pg_accepts pg "$work/new" $(b2b_pg_candidates) \
-    || fail "no known password of the Postgres user of b2b_postgres is accepted (config tree, env files, application-active.yml, compose, container, previous)"
-}
-
-b2b_postgres_test() {
-  writable_etc
-  prerequisite b2b_postgres_prerequisites
-  new_value B2B_API_POSTGRES_PASSWORD
-  b2b_pg_target
-  found=$(working_b2b_pg)
-  if [ "$found" = new ]; then
-    ok "b2b_postgres already accepts the new password: source would skip the change"
-  else
-    ok "the password of $pg_user in service is found ($found) and accepted; source would change it"
-  fi
-}
-
-b2b_postgres_source() {
-  writable_etc
-  b2b_postgres_prerequisites
-  new_value B2B_API_POSTGRES_PASSWORD
-  b2b_pg_target
-  found=$(working_b2b_pg)
-  if [ "$found" = new ]; then
-    ok "b2b_postgres already accepts the new password of $pg_user: nothing to change"
-    return 0
-  fi
-  keep_previous B2B_API_POSTGRES_PASSWORD "$work/current-pg"
-  pg_set_password "$work/current-pg" "$work/new"
-}
-
-b2b_postgres_restart() {
-  new_value B2B_API_POSTGRES_PASSWORD
-  b2b_pg_target
-  pg_accepts "$work/new" || fail "b2b_postgres does not accept the new password: run source first"
-  holds "$etc/secrets/b2b-api/spring.datasource.password" "$(cat "$work/new")" \
-    || fail "the config tree of b2b-api does not hold the new password: render it first"
-  [ "$(env_value "$infra_env" B2B_POSTGRES_PASSWORD)" = "$(cat "$work/new")" ] \
-    || fail "$infra_env does not hold the new B2B_POSTGRES_PASSWORD: render it first"
-  # b2b-api only: b2b_postgres keeps running (POSTGRES_PASSWORD is only read when its data directory is created).
-  echo "----- Restarting b2b-api -----"
-  sh "$opt/bin/publish-jars.sh" "$env_name" restart b2b-api
-}
-
-b2b_postgres_rollback() {
-  previous=$(raw_value "$previous_env" B2B_API_POSTGRES_PASSWORD)
-  [ -n "$previous" ] || fail "no previous password of b2b_postgres is kept in $previous_env"
-  printf '%s' "$previous" > "$work/previous"
-  new_value B2B_API_POSTGRES_PASSWORD
-  b2b_pg_target
-  if pg_accepts "$work/previous"; then
-    ok "b2b_postgres already accepts the previous password"
-  else
-    working_b2b_pg > /dev/null
-    pg_set_password "$work/current-pg" "$work/previous"
-  fi
-  tree=$etc/secrets/b2b-api/spring.datasource.password
-  if [ -f "$tree" ]; then
-    write_exact "$tree" "$previous"
-    ok "$tree holds the previous password"
-  fi
-  set_infra_line B2B_POSTGRES_PASSWORD "$previous"
-  echo "----- Restarting b2b-api -----"
-  sh "$opt/bin/publish-jars.sh" "$env_name" restart b2b-api
 }
 
 # --- es-ops-readonly ----------------------------------------------------------------------------------------------

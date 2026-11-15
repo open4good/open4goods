@@ -3,6 +3,8 @@ package org.open4goods.api.services.aggregation.services.realtime.parser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.exceptions.ParseException;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalConfig.WeightParserConfig;
@@ -72,14 +74,13 @@ class WeightParserTest {
     }
     
     @Test
-    void datasourceHint() throws ParseException {
+    void valueWithoutUnitIsReadAsKilograms() throws ParseException {
         VerticalConfig vc = new VerticalConfig();
         vc.setParsers(new ParsersConfig());
         vc.getParsers().getWeight().setMinKg(0.001);
         vc.getParsers().getWeight().setMaxKg(2000.0);
-        
-        // verify simple parse with datasource
-        assertThat(parser.parse("100", null, vc, "test-source")).isEqualTo("100"); // assumes kg
+
+        assertThat(parser.parse("100", null, vc)).isEqualTo("100"); // assumes kg
     }
 
     @Test
@@ -92,5 +93,144 @@ class WeightParserTest {
         assertThat(parser.parse("43, 1 KG", null, vc)).isEqualTo("43.1");
         assertThat(parser.parse("43 ,1 KG", null, vc)).isEqualTo("43.1");
         assertThat(parser.parse("43 , 1 KG", null, vc)).isEqualTo("43.1");
+    }
+
+    @Test
+    void parenthesisedEquivalentIsNotAdded() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        // GOU-2275: "3.5 kg (3500 g)" used to give 7 kg (first kg + first g).
+        assertThat(parser.parse("3.5 kg (3500 g)", null, vc)).isEqualTo("3.5");
+        assertThat(parser.parse("3500 g (3.5 kg)", null, vc)).isEqualTo("3.5");
+    }
+
+    @Test
+    void trueCompoundIsAdded() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        assertThat(parser.parse("1 kg 250 g", null, vc)).isEqualTo("1.25");
+        assertThat(parser.parse("1kg250g", null, vc)).isEqualTo("1.25");
+    }
+
+    @Test
+    void secondValueOfSameMagnitudeIsNotAdded() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        // Not a compound: the gram part is not below 1000, or both parts are in kg. The first explicit value wins.
+        assertThat(parser.parse("1 kg 1500 g", null, vc)).isEqualTo("1");
+        assertThat(parser.parse("3 kg 2 kg", null, vc)).isEqualTo("3");
+        assertThat(parser.parse("12 kg brut, 10 kg net", null, vc)).isEqualTo("12");
+    }
+
+    @Test
+    void thousandsGroupsAreJoined() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        // GOU-2275: "1 200 g" used to give 0.2 kg (only "200 g" was read).
+        assertThat(parser.parse("1 200 g", null, vc)).isEqualTo("1.2");
+        assertThat(parser.parse("1\u00A0200 g", null, vc)).isEqualTo("1.2");
+        assertThat(parser.parse("1\u202F200 g", null, vc)).isEqualTo("1.2");
+        assertThat(parser.parse("1\u2009200 g", null, vc)).isEqualTo("1.2");
+        assertThat(parser.parse("1 200,5 g", null, vc)).isEqualTo("1.2005");
+        assertThat(parser.parse("5 000 kg", null, vc)).isEqualTo("5000");
+    }
+
+    @Test
+    void rangeIsRejected() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        // GOU-2275: "10-12 kg" used to give -12 kg. A range is not a single weight: it is rejected.
+        assertThat(parser.parse("10-12 kg", null, vc)).isNull();
+        assertThat(parser.parse("10 - 12 kg", null, vc)).isNull();
+        assertThat(parser.parse("10\u201312 kg", null, vc)).isNull();
+        assertThat(parser.parse("10-12", null, vc)).isNull();
+        // A dash between digits anywhere rejects the whole value, even next to a valid weight.
+        assertThat(parser.parse("45 kg, 60-85-60 cm", null, vc)).isNull();
+        assertThat(parser.parse("45 kg (réf. WM-1234)", null, vc)).isNull();
+    }
+
+    @Test
+    void writtenRangeKeepsValueWithUnit() throws ParseException {
+        // TV bounds from tv.yml; "TRANCHE DE POIDS" values look like "15 à 30 kg".
+        VerticalConfig tvConfig = new VerticalConfig();
+        tvConfig.setParsers(new ParsersConfig());
+        tvConfig.getParsers().getWeight().setMinKg(1.0);
+        tvConfig.getParsers().getWeight().setMaxKg(100.0);
+
+        assertThat(parser.parse("15 à 30 kg", null, tvConfig)).isEqualTo("30");
+        assertThat(parser.parse("3 à 10 kg", null, tvConfig)).isEqualTo("10");
+        assertThat(parser.parse("+ de 100 kg", null, tvConfig)).isEqualTo("100");
+    }
+
+    @Test
+    void negativeOrZeroWeightIsRejected() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        assertThat(parser.parse("-5 kg", null, vc)).isNull();
+        assertThat(parser.parse("-5", null, vc)).isNull();
+        assertThat(parser.parse("\u22125 kg", null, vc)).isNull();
+        assertThat(parser.parse("0 kg", null, vc)).isNull();
+        assertThat(parser.parse("0 g", null, vc)).isNull();
+        assertThat(parser.parse("0.1 mg", null, vc)).isNull();
+    }
+
+    @Test
+    void productAttributePathRejectsRangesAndNegatives() throws ParseException {
+        VerticalConfig vc = defaultRangeConfig();
+
+        ProductAttribute onlyInvalid = attribute("WEIGHT", "a:10-12 kg", "b:-5 kg", "c:0 kg");
+        assertThat(parser.parse(onlyInvalid, null, vc)).isNull();
+
+        ProductAttribute mixed = attribute("WEIGHT", "a:10-12 kg", "b:-5 kg", "c:1 200 g");
+        assertThat(parser.parse(mixed, null, vc)).isEqualTo("1.2");
+        assertThat(parser.parse(attribute("WEIGHT", "a:3.5 kg (3500 g)"), null, vc)).isEqualTo("3.5");
+        assertThat(parser.parse(attribute("WEIGHT", "a:1 200 g"), null, vc)).isEqualTo("1.2");
+    }
+
+    @Test
+    void belowLowerBoundIsRejected() throws ParseException {
+        VerticalConfig tv = new VerticalConfig();
+        tv.setParsers(new ParsersConfig());
+        tv.getParsers().getWeight().setMinKg(1.0);
+        tv.getParsers().getWeight().setMaxKg(100.0);
+
+        assertThat(parser.parse("1.200 g", null, tv)).isNull();
+        assertThat(parser.parse("0 à 100 g", null, tv)).isNull();
+        assertThat(parser.parse("0.1", null, tv)).isNull();
+        assertThat(parser.parse("a:0.1 kg", null, tv)).isNull();
+        assertThat(parser.parse("1 200 g", null, tv)).isEqualTo("1.2");
+        assertThat(parser.parse("8.5 kg", null, tv)).isEqualTo("8.5");
+
+        VerticalConfig phone = new VerticalConfig();
+        phone.setParsers(new ParsersConfig());
+        phone.getParsers().getWeight().setMinKg(0.08);
+        phone.getParsers().getWeight().setMaxKg(0.6);
+        assertThat(parser.parse("0.1 kg", null, phone)).isEqualTo("0.1");
+        assertThat(parser.parse("100 g", null, phone)).isEqualTo("0.1");
+    }
+
+    private VerticalConfig defaultRangeConfig() {
+        VerticalConfig vc = new VerticalConfig();
+        vc.setParsers(new ParsersConfig());
+        vc.getParsers().getWeight().setMinKg(0.001);
+        vc.getParsers().getWeight().setMaxKg(2000.0);
+        return vc;
+    }
+
+    /**
+     * Builds an attribute from {@code datasource:value} pairs.
+     */
+    private ProductAttribute attribute(String name, String... sourcedValues) {
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setName(name);
+        for (String sourcedValue : sourcedValues) {
+            String[] parts = sourcedValue.split(":", 2);
+            SourcedAttribute source = new SourcedAttribute();
+            source.setName(name);
+            source.setDataSourcename(parts[0]);
+            source.setValue(parts[1]);
+            attribute.addSourceAttribute(source);
+        }
+        return attribute;
     }
 }

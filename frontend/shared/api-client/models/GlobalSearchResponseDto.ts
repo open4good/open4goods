@@ -66,6 +66,7 @@ export interface GlobalSearchResponseDto {
    * @memberof GlobalSearchResponseDto
    */
   missingVerticalPage?: GlobalSearchPageMetaDto
+  accessoryResults?: Array<GlobalSearchResultDto>
   /**
    * Category suggestion if a strict match is found
    * @type {SearchSuggestCategoryDto}
@@ -109,6 +110,7 @@ export function GlobalSearchResponseDtoFromJSONTyped(
         : (json['missingVerticalResults'] as Array<any>).map(
             GlobalSearchResultDtoFromJSON
           ),
+    accessoryResults: json['accessoryResults'] == null ? undefined : (json['accessoryResults'] as Array<any>).map(GlobalSearchResultDtoFromJSON),
     missingVerticalPage:
       json['missingVerticalPage'] == null
         ? undefined

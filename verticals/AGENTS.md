@@ -14,6 +14,9 @@ This module is part of the open4goods multi-module Maven project.
 ## Directory structure
 
 - `src/main/resources/verticals` - vertical definitions
+- `src/main/resources/eprel-model-aliases/{vertical-id}/*.yml` - brand tables mapping commercial names and part
+  numbers to the model registered in EPREL (for example Apple iPhone numbers), loaded into
+  `VerticalConfig.eprelModelAliases`
 - `src/test/java` - unit tests
 
 ## Purpose

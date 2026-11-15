@@ -1,0 +1,22 @@
+# BATTERY_USER_REPLACEABLE — Battery replaceable by the user (GOU-1891). Source: EPREL, batteryUserReplaceable.
+key: "BATTERY_USER_REPLACEABLE"
+userBetterIs: "GREATER"
+impactBetterIs: "GREATER"
+faIcon: "mdi-battery-sync-outline"
+name:
+  default: "User-replaceable battery"
+  fr: "Batterie remplaçable par l'utilisateur"
+filteringType: "TEXT"
+asScore: false
+synonyms:
+  eprel:
+    - "BATTERYUSERREPLACEABLE"
+parser:
+  normalize: true
+  trim: true
+  lowerCase: false
+  upperCase: true
+  removeParenthesis: false
+mappings:
+  "TRUE": "OUI"
+  "FALSE": "NON"

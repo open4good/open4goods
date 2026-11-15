@@ -18,6 +18,15 @@ public record AffiliationClickStats(Map<String, Long> clicksShort, Map<String, L
         long totalLong, List<MerchantClicks> topMerchantsLong, List<OriginClicks> topOriginsLong) {
 
     /**
+     * Clicks of one window, per network and in total.
+     *
+     * @param clicks per {@link AffiliationNetwork#key()}, every network present (0 when it has no click)
+     * @param total  all clicks of the window
+     */
+    public record ClickCounts(Map<String, Long> clicks, long total) {
+    }
+
+    /**
      * Clicks of one merchant through one network.
      *
      * @param merchant datasource name

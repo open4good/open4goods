@@ -42,6 +42,76 @@ Requests are limited using an in-memory token bucket. Defaults can be changed in
 
 When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
+## Search sort tie-break
+
+An explicitly sorted `/products/search` page ends on
+`ProductRepository.stableSortTieBreak()`: `gtinInfos.normalizedGtin14`
+ascending (the GTIN zero-padded to 14 digits, a keyword with doc values),
+missing values last, so ties such as equal ImpactScores keep their position
+between requests and pages. Never sort on `id`: it is mapped without doc values
+and Elasticsearch rejects the whole search, which made every sorted listing
+return a 500 (GOU-1940). `ProductRepositorySortTieBreakIT` checks both against
+the production mapping.
+
+The category page server-renders its listing with the default sort
+(ImpactScore descending) and reuses it after hydration only while that sort is
+still applied. A failed search shows an error with a retry action instead of
+the previous listing.
+
+## Global search relevance
+
+`SearchService.globalSearch` (`POST /products/search/global`, page
+`/rechercher`) applies relevance rules held by `GlobalSearchRelevance` and
+configured under `front.global-search` (GOU-2029). They never reach
+`SearchService.search` (category pages, `/products/search`):
+`SearchServiceTest` pins the query it sends.
+
+- **Ranking** of both levels (category groups and long tail): text score, plus
+  a `match_phrase` bonus on `offerNames` (`phrase-boost`, `phrase-slop`), plus
+  `offers-count-weight` x `log1p(offersCount)` (`function_score`, `boost_mode`
+  `sum`), so that at comparable relevance the product sold by more merchants
+  comes first. Freshness stays a filter (`lastChange`), not a score.
+- **Accessories**: a product is an accessory when one of `accessory-terms`
+  (or its plural with `s`) starts its offer name, within
+  `accessory-head-words` words. Elasticsearch checks it with an `intervals`
+  query filtered on `interval.start`: the field analyzer folds accents and
+  case, and a term further in the name ("lave-linge avec filtre
+  anti-calcaire") does not count. Positions of the multi-valued `offerNames`
+  run on from one value to the next, so only the first indexed offer name is
+  checked. When the normalized query contains one of the terms, nothing
+  changes. Besides these head terms, when the query does not use the words
+  itself, a name is also an accessory of the requested object with
+  `pour <query term>`, `<accessory term> de/du/des <query term>` (one word
+  tolerated in between) or the word `compatible` (GOU-2077); query terms are
+  the whole query and each word of 4 letters or more, accents, case and
+  hyphens ignored (`lave-linge` = `lave linge`). `thermostat` only counts
+  followed by `pour` or an appliance name, and "Lave-linge pour petits
+  espaces" stays a product. `accessory-phrases` hold expressions that count
+  anywhere in the name (`meuble tv`, `kit calfeutrage`...), for products
+  without a category whose object comes after the 3rd word (GOU-2235). The
+  long tail also sets apart the products whose `nature` is `ACCESSORY` or
+  `SPARE_PART` (`longTailAccessoryQuery`); that clause is not used for the
+  demotion in the category groups, so a product of a vertical is never
+  demoted because of `nature`. Otherwise accessories are demoted in the category groups
+  (`boosting`, `accessory-negative-boost`) and leave the long tail for the
+  additive `accessoryResults` field (at most `accessory-results-limit`).
+- **Long tail** (`missingVerticalResults`, products without a vertical): only
+  products with a fresh offer (`OfferFreshnessService`), an image and a
+  readable title. The index holds neither `coverImagePath` nor an indexed
+  image URL for these products, so the check runs in Java: the service reads
+  the first `(page + 1) x pageSize x long-tail-over-read` candidates with a
+  light source, keeps the displayable ones in order, serves the requested
+  slice and fetches only that slice in full. An image is a cover or a merchant
+  image that is not a placeholder (`noimage`). A readable title is an offer
+  name of at least `min-title-words` words, one of them alphabetic, at least
+  `min-title-word-length` letters long and other than the brand.
+- **Post-filter limits**: `missingVerticalPage.totalElements` is exact when
+  every candidate was read; otherwise it is the Elasticsearch total scaled by
+  the share of displayable candidates read, so the last pages announced may be
+  shorter or empty. At most `long-tail-max-candidates` candidates are read:
+  `totalPages` is capped at `long-tail-max-candidates / (pageSize x
+  long-tail-over-read)` (20 pages of 20).
+
 ## Offer freshness
 
 front-api never serves an offer older than `front.offers.max-age` (default: the
@@ -73,6 +143,90 @@ still read the indexed values.
 
 - `front.offers.max-age` - maximum offer age (Spring `Duration`, e.g. `3d`;
   env `FRONT_OFFERS_MAX_AGE`).
+
+## Merchant domains count
+
+`GET /stats/categories` returns `activeMerchantDomains` = `{ count, computedAt,
+franceOnly }` (GOU-2037): the number of distinct merchant domains with at least
+one active offer. It backs the "compare prices from N merchants" claim and the
+Google CSS 50-domain threshold, so it is conservative. Unlike
+`affiliationPartnersCount` (every configured partner), it leaves out affiliation
+networks, merchants without an active offer and duplicate domains.
+
+- **Source**: `price.offers` is not indexed in Elasticsearch, so the api records
+  the date of the last offer of each datasource as fragments are aggregated
+  (`DatasourceOfferActivityService`, `GET /merchants/offer-activity`, see
+  `api/AGENTS.md`). Nothing scans the product index.
+- **Active**: the datasource's last offer is fresh under `front.offers.max-age`
+  (same rule as `OfferFreshnessService`).
+- **Merchant domain**, in this order: the
+  `front.merchant-domains.datasource-domains` entry of the datasource, the portal
+  URL of its affiliation partner, its name when the name is a domain
+  (`darty.com`). Offer URLs are never used: they are affiliation links
+  (`awin1.com`...). A datasource without domain is not counted (logged).
+- **Normalisation**: host only, lower case, without `www.`, reduced to the
+  registrable domain of the public suffix list (Guava `InternetDomainName`):
+  `https://fr.aliexpress.com` and `www.aliexpress.com` both count as
+  `aliexpress.com`.
+- **Not a merchant**: domains of `front.merchant-domains.excluded-domains`
+  (Awin, TradeTracker, Effiliation, Kwanko, CJ, Webgains...) and their
+  subdomains.
+- **France**: a partner whose `countryCodes` do not include `FR` is left out.
+  `franceOnly` is true only when every counted domain states its countries; the
+  feeds give none today, so it is `false` (delivery to France is not filtered).
+- **When**: `MerchantDomainsService.refresh()`, 30 s after startup then hourly,
+  never in a user request. `computedAt` dates it; on failure the previous count
+  is kept. `activeMerchantDomains` is `null` until the first success. Each
+  refresh logs the counted domains, and the datasources not counted.
+- **Warm-up**: the api starts recording at its first deployment with this
+  feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
+  whose last offer predates it are missing and a warning is logged.
+
+## Google CSS dry run
+
+`front.css.*` (`CssProperties`, disabled by default) prepares the product pages sent to Google by the CSS API
+(GOU-2079, lot GOU-2080). **Nothing is sent to Google**: no CSS client is instantiated, the module only depends on
+`com.google.shopping:google-shopping-css` for the `CssProductInput` type.
+
+- Eligibility (`CssEligibilityService`, one `CssExclusionReason` per failed rule): at least
+  `front.css.min-merchant-domains` (2) distinct merchant domains with a fresh offer, an image, a real title (not the
+  GTIN, not a generic title), a valid GTIN, a canonical URL. Offers are read through `OfferFreshnessService` and the
+  domains through `MerchantDomainsService.domainResolver()` (registrable domain, affiliation networks excluded).
+- Mapping (`CssProductInputMapper`): `rawProvidedId` = GTIN, `contentLanguage`/`feedLabel` from the properties,
+  `cppLink` = `ProductCanonicalUrl.fullSlug` on `front.css.site-base-url`, `lowPrice`/`highPrice`/`numberOfOffers`/headline
+  offer from the same fresh prices as the product page (amounts in micros, decimal arithmetic),
+  `includedDestinations`, short `expirationDate`. `rating`, `reviewCount` and the ImpactScore are never sent.
+  `productHighlights` is not filled: the index holds no such data.
+- Dry run (`front.css.enabled=true`): `POST /admin/css/dry-run` (site editor role, like `/admin/cache/reset`) starts
+  a background run (409 if one is running); `GET /admin/css/dry-run` returns the last report. Files written in
+  `front.css.output-directory`: one `<vertical>.ndjson` per vertical (one `CssProductInput` per line) and
+  `report.json` / `report.md` (per vertical: examined, eligible, count by exclusion reason; a product failing several
+  rules counts once per reason).
+
+### Google CSS synchronisation (GOU-2081)
+
+`front.css.sync.*` sends the eligible products to Google (CSS API `CssProductInputsService`). **Disabled by default**
+(`front.css.sync.enabled=false`): no client bean, no scheduled job, no credential needed to start. It also requires
+`front.css.enabled=true`. No real call in CI or beta: tests use `SimulatedCssProductsClient`.
+
+- Each run (`interval`, 6 h; `CssSyncService`) compares the products with the state of the last successful send
+  (fingerprint of the `CssProductInput` without `expirationDate`, per `rawProvidedId`) and sends: an insert (upsert) for
+  a new or modified product, a delete for a product no longer eligible or gone from a fully scanned vertical, and an
+  insert again when an unchanged product expires in less than `resend-before` (24 h). A product that loses its fresh
+  offers is not sent again and expires by itself.
+- State: JSON file `front.css.sync.state-file`, written atomically and protected by a file lock (`.lock`), so it survives
+  a restart and two instances sharing the file never run together. front-api is one jar per environment (beta, prod):
+  a local file is enough; with several hosts, enable the sync on one instance only or share the volume.
+- Safeguards: `max-requests-per-second` (2), `max-products-per-run` (0 = no limit; 100 for the lot-3 sample),
+  `verticals` filter, a failed call leaves the state of that product untouched (retried next run, the rest is not
+  resent), run aborted after `max-consecutive-failures` consecutive failures.
+- Metrics: `css.products.sent{type=insert|renewal}`, `css.products.rejected{reason}`, `css.products.deleted`,
+  `css.products.expired`, timer `css.products.sync.duration`.
+- `front.css.sync.simulated=true`: whole job with the client that only logs (dry run).
+- **Activation (lot 3 provides)**: a CSS account (`account-id`), a service account authorised on it with scope
+  `https://www.googleapis.com/auth/content` (`service-account-path` or `service-account-json` from the secret store,
+  never in Git), then `front.css.enabled=true`, `front.css.sync.enabled=true`, `max-products-per-run=100` and a
+  `verticals` filter for the first sample, and the opt-in of the CSS programme on the Google side.
 
 ## Contribution votes ip/ua purge
 

@@ -9,7 +9,8 @@ a ``<lastmod>`` younger than the given age). Requests are sequential and spaced
 by ``--delay`` seconds; a 403 or 429 stops the run instead of retrying.
 
 A site behind HTTP basic auth (beta) is reached by exporting
-``SITEMAP_SAMPLER_BASIC_AUTH=user:password``; the value is never printed.
+``SITEMAP_SAMPLER_BASIC_AUTH=user:password`` (or ``BETA_BASIC_AUTH``, the
+shared beta secret, used when the first is unset); the value is never printed.
 
 Example (product sitemap acceptance, GOU-1366)::
 
@@ -36,13 +37,14 @@ from pathlib import Path
 
 USER_AGENT = "open4goods-sitemap-sampler/1.1"
 BASIC_AUTH_ENV = "SITEMAP_SAMPLER_BASIC_AUTH"
+BETA_BASIC_AUTH_ENV = "BETA_BASIC_AUTH"
 
 
 def request_headers(accept: str | None = None) -> dict[str, str]:
     headers = {"User-Agent": USER_AGENT}
     if accept:
         headers["Accept"] = accept
-    credentials = os.environ.get(BASIC_AUTH_ENV)
+    credentials = os.environ.get(BASIC_AUTH_ENV) or os.environ.get(BETA_BASIC_AUTH_ENV)
     if credentials:
         headers["Authorization"] = "Basic " + base64.b64encode(credentials.encode("utf-8")).decode("ascii")
     return headers

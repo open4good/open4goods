@@ -75,4 +75,4 @@ Oui, certains produits d'autrefois duraient plus longtemps. Mais on a aujourd'hu
 
 La clé, ce n'est pas de tout rejeter en bloc, mais d'adopter une autre posture : **acheter moins, mais mieux. Choisir la durabilité plutôt que le dernier cri. Et faire pression, en tant que consommateur, pour que les marques suivent.**
 
-Parce qu'un monde où la technologie dure plus longtemps, c'est bon pour vous, et encore meilleur pour la planète. Et pour ce faire, vous pouvez notamment adopter Nudger qui vous aide à vous orienter vers les produits ayant le meilleur indice de réparabilité (entre autres) ainsi que ceux ayant l'impact environnemental le moins important !
+Un produit qui dure plus longtemps, c'est moins d'achats à refaire. Sur Nudger, vous pouvez classer les produits par indice de réparabilité et par Impact Score (sur 20), et comparer ceux d'une même catégorie.

@@ -83,6 +83,8 @@
               <ProductHero
                 :product="product"
                 :breadcrumbs="productBreadcrumbs"
+                :vertical-home-url="verticalHomeUrl"
+                :vertical-plural-name="normalizedVerticalTitle"
                 :impact-score="impactScoreOutOf20"
                 :impact-score-min="impactScoreMin"
                 :impact-score-max="impactScoreMax"
@@ -119,6 +121,7 @@
               :on-market-end-date="product.eprel?.onMarketEndDate"
               :score-min="impactScoreMin"
               :score-max="impactScoreMax"
+              :impact-status="impactScoreV2"
             />
           </section>
 
@@ -252,6 +255,8 @@ import type {
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
 import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
+import { resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
+import type { ScoreView } from '~/components/product/impact/impact-types'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
 import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
 import { buildProductHreflangLinks } from '~~/shared/utils/domain-language'
@@ -619,8 +624,13 @@ const productTitle = computed(() => {
 const heroPopularAttributes = computed(
   () => categoryDetail.value?.popularAttributes ?? []
 )
+// The route slug is the vertical home URL (matched in selectCategoryBySlug),
+// so it backs up a detail payload that omits verticalHomeUrl.
 const verticalHomeUrl = computed(
-  () => categoryDetail.value?.verticalHomeUrl?.trim() ?? ''
+  () =>
+    categoryDetail.value?.verticalHomeUrl?.trim() ||
+    (typeof categorySlug === 'string' ? categorySlug.trim() : '') ||
+    ''
 )
 const verticalTitle = computed(() => {
   const candidates = [
@@ -1127,11 +1137,36 @@ const resolveEnergyClassImage = (scoreId: string): string | null => {
   return null
 }
 
+const impactScoreV2 = computed(() =>
+  resolveImpactScoreV2(product.value?.scores)
+)
+
+// V2: a criterion of the active matrix that the product does not have is
+// listed as "not filled in" (never drawn in the radar, which skips it).
+const notFilledMatrixScores = computed(() => {
+  if (!impactScoreV2.value) return []
+  const present = new Set(
+    selectedProductScores.value.map(score => score.id?.trim().toUpperCase())
+  )
+  return Object.keys(scoreCoefficientMap.value)
+    .filter(key => !present.has(key))
+    .map(key => {
+      const attributeConfig = attributeConfigMap.value.get(key)
+      return {
+        id: key,
+        name:
+          availableImpactCriteriaMap.value.get(key)?.title ??
+          attributeConfig?.name ??
+          key,
+      }
+    })
+})
+
 const impactScores = computed(() => {
   const desiredScores = selectedProductScores.value
   const coefficients = scoreCoefficientMap.value
 
-  return desiredScores.map(score => {
+  const filledScores = desiredScores.map(score => {
     const normalizedScoreId = score.id?.toString().trim().toUpperCase() ?? ''
     const attributeConfig = normalizedScoreId
       ? attributeConfigMap.value.get(normalizedScoreId)
@@ -1226,6 +1261,20 @@ const impactScores = computed(() => {
       numericMapping: attributeConfig?.numericMapping ?? null,
     }
   })
+
+  const notFilledScores: ScoreView[] = notFilledMatrixScores.value.map(
+    ({ id, name }) => ({
+      id,
+      label: name,
+      relativeValue: null,
+      value: null,
+      on20: null,
+      coefficient: coefficients[id] ?? null,
+      notFilled: true,
+    })
+  )
+
+  return [...filledScores, ...notFilledScores]
 })
 
 const formatBrandModelLabel = (
@@ -2429,12 +2478,15 @@ const fallbackSeoMetaTitle = computed(() => seoMetaBase.value.title)
 const fallbackSeoMetaDescription = computed(() => seoMetaBase.value.description)
 
 const fallbackSocialMetaTitle = computed(() => socialMetaBase.value.title)
-const fallbackSocialMetaDescription = computed(() => socialMetaBase.value.description)
+const fallbackSocialMetaDescription = computed(
+  () => socialMetaBase.value.description
+)
 
 const productSeoMeta = computed(() => ({
   title: product.value?.names?.metaTitle?.trim() || fallbackSeoMetaTitle.value,
   description: productMetaDescription.value,
-  ogTitle: product.value?.names?.ogTitle?.trim() || fallbackSocialMetaTitle.value,
+  ogTitle:
+    product.value?.names?.ogTitle?.trim() || fallbackSocialMetaTitle.value,
   ogDescription:
     product.value?.names?.ogDescription?.trim() ||
     fallbackSocialMetaDescription.value,

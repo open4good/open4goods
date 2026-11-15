@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.open4goods.api.services.AggregationFacadeService;
 import org.open4goods.api.services.BatchService;
+import org.open4goods.api.services.DatasourcePurgeScope;
 import org.open4goods.api.services.DatasourcePurgeService;
 import org.open4goods.api.services.DatasourcePurgeStatus;
 import org.open4goods.api.services.ResourceCleanupMode;
@@ -30,13 +31,13 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Admin endpoints for batch operations (full-scan reprocessing, cleanup, AI batch job status).
- * Scoring and aggregation are in {@link ScoreController} and {@link AggregationController}.
+ * Scoring runs only within the batch; on-demand aggregation without scoring is in {@link AggregationController}.
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")
 @Tag(name = "Batch", description = "Trigger the full scoring and aggregation batch pipeline, data-cleanup routines, "
         + "and monitor AI (OpenAI) batch job status. "
-        + "Scoring-only and aggregation-only endpoints are in the Scoring and Aggregation groups respectively.")
+        + "Aggregation without scoring is in the Aggregation group.")
 public class BatchController {
 
     private final VerticalsConfigService verticalConfigService;
@@ -109,25 +110,32 @@ public class BatchController {
     @Operation(
             summary = "Purge the data of a retired datasource from the product index",
             description = "Scans the whole product index by pages and removes, from every product holding data of the "
-                    + "datasource, its offers (price.offers), datasource code, brand alias, categories, description and "
-                    + "attribute sources, then recomputes the best offer, the offers count and the offer conditions from "
-                    + "the remaining offers. Data of other datasources is never removed, and a product without data of "
-                    + "the datasource is never written, so a second run touches nothing. Defaults to dryRun=true, which "
-                    + "only counts the products and offers concerned and returns example GTINs: run it first and check "
-                    + "the report (GET /batch/purge-datasource) before running with dryRun=false. The run is "
-                    + "asynchronous: this call answers 202 immediately.")
+                    + "datasource in the scope, its offers (price.offers), then recomputes the best offer, the offers "
+                    + "count and the offer conditions from the remaining offers. scope=OFFERS (default, the least "
+                    + "destructive) removes only the offers: it reads only the prices, writes only price and "
+                    + "offersCount by partial updates, and keeps the attribute sources, descriptions, categories, brand "
+                    + "aliases and datasource codes of the datasource. scope=ALL also removes the datasource code, brand "
+                    + "alias, categories, description and attribute sources, and stores the complete product. Data of "
+                    + "other datasources is never removed, and a product without data of the datasource in the scope is "
+                    + "never written, so a second run touches nothing. Defaults to dryRun=true, which only counts the "
+                    + "products and offers concerned and returns example GTINs: run it first and check the report "
+                    + "(GET /batch/purge-datasource) before running with dryRun=false. The run is asynchronous: this "
+                    + "call answers 202 immediately.")
     @ApiResponses({
             @ApiResponse(responseCode = "202", description = "Purge started in the background (or already running: current status returned)"),
-            @ApiResponse(responseCode = "400", description = "Missing or blank datasource")
+            @ApiResponse(responseCode = "400", description = "Missing or blank datasource, or unknown scope")
     })
     public ResponseEntity<DatasourcePurgeStatus> purgeDatasource(
             @Parameter(description = "Exact datasource name, as stored in price.offers[].datasourceName and in the "
                     + "datasourceCodes keys (the 'name' of the datasource YAML, e.g. 'rakuten.com'), not the YAML file name",
                     required = true)
             @RequestParam @NotBlank final String datasource,
+            @Parameter(description = "OFFERS (default): only the offers of the datasource. ALL: also every other piece "
+                    + "of data of the datasource (product sheet data)")
+            @RequestParam(defaultValue = "OFFERS") final DatasourcePurgeScope scope,
             @Parameter(description = "When true (default), nothing is written")
             @RequestParam(defaultValue = "true") final boolean dryRun) {
-        return ResponseEntity.accepted().body(datasourcePurgeService.start(datasource, dryRun));
+        return ResponseEntity.accepted().body(datasourcePurgeService.start(datasource, scope, dryRun));
     }
 
     @GetMapping("/batch/purge-datasource")
@@ -135,7 +143,7 @@ public class BatchController {
             summary = "Status and report of the datasource purge",
             description = "Returns IDLE, RUNNING (with the counters of the last progress step), COMPLETED (with the "
                     + "report: scanned, touched and saved products, removed offers, example GTINs), FAILED or INTERRUPTED "
-                    + "for the current or last purge-datasource run. The status is persisted in a JSON file and read back "
+                    + "for the current or last purge-datasource run, with its datasource, scope and dryRun. The status is persisted in a JSON file and read back "
                     + "at startup: a run still RUNNING when the api stopped is reported INTERRUPTED with its last counters "
                     + "(lastProgressAt). It is never resumed; a new POST starts a new run.")
     @ApiResponse(responseCode = "200", description = "Current status")
@@ -158,9 +166,11 @@ public class BatchController {
     @PostMapping("/batch/{vertical}")
     @Operation(
             summary = "Run the full batch pipeline for a specific vertical",
-            description = "Executes the complete batch pipeline (feed fetch, scoring, aggregation, AI completion) "
-                    + "scoped to the named vertical only. Faster than a global /batch run when only one category "
-                    + "needs to be refreshed.")
+            description = "Runs the 13:00 batch for the named vertical only: loads the products assigned to it, "
+                    + "completes (resources, Icecat, EPREL, Wikidata, Amazon), aggregates and scores them, runs the "
+                    + "ImpactScore checks, then queues them for full indexation with the newest realtime offers. "
+                    + "No feed is fetched. This is the on-demand way to recompute the scores of a vertical; do not "
+                    + "run it while the 13:00 batch runs.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Batch pipeline completed for the vertical"),
             @ApiResponse(responseCode = "404", description = "Vertical not found")

@@ -378,6 +378,27 @@
       "defaultValue": 50
     },
     {
+      "name": "front.merchant-domains.activity-path",
+      "type": "java.lang.String",
+      "description": "Path appended to front.affiliation-partners.api-base-url to read the last offer date of each datasource (GOU-2037).",
+      "defaultValue": "/merchants/offer-activity"
+    },
+    {
+      "name": "front.merchant-domains.datasource-domains[].datasource",
+      "type": "java.lang.String",
+      "description": "Datasource name, as in the offers (compared trimmed, case insensitive)."
+    },
+    {
+      "name": "front.merchant-domains.datasource-domains[].domain",
+      "type": "java.lang.String",
+      "description": "Merchant domain of the datasource, used before the partner portal URL and the datasource name."
+    },
+    {
+      "name": "front.merchant-domains.excluded-domains",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "Affiliation network domains: a datasource resolved to one of them, or to one of their subdomains, is not counted as a merchant. Defaults to the known networks (Awin, TradeTracker, Effiliation, Kwanko, CJ, Webgains...)."
+    },
+    {
       "name": "front.offers.max-age",
       "type": "java.time.Duration",
       "description": "Maximum age of a served offer, from its indexation timestamp. Older offers are hidden from the offer list, best prices, offer count, SEO price range, search suggestions and /contrib/ links. Defaults to the api rule (ProductRepository.VALID_UNTIL_DURATION).",
@@ -661,6 +682,12 @@
       "defaultValue": false
     },
     {
+      "name": "open-data-config.public-base-url",
+      "type": "java.lang.String",
+      "description": "Public base URL of the dataset downloads (for example https://data.nudger.fr). Empty keeps the api.resource-root-path based links.",
+      "defaultValue": ""
+    },
+    {
       "name": "price-config.events",
       "type": "java.util.Map<java.lang.String,java.util.List<org.open4goods.model.priceevents.Event>>",
       "description": "Commercial events indexed by language code."
@@ -752,6 +779,253 @@
       "type": "java.util.Map<java.lang.String,java.util.List<java.lang.String>>",
       "description": "Deny-by-default email to role list allowlist. Keys are emails, lower-cased on binding; in YAML each key must be quoted and bracketed (\"[john.doe@example.com]\") or Spring Boot drops the @ and the entry never matches. Values are granted authorities (e.g. ROLE_SITEEDITOR, XWIKIADMINGROUP). An email missing from this map is refused.",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GoogleSsoProperties"
+    },
+    {
+      "name": "impactscore.methodology-version-overrides",
+      "type": "java.lang.String",
+      "description": "ImpactScore methodology version forced per vertical, comma-separated <vertical>:<version> pairs (for example tv:2), versions 1 or 2. Blank or none forces nothing. Rendered from the GitHub Environment variable IMPACTSCORE_METHODOLOGY_OVERRIDES; api, front-api and ui must receive the same value. An invalid value fails the startup (docs/impactscore/v2-design.md, section 5.2).",
+      "defaultValue": ""
+    },
+    {
+      "name": "front.global-search.accessory-terms",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Words or expressions naming an accessory or a spare part. A global search result is an accessory when one of them starts its first offer name (within accessory-head-words words); plural (+s) and unaccented forms are matched too. Ignored when the query itself contains one of them."
+    },
+    {
+      "name": "front.global-search.accessory-head-words",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Number of leading words of the offer name searched for an accessory term.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.accessory-negative-boost",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Score factor of an accessory in the global search vertical groups (Elasticsearch boosting negative_boost).",
+      "defaultValue": 0.1
+    },
+    {
+      "name": "front.global-search.accessory-results-limit",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Maximum number of accessories without a vertical returned apart in accessoryResults.",
+      "defaultValue": 8
+    },
+    {
+      "name": "front.global-search.offers-count-weight",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Weight of log1p(offersCount) added to the global search text score. 0 disables it.",
+      "defaultValue": 1.0
+    },
+    {
+      "name": "front.global-search.phrase-boost",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Boost of the exact expression (match_phrase on offerNames) added to the global search text score. 0 disables it.",
+      "defaultValue": 2.0
+    },
+    {
+      "name": "front.global-search.phrase-slop",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Slop of the exact expression bonus.",
+      "defaultValue": 1
+    },
+    {
+      "name": "front.global-search.long-tail-over-read",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Long tail candidates read from Elasticsearch per displayed product, before the image and title filter done in Java.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.long-tail-max-candidates",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Maximum number of long tail candidates read for one request; deeper pages are not reachable.",
+      "defaultValue": 1200
+    },
+    {
+      "name": "front.global-search.min-title-words",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Minimum number of words of a readable offer name (long tail filter).",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.min-title-word-length",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Minimum length of the alphabetic word, other than the brand, that a readable offer name must hold.",
+      "defaultValue": 3
+    },
+    {
+      "name": "front.css.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Enables the Google CSS dry run (service and /admin/css/dry-run endpoint). Nothing is sent to Google.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.output-directory",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Directory receiving the NDJSON files (one per vertical) and the report.",
+      "defaultValue": "/tmp/nudger-css-dry-run"
+    },
+    {
+      "name": "front.css.site-base-url",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Public base URL used for cppLink, the headline offer link and relative image URLs.",
+      "defaultValue": "https://nudger.fr"
+    },
+    {
+      "name": "front.css.content-language",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "contentLanguage of the inputs.",
+      "defaultValue": "fr"
+    },
+    {
+      "name": "front.css.feed-label",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "feedLabel of the inputs.",
+      "defaultValue": "FR"
+    },
+    {
+      "name": "front.css.min-merchant-domains",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Minimum distinct merchant domains with a fresh offer for a product to be eligible.",
+      "defaultValue": 2
+    },
+    {
+      "name": "front.css.expiration",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Validity of an input from its generation (expirationDate).",
+      "defaultValue": "3d"
+    },
+    {
+      "name": "front.css.included-destinations",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "includedDestinations of the inputs.",
+      "defaultValue": [
+        "css_organic_experiences"
+      ]
+    },
+    {
+      "name": "front.css.generic-titles",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Titles (trimmed, case insensitive) that are not a real product title."
+    },
+    {
+      "name": "front.css.max-product-details",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum number of product details per input.",
+      "defaultValue": 30
+    },
+    {
+      "name": "front.css.sync.enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Enables the CSS synchronisation job and client (also needs front.css.enabled=true).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.sync.simulated",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Uses the simulated client: no network call.",
+      "defaultValue": false
+    },
+    {
+      "name": "front.css.sync.account-id",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "CSS account (domain or group) identifier: requests target accounts/<id>."
+    },
+    {
+      "name": "front.css.sync.service-account-path",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Path of the service account JSON file (never in the repository)."
+    },
+    {
+      "name": "front.css.sync.service-account-json",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Raw service account JSON, alternative to the path (environment variable)."
+    },
+    {
+      "name": "front.css.sync.scope",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "OAuth scope of the CSS API.",
+      "defaultValue": "https://www.googleapis.com/auth/content"
+    },
+    {
+      "name": "front.css.sync.interval",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Delay between two runs.",
+      "defaultValue": "PT6H"
+    },
+    {
+      "name": "front.css.sync.initial-delay",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Delay before the first run after startup.",
+      "defaultValue": "PT5M"
+    },
+    {
+      "name": "front.css.sync.state-file",
+      "type": "java.lang.String",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "JSON state file of the last successful send.",
+      "defaultValue": "/tmp/nudger-css-sync-state.json"
+    },
+    {
+      "name": "front.css.sync.resend-before",
+      "type": "java.time.Duration",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "An unchanged product is sent again when its expiration is closer than this.",
+      "defaultValue": "PT24H"
+    },
+    {
+      "name": "front.css.sync.max-products-per-run",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum calls (inserts and deletes) per run, 0 for no limit.",
+      "defaultValue": 0
+    },
+    {
+      "name": "front.css.sync.max-requests-per-second",
+      "type": "java.lang.Double",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Maximum calls per second, 0 for no limit.",
+      "defaultValue": 2.0
+    },
+    {
+      "name": "front.css.sync.verticals",
+      "type": "java.util.Set<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Verticals synchronised, empty for all."
+    },
+    {
+      "name": "front.css.sync.max-consecutive-failures",
+      "type": "java.lang.Integer",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",
+      "description": "Consecutive failed calls aborting a run.",
+      "defaultValue": 10
     }
   ]
 }

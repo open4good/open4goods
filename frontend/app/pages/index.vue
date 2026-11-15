@@ -14,6 +14,7 @@ import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
+import HomeHeroFallback from '~/components/home/sections/HomeHeroFallback.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
 import SectionReveal from '~/components/shared/ui/SectionReveal.vue'
 import type {
@@ -31,16 +32,22 @@ import {
 } from '~~/config/theme/assets'
 import { useAccessibilityStore } from '~/stores/useAccessibilityStore'
 
-const HomeHeroSection = defineAsyncComponent(
-  () => import('~/components/home/sections/HomeHeroSection.vue')
-)
+// The holder stays in place while the hero chunk loads (delay: 0), so the
+// page height never drops between the server fallback and the hero (CLS).
+// `suspensible: false`: inside the page <Suspense>, Vue would otherwise
+// ignore the loading component and render nothing until the chunk arrives.
+const HomeHeroSection = defineAsyncComponent({
+  loader: () => import('~/components/home/sections/HomeHeroSection.vue'),
+  loadingComponent: HomeHeroFallback,
+  delay: 0,
+  suspensible: false,
+})
 const PwaMobileLanding = defineAsyncComponent(
   () => import('~/components/pwa/PwaMobileLanding.vue')
 )
 
-defineRouteRules({
-  isr: 3600, // Cache home page for 1 hour
-})
+// No isr/swr route rule: on the node-server preset it caches no HTML but keeps
+// every rendered payload in the in-memory storage, without bound (GOU-2093).
 
 definePageMeta({
   ssr: true,
@@ -815,7 +822,7 @@ useHead(() => ({
           @select-product="handleProductSuggestion"
         />
         <template #fallback>
-          <section class="home-page__hero-fallback" aria-hidden="true" />
+          <HomeHeroFallback v-if="!isMobileLayout" />
         </template>
       </ClientOnly>
       <div class="home-page__sections">
@@ -1025,10 +1032,6 @@ useHead(() => ({
 .home-page__promises-content--visible
   opacity: 1
   transform: translateY(0)
-
-.home-page__hero-fallback
-  min-height: min(760px, 90vh)
-  background: rgb(var(--v-theme-surface-default))
 
 .home-contact-redirect__card
   border: 1px solid rgb(var(--v-theme-surface-primary-080))

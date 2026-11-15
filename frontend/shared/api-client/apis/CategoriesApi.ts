@@ -15,12 +15,15 @@
 import * as runtime from '../runtime'
 import type {
   CategoryNavigationDto,
+  ImpactScoreStatsDto,
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '../models/index'
 import {
   CategoryNavigationDtoFromJSON,
   CategoryNavigationDtoToJSON,
+  ImpactScoreStatsDtoFromJSON,
+  ImpactScoreStatsDtoToJSON,
   VerticalConfigDtoFromJSON,
   VerticalConfigDtoToJSON,
   VerticalConfigFullDtoFromJSON,
@@ -35,6 +38,11 @@ export interface Categories1Request {
 export interface CategoryRequest {
   categoryId: string
   domainLanguage: CategoryDomainLanguageEnum
+}
+
+export interface ImpactScoreStatsRequest {
+  categoryId: string
+  domainLanguage: ImpactScoreStatsDomainLanguageEnum
 }
 
 export interface NavigationRequest {
@@ -205,6 +213,81 @@ export class CategoriesApi extends runtime.BaseAPI {
   }
 
   /**
+   * Return, for the vertical's current methodology, the rated and not rated counts, the real coverage per criterion and the distribution of the scores. Computed from the batch's assessment of each product and cached; a figure that is not measured is null or empty.
+   * Get the measured ImpactScore figures of a category
+   */
+  async impactScoreStatsRaw(
+    requestParameters: ImpactScoreStatsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<runtime.ApiResponse<ImpactScoreStatsDto>> {
+    if (requestParameters['categoryId'] == null) {
+      throw new runtime.RequiredError(
+        'categoryId',
+        'Required parameter "categoryId" was null or undefined when calling impactScoreStats().'
+      )
+    }
+
+    if (requestParameters['domainLanguage'] == null) {
+      throw new runtime.RequiredError(
+        'domainLanguage',
+        'Required parameter "domainLanguage" was null or undefined when calling impactScoreStats().'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (requestParameters['domainLanguage'] != null) {
+      queryParameters['domainLanguage'] = requestParameters['domainLanguage']
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    if (this.configuration && this.configuration.accessToken) {
+      const token = this.configuration.accessToken
+      const tokenString = await token('bearerAuth', [])
+
+      if (tokenString) {
+        headerParameters['Authorization'] = `Bearer ${tokenString}`
+      }
+    }
+
+    let urlPath = `/category/{categoryId}/impact-score-stats`
+    urlPath = urlPath.replace(
+      `{${'categoryId'}}`,
+      encodeURIComponent(String(requestParameters['categoryId']))
+    )
+
+    const response = await this.request(
+      {
+        path: urlPath,
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters,
+      },
+      initOverrides
+    )
+
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ImpactScoreStatsDtoFromJSON(jsonValue)
+    )
+  }
+
+  /**
+   * Return, for the vertical's current methodology, the rated and not rated counts, the real coverage per criterion and the distribution of the scores.
+   * Get the measured ImpactScore figures of a category
+   */
+  async impactScoreStats(
+    requestParameters: ImpactScoreStatsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<ImpactScoreStatsDto> {
+    const response = await this.impactScoreStatsRaw(
+      requestParameters,
+      initOverrides
+    )
+    return await response.value()
+  }
+
+  /**
    * Return the Google taxonomy navigation data required to display deep category navigation.
    * Get category navigation
    */
@@ -304,6 +387,15 @@ export const CategoryDomainLanguageEnum = {
 } as const
 export type CategoryDomainLanguageEnum =
   (typeof CategoryDomainLanguageEnum)[keyof typeof CategoryDomainLanguageEnum]
+/**
+ * @export
+ */
+export const ImpactScoreStatsDomainLanguageEnum = {
+  Fr: 'fr',
+  En: 'en',
+} as const
+export type ImpactScoreStatsDomainLanguageEnum =
+  (typeof ImpactScoreStatsDomainLanguageEnum)[keyof typeof ImpactScoreStatsDomainLanguageEnum]
 /**
  * @export
  */
