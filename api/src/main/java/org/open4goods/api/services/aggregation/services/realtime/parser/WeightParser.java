@@ -31,8 +31,14 @@ import org.slf4j.LoggerFactory;
  * <p>
  * <h3>Rule levels</h3>
  * <ol>
+ *   <li><b>Compound rule</b>: only a true compound is added up, i.e. an integer kilogram part
+ *       immediately followed by a gram part below 1000 ("1 kg 250 g" = 1.25 kg). An equivalent
+ *       given in parentheses ("3.5 kg (3500 g)") or a second value of the same magnitude
+ *       ("3 kg 2 kg", "1 kg 1500 g") is not added: the explicit unit rule applies.</li>
  *   <li><b>Explicit unit rules</b>: if the raw string contains an explicit unit ("kg", "g", "mg",
- *       "lb", "oz" ...), the parser will trust it (with sanity checks against configured bounds).</li>
+ *       "lb", "oz" ...), the parser will trust it (with sanity checks against configured bounds).
+ *       When several explicit values are found, a value inside the plausible range wins over one
+ *       outside it, then the first one in the string wins.</li>
  *   <li><b>Implicit unit rules</b>: if the raw string is numeric (or contains numeric tokens),
  *       the parser will infer the most plausible unit by trying several interpretations
  *       (kg/g/mg/…) and selecting the one fitting best inside plausible bounds.</li>
@@ -43,6 +49,21 @@ import org.slf4j.LoggerFactory;
  *       unit can be configured (e.g. "amazon" values are in grams), which strongly influences
  *       inference.</li>
  * </ol>
+ *
+ * <h3>Normalization and rejections</h3>
+ * <ul>
+ *   <li>Thousands groups are joined before extraction: "1 200 g" and "1 200,5 g" (space, no-break
+ *       space or thin space between groups of 3 digits) read as 1200 g and 1200.5 g.</li>
+ *   <li>A dash between two digits, or glued in front of a digit, <b>anywhere</b> in the value
+ *       rejects the whole value: "10-12 kg" and "10 - 12 kg" are ranges, not one measured weight,
+ *       and "45 kg, 60-85-60 cm" or "45 kg (ref. WM-1234)" give {@code null} too. Another source of
+ *       the same attribute may still provide a value.</li>
+ *   <li>A range written in words keeps the value that carries the unit, through the explicit unit
+ *       rule: "15 à 30 kg" gives 30, "+ de 100 kg" gives 100. This is the common
+ *       format of the "TRANCHE DE POIDS" synonym, so it is deliberately not rejected.</li>
+ *   <li>A negative value ("-5 kg") is rejected, and so is any result that is not strictly positive
+ *       once rounded to the output scale ("0 kg"), on every parsing path.</li>
+ * </ul>
  *
  * <p>
  * The configuration is exposed as a simple POJO ({@link WeightParserConfiguration}) so it can be
@@ -358,18 +379,36 @@ public class WeightParser extends AttributeParser {
         // Internals
         // ----------------------------
 
-        private static final Pattern NUMBER_PATTERN = Pattern.compile("(-?\\d+(?:[\\.,]\\d+)?)");
+        // Unsigned on purpose: negative values and ranges are rejected upfront (RANGE_OR_SIGNED_PATTERN).
+        private static final Pattern NUMBER_PATTERN = Pattern.compile("(\\d+(?:[\\.,]\\d+)?)");
 
         // Find explicit unit occurrences, possibly surrounded by spaces.
         private static final Pattern EXPLICIT_UNIT_PATTERN = Pattern.compile(
-                        "(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?|g|gr|grammes?|grams?|mg|milligrammes?|milligrams?|lb|lbs|pounds?|oz|ounces?)\\b");
+                        "(?i)(\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?|g|gr|grammes?|grams?|mg|milligrammes?|milligrams?|lb|lbs|pounds?|oz|ounces?)\\b");
 
-        // Compound forms like "1 kg 250 g".
-        private static final Pattern KG_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(kg|kgs|kilogrammes?|kilograms?)\\b");
-        private static final Pattern G_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(g|gr|grammes?|grams?)\\b");
-        private static final Pattern MG_PART_PATTERN = Pattern.compile("(?i)(-?\\d+(?:[\\.,]\\d+)?)\\s*(mg|milligrammes?|milligrams?)\\b");
+        // True compound "1 kg 250 g": integer kg part, then only whitespace, then a gram part below 1000.
+        private static final Pattern COMPOUND_PATTERN = Pattern.compile(
+                        "(?i)(?<![\\d.])(\\d+)\\s*(?:kilogrammes?|kilograms?|kgs|kg)\\s*(\\d{1,3}(?:\\.\\d+)?)\\s*(?:grammes?|grams?|gr|g)\\b");
 
+        // Groups of 3 digits separated by a space ("1 200", "12 345 678"), once Unicode spaces are normalized.
+        private static final Pattern THOUSANDS_PATTERN = Pattern.compile("(?<![\\d.,])\\d{1,3}(?: \\d{3})+(?!\\d)");
+
+        // A range ("10-12", "10 - 12", any dash) or a number with a dash or minus sign (U+2212) glued to it ("-5").
+        private static final Pattern RANGE_OR_SIGNED_PATTERN = Pattern.compile("\\d\\s*[\\p{Pd}\\u2212]\\s*\\d|[\\p{Pd}\\u2212]\\d");
+
+        /**
+         * Parses one raw value and keeps the result only when it is a strictly positive weight once
+         * rounded to the output scale, so that no parsing path can yield a zero or negative weight.
+         */
         private ParsedWeight parseInternal(String rawValue, VerticalConfig verticalConfig, String datasource) {
+                final ParsedWeight weight = parseCandidate(rawValue, verticalConfig, datasource);
+                if (weight == null || !isStrictlyPositive(weight.kilograms())) {
+                        return null;
+                }
+                return weight;
+        }
+
+        private ParsedWeight parseCandidate(String rawValue, VerticalConfig verticalConfig, String datasource) {
                 if (rawValue == null) {
                         return null;
                 }
@@ -379,10 +418,16 @@ public class WeightParser extends AttributeParser {
                         return null;
                 }
 
+                // A range or a negative value is never a single measured weight (see class Javadoc).
+                if (RANGE_OR_SIGNED_PATTERN.matcher(normalized).find()) {
+                        LOGGER.debug("Rejected weight '{}' (datasource={}): range or negative value", rawValue, datasource);
+                        return null;
+                }
+
                 final WeightRangeKg range = resolveEffectiveRange(verticalConfig);
                 final WeightUnit datasourceHint = GLOBAL_CONFIG.resolveDefaultUnitHintForDatasource(datasource);
 
-                // Level 1: compound forms like "1 kg 250 g" or "500 g 250 mg".
+                // Level 1: true compound forms like "1 kg 250 g".
                 ParsedWeight compound = parseCompound(normalized, range, datasource);
                 if (compound != null) {
                         return compound;
@@ -438,6 +483,10 @@ public class WeightParser extends AttributeParser {
                 s = Normalizer.normalize(s, Normalizer.Form.NFKC);
                 s = s.replace('\u00A0', ' '); // NBSP
                 s = s.replace('\u202F', ' '); // narrow NBSP
+                s = s.replace('\u2009', ' '); // thin space
+
+                // Join thousands groups ("1 200" -> "1200") before the comma becomes a decimal point.
+                s = THOUSANDS_PATTERN.matcher(s).replaceAll(m -> m.group().replace(" ", ""));
 
                 // Common separators.
                 s = s.replace(',', '.');
@@ -468,45 +517,22 @@ public class WeightParser extends AttributeParser {
                 return numbers;
         }
 
+        /**
+         * Adds up a true compound ("1 kg 250 g", see COMPOUND_PATTERN). Returns {@code null}
+         * otherwise, so that the explicit unit rule picks a single value.
+         */
         private static ParsedWeight parseCompound(String normalized, WeightRangeKg range, String datasource) {
-                Double kgPart = extractSingleUnit(normalized, KG_PART_PATTERN);
-                Double gPart = extractSingleUnit(normalized, G_PART_PATTERN);
-                Double mgPart = extractSingleUnit(normalized, MG_PART_PATTERN);
-
-                if (kgPart == null && gPart == null && mgPart == null) {
+                Matcher m = COMPOUND_PATTERN.matcher(normalized);
+                if (!m.find()) {
                         return null;
                 }
 
-                double kg = 0.0;
-                if (kgPart != null) {
-                        kg += WeightUnit.KILOGRAM.toKg(kgPart);
-                }
-                if (gPart != null) {
-                        kg += WeightUnit.GRAM.toKg(gPart);
-                }
-                if (mgPart != null) {
-                        kg += WeightUnit.MILLIGRAM.toKg(mgPart);
-                }
+                double kg = WeightUnit.KILOGRAM.toKg(Double.parseDouble(m.group(1)))
+                                + WeightUnit.GRAM.toKg(Double.parseDouble(m.group(2)));
 
                 double conf = range.contains(kg) ? 0.99 : 0.85;
                 String reason = "compound-units";
                 return new ParsedWeight(kg, conf, WeightUnit.KILOGRAM, reason, normalized, datasource);
-        }
-
-        private static Double extractSingleUnit(String normalized, Pattern p) {
-                Matcher m = p.matcher(normalized);
-                if (!m.find()) {
-                        return null;
-                }
-                String token = m.group(1);
-                if (token == null) {
-                        return null;
-                }
-                token = token.trim().replace(',', '.');
-                if (!IdHelper.isPureDouble(token)) {
-                        return null;
-                }
-                return Double.parseDouble(token);
         }
 
         private static ParsedWeight parseExplicitUnit(String normalized, WeightRangeKg range, String datasource) {
@@ -541,11 +567,8 @@ public class WeightParser extends AttributeParser {
                                 continue;
                         }
 
-                        // Prefer higher confidence; if tied, prefer the smallest plausible weight.
+                        // Prefer higher confidence (inside the plausible range); if tied, keep the first explicit value.
                         if (candidate.confidence() > best.confidence()) {
-                                best = candidate;
-                        } else if (Double.compare(candidate.confidence(), best.confidence()) == 0
-                                        && candidate.kilograms() < best.kilograms()) {
                                 best = candidate;
                         }
                 }
@@ -664,6 +687,11 @@ public class WeightParser extends AttributeParser {
                 double nearest = kg < range.getMinKg() ? range.getMinKg() : range.getMaxKg();
                 double denom = Math.max(1e-9, nearest);
                 return Math.abs(kg - nearest) / denom;
+        }
+
+        private static boolean isStrictlyPositive(double kg) {
+                return Double.isFinite(kg) && BigDecimal.valueOf(kg)
+                                .setScale(GLOBAL_CONFIG.getOutputScale(), RoundingMode.HALF_UP).signum() > 0;
         }
 
         private static String formatKg(double kg) {

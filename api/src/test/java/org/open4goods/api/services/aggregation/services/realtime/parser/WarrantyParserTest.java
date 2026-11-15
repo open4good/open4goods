@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.api.services.aggregation.services.realtime.parser.WarrantyParser;
+import org.open4goods.model.attribute.ProductAttribute;
+import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.model.vertical.VerticalConfig.WarrantyParserConfig;
 import org.open4goods.model.vertical.VerticalConfig.ParsersConfig;
@@ -64,6 +66,49 @@ class WarrantyParserTest {
         assertThat(parser.parse("EUR", null, vc)).isNull();
     }
     
+    @Test
+    void keepsDecimalPoint() throws ParseException {
+        VerticalConfig vc = createConfig(0, 10);
+
+        // GOU-2275: the decimal point used to become a space, so "1.5 ans" gave 5 years.
+        assertThat(parser.parse("1.5 ans", null, vc)).isEqualTo("1.5");
+        assertThat(parser.parse("2.5 years", null, vc)).isEqualTo("2.5");
+        assertThat(parser.parse("1.5", null, vc)).isEqualTo("1.5");
+    }
+
+    @Test
+    void parsesDecimalCommaAndMonths() throws ParseException {
+        VerticalConfig vc = createConfig(0, 10);
+
+        assertThat(parser.parse("2,5 ans", null, vc)).isEqualTo("2.5");
+        assertThat(parser.parse("24 mois", null, vc)).isEqualTo("2");
+        assertThat(parser.parse("18 mois", null, vc)).isEqualTo("1.5");
+    }
+
+    @Test
+    void stillStripsPointsOutsideNumbers() throws ParseException {
+        VerticalConfig vc = createConfig(0, 10);
+
+        assertThat(parser.parse("Garantie 2 ans.", null, vc)).isEqualTo("2");
+        assertThat(parser.parse("2 ans p.m.o.", null, vc)).isEqualTo("2");
+        assertThat(parser.parse("n/a", null, vc)).isNull();
+    }
+
+    @Test
+    void productAttributePathKeepsDecimals() throws ParseException {
+        VerticalConfig vc = createConfig(0, 10);
+
+        ProductAttribute attribute = new ProductAttribute();
+        attribute.setName("WARRANTY");
+        SourcedAttribute source = new SourcedAttribute();
+        source.setName("WARRANTY");
+        source.setDataSourcename("a");
+        source.setValue("1.5 ans");
+        attribute.addSourceAttribute(source);
+
+        assertThat(parser.parse(attribute, null, vc)).isEqualTo("1.5");
+    }
+
     private VerticalConfig createConfig(double min, double max) {
         VerticalConfig vc = new VerticalConfig();
         ParsersConfig pc = new ParsersConfig();
