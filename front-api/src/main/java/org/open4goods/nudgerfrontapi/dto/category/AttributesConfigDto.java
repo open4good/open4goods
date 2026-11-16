@@ -12,8 +12,6 @@ public record AttributesConfigDto(
         @Schema(description = "Attribute configurations defined for the vertical.")
         List<AttributeConfigDto> configs,
         @Schema(description = "Attribute values considered as featured for highlighting.")
-        Set<String> featuredValues,
-        @Schema(description = "Attribute names excluded from aggregation.")
-        Set<String> exclusions
+        Set<String> featuredValues
 ) {
 }
