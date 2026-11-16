@@ -14,6 +14,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,6 +53,12 @@ public class RemoteFileCachingService {
 
 
 	private final Map<String,CacheResourceConfig> configs = new HashMap<>();
+
+	/** Negative cache: URL to the time (ms) of its last failed retrieval. */
+	private final Map<String,Long> failures = new ConcurrentHashMap<>();
+
+	/** Time during which a failed URL is not downloaded again (a request-driven caller would retry on each call). */
+	static final Duration NEGATIVE_CACHE_TTL = Duration.ofMinutes(5);
 
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileCachingService.class);
 
@@ -159,6 +166,22 @@ public class RemoteFileCachingService {
 	 * @return the cached file, which may not exist when the resource could never be retrieved
 	 */
 	public File getResource(final String url, Integer refreshInDays, String logLabel) throws InvalidParameterException, IOException {
+		return getResource(url, refreshInDays, logLabel, true);
+	}
+
+	/**
+	 * Same as {@link #getResource(String, Integer)} for a resource the caller can do without (logo, icon...):
+	 * a failed retrieval is logged as a warning even when no copy exists.
+	 *
+	 * @param url remote resource URL
+	 * @param refreshInDays cache TTL, in days
+	 * @return the cached file, which may not exist when the resource could never be retrieved
+	 */
+	public File getOptionalResource(final String url, Integer refreshInDays) throws InvalidParameterException, IOException {
+		return getResource(url, refreshInDays, null, false);
+	}
+
+	private File getResource(final String url, Integer refreshInDays, String logLabel, boolean critical) throws InvalidParameterException, IOException {
 
 		File resource = resolveCacheFile(resourceFolder, url);
 
@@ -172,16 +195,38 @@ public class RemoteFileCachingService {
 			logger.info("No cache config for resource {}, caching with default config", loggableResource(conf));
 		}
 
-		try {
-			if (!resource.exists()) {
-				logger.info("Resource {} does not exist, will download it", loggableResource(conf));
-				resource = retrieve(conf);
-			} else if ((System.currentTimeMillis() - resource.lastModified()) > TimeUnit.DAYS.toMillis(conf.getRefreshInDays())) {
-				logger.warn("Resource {} is outdated, will replace it", loggableResource(conf));
-				resource = retrieve(conf);
+		boolean missing = !resource.exists();
+		boolean outdated = !missing && (System.currentTimeMillis() - resource.lastModified()) > TimeUnit.DAYS.toMillis(conf.getRefreshInDays());
+		if (!missing && !outdated) {
+			return resource;
+		}
+
+		Long failedAt = failures.get(url);
+		if (failedAt != null) {
+			if (System.currentTimeMillis() - failedAt < NEGATIVE_CACHE_TTL.toMillis()) {
+				logger.debug("Resource {} failed recently, not retrieved again", loggableResource(conf));
+				return resource;
 			}
+			failures.remove(url);
+		}
+
+		try {
+			if (missing) {
+				logger.info("Resource {} does not exist, will download it", loggableResource(conf));
+			} else {
+				logger.warn("Resource {} is outdated, will replace it", loggableResource(conf));
+			}
+			resource = retrieve(conf);
 		} catch (final Exception e) {
-			logger.error("Resource {} cannot be retrieved ({})", loggableResource(conf), e.getClass().getSimpleName());
+			failures.put(url, System.currentTimeMillis());
+			// No stacktrace: the cause is summarised by its class and, for a download, the HTTP status
+			String cause = e.getClass().getSimpleName() + (e.getCause() != null ? ": " + e.getCause().getMessage() : "");
+			if (missing && critical) {
+				logger.error("Resource {} cannot be retrieved and has no cached copy ({})", loggableResource(conf), cause);
+			} else {
+				logger.warn("Resource {} cannot be retrieved, {} ({})", loggableResource(conf),
+						missing ? "no cached copy" : "keeping the cached copy", cause);
+			}
 		}
 
 		return resource;

@@ -316,6 +316,47 @@ class RemoteFileCachingServiceTest {
         assertThat(workFolder()).isEmptyDirectory();
     }
 
+    /**
+     * Ensures a failed download is not retried at once (negative cache), is an ERROR without a cached copy for a
+     * critical resource, a WARN for an optional one or when a stale copy is kept, and never carries a stacktrace.
+     */
+    @Test
+    void failedResourcesAreNotRetriedAndLogAtTheRightLevel() throws Exception {
+        String missing = tempDir.resolve("remote/absent.png").toUri().toString();
+        String optional = tempDir.resolve("remote/absent-logo.png").toUri().toString();
+        RemoteFileCachingService service = newService();
+
+        ListAppender<ILoggingEvent> appender = captureLogs();
+        try {
+            assertThat(service.getResource(missing, 1)).doesNotExist();
+            assertThat(service.getResource(missing, 1)).doesNotExist();
+            assertThat(service.getOptionalResource(optional, 1)).doesNotExist();
+        } finally {
+            releaseLogs(appender);
+        }
+
+        assertThat(appender.list).filteredOn(e -> e.getLevel() == ch.qos.logback.classic.Level.ERROR).hasSize(1);
+        assertThat(appender.list).filteredOn(e -> e.getLevel() == ch.qos.logback.classic.Level.WARN)
+                .hasSize(1).allSatisfy(e -> assertThat(e.getFormattedMessage()).contains("no cached copy"));
+        assertThat(appender.list).allSatisfy(e -> assertThat(e.getThrowableProxy()).isNull());
+        // Not downloaded again: the second call did not log a download attempt
+        assertThat(appender.list).filteredOn(e -> e.getFormattedMessage().contains("will download")).hasSize(2);
+
+        // A stale copy is kept, with a WARN only
+        String stale = remoteUrl("stale.csv", "v1");
+        File cached = service.getResource(stale, 1);
+        assertThat(cached.setLastModified(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2))).isTrue();
+        Files.delete(tempDir.resolve("remote/stale.csv"));
+        appender = captureLogs();
+        try {
+            assertThat(service.getResource(stale, 1)).isEqualTo(cached).hasContent("v1");
+        } finally {
+            releaseLogs(appender);
+        }
+        assertThat(appender.list).noneMatch(e -> e.getLevel() == ch.qos.logback.classic.Level.ERROR);
+        assertThat(appender.list).anyMatch(e -> e.getFormattedMessage().contains("keeping the cached copy"));
+    }
+
     private RemoteFileCachingService newService() {
         return new RemoteFileCachingService(cacheFolder().toString(), new RemoteFileCachingProperties(), workFolder().toFile());
     }
