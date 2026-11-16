@@ -19,8 +19,9 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 /**
  * {@link TaxonomyRealTimeAggregationService#onProduct} with the vote between datasources switched on (GOU-2256),
  * against the real vertical configurations. The flag is set on a dedicated {@link VerticalsConfigService}: the
- * other tests keep {@code _default.yml} as shipped. Categories are reconstructed from the card (see
- * {@code CategoryVoteTest} of the verticals module).
+ * other tests keep {@code _default.yml} as shipped. Categories are reconstructed from the card, except the Zalman P10
+ * case, copied from {@code products-moustik} (the real categories of the card are replayed in {@code CategoryVoteTest}
+ * of the verticals module).
  */
 class TaxonomyRealTimeAggregationServiceCategoryVoteTest {
 
@@ -64,6 +65,27 @@ class TaxonomyRealTimeAggregationServiceCategoryVoteTest {
 		final Product p = product("dishwasher",
 				"rakuten.com-csv.yml", "ELECTROMENAGER | LAVE-VAISSELLE",
 				"alternate FR", "INFORMATIQUE > COMPOSANT - PIECE DETACHEE > MEMOIRE PC");
+		p.setGoogleTaxonomyId(1);
+
+		aggregate(p);
+
+		assertThat(p.getVertical()).isNull();
+		assertThat(p.getGoogleTaxonomyId()).isNull();
+		assertThat(p.getNature()).isNull();
+	}
+
+	/**
+	 * Zalman P10 8800263650385 (GOU-2317), real categories: one refrigerator row for, two PC component rows without
+	 * {@code PIECE DETACHEE} against since GOU-2317. It loses refrigerator, and gets no nature: the PC component markers
+	 * are neutral fragments of the nature.
+	 */
+	@Test
+	void pcCaseFiledAsAFridgeLosesItsVerticalWithoutNature() throws Exception {
+		final Product p = product("refrigerator",
+				"RueDuCommerce FR", "BOITIER PC",
+				"rakuten.com-csv.yml", "INFORMATIQUE | COMPOSANTS | BOITIER",
+				"Cdiscount FR", "ELECTROMENAGER | ELECTROMENAGER > FROID > ARMOIRE A BOISSON - ARRIERE-BAR - DESSOUS DE "
+						+ "COMPTOIR | FROID | ARMOIRE A BOISSON - ARRIERE-BAR - DESSOUS DE COMPTOIR");
 		p.setGoogleTaxonomyId(1);
 
 		aggregate(p);

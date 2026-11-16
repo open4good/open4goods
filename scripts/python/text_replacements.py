@@ -41,6 +41,8 @@ EXCLUDED_DIRS = {
 
 EXCLUDED_FILES = {
     Path("frontend/config/lint-forbidden.json"),
+    # Real Elasticsearch categories kept byte for byte: an en dash row matches refrigerator.yml (GOU-2317).
+    Path("verticals/src/test/resources/category-vote/real-categories-2026-11-16.json"),
 }
 
 # Generated content committed by CI (release notes built from PR titles).

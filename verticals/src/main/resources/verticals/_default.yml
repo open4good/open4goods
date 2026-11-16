@@ -72,6 +72,14 @@ excludingTokensFromCategoriesMatching:
 sparePartCategoryMarkers:
   - PIECES DETACHEE
   - PIECE DETACHEE
+  # PC components, for the vote only (GOU-2317): they are also natureNeutralCategoryFragments below, so the
+  # nature does not change. A PC case filed by one marketplace as a fridge has rows such as "BOITIER PC" or
+  # "INFORMATIQUE | COMPOSANTS | BOITIER" that must vote against. No generic COMPOSANT token: it would reach
+  # categories that are not PC components.
+  - BOITIER PC
+  - COMPOSANT PC
+  - COMPOSANTS PC
+  - "INFORMATIQUE | COMPOSANTS |"
 
 accessoryCategoryMarkers:
   - ACCESSOIRE
@@ -90,6 +98,12 @@ natureNeutralCategoryFragments:
   - PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES
   # Shoes (about 224 K products), not accessories
   - CHAUSSURES - ACCESSOIRES
+  # The PC component markers of the vote (GOU-2317): a PC component is neither a spare part nor an accessory.
+  # Each one is written exactly as in sparePartCategoryMarkers (PcComponentMarkersTest).
+  - BOITIER PC
+  - COMPOSANT PC
+  - COMPOSANTS PC
+  - "INFORMATIQUE | COMPOSANTS |"
 
 # Minimum share (0 to 1) of a product's distinct categories that must carry a marker for the nature
 # to be set. 0: one marked category is enough. Set after the dry-run of the recovery (GOU-2234).

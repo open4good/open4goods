@@ -1049,7 +1049,9 @@ public class VerticalsConfigService {
 	 * {@code natureNeutralCategoryFragments} are not removed: they keep a PC
 	 * component from being a "spare part" for the nature, whereas for the vote
 	 * {@code COMPOSANT - PIECE DETACHEE} is precisely what says the product is not
-	 * a phone or a fridge;</li>
+	 * a phone or a fridge. The PC component markers ({@code BOITIER PC},
+	 * {@code COMPOSANT PC}, {@code COMPOSANTS PC}, {@code INFORMATIQUE | COMPOSANTS |},
+	 * GOU-2317) are in both lists: they vote against, and the nature removes them;</li>
 	 * <li><i>for</i> when its category matches V;</li>
 	 * <li><i>against</i> when its category matches another vertical;</li>
 	 * <li><i>abstains</i> otherwise: a category that matches no vertical and
@@ -1161,8 +1163,7 @@ public class VerticalsConfigService {
 	 */
 	private CategoryVote categoryVote(VerticalConfig candidate, String category, VerticalConfig matched) {
 		if (containsAny(category, candidate.getExcludingTokensFromCategoriesMatching())
-				|| (defaultConfig != null && (containsAny(category, defaultConfig.getSparePartCategoryMarkers())
-						|| containsAny(category, defaultConfig.getAccessoryCategoryMarkers())))) {
+				|| carriesNatureMarker(category)) {
 			return CategoryVote.AGAINST;
 		}
 		if (matched == null) {
@@ -1172,15 +1173,30 @@ public class VerticalsConfigService {
 	}
 
 	/**
+	 * Tells whether a category carries a {@code sparePartCategoryMarkers} or
+	 * {@code accessoryCategoryMarkers} marker of {@code _default.yml}, as the vote
+	 * reads it: the raw category, without removing the
+	 * {@code natureNeutralCategoryFragments} (GOU-2256). Package-private for the
+	 * before/after replay of the tests (GOU-2317).
+	 *
+	 * @param category the datasource category, not null
+	 * @return true when the vote counts this category against every candidate
+	 */
+	boolean carriesNatureMarker(String category) {
+		return defaultConfig != null && (containsAny(category, defaultConfig.getSparePartCategoryMarkers())
+				|| containsAny(category, defaultConfig.getAccessoryCategoryMarkers()));
+	}
+
+	/**
 	 * The vertical a datasource category matches: the {@code matchingCategories}
 	 * of the datasource first, then those under {@code all}, as in the historical
-	 * rule.
+	 * rule. Package-private for the before/after replay of the tests (GOU-2317).
 	 *
 	 * @param datasource the datasource name
 	 * @param category   the category
 	 * @return the matched vertical, or null
 	 */
-	private VerticalConfig matchingVertical(String datasource, String category) {
+	VerticalConfig matchingVertical(String datasource, String category) {
 		Map<String, VerticalConfig> byDatasource = categoriesToVertical.get(datasource);
 		VerticalConfig matched = byDatasource == null ? null : byDatasource.get(category);
 		if (matched == null) {
@@ -1264,7 +1280,12 @@ public class VerticalsConfigService {
 		return sparePart ? ProductNature.SPARE_PART : ProductNature.ACCESSORY;
 	}
 
-	private static boolean containsAny(String category, Set<String> markers) {
+	/**
+	 * @param category the category, not null
+	 * @param markers  substrings searched, may be null; blank ones are ignored
+	 * @return true when the category contains one of the markers
+	 */
+	static boolean containsAny(String category, Set<String> markers) {
 		if (markers == null) {
 			return false;
 		}
