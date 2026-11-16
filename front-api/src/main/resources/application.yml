@@ -258,7 +258,8 @@ management:
 
 open-data-config:
   generation-enabled: false
-  # Public base URL of the dataset downloads (lot 0c: https://data.nudger.fr). Empty keeps api.resource-root-path.
+  # Public base URL of the published files (lot 0c: https://data.nudger.fr): download links and
+  # {base}/manifest.json read by /opendata/* (GOU-2290, front.opendata.*). Empty: no link, no manifest read.
   public-base-url: ${OPEN_DATA_PUBLIC_BASE_URL:}
 
 google-indexation:

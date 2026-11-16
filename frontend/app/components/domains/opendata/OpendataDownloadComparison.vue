@@ -175,6 +175,11 @@ const handleDownloadClick = (option: DownloadOption) => {
   font-size: 0.95rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
 
+// Long unbreakable values (a SHA-256 checksum) wrap instead of overflowing on mobile.
+.dataset-download__highlights li span
+  min-width: 0
+  overflow-wrap: anywhere
+
 .dataset-download__cta
   margin-top: auto
 

@@ -1,9 +1,6 @@
 package org.open4goods.services.opendata.service;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.CharacterIterator;
@@ -37,7 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -47,7 +43,6 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.product.BarcodeType;
 import org.open4goods.model.product.Product;
@@ -56,7 +51,6 @@ import org.open4goods.services.opendata.DatasetDefinition;
 import org.open4goods.services.opendata.DatasetWriter;
 import org.open4goods.services.opendata.DatasetWriterManager;
 import org.open4goods.services.opendata.OpenDataGenerationException;
-import org.open4goods.services.opendata.ThrottlingInputStream;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.opendata.model.ColumnManifest;
 import org.open4goods.services.opendata.model.DatasetManifest;
@@ -76,8 +70,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.google.common.util.concurrent.RateLimiter;
-
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -85,10 +77,11 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
  * Service responsible for generating and managing the CSV OpenData files.
- * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files, their manifests, and the management
- * of download limits and rates. Generation runs in the api only (GOU-2248, {@code generation-enabled}); the schedule
- * lives in the api, this bean has none. After a successful pass, {@link OpenDataPublisher} publishes the files on R2
- * when {@code open-data-config.publication.enabled} is set (GOU-2289).
+ * Handles the creation of GTIN and ISBN datasets, their compression into ZIP files and their manifests. The files are
+ * never served by this service: they are downloaded from {@code data.nudger.fr} (R2, GOU-2290). Generation runs in the
+ * api only (GOU-2248, {@code generation-enabled}); the schedule lives in the api, this bean has none. After a
+ * successful pass, {@link OpenDataPublisher} publishes the files on R2 when {@code open-data-config.publication.enabled}
+ * is set (GOU-2289).
  */
 @Service
 public class OpenDataService implements HealthIndicator {
@@ -164,7 +157,6 @@ public class OpenDataService implements HealthIndicator {
     private final OpenDataPublisher publisher;
 
     private final AtomicBoolean exportRunning = new AtomicBoolean(false);
-    private final AtomicInteger concurrentDownloadsCounter = new AtomicInteger(0);
     private volatile OpenDataGenerationStatus status = OpenDataGenerationStatus.idle();
     private final Map<String, AtomicLong> exportedRows = new ConcurrentHashMap<>();
     private volatile Runnable passStartHook = () -> { };
@@ -321,39 +313,6 @@ public class OpenDataService implements HealthIndicator {
      */
     public OpenDataGenerationStatus status() {
         return status;
-    }
-
-    /**
-     * Provides a limited bandwidth stream for downloading the opendata file.
-     * Enforces a limit on the number of concurrent downloads.
-     */
-    public InputStream limitedRateStream(String file) throws TechnicalException, FileNotFoundException {
-
-        // The limiter enforces a maximum bandwidth per download so that a single
-        // client cannot saturate the outbound network interface.
-        RateLimiter rateLimiter = RateLimiter.create(openDataConfig.getDownloadSpeedKb() * FileUtils.ONE_KB);
-
-        if (concurrentDownloadsCounter.get() >= openDataConfig.getConcurrentDownloads()) {
-            throw new TechnicalException("Too many requests ");
-        } else {
-            concurrentDownloadsCounter.incrementAndGet();
-        }
-
-        try {
-            LOGGER.info("Starting opendata dataset download");
-            return new ThrottlingInputStream(new BufferedInputStream(new FileInputStream(file)),
-                    rateLimiter) {
-                @Override
-                public void close() throws IOException {
-                    super.close();
-                    concurrentDownloadsCounter.decrementAndGet();
-                    LOGGER.info("Ending opendata dataset download");
-                }
-            };
-        } catch (IOException e) {
-            concurrentDownloadsCounter.decrementAndGet();
-            throw e;
-        }
     }
 
     /**
@@ -972,13 +931,6 @@ public class OpenDataService implements HealthIndicator {
         line[12] = exportSources(data);
 
         return line;
-    }
-
-    /**
-     * Decrements the download counter, for instance when an IOException occurs (e.g., user stops the download).
-     */
-    public void decrementDownloadCounter() {
-        concurrentDownloadsCounter.decrementAndGet();
     }
 
     /**

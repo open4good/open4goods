@@ -3,23 +3,26 @@ package org.open4goods.nudgerfrontapi.dto.opendata;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Overview information about all available OpenData datasets.
+ * Overview of the GTIN and ISBN datasets, read from the published manifest (GOU-2290).
+ * <p>
+ * The values cover the GTIN and ISBN entries of {@code manifest.json} only: the impact datasets describe the same
+ * products and are not counted. Every field is null while the manifest is not configured
+ * ({@code open-data-config.public-base-url} empty) or was never read successfully.
+ * </p>
  */
-@Schema(description = "Aggregated information describing the full OpenData catalogue.")
+@Schema(description = "Aggregated information describing the GTIN and ISBN datasets, read from the published manifest. "
+        + "Fields are null while the manifest is not configured or not readable.")
 public record OpenDataOverviewDto(
-        @Schema(description = "Total number of products covered by all datasets, formatted using the requested locale.",
-                example = "12\u00a0345")
+        @Schema(description = "Rows of the GTIN and ISBN files (sum of the manifest rows), formatted using the requested "
+                + "locale; null when unknown.", example = "124 490 051", nullable = true)
         String totalProductCount,
 
-        @Schema(description = "Number of datasets available for download, formatted using the requested locale.",
-                example = "2")
+        @Schema(description = "Number of GTIN and ISBN datasets listed in the manifest, formatted using the requested "
+                + "locale; null when unknown.", example = "2", nullable = true)
         String datasetCount,
 
-        @Schema(description = "Human readable size of all datasets combined, formatted using the requested locale.",
-                example = "1,5\u00a0GB")
-        String totalDatasetSize,
-
-        @Schema(description = "Download restrictions applied when fetching the datasets.")
-        OpenDataDownloadLimitsDto downloadLimits
+        @Schema(description = "Size of the GTIN and ISBN zips combined (sum of the manifest bytes), formatted using the "
+                + "requested locale; null when unknown.", example = "6,6 GB", nullable = true)
+        String totalDatasetSize
 ) {
 }

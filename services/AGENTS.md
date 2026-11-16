@@ -252,6 +252,8 @@ or a provider/feed name; see the
 - Expose the generation status, health and metrics; generation runs in the api only (GOU-2248)
 - Publish the zips and manifests on R2 through its S3 API after a successful pass, disabled by default
   (`OpenDataPublisher`, GOU-2289): temporary key, read back and sha256, copy, `manifest.json` last, budget guard
+- Never serve a file: downloads come from `data.nudger.fr`; `front-api` reads the published `manifest.json`
+  (GOU-2290) and `ui` only answers 301 on the legacy URLs, without depending on this module
 
 See [docs/architecture/opendata.md](../docs/architecture/opendata.md).
 

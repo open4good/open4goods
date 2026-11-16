@@ -55,8 +55,18 @@ fichier ne disparaît qu'à la fin du dernier des deux. Voir `ci-workflows-statu
   - `opendata_publication_enabled`.
   La health `openDataService` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
   `ERROR` `Open data publication on R2 failed`, avec la cause.
-- Âge des fichiers publiés (`opendata_dataset_age_seconds`, seuil de 8 jours) : front-api, lecture du manifest (lot 1,
-  PR suivante).
+- Âge des fichiers publiés, côté front-api (lecture de `https://data.nudger.fr/manifest.json`, GOU-2290, détail dans
+  l'[architecture](../architecture/opendata.md#lecture-du-manifest-par-front-api-gou-2290)) :
+  - `opendata_dataset_age_seconds{dataset="gtin|isbn|impact-..."}` (Micrometer `opendata.dataset.age`) : maintenant
+    moins le `generatedAt` du jeu, NaN si inconnu. **Alerte Ops : au-delà de 691 200 s (8 jours).**
+  - Health `openDataManifest` de front-api : `DEGRADED` si le manifest est illisible (404, réseau, JSON invalide), si
+    `gtin` ou `isbn` manque, ou si un jeu a plus de 8 jours (`front.opendata.max-age`) ; détails `state`,
+    `datasetAgeSeconds`, `problems`. `UNKNOWN` tant que `open-data-config.public-base-url` est vide (bêta). Ce statut
+    ne change pas la santé globale de front-api, et `/actuator/health/openDataManifest` répond **200** même en
+    `DEGRADED` : une alerte sur ce point doit lire le champ JSON `status`, pas le code HTTP.
+  - Sans registre Prometheus dans le dépôt, la jauge se lit sur
+    `/actuator/metrics/opendata.dataset.age?tag=dataset:gtin` (idem `isbn`), valeur en secondes.
+  - Log WARN `Open data manifest ... unavailable (...)` au changement de cause, INFO `... is readable again` au retour.
 
 ## Échecs et reprise
 

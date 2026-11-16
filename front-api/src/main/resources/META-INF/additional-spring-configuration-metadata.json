@@ -405,6 +405,30 @@
       "defaultValue": "2d"
     },
     {
+      "name": "front.opendata.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout of a read of the published open data manifest (open-data-config.public-base-url/manifest.json).",
+      "defaultValue": "2s"
+    },
+    {
+      "name": "front.opendata.manifest-cache-ttl",
+      "type": "java.time.Duration",
+      "description": "How long a read of the open data manifest, successful or not, is reused before the next read (the manifests are served with max-age=300).",
+      "defaultValue": "5m"
+    },
+    {
+      "name": "front.opendata.max-age",
+      "type": "java.time.Duration",
+      "description": "Age of a published open data file (now minus its manifest generatedAt) above which the openDataManifest health component turns DEGRADED.",
+      "defaultValue": "8d"
+    },
+    {
+      "name": "front.opendata.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout of a read of the published open data manifest.",
+      "defaultValue": "3s"
+    },
+    {
       "name": "front.partners.ecosystem.partners[].bloc-id",
       "type": "java.lang.String",
       "description": "XWiki bloc identifier for an ecosystem partner."
@@ -664,18 +688,6 @@
       "description": "Icecat account username."
     },
     {
-      "name": "open-data-config.concurrent-downloads",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of concurrent OpenData downloads.",
-      "defaultValue": 4
-    },
-    {
-      "name": "open-data-config.download-speed-kb",
-      "type": "java.lang.Integer",
-      "description": "Maximum OpenData download speed per client in kilobytes.",
-      "defaultValue": 256
-    },
-    {
       "name": "open-data-config.generation-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable scheduled OpenData export generation.",
@@ -684,7 +696,7 @@
     {
       "name": "open-data-config.public-base-url",
       "type": "java.lang.String",
-      "description": "Public base URL of the dataset downloads (for example https://data.nudger.fr). Empty keeps the api.resource-root-path based links.",
+      "description": "Public base URL of the published open data files (for example https://data.nudger.fr): download links and {base}/manifest.json read by /opendata/* (GOU-2290). Empty: no download link and no manifest read, manifest values served as null.",
       "defaultValue": ""
     },
     {
