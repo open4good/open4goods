@@ -84,6 +84,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 */
 	private static final Pattern THOUSANDS_PATTERN =
 			Pattern.compile("(?<![\\d.,])\\d{1,3}(?:[ \u00a0\u2009\u202f]\\d{3})+(?!\\d)");
+	private static final Pattern NUMBER_WITH_UNIT_PATTERN =
+			Pattern.compile("\\s*([-+]?\\d+(?:[.,]\\d+)?)\\s*(\\p{L}+)\\s*");
 	private static final Pattern THOUSANDS_SEPARATOR_PATTERN = Pattern.compile("[ \u00a0\u2009\u202f]");
 	/**
 	 * Order in which merged sources are handed to a custom parser: trusted datasources first, as in
@@ -659,6 +661,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		// stays 55).
 		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
 			string = joinThousands(string);
+			string = applyUnitFactor(string, attrConf);
 		}
 		string = isWattAttribute(attrConf) ? powerToWatts(string, unitlessUnit(attrConf, rawName)) : string;
 		///////////////////
@@ -766,10 +769,48 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
 			string = sanitizeNumericValue(string);
+			checkBounds(string, attrConf);
 		}
 
 		return string;
 
+	}
+
+	/**
+	 * Converts "165 cm" with the {@code parser.unitFactors} of the attribute (0.3937 for cm gives "64.96"). A value
+	 * without unit, or with an unlisted unit, is returned unchanged.
+	 */
+	static String applyUnitFactor(String value, AttributeConfig attrConf) {
+		Map<String, Double> factors = attrConf.getParser().getUnitFactors();
+		if (factors == null || factors.isEmpty()) {
+			return value;
+		}
+		Matcher matcher = NUMBER_WITH_UNIT_PATTERN.matcher(value);
+		if (!matcher.matches()) {
+			return value;
+		}
+		String unit = matcher.group(2);
+		return factors.entrySet().stream()
+				.filter(entry -> entry.getKey().equalsIgnoreCase(unit))
+				.findFirst()
+				.map(entry -> new java.math.BigDecimal(matcher.group(1).replace(',', '.'))
+						.multiply(java.math.BigDecimal.valueOf(entry.getValue()))
+						.setScale(2, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString())
+				.orElse(value);
+	}
+
+	/**
+	 * Rejects a numeric value outside the {@code parser.minValue} / {@code parser.maxValue} of the attribute.
+	 *
+	 * @throws ValidationException when the value is out of bounds
+	 */
+	private static void checkBounds(String numeric, AttributeConfig attrConf) throws ValidationException {
+		Double min = attrConf.getParser().getMinValue();
+		Double max = attrConf.getParser().getMaxValue();
+		double v = Double.parseDouble(numeric);
+		if ((min != null && v < min) || (max != null && v > max)) {
+			throw new ValidationException("Implausible value " + numeric + " for attribute " + attrConf.getKey());
+		}
 	}
 
 	/**

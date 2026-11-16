@@ -73,6 +73,24 @@ public class AttributeParserConfig {
 	 */
 	private Map<String, String> sourceUnits = new HashMap<>();
 
+	/**
+	 * Lower bound of a plausible numeric value, in the unit of the attribute. A source whose parsed value is below it
+	 * does not vote. {@code null} means no bound.
+	 */
+	private Double minValue;
+
+	/**
+	 * Upper bound of a plausible numeric value, in the unit of the attribute (an identifier read as a screen size
+	 * is far above any diagonal). A source whose parsed value is above it does not vote. {@code null} means no bound.
+	 */
+	private Double maxValue;
+
+	/**
+	 * Conversion factors of a value written with an explicit unit, by unit token (case-insensitive): with
+	 * {@code cm: 0.3937}, "165 cm" is read as 64.96. A value without unit, or with an unlisted unit, is unchanged.
+	 */
+	private Map<String, Double> unitFactors = new HashMap<>();
+
 
 
 
@@ -163,6 +181,30 @@ public class AttributeParserConfig {
 	public void setDefaultUnitHint(String defaultUnitHint)
 	{
 		this.defaultUnitHint = defaultUnitHint;
+	}
+
+	public Double getMinValue() {
+		return minValue;
+	}
+
+	public void setMinValue(Double minValue) {
+		this.minValue = minValue;
+	}
+
+	public Double getMaxValue() {
+		return maxValue;
+	}
+
+	public void setMaxValue(Double maxValue) {
+		this.maxValue = maxValue;
+	}
+
+	public Map<String, Double> getUnitFactors() {
+		return unitFactors;
+	}
+
+	public void setUnitFactors(Map<String, Double> unitFactors) {
+		this.unitFactors = unitFactors == null ? new HashMap<>() : unitFactors;
 	}
 
 	public Map<String, String> getSourceUnits() {

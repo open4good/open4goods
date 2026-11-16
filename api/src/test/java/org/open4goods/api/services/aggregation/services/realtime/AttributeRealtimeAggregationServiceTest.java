@@ -697,6 +697,31 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(service.parseValue(raw, attribute, verticalConfig)).isEqualTo(expected);
 	}
 
+	/**
+	 * GOU-2377: a diagonal with an explicit unit is converted to inches ("165 cm" is about 65").
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "tv|165 cm|64.96", "tv|165cm|64.96", "tv|139,7 cm|55", "tv|1651 mm|65",
+			"tv|65\"|65", "smartphones|6,1|6.1" })
+	void diagonalWithAUnitIsConvertedToInches(String vertical, String raw, String expected) throws Exception {
+		AttributeConfig diagonal = realAttribute(vertical, "DIAGONALE_POUCES");
+
+		assertThat(service.parseValue(raw, diagonal, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2377: a code pushed under the DIAGONALE key (Rakuten "PRD_PM255575188") or a bare number of centimetres is
+	 * no diagonal: the source is rejected instead of being indexed.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = { "PRD_PM255575188", "255575188", "123636", "165", "0" })
+	void implausibleDiagonalIsRejected(String raw) throws Exception {
+		AttributeConfig diagonal = realAttribute("smartphones", "DIAGONALE_POUCES");
+
+		assertThatThrownBy(() -> service.parseValue(raw, diagonal, verticalConfig))
+				.isInstanceOf(ValidationException.class);
+	}
+
 	@Test
 	void onProductIndexesTheSpinSpeedWithItsThousands() throws Exception {
 		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "SPIN_SPEED")));

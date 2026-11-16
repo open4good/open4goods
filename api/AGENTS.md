@@ -394,6 +394,11 @@ horaire EPREL des climatiseurs (`COOLINGCHARACTERISTICS-HOURLYELECTRICITYCONSUMP
 rend l'ancienne lecture. Une source qui ne se lit plus ne vote pas : sa `cleanedValue` est vidée, l'ancienne ne reste
 pas. Les valeurs déjà indexées sont relues au batch de 13 h, qui réagrège chaque verticale.
 
+Un attribut `NUMERIC` peut borner ses valeurs (`parser.minValue`, `parser.maxValue`) : une source hors bornes ne vote
+pas (comme une valeur illisible). `parser.unitFactors` convertit une valeur écrite avec unité (`165 cm` donne 64.96
+avec `cm: 0.3937`). `DIAGONALE_POUCES` les utilise (1 à 120 pouces) : un identifiant poussé sous la clé `DIAGONALE`
+(Rakuten `PRD_PM255575188`) ou des cm sans unité ne sont plus indexés (GOU-2377).
+
 ### Slug produit figé
 
 `NamesAggregationService` (GOU-1708) ne génère le slug (`names.url`, base du `fullSlug` de front-api) que s'il
