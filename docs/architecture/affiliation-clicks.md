@@ -97,6 +97,11 @@ recognised by their signature, read on the full URL: query parameters `c`, `m`
 and `a` all numeric and `u` present. Only the host is stored. A direct merchant
 link without this signature stays `other`.
 
+Kwanko links on a merchant's own tracking domain (e.g. `qby.mda-electromenager.com`)
+are recognised the same way: the whole query string, or the value of `mclic`,
+has the form `P<hex>S<digit>U<alphanumeric>V<digit>` (GOU-2319). Clicks already
+stored keep their network.
+
 Clicks stored before this classification (since 2026-10-26) keep `network =
 other`: they are not rewritten, so Kwanko and TradeTracker counts start at the
 deployment date.
