@@ -108,8 +108,7 @@ zip téléchargé. Réponse retenue pour le lot 1, sans déclencheur "publier se
 
 Le cache des zips et des manifests est de 5 min : l'écart visible côté public dure au plus ce délai après la reprise.
 
-L'envoi manuel `opendataR2Upload.yml` ([opendata-r2-upload.md](opendata-r2-upload.md)) reste un secours : il ne
-publie que les zips, pas les manifests.
+L'envoi manuel `opendataR2Upload.yml` ([opendata-r2-upload.md](opendata-r2-upload.md)) reste un secours : il publie les zips et aussi les manifests impact (`impact-*-manifest.json`), mais pas `manifest.json`.
 
 ## Mesures en bêta (critère d'acceptation)
 

@@ -23,8 +23,11 @@ import org.open4goods.services.opendata.model.ColumnManifest;
 
 /**
  * Columns and rows of the impact dataset of one vertical (GOU-2250): the raw values of the criteria listed by
- * {@code availableImpactScoreCriterias} in the vertical YAML, without any aggregated score, normalised sub-score,
- * percentile or rank. A missing value stays empty: no default and no imputation.
+ * {@code availableImpactScoreCriterias} of the ImpactScore (from {@code impactscores/{vertical}.yml}, available for 5
+ * verticals out of 7), not the vertical YAML, without any aggregated score, normalised sub-score, percentile or rank.
+ * A published criterion is a criterion that enters the score: {@code MINAVAILABILITYSPAREPARTSYEARS} (dishwasher) and
+ * {@code OVEN_ENERGY_EFFICIENCY_INDEX} (oven) are not in their ImpactScore, so they stay unpublished until a later
+ * batch decides otherwise. A missing value stays empty: no default and no imputation.
  */
 final class ImpactDataset {
 
