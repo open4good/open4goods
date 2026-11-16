@@ -3,6 +3,7 @@ package org.open4goods.services.contribution.model;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Affiliation network of an outbound {@code /contrib/} click, deduced from the host of the target URL.
@@ -16,7 +17,10 @@ public enum AffiliationNetwork {
     AWIN("awin", "Awin"),
     /** Effiliation: {@code effiliation.com}, {@code effinity.fr} and their sub-domains. */
     EFFILIATION("effiliation", "Effiliation"),
-    /** Kwanko (ex Metaffiliation): {@code metaffiliation.com}, {@code kwanko.com} and their sub-domains. */
+    /**
+     * Kwanko (ex Metaffiliation): {@code metaffiliation.com}, {@code kwanko.com} and their sub-domains, or a merchant's
+     * own tracking domain carrying the Kwanko click token ({@link #hasKwankoSignature(String)}).
+     */
     KWANKO("kwanko", "Kwanko"),
     /**
      * TradeTracker: {@code tradetracker.net}, {@code tradetracker.com} and their sub-domains, or a merchant's own
@@ -58,10 +62,59 @@ public enum AffiliationNetwork {
      */
     public static AffiliationNetwork fromUrl(String url) {
         AffiliationNetwork network = fromHost(hostOf(url));
-        if (network == OTHER && hostOf(url) != null && hasTradeTrackerSignature(url)) {
-            return TRADETRACKER;
+        if (network == OTHER && hostOf(url) != null) {
+            if (hasTradeTrackerSignature(url)) {
+                return TRADETRACKER;
+            }
+            if (hasKwankoSignature(url)) {
+                return KWANKO;
+            }
         }
         return network;
+    }
+
+    /** Kwanko click token: {@code P<hex>S<digit>U<alphanumeric>V<digit>}. */
+    private static final Pattern KWANKO_TOKEN = Pattern.compile("P[0-9A-F]+S\\dU[0-9A-Za-z]+V\\d");
+
+    /**
+     * Tells whether a URL carries the Kwanko click token, used by merchants' own tracking domains: the whole query
+     * string, or the value of {@code mclic}, has the form {@code P<hex>S<digit>U<alphanumeric>V<digit>}.
+     *
+     * @param url the URL, possibly {@code null}
+     * @return {@code true} when the token is present
+     */
+    static boolean hasKwankoSignature(String url) {
+        String query = queryOf(url);
+        if (query == null) {
+            return false;
+        }
+        if (KWANKO_TOKEN.matcher(query).matches()) {
+            return true;
+        }
+        String mclic = queryParams(query).get("mclic");
+        return mclic != null && KWANKO_TOKEN.matcher(mclic).matches();
+    }
+
+    private static String queryOf(String url) {
+        if (url == null) {
+            return null;
+        }
+        int start = url.indexOf('?');
+        if (start < 0) {
+            return null;
+        }
+        int end = url.indexOf('#', start);
+        return url.substring(start + 1, end < 0 ? url.length() : end);
+    }
+
+    private static Map<String, String> queryParams(String query) {
+        Map<String, String> params = new HashMap<>();
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf('=');
+            String name = eq < 0 ? pair : pair.substring(0, eq);
+            params.putIfAbsent(name, eq < 0 ? "" : pair.substring(eq + 1));
+        }
+        return params;
     }
 
     /**
@@ -72,21 +125,11 @@ public enum AffiliationNetwork {
      * @return {@code true} when the signature is present
      */
     static boolean hasTradeTrackerSignature(String url) {
-        if (url == null) {
+        String query = queryOf(url);
+        if (query == null) {
             return false;
         }
-        int start = url.indexOf('?');
-        if (start < 0) {
-            return false;
-        }
-        int end = url.indexOf('#', start);
-        String query = url.substring(start + 1, end < 0 ? url.length() : end);
-        Map<String, String> params = new HashMap<>();
-        for (String pair : query.split("&")) {
-            int eq = pair.indexOf('=');
-            String name = eq < 0 ? pair : pair.substring(0, eq);
-            params.putIfAbsent(name, eq < 0 ? "" : pair.substring(eq + 1));
-        }
+        Map<String, String> params = queryParams(query);
         return isDigits(params.get("c")) && isDigits(params.get("m")) && isDigits(params.get("a"))
                 && params.containsKey("u");
     }
