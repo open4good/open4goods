@@ -452,7 +452,9 @@ class AttributeRealtimeAggregationServiceTest {
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', value = {
 			"1,2 KW|1200", "1.2kW|1200", "1 200 W|1200", "1\u00a0200 W|1200", "1200 W|1200", "2,5 kW|2500",
-			"0,3 W|0.3", "0, 3 W|0.3", "0.5 W|0.5", "500 mW|0.5", "1,2 kilowatts|1200", "900 Watts|900", "1500|1500" })
+			"0,3 W|0.3", "0, 3 W|0.3", "0.5 W|0.5", "500 mW|0.5", "1,2 kilowatts|1200", "900 Watts|900", "1500|1500",
+			// GOU-2315: an energy per hour is a power
+			"0,85 kWh/h|850", "0.85 KWH/H|850", "1,1 kWh/60 min|1100", "2 kWh / heure|2000", "500 Wh/h|500" })
 	void powerIsConvertedToWatts(String raw, String expected) throws Exception {
 		AttributeConfig attrConfig = wattAttribute();
 
@@ -474,6 +476,18 @@ class AttributeRealtimeAggregationServiceTest {
 		attrConfig.getParser().setDeleteTokens(java.util.List.of("/10", "/ 10", "SUR 10"));
 
 		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2315: an energy (per cycle, per year) is not a power; it used to lose its unit and read as watts.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = { "0.543 kWh", "84 kWh/an", "52 kWh/100 cycles", "300 Wh" })
+	void energyIsNotReadAsWatts(String raw) {
+		AttributeConfig attrConfig = wattAttribute();
+
+		assertThatThrownBy(() -> service.parseValue(raw, attrConfig, verticalConfig))
+				.isInstanceOf(ValidationException.class);
 	}
 
 	private static AttributeConfig wattAttribute() {
@@ -694,6 +708,50 @@ class AttributeRealtimeAggregationServiceTest {
 		IndexedAttribute spinSpeed = product.getAttributes().getIndexed().get("SPIN_SPEED");
 		assertThat(spinSpeed.getValue()).isEqualTo("1400");
 		assertThat(spinSpeed.getNumericValue()).isEqualTo(1400.0);
+	}
+
+	/**
+	 * GOU-2315: EPREL sends the hourly consumption of an air conditioner without a unit, in kWh/h; the shipped
+	 * {@code sourceUnits} reads it in watts. A unitless Icecat value of the same attribute stays in watts.
+	 */
+	@Test
+	void onProductReadsTheUnitlessEprelHourlyConsumptionInKilowatts() throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("air-conditioner", "POWER_CONSUMPTION_TYPICAL")));
+		Product eprel = new Product(123L);
+		addSourcedAttribute(eprel, "coolingCharacteristics-hourlyElectricityConsumption", "1.1",
+				EprelCompletionService.EPREL_DS_NAME);
+		Product icecat = new Product(124L);
+		addSourcedAttribute(icecat, "CONSOMMATION ELECTRIQUE TYPIQUE", "950", "icecat.biz");
+
+		service.onProduct(eprel, verticalConfig);
+		service.onProduct(icecat, verticalConfig);
+
+		IndexedAttribute fromEprel = eprel.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL");
+		assertThat(fromEprel.getValue()).isEqualTo("1100");
+		assertThat(fromEprel.getNumericValue()).isEqualTo(1100.0);
+		assertThat(fromEprel.getSource()).extracting(SourcedAttribute::getCleanedValue).containsExactly("1100");
+		assertThat(icecat.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL").getValue()).isEqualTo("950");
+	}
+
+	/**
+	 * GOU-2315: a source that no longer parses (an energy in kWh) does not vote with the cleaned value left by an
+	 * earlier aggregation, even when its datasource ranks first.
+	 */
+	@Test
+	void onProductDropsTheStaleCleanedValueOfASourceThatNoLongerParses() throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("air-conditioner", "POWER_CONSUMPTION_TYPICAL")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "CONSOMMATION ELECTRIQUE TYPIQUE", "950 W", "icecat.biz");
+		SourcedAttribute energy = new SourcedAttribute(new Attribute("CONSOMMATION ELECTRIQUE TYPIQUE", "0,5 kWh"),
+				EprelCompletionService.EPREL_DS_NAME);
+		energy.setCleanedValue("0.5");
+		product.getAttributes().getAll().get("CONSOMMATION ELECTRIQUE TYPIQUE").addSourceAttribute(energy);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL").getValue()).isEqualTo("950");
 	}
 
 	/**

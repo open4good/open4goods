@@ -1,7 +1,9 @@
 package org.open4goods.model.vertical;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Attribute parsing configuration
@@ -62,6 +64,14 @@ public class AttributeParserConfig {
 	 * "kg" for MASS). Used by {@code UnitAwareNumericParser} as a last-resort hint.
 	 */
 	private String defaultUnitHint;
+
+	/**
+	 * Unit of the values that a raw attribute sends without a unit, by raw attribute name (compared after
+	 * {@code IdHelper.normalizeAttributeName}). For example, EPREL sends the hourly consumption of an air conditioner
+	 * as "1.1", in kWh/h. Only the watt conversion of the generic parser uses it. Remove an entry to go back to
+	 * reading these values as they are.
+	 */
+	private Map<String, String> sourceUnits = new HashMap<>();
 
 
 
@@ -153,6 +163,14 @@ public class AttributeParserConfig {
 	public void setDefaultUnitHint(String defaultUnitHint)
 	{
 		this.defaultUnitHint = defaultUnitHint;
+	}
+
+	public Map<String, String> getSourceUnits() {
+		return sourceUnits;
+	}
+
+	public void setSourceUnits(Map<String, String> sourceUnits) {
+		this.sourceUnits = sourceUnits == null ? new HashMap<>() : sourceUnits;
 	}
 
 

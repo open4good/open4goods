@@ -98,10 +98,16 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 	/**
 	 * A power written with its unit: number (space-grouped thousands such as "1 200", comma or point decimal,
-	 * optionally spaced as in "0, 3") followed by W, kW or mW.
+	 * optionally spaced as in "0, 3") followed by W, kW or mW, or by an energy per hour (kWh/h, kWh/60 min, Wh/h),
+	 * which is a power: 0.85 kWh/h is 850 W.
 	 */
 	private static final Pattern POWER_PATTERN = Pattern.compile(
-			"(?i)([-+]?\\d+(?:[\\s\u00a0\u202f]\\d{3}(?!\\d))*(?:\\s*[.,]\\s*\\d+)?)\\s*(kilowatts?|kw|milliwatts?|mw|watts?|w)(?![\\p{L}\\d])");
+			"(?i)([-+]?\\d+(?:[\\s\u00a0\u202f]\\d{3}(?!\\d))*(?:\\s*[.,]\\s*\\d+)?)\\s*"
+					+ "(k?wh\\s*/\\s*(?:60\\s*min|heure|h)|kilowatts?|kw|milliwatts?|mw|watts?|w)(?![\\p{L}\\d])");
+	/** An energy (Wh, kWh, MWh, per year or per cycle included), which is not a power. */
+	private static final Pattern ENERGY_PATTERN = Pattern.compile("(?i)\\d\\s*[km]?wh(?!\\p{L})");
+	/** A number alone, without a unit. */
+	private static final Pattern BARE_NUMBER_PATTERN = Pattern.compile("\\s*[-+]?\\d+(?:[.,]\\d+)?\\s*");
 	private static final Pattern EMPTY_VALUE_SEPARATOR_PATTERN =
 			Pattern.compile("[()_./-]+");
 	/** Values meaning that the attribute is absent, compared after {@link #EMPTY_VALUE_SEPARATOR_PATTERN}. */
@@ -292,9 +298,13 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		for (SourcedAttribute source : attr.getSource()) {
 			try {
-				String parsed = parseValue(source.getValue(), attrConf, vConf);
+				String name = source.getName() != null ? source.getName() : attr.getName();
+				String parsed = parseValue(source.getValue(), name, attrConf, vConf);
 				source.setCleanedValue(parsed);
 			} catch (ValidationException e) {
+				// A source that no longer parses does not vote, neither with its raw value nor with the cleaned value
+				// left by an earlier aggregation (a "0,5 kWh" would otherwise be indexed as 0.5 W).
+				source.setCleanedValue("");
 				dedicatedLogger.warn("Failed to parse source value {} for attribute {}", source.getValue(), attrConf.getKey());
 			}
 		}
@@ -605,7 +615,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			}
 		}
 
-		return parseValue(attr.getValue(), attrConf, vConf);
+		return parseValue(attr.getValue(), attr.getName(), attrConf, vConf);
 
 }
 
@@ -622,6 +632,22 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 */
 	public String parseValue(final String rawValue, final AttributeConfig attrConf, VerticalConfig vConf)
 			throws ValidationException {
+		return parseValue(rawValue, null, attrConf, vConf);
+	}
+
+	/**
+	 * Same as {@link #parseValue(String, AttributeConfig, VerticalConfig)}, for a value of a named raw attribute:
+	 * the name selects the unit of a value sent without one ({@code parser.sourceUnits}).
+	 *
+	 * @param rawValue raw value from a datasource
+	 * @param rawName  name of the raw attribute, or {@code null} when unknown
+	 * @param attrConf attribute configuration containing parser options
+	 * @param vConf    vertical configuration owning the attribute
+	 * @return normalized and type-sanitized value, or an empty string for known empty placeholders
+	 * @throws ValidationException when the value is null or cannot satisfy parser constraints
+	 */
+	public String parseValue(final String rawValue, final String rawName, final AttributeConfig attrConf,
+			VerticalConfig vConf) throws ValidationException {
 
 		if (rawValue == null) {
 			throw new ValidationException("Null rawValue in attribute " + attrConf.getKey());
@@ -634,7 +660,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
 			string = joinThousands(string);
 		}
-		string = isWattAttribute(attrConf) ? powerToWatts(string) : string;
+		string = isWattAttribute(attrConf) ? powerToWatts(string, unitlessUnit(attrConf, rawName)) : string;
 		///////////////////
 		// To upperCase / lowerCase
 		///////////////////
@@ -755,15 +781,52 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
-	 * Rewrites a power with an explicit unit into plain watts: "1,2 KW" gives "1200", "1 200 W" gives "1200" and
-	 * "0, 3 W" gives "0.3". A value without a unit, or that does not look like a power, is returned unchanged.
+	 * @return the unit configured for the values that {@code rawName} sends without a unit, or {@code null}
+	 */
+	private static String unitlessUnit(AttributeConfig attrConf, String rawName) {
+		Map<String, String> sourceUnits = attrConf.getParser().getSourceUnits();
+		if (rawName == null || sourceUnits == null || sourceUnits.isEmpty()) {
+			return null;
+		}
+		String name = IdHelper.normalizeAttributeName(rawName);
+		return sourceUnits.entrySet().stream()
+				.filter(entry -> name.equals(IdHelper.normalizeAttributeName(entry.getKey())))
+				.map(Map.Entry::getValue)
+				.findFirst()
+				.orElse(null);
+	}
+
+	/**
+	 * Rewrites a power with an explicit unit into plain watts: "1,2 KW" gives "1200", "1 200 W" gives "1200",
+	 * "0,85 kWh/h" gives "850" and "0, 3 W" gives "0.3". A value without a unit, or that does not look like a power,
+	 * is returned unchanged.
 	 *
 	 * @param raw raw datasource value
 	 * @return the value in watts, or {@code raw} when no unit is recognised
+	 * @throws ValidationException when the value is an energy (kWh, kWh/an), not a power
 	 */
-	static String powerToWatts(String raw) {
+	static String powerToWatts(String raw) throws ValidationException {
+		return powerToWatts(raw, null);
+	}
+
+	/**
+	 * Same as {@link #powerToWatts(String)}; a number alone is read in {@code unitlessUnit} when one is given
+	 * ("1.1" in kWh/h gives "1100").
+	 *
+	 * @param raw          raw datasource value
+	 * @param unitlessUnit unit of a value without a unit, or {@code null} to return such a value unchanged
+	 * @return the value in watts, or {@code raw} when no unit is recognised
+	 * @throws ValidationException when the value is an energy (kWh, kWh/an), not a power
+	 */
+	static String powerToWatts(String raw, String unitlessUnit) throws ValidationException {
 		Matcher matcher = POWER_PATTERN.matcher(raw);
 		if (!matcher.find()) {
+			if (ENERGY_PATTERN.matcher(raw).find()) {
+				throw new ValidationException("An energy is not a power in watts: " + raw);
+			}
+			if (unitlessUnit != null && BARE_NUMBER_PATTERN.matcher(raw).matches()) {
+				return powerToWatts(raw.trim() + " " + unitlessUnit, null);
+			}
 			return raw;
 		}
 		String number = matcher.group(1).replaceAll("[\\s\u00a0\u202f]", "").replace(',', '.');
