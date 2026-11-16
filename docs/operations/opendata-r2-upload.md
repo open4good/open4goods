@@ -10,8 +10,9 @@ Les zips open data (`gtin.zip`, `isbn.zip`) sont servis depuis un bucket Cloudfl
 | `open-data-config.public-base-url` (`OPEN_DATA_PUBLIC_BASE_URL`) | front-api | `downloadUrl` = `{base}/{nom}`, ex. `https://data.nudger.fr/gtin-open-data.zip` |
 | `open-data-config.redirect-base-url` (`OPEN_DATA_REDIRECT_BASE_URL`) | ui | `GET`/`HEAD` sur `/opendata/{gtin,isbn}-open-data.zip` répondent 301 vers `{base}/{nom}` |
 
-Vides : comportement inchangé. Un `HEAD` n'ouvre jamais le flux bridé. Activation en prod : lot 0c, une fois les
-fichiers sur R2 et vérifiés.
+Vides : comportement inchangé. Un `HEAD` n'ouvre jamais le flux bridé. Activation en prod (lot 0c, GOU-2247) : variables
+d'environnement GitHub `OPEN_DATA_PUBLIC_BASE_URL` et `OPEN_DATA_REDIRECT_BASE_URL` = `https://data.nudger.fr`, rendues
+par `serviceSecrets.yml` (voir `prod-service-secrets.md`) ; beta vide.
 
 ## Workflow `📤 Open data → R2` (`opendataR2Upload.yml`)
 
