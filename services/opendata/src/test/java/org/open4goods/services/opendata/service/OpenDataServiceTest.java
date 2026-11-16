@@ -340,7 +340,8 @@ class OpenDataServiceTest {
 
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<OpenDataPublisher.Dataset>> datasets = ArgumentCaptor.forClass(List.class);
-        verify(publisher).publish(datasets.capture(), Mockito.eq(openDataConfig.manifestFile().toPath()));
+        verify(publisher).publish(datasets.capture(), Mockito.eq(List.of()),
+                Mockito.eq(openDataConfig.manifestFile().toPath()));
         assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::zipFile)
                 .containsExactly(openDataConfig.gtinZipFile().toPath(), openDataConfig.isbnZipFile().toPath());
         assertThat(datasets.getValue()).extracting(OpenDataPublisher.Dataset::manifestFile)
@@ -373,7 +374,7 @@ class OpenDataServiceTest {
 
         assertThat(publishing.generateOpendata()).isFalse();
 
-        verify(publisher, never()).publish(any(), any());
+        verify(publisher, never()).publish(any(), any(), any());
     }
 
     @Test
@@ -538,7 +539,7 @@ class OpenDataServiceTest {
         when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(oven, tv));
         when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
         when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 5L);
-        when(productRepository.countItemsByVertical("tv")).thenReturn(1L, 6L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L, 7L);
         List<Product> first = new ArrayList<>(IntStream.range(0, 10)
                 .mapToObj(i -> impactProduct("123456789012" + i, "oven", "WARRANTY", "2", "eprel")).toList());
         first.add(impactProduct("2234567890120", "tv", "WARRANTY", "3", "eprel"));
@@ -549,7 +550,7 @@ class OpenDataServiceTest {
 
         List<Product> second = new ArrayList<>(IntStream.range(0, 5)
                 .mapToObj(i -> impactProduct("123456789012" + i, "oven", "WARRANTY", "2", "eprel")).toList());
-        IntStream.range(0, 6).forEach(i -> second.add(impactProduct("223456789012" + i, "tv", "WARRANTY", "3", "eprel")));
+        IntStream.range(0, 7).forEach(i -> second.add(impactProduct("223456789012" + i, "tv", "WARRANTY", "3", "eprel")));
         exportReturns(second.toArray(Product[]::new));
 
         assertThat(service.generateOpendata()).isTrue();
@@ -557,8 +558,9 @@ class OpenDataServiceTest {
         // The refused impact dataset keeps its published version and stays listed, the others are refreshed.
         assertThat(sha256(openDataConfig.impactZipFile("oven"))).isEqualTo(ovenZipSha);
         assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow()).isEqualTo(ovenBefore);
-        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("tv")).orElseThrow().rows()).isEqualTo(6);
-        assertThat(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow().rows()).isEqualTo(11);
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("tv")).orElseThrow().rows()).isEqualTo(7);
+        // 11 GTIN rows in the first pass, 12 in the second: the GTIN file is really refreshed.
+        assertThat(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow().rows()).isEqualTo(12);
         OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
         assertThat(all.datasets()).extracting(DatasetManifest::id)
                 .containsExactlyInAnyOrder("gtin", "isbn", "impact-tv", "impact-all", "impact-oven");
@@ -566,6 +568,182 @@ class OpenDataServiceTest {
         assertThat(service.status().state()).isEqualTo(State.FAILED);
         assertThat(service.status().error()).contains("impact-oven").contains("Datasets not published");
         assertThat(service.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(meterRegistry.get("opendata.generation.runs").tag("outcome", "partial").counter().count()).isEqualTo(1);
+
+        // GOU-2314: impact-all keeps the CSV still published for the refused dataset, and counts its carried rows.
+        assertThat(impactAllEntries()).containsExactly("impact-oven.csv", "impact-tv.csv");
+        assertThat(readZipLines(openDataConfig.impactZipFile("all"), "impact-oven.csv"))
+                .hasSize(11).isEqualTo(readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv"));
+        assertThat(readZipLines(openDataConfig.impactZipFile("all"), "impact-tv.csv")).hasSize(8);
+        DatasetManifest global = manifestStore.readDataset(openDataConfig.impactManifestFile("all")).orElseThrow();
+        assertThat(global.rows()).isEqualTo(17);
+        assertThat(global.indexCount()).isEqualTo(17);
+        assertThat(global.sha256()).isEqualTo(sha256(openDataConfig.impactZipFile("all")));
+        assertThat(all.datasets()).filteredOn(d -> d.id().equals("impact-all")).containsExactly(global);
+    }
+
+    @Test
+    void severalRefusedImpactDatasetsShouldAllStayInImpactAll() throws Exception {
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(verticalConfig("oven", "WARRANTY"),
+                verticalConfig("tv", "WARRANTY"), verticalConfig("washer", "WARRANTY")));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 5L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(10L, 5L);
+        when(productRepository.countItemsByVertical("washer")).thenReturn(1L, 2L);
+        exportReturns(pass(10, 10, 1, 0));
+        assertThat(service.generateOpendata()).isTrue();
+        String tvZipSha = sha256(openDataConfig.impactZipFile("tv"));
+
+        exportReturns(pass(5, 5, 2, 10));
+        assertThat(service.generateOpendata()).isTrue();
+
+        assertThat(service.status().error()).contains("impact-oven").contains("impact-tv").doesNotContain("impact-washer");
+        assertThat(sha256(openDataConfig.impactZipFile("tv"))).isEqualTo(tvZipSha);
+        assertThat(impactAllEntries()).containsExactly("impact-oven.csv", "impact-tv.csv", "impact-washer.csv");
+        assertThat(readZipLines(openDataConfig.impactZipFile("all"), "impact-oven.csv")).hasSize(11);
+        assertThat(readZipLines(openDataConfig.impactZipFile("all"), "impact-tv.csv")).hasSize(11);
+        assertThat(readZipLines(openDataConfig.impactZipFile("all"), "impact-washer.csv")).hasSize(3);
+        OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
+        assertThat(all.datasets()).extracting(DatasetManifest::id).containsExactlyInAnyOrder("gtin", "isbn",
+                "impact-oven", "impact-tv", "impact-washer", "impact-all");
+        assertThat(all.datasets()).filteredOn(d -> d.id().equals("impact-all")).singleElement()
+                .satisfies(global -> assertThat(global.rows()).isEqualTo(22));
+        assertThat(meterRegistry.get("opendata.generation.runs").tag("outcome", "partial").counter().count()).isEqualTo(1);
+    }
+
+    @Test
+    void everyImpactDatasetRefusedShouldKeepImpactAllListed() throws Exception {
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "WARRANTY"), verticalConfig("tv", "WARRANTY")));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 5L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(10L, 5L);
+        exportReturns(pass(10, 10, 0, 0));
+        assertThat(service.generateOpendata()).isTrue();
+        DatasetManifest globalBefore = manifestStore.readDataset(openDataConfig.impactManifestFile("all")).orElseThrow();
+        String globalZipSha = sha256(openDataConfig.impactZipFile("all"));
+
+        exportReturns(pass(5, 5, 0, 10));
+        assertThat(service.generateOpendata()).isTrue();
+
+        assertThat(sha256(openDataConfig.impactZipFile("all"))).isEqualTo(globalZipSha);
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("all")).orElseThrow()).isEqualTo(globalBefore);
+        OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
+        assertThat(all.datasets()).extracting(DatasetManifest::id)
+                .containsExactlyInAnyOrder("gtin", "isbn", "impact-oven", "impact-tv", "impact-all");
+        assertThat(all.datasets()).filteredOn(d -> d.id().equals("impact-all")).containsExactly(globalBefore);
+        assertThat(service.status().error()).contains("impact-oven").contains("impact-tv");
+    }
+
+    @Test
+    void refusedDatasetAfterAFailedPublicationShouldMatchWhatR2Serves() throws Exception {
+        // Pass N-2 published on R2, pass N-1 refreshes oven locally but its publication fails, pass N refuses oven.
+        openDataConfig.getPublication().setEnabled(true);
+        InMemoryOpenDataStorage storage = new InMemoryOpenDataStorage();
+        OpenDataPublisher publisher = new OpenDataPublisher(openDataConfig, meterRegistry, publication -> storage);
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher,
+                verticalsConfigService);
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "WARRANTY"), verticalConfig("tv", "WARRANTY")));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 11L, 5L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L);
+
+        exportReturns(pass(10, 1, 0, 0));
+        assertThat(publishing.generateOpendata()).isTrue();
+        assertThat(publisher.status().state()).isEqualTo(State.SUCCEEDED);
+
+        storage.failUploadOf = ".staging/impact-tv.zip";
+        exportReturns(pass(11, 1, 0, 0));
+        assertThat(publishing.generateOpendata()).isTrue();
+        assertThat(publisher.status().state()).isEqualTo(State.FAILED);
+        DatasetManifest ovenLocal = manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow();
+        assertThat(ovenLocal.rows()).isEqualTo(11);
+        assertThat(sha256(storage.objects.get("impact-oven.zip").content())).isNotEqualTo(ovenLocal.sha256());
+
+        storage.failUploadOf = null;
+        exportReturns(pass(5, 1, 0, 7));
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        assertThat(publishing.status().error()).contains("impact-oven");
+        assertThat(publisher.status().state()).isEqualTo(State.SUCCEEDED);
+        Path onlineFile = tempDir.resolve("online-manifest.json");
+        Files.write(onlineFile, storage.objects.get("manifest.json").content());
+        OpenDataManifest online = manifestStore.readAll(onlineFile.toFile()).orElseThrow();
+        for (DatasetManifest dataset : online.datasets()) {
+            assertThat(sha256(storage.objects.get(dataset.file()).content())).as(dataset.id()).isEqualTo(dataset.sha256());
+        }
+        assertThat(online.datasets()).filteredOn(d -> d.id().equals("impact-oven")).containsExactly(ovenLocal);
+    }
+
+    @Test
+    void failedGenerationShouldNotHideAFailedPublication() {
+        openDataConfig.getPublication().setEnabled(true);
+        OpenDataPublisher publisher = new OpenDataPublisher(openDataConfig, meterRegistry, publication -> {
+            throw new IllegalStateException("R2 unreachable");
+        });
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher,
+                verticalsConfigService);
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), buildProduct("1234567890123", BarcodeType.GTIN_13));
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        when(productRepository.exportAll(any(String[].class), anyInt())).thenThrow(new IllegalStateException("ES down"));
+        assertThat(publishing.generateOpendata()).isFalse();
+
+        assertThat(publishing.health().getStatus()).isEqualTo(Status.DOWN);
+        assertThat(publishing.health().getDetails())
+                .containsEntry("error", "IllegalStateException: ES down")
+                .containsEntry("publicationError", "IllegalStateException: R2 unreachable");
+    }
+
+    @Test
+    void carriedDatasetsShouldBeHandedToThePublisher() throws Exception {
+        OpenDataPublisher publisher = Mockito.mock(OpenDataPublisher.class);
+        when(publisher.isEnabled()).thenReturn(true);
+        lenient().when(publisher.status()).thenReturn(OpenDataPublicationStatus.idle());
+        OpenDataService publishing = new OpenDataService(productRepository, openDataConfig, meterRegistry, publisher,
+                verticalsConfigService);
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "WARRANTY"), verticalConfig("tv", "WARRANTY")));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 5L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L);
+        exportReturns(pass(10, 1, 0, 0));
+        assertThat(publishing.generateOpendata()).isTrue();
+        DatasetManifest ovenBefore = manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow();
+
+        exportReturns(pass(5, 1, 0, 5));
+        assertThat(publishing.generateOpendata()).isTrue();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<OpenDataPublisher.Dataset>> carried = ArgumentCaptor.forClass(List.class);
+        verify(publisher, Mockito.times(2)).publish(any(), carried.capture(), any());
+        assertThat(carried.getAllValues().get(0)).isEmpty();
+        assertThat(carried.getValue()).singleElement().satisfies(dataset -> {
+            assertThat(dataset.manifest()).isEqualTo(ovenBefore);
+            assertThat(dataset.zipFile()).isEqualTo(openDataConfig.impactZipFile("oven").toPath());
+            assertThat(dataset.manifestFile()).isEqualTo(openDataConfig.impactManifestFile("oven").toPath());
+        });
+    }
+
+    /** Products of a pass: {@code oven}, {@code tv} and {@code washer} impact products, plus GTIN-only fillers. */
+    private Product[] pass(int oven, int tv, int washer, int fillers) {
+        List<Product> products = new ArrayList<>();
+        IntStream.range(0, oven).forEach(i -> products.add(impactProduct(gtin(2, i), "oven", "WARRANTY", "2", "eprel")));
+        IntStream.range(0, tv).forEach(i -> products.add(impactProduct(gtin(3, i), "tv", "WARRANTY", "3", "eprel")));
+        IntStream.range(0, washer).forEach(i -> products.add(impactProduct(gtin(4, i), "washer", "WARRANTY", "1", "eprel")));
+        IntStream.range(0, fillers).forEach(i -> products.add(buildProduct(gtin(5, i), BarcodeType.GTIN_13)));
+        return products.toArray(Product[]::new);
+    }
+
+    private static String gtin(int prefix, int index) {
+        return String.format(Locale.ROOT, "%d%012d", prefix, index);
+    }
+
+    private List<String> impactAllEntries() throws Exception {
+        try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(openDataConfig.impactZipFile("all"))) {
+            return java.util.Collections.list(zip.entries()).stream().map(ZipEntry::getName).toList();
+        }
     }
 
     @Test
@@ -658,7 +836,11 @@ class OpenDataServiceTest {
     }
 
     private static String sha256(File file) throws Exception {
-        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file.toPath())));
+        return sha256(Files.readAllBytes(file.toPath()));
+    }
+
+    private static String sha256(byte[] content) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
     }
 
     private String[] invokeMapper(String methodName, Product product) throws Exception {

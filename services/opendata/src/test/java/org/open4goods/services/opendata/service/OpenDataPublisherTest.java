@@ -2,19 +2,13 @@ package org.open4goods.services.opendata.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HexFormat;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +20,7 @@ import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.ObjectHeaders;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
-import org.open4goods.services.opendata.model.StoredObject;
+import org.open4goods.services.opendata.service.InMemoryOpenDataStorage.Stored;
 import org.springframework.util.unit.DataSize;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -44,7 +38,7 @@ class OpenDataPublisherTest {
 
     private OpenDataConfig config;
     private SimpleMeterRegistry meterRegistry;
-    private InMemoryStorage storage;
+    private InMemoryOpenDataStorage storage;
     private AtomicInteger storagesCreated;
     private OpenDataPublisher publisher;
     private List<OpenDataPublisher.Dataset> datasets;
@@ -57,7 +51,7 @@ class OpenDataPublisherTest {
         config.getPublication().setEnabled(true);
         Files.createDirectories(config.openDataDirectory());
         meterRegistry = new SimpleMeterRegistry();
-        storage = new InMemoryStorage();
+        storage = new InMemoryOpenDataStorage();
         storagesCreated = new AtomicInteger();
         publisher = new OpenDataPublisher(config, meterRegistry, publication -> {
             storagesCreated.incrementAndGet();
@@ -215,6 +209,50 @@ class OpenDataPublisherTest {
                 .doesNotContain("access-key-id-value", "secret-access-key-value");
     }
 
+    @Test
+    void carriedDatasetAlreadyServedByR2IsNotSentAgain() throws Exception {
+        // GOU-2314: an impact dataset refused by the row guard keeps the version R2 already serves.
+        OpenDataPublisher.Dataset oven = dataset("impact-oven", "impact-oven.zip", "impact-oven.zip", 1000);
+        storage.objects.put("impact-oven.zip", new Stored(Files.readAllBytes(oven.zipFile()),
+                new ObjectHeaders("application/zip", null, null, oven.manifest().sha256())));
+        writeGlobalManifest(oven);
+
+        assertThat(publisher.publish(datasets, List.of(oven), globalManifest)).isTrue();
+
+        assertThat(storage.operations).contains("head impact-oven.zip", "put impact-oven-manifest.json")
+                .doesNotContain("upload .staging/impact-oven.zip", "copy .staging/impact-oven.zip impact-oven.zip");
+        assertThat(storage.operations.indexOf("put impact-oven-manifest.json"))
+                .isLessThan(storage.operations.indexOf("put manifest.json"));
+        assertThat(storage.objects.get("manifest.json").content()).isEqualTo(Files.readAllBytes(globalManifest));
+    }
+
+    @Test
+    void carriedDatasetThatR2DoesNotServeIsSentWithTheNewOnes() throws Exception {
+        // GOU-2314: the previous publication failed, R2 still serves an older zip than the local manifest announces.
+        OpenDataPublisher.Dataset oven = dataset("impact-oven", "impact-oven.zip", "impact-oven.zip", 1000);
+        storage.objects.put("impact-oven.zip", new Stored(OLD.getBytes(StandardCharsets.UTF_8),
+                new ObjectHeaders("application/zip", null, null, sha256(OLD.getBytes(StandardCharsets.UTF_8)))));
+        writeGlobalManifest(oven);
+
+        assertThat(publisher.publish(datasets, List.of(oven), globalManifest)).isTrue();
+
+        assertThat(storage.operations).contains("upload .staging/impact-oven.zip", "read .staging/impact-oven.zip",
+                "copy .staging/impact-oven.zip impact-oven.zip", "put impact-oven-manifest.json");
+        Stored zip = storage.objects.get("impact-oven.zip");
+        assertThat(zip.content()).isEqualTo(Files.readAllBytes(oven.zipFile()));
+        assertThat(zip.headers().sha256()).isEqualTo(oven.manifest().sha256());
+        assertThat(storage.objects.get("manifest.json").content()).isEqualTo(Files.readAllBytes(globalManifest));
+    }
+
+    private void writeGlobalManifest(OpenDataPublisher.Dataset carried) throws IOException {
+        List<DatasetManifest> listed = new java.util.ArrayList<>(datasets.stream().map(OpenDataPublisher.Dataset::manifest)
+                .toList());
+        listed.add(carried.manifest());
+        new OpenDataManifestStore().write(new OpenDataManifest(OpenDataManifest.SCHEMA_VERSION, "2026-11-29T03:00:00Z",
+                OpenDataManifest.LICENSE, listed), globalManifest.toFile());
+        storage.operations.clear();
+    }
+
     private void assertOldVersionIntact() {
         for (String key : List.of("gtin-open-data.zip", "isbn-open-data.zip", "gtin-manifest.json", "isbn-manifest.json",
                 "manifest.json")) {
@@ -250,84 +288,6 @@ class OpenDataPublisherTest {
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content));
         } catch (Exception e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    private record Stored(byte[] content, ObjectHeaders headers) {
-    }
-
-    /** A bucket in memory, recording each call. */
-    private static final class InMemoryStorage implements OpenDataStorage {
-
-        final Map<String, Stored> objects = new LinkedHashMap<>();
-        final List<String> operations = new ArrayList<>();
-        boolean corruptUploads;
-        String failUploadOf;
-
-        long totalBytes() {
-            return objects.values().stream().mapToLong(stored -> stored.content().length).sum();
-        }
-
-        @Override
-        public List<StoredObject> list(String prefix) {
-            operations.add("list " + prefix);
-            return objects.entrySet().stream().filter(entry -> entry.getKey().startsWith(prefix))
-                    .map(entry -> new StoredObject(entry.getKey(), entry.getValue().content().length, null))
-                    .toList();
-        }
-
-        @Override
-        public Optional<StoredObject> head(String key) {
-            operations.add("head " + key);
-            Stored stored = objects.get(key);
-            return stored == null ? Optional.empty() : Optional.of(new StoredObject(key, stored.content().length,
-                    stored.headers() == null ? null : stored.headers().sha256()));
-        }
-
-        @Override
-        public void upload(Path file, String key, ObjectHeaders headers) throws IOException {
-            operations.add("upload " + key);
-            if (key.equals(failUploadOf)) {
-                throw new IOException("connection reset during part 2");
-            }
-            byte[] content = Files.readAllBytes(file);
-            if (corruptUploads) {
-                content[0] ^= 1;
-            }
-            objects.put(key, new Stored(content, headers));
-        }
-
-        @Override
-        public void put(byte[] content, String key, ObjectHeaders headers) {
-            operations.add("put " + key);
-            objects.put(key, new Stored(content.clone(), headers));
-        }
-
-        @Override
-        public InputStream read(String key) throws IOException {
-            operations.add("read " + key);
-            Stored stored = objects.get(key);
-            if (stored == null) {
-                throw new IOException("NoSuchKey " + key);
-            }
-            return new ByteArrayInputStream(stored.content());
-        }
-
-        @Override
-        public void copy(String sourceKey, String targetKey, long bytes, ObjectHeaders headers) {
-            operations.add("copy " + sourceKey + " " + targetKey);
-            objects.put(targetKey, new Stored(objects.get(sourceKey).content(), headers));
-        }
-
-        @Override
-        public void delete(String key) {
-            operations.add("delete " + key);
-            objects.remove(key);
-        }
-
-        @Override
-        public void close() {
-            // Nothing to release.
         }
     }
 }
