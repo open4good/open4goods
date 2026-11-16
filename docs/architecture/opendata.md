@@ -26,13 +26,15 @@ flowchart LR
 - **Lecture** : `ProductRepository.exportAll(fields, pageSize)` (scroll), `_source` limité à
   `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un échantillon de prod de
   200 produits, contre environ 21 Ko complet). Pages de `export-page-size` (2000, environ 1,5 Mo par réponse) et pause
-  `page-pause` (50 ms) après chaque page. Aucune clé d'attribut autre que les 5 clés ISBN n'est lue (pas de clé
-  Decitre, GOU-2262). Ne relève jamais le buffer du client.
+  `page-pause` (50 ms) après chaque page. Les seules clés d'attribut lues sont les 5 clés ISBN et les critères des jeux
+  impact (`attributes.indexed.{CRITERE}`, GOU-2250) ; pas de clé Decitre (GOU-2262). Ne relève jamais le buffer du client.
 - **Écriture** : un passage écrit dans `opendata/tmp/`, sur le même disque. Il échoue avant toute lecture si l'espace
   libre est inférieur à `min-free-space-ratio` (1,5) fois la taille des zips publiés. Le sha256, les lignes et le
   remplissage des colonnes sont calculés pendant l'écriture.
 - **Garde-fou de lignes** : un jeu refusé si ses lignes sont inférieures à `min-rows-ratio` (0,9) fois celles du
-  manifest publié, ou fois le compte de l'index pris au début du passage (export arrêté en route).
+  manifest publié, ou fois le compte de l'index pris au début du passage (export arrêté en route). Un jeu *impact*
+  refusé est isolé (GOU-2308) : il n'est pas publié, GTIN, ISBN et les autres jeux le sont ; voir
+  `operations/opendata-generation.md`.
 - **Publication locale** : renommages atomiques dans l'ordre zips, `gtin-manifest.json` et `isbn-manifest.json`,
   puis `manifest.json` en dernier (point de validation). `opendata/tmp/` est supprimé après chaque passage.
 - **Échec visible** : toute exception termine le passage en `FAILED`, sans toucher aux fichiers publiés : log

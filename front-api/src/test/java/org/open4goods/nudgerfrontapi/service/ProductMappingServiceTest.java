@@ -9,6 +9,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import java.time.Duration;
 import java.util.EnumSet;
@@ -51,12 +53,16 @@ import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductImpactScoreStatusDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductScoreDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductSourceDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 
 class ProductMappingServiceTest {
 
@@ -70,6 +76,7 @@ class ProductMappingServiceTest {
     private CacheManager cacheManager;
     private ProductTimelineService productTimelineService;
     private OfferFreshnessService offerFreshnessService;
+    private DatasourceAttributionService datasourceAttributionService;
 
     @BeforeEach
     void setUp() {
@@ -86,10 +93,15 @@ class ProductMappingServiceTest {
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         offerFreshnessService = new OfferFreshnessService(new OfferFreshnessProperties());
-        service = new ProductMappingService(repository, apiProperties,
+        datasourceAttributionService = new DatasourceAttributionService(mock(RestClient.class));
+        service = newService(datasourceAttributionService);
+    }
+
+    private ProductMappingService newService(DatasourceAttributionService attributionService) {
+        return new ProductMappingService(repository, apiProperties,
                 verticalsConfigService, searchService, affiliationService, icecatService, cacheManager,
                 productTimelineService, new ProductSeoMetaService(offerFreshnessService), offerFreshnessService,
-                new AmazonSearchLinkService(new AmazonSearchLinkProperties(), affiliationService));
+                new AmazonSearchLinkService(new AmazonSearchLinkProperties(), affiliationService), attributionService);
     }
 
     @Test
@@ -166,6 +178,57 @@ class ProductMappingServiceTest {
 
         assertThat(dto.datasources().datasourceCodes()).containsOnlyKeys("eprel", "rakuten.com");
         assertThat(product.getDatasourceCodes()).containsKey("eprel.searchSignature");
+    }
+
+    /**
+     * GOU-2302: each source of the product is described once, with the licence and attribution its datasource
+     * configuration states (read from the api {@code GET /datasources}, keyed there by file name); a source that
+     * states none gets null fields, never a guessed licence, and the technical completion keys are not sources.
+     */
+    @Test
+    void datasourcesExposeTheAttributionOnlyForTheSourcesThatStateIt() throws Exception {
+        RestClient.Builder builder = RestClient.builder().baseUrl("http://api.test");
+        MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
+        server.expect(requestTo("http://api.test/datasources")).andRespond(withSuccess("""
+                {
+                  "fr-indice-durabilite.yml": {
+                    "name": "fr-indice-durabilite",
+                    "portalUrl": "https://www.data.gouv.fr/fr/datasets/indice-de-durabilite/",
+                    "license": "Licence Ouverte 2.0",
+                    "licenseUrl": "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
+                    "attribution": "Producteurs, via data.gouv.fr",
+                    "logLevel": {"levelInt": 30000, "levelStr": "WARN"},
+                    "validationFields": ["GTIN"],
+                    "csvDatasource": null
+                  },
+                  "icecat.biz.yml": {
+                    "name": "icecat.biz",
+                    "favico": "https://icecat.biz/favicon.ico?v=2",
+                    "license": null,
+                    "licenseUrl": "",
+                    "attribution": "  "
+                  }
+                }
+                """, MediaType.APPLICATION_JSON));
+        DatasourceAttributionService attributionService = new DatasourceAttributionService(builder.build());
+        attributionService.refresh();
+        server.verify();
+
+        long gtin = 323L;
+        Product product = new Product(gtin);
+        product.getDatasourceCodes().put("icecat.biz", 10L);
+        product.getDatasourceCodes().put("fr-indice-durabilite", 20L);
+        product.getDatasourceCodes().put(Product.ICECAT_MISS_CODE, 30L);
+        when(repository.getByIdWithoutEmbedding(gtin)).thenReturn(product);
+
+        ProductDto dto = newService(attributionService)
+                .getProduct(gtin, Locale.FRENCH, Set.of("datasources"), DomainLanguage.fr);
+
+        assertThat(dto.datasources().sources()).containsExactly(
+                new ProductSourceDto("fr-indice-durabilite", "https://www.data.gouv.fr/fr/datasets/indice-de-durabilite/",
+                        "Licence Ouverte 2.0", "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
+                        "Producteurs, via data.gouv.fr"),
+                new ProductSourceDto("icecat.biz", null, null, null, null));
     }
 
     @Test

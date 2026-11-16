@@ -169,7 +169,7 @@ public class BatchController {
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
             @PathVariable @NotBlank final String vertical)
             throws InvalidParameterException, IOException, InterruptedException, ResourceNotFoundException {
-        batchService.batch(knownVertical(vertical));
+        batchService.batch(KnownVertical.of(verticalConfigService, vertical));
     }
 
     @GetMapping("/batch/ai-job/{jobId}/status")
@@ -186,18 +186,5 @@ public class BatchController {
             @Parameter(description = "AI provider batch job identifier as returned by the review or scoring batch submission endpoint", required = true)
             @PathVariable String jobId) {
         return batchPromptService.checkStatus(jobId);
-    }
-
-    /**
-     * @param vertical vertical identifier from the path
-     * @return the configuration of that vertical
-     * @throws ResourceNotFoundException when no vertical has this identifier (404, GOU-2280)
-     */
-    private VerticalConfig knownVertical(String vertical) throws ResourceNotFoundException {
-        VerticalConfig config = verticalConfigService.getConfigById(vertical);
-        if (config == null) {
-            throw new ResourceNotFoundException("Unknown vertical: " + vertical);
-        }
-        return config;
     }
 }

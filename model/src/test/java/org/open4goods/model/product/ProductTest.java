@@ -231,6 +231,7 @@ class ProductTest
         product.getDatasourceCodes().put("eprel", 2L);
         product.getDatasourceCodes().put(Product.EPREL_SEARCH_SIGNATURE_CODE, -3L);
         product.getDatasourceCodes().put(Product.WIKIDATA_MISS_CODE, 4L);
+        product.getDatasourceCodes().put(Product.ICECAT_MISS_CODE, 5L);
 
         product.refreshSources();
 

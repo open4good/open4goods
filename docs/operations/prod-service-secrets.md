@@ -165,6 +165,7 @@ before anything is written.
 | `O4G_ELASTICSEARCH_PASSWORD` (source) | api, ui, front-api: tree `spring.elasticsearch.password`                                                                                                                 | Elasticsearch user `elastic` (`infraSecrets.yml` only)         |
 | `INFRA_*` (source)                | infra: `/etc/open4goods/infra.env` (Kibana, Plausible and its Postgres and ClickHouse)                                                                          | compose infrastructure (`infraSecrets.yml` only)               |
 | `IMPACTSCORE_METHODOLOGY_OVERRIDES` (GitHub Environment **variable**, not a secret) | api, ui, front-api: tree `impactscore.methodology-version-overrides`                                                                              | ImpactScore methodology version forced per vertical (`tv:2`), read by `VerticalsConfigService` ([ImpactScore V2 design](../impactscore/v2-design.md), 5.2) |
+| `OPEN_DATA_PUBLIC_BASE_URL`, `OPEN_DATA_REDIRECT_BASE_URL` (GitHub Environment **variables**, not secrets) | front-api: tree `open-data-config.public-base-url`; ui: tree `open-data-config.redirect-base-url` | `downloadUrl` of `/api/opendata/*` and 301 of the ui zip URLs to data.nudger.fr (`OpenDataConfig`, GOU-2247); prod only, full `https://` URL |
 | `INFRA_GOOGLE_CLIENT_ID`, `INFRA_GOOGLE_CLIENT_SECRET` (source) | infra: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` in `/etc/open4goods/infra.env` (beta)                                                         | Google OAuth client of Plausible's Search Console integration (`infraSecrets.yml` `target=plausible-google` only) |
 
 Not rendered, on purpose:
@@ -222,6 +223,22 @@ follows its `methodologyVersion`. To force a version: `tv:2` (beta pilot) or
 a rendered override, set it to `none`, render, then it may be emptied. A
 malformed value, an unknown vertical, or version 2 on a vertical without `v2`
 block fails the startup of the three services.
+
+`OPEN_DATA_PUBLIC_BASE_URL` (front-api, `open-data-config.public-base-url`) and
+`OPEN_DATA_REDIRECT_BASE_URL` (ui, `open-data-config.redirect-base-url`) are GitHub
+Environment variables too (GOU-2247, lot 0c). Set both to `https://data.nudger.fr` in `prod` only, once the
+zips are on R2 and the resume is checked; `beta` leaves them empty (it does not serve the files). Then run
+`serviceSecrets.yml` for `front-api` and `ui`, or ship a release. The value must be a full `https://` URL: the
+render does not check it, and `data.nudger.fr` without a scheme gives a relative `Location` and relative
+`downloadUrl`.
+
+Rollback: an empty variable is not rendered (the previous render stays). First empty both variables in the `prod`
+environment, otherwise the next release renders them again. Then delete
+`/etc/open4goods/secrets/front-api/open-data-config.public-base-url` and
+`/etc/open4goods/secrets/ui/open-data-config.redirect-base-url` on the host and restart front-api and ui. Since
+GOU-2290 ui serves no file any more: without these values `downloadUrl` is `null` and ui answers 404, so a rollback
+stops the downloads from nudger.fr (the mirrors data.gouv.fr, Zenodo and Kaggle remain). Browsers and Cloudflare may
+keep the permanent 301 cached for a while.
 
 ### Paired secrets
 

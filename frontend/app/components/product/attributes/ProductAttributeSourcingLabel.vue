@@ -6,6 +6,7 @@
         open-delay="150"
         :close-delay="100"
         :disabled="!isTooltipEnabled"
+        :interactive="hasSourceLinks"
         :scrim="false"
         :content-class="tooltipContentClass"
         :content-style="tooltipContentStyles"
@@ -72,12 +73,46 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr
-                    v-for="source in normalizedSources"
-                    :key="sourceKey(source)"
-                  >
-                    <td>{{ formatSourceName(source.datasourceName) }}</td>
-                    <td>{{ formatSourceValue(source.value) }}</td>
+                  <tr v-for="row in sourceRows" :key="sourceKey(row.source)">
+                    <td>
+                      <a
+                        v-if="row.details?.portalUrl"
+                        :href="row.details.portalUrl"
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        class="product-attribute-sourcing__source-link"
+                      >
+                        {{ formatSourceName(row.source.datasourceName) }}
+                      </a>
+                      <template v-else>
+                        {{ formatSourceName(row.source.datasourceName) }}
+                      </template>
+                      <span
+                        v-if="row.details?.license"
+                        class="product-attribute-sourcing__source-license"
+                      >
+                        <a
+                          v-if="row.details.licenseUrl"
+                          :href="row.details.licenseUrl"
+                          target="_blank"
+                          rel="nofollow noopener noreferrer"
+                        >
+                          {{
+                            t('product.attributes.sourcing.license', {
+                              license: row.details.license,
+                            })
+                          }}
+                        </a>
+                        <template v-else>
+                          {{
+                            t('product.attributes.sourcing.license', {
+                              license: row.details.license,
+                            })
+                          }}
+                        </template>
+                      </span>
+                    </td>
+                    <td>{{ formatSourceValue(row.source.value) }}</td>
                   </tr>
                 </tbody>
               </v-table>
@@ -110,8 +145,13 @@ import type { PropType, Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiInformation } from '@mdi/js'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
+import {
+  declaresAttribution,
+  useProductSources,
+} from '~/composables/useProductSources'
 import type {
   ProductAttributeSourceDto,
+  ProductSourceDto,
   ProductSourcedAttributeDto,
 } from '~~/shared/api-client'
 import { _sanitizeHtml } from '~~/shared/utils/sanitizer'
@@ -137,6 +177,15 @@ const props = defineProps({
 
 const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
+// Licence and portal of each source, provided by the product page (GOU-2302).
+const resolveProductSource = useProductSources()
+
+// Only a source declaring a licence or an attribution gets its link and
+// licence; any other keeps its plain name.
+const attributedSource = (name: string | null | undefined) => {
+  const source = resolveProductSource(name)
+  return declaresAttribution(source) ? source : undefined
+}
 
 const tooltipContentClass =
   'product-attribute-sourcing__tooltip-overlay' as const
@@ -237,6 +286,27 @@ const normalizedSources = computed<ProductSourcedAttributeDto[]>(() =>
 )
 
 const hasSources = computed(() => normalizedSources.value.length > 0)
+
+type SourceRow = {
+  source: ProductSourcedAttributeDto
+  details: ProductSourceDto | undefined
+}
+
+const sourceRows = computed<SourceRow[]>(() =>
+  normalizedSources.value.map(source => ({
+    source,
+    details: attributedSource(source.datasourceName),
+  }))
+)
+
+// Links are only clickable when the tooltip stays open under the pointer.
+const hasSourceLinks = computed(() =>
+  sourceRows.value.some(
+    row =>
+      Boolean(row.details?.portalUrl) ||
+      Boolean(row.details?.license && row.details.licenseUrl)
+  )
+)
 
 const hasSourcingDetails = computed(
   () => Boolean(bestValue.value) || hasSources.value
@@ -408,6 +478,20 @@ const sourceKey = (source: ProductSourcedAttributeDto) => {
   padding: 0.45rem 0.75rem;
   font-size: 0.85rem;
   color: rgb(var(--v-theme-text-neutral-strong));
+}
+
+.product-attribute-sourcing__source-link {
+  color: rgb(var(--v-theme-primary));
+}
+
+.product-attribute-sourcing__source-license {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(var(--v-theme-text-neutral-secondary), 0.9);
+}
+
+.product-attribute-sourcing__source-license a {
+  color: inherit;
 }
 
 .product-attribute-sourcing__sources tbody tr:nth-child(odd) {

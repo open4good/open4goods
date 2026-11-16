@@ -506,6 +506,71 @@ class OpenDataServiceTest {
         assertThat(ImpactDataset.slug("°")).isEmpty();
     }
 
+    @Test
+    void impactDatasetBelowTheRowThresholdShouldNotBlockGtinIsbnAndOtherImpactDatasets() throws Exception {
+        VerticalConfig oven = verticalConfig("oven", "WARRANTY");
+        VerticalConfig tv = verticalConfig("tv", "WARRANTY");
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(oven, tv));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        when(productRepository.countItemsByVertical("oven")).thenReturn(10L, 5L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L, 6L);
+        List<Product> first = new ArrayList<>(IntStream.range(0, 10)
+                .mapToObj(i -> impactProduct("123456789012" + i, "oven", "WARRANTY", "2", "eprel")).toList());
+        first.add(impactProduct("2234567890120", "tv", "WARRANTY", "3", "eprel"));
+        exportReturns(first.toArray(Product[]::new));
+        assertThat(service.generateOpendata()).isTrue();
+        DatasetManifest ovenBefore = manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow();
+        String ovenZipSha = sha256(openDataConfig.impactZipFile("oven"));
+
+        List<Product> second = new ArrayList<>(IntStream.range(0, 5)
+                .mapToObj(i -> impactProduct("123456789012" + i, "oven", "WARRANTY", "2", "eprel")).toList());
+        IntStream.range(0, 6).forEach(i -> second.add(impactProduct("223456789012" + i, "tv", "WARRANTY", "3", "eprel")));
+        exportReturns(second.toArray(Product[]::new));
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        // The refused impact dataset keeps its published version and stays listed, the others are refreshed.
+        assertThat(sha256(openDataConfig.impactZipFile("oven"))).isEqualTo(ovenZipSha);
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow()).isEqualTo(ovenBefore);
+        assertThat(manifestStore.readDataset(openDataConfig.impactManifestFile("tv")).orElseThrow().rows()).isEqualTo(6);
+        assertThat(manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow().rows()).isEqualTo(11);
+        OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
+        assertThat(all.datasets()).extracting(DatasetManifest::id)
+                .containsExactlyInAnyOrder("gtin", "isbn", "impact-tv", "impact-all", "impact-oven");
+        assertThat(all.datasets()).filteredOn(d -> d.id().equals("impact-oven")).containsExactly(ovenBefore);
+        assertThat(service.status().state()).isEqualTo(State.FAILED);
+        assertThat(service.status().error()).contains("impact-oven").contains("Datasets not published");
+        assertThat(service.health().getStatus()).isEqualTo(Status.DOWN);
+    }
+
+    @Test
+    void impactNameShouldSkipCorruptedOfferNames() {
+        Product product = impactProduct("1234567890123", "oven", "WARRANTY", "2", "eprel");
+        product.setOfferNames(new HashSet<>(Set.of("P\u00BF\u00BAcheur", "bad \uFFFD", "Chapeau de p\u00EAcheur")));
+        ImpactDataset impact = new ImpactDataset(verticalConfig("oven", "WARRANTY"), "https://nudger.fr");
+        assertThat(impact.toRow(product)[3]).isEqualTo("Chapeau de p\u00EAcheur");
+
+        product.setOfferNames(new HashSet<>(Set.of("V\u00BF\u00BFlo")));
+        assertThat(impact.toRow(product)[3]).isEmpty();
+    }
+
+    @Test
+    void impactSourceShouldBeEmptyWhenNoSourceCarriesThePublishedValue() {
+        Product product = impactProduct("1234567890123", "oven", "WARRANTY", "2", "eprel");
+        SourcedAttribute other = new SourcedAttribute();
+        other.setDataSourcename("icecat.biz");
+        other.setValue("5");
+        product.getAttributes().getIndexed().get("WARRANTY").getSource().add(other);
+        ImpactDataset impact = new ImpactDataset(verticalConfig("oven", "WARRANTY"), "https://nudger.fr");
+        // Only the source with the published value is listed, never all the contributors.
+        assertThat(impact.toRow(product)[10]).isEqualTo("eprel");
+
+        product.getAttributes().getIndexed().get("WARRANTY").setValue("9");
+        String[] row = impact.toRow(product);
+        assertThat(row[9]).isEqualTo("9");
+        assertThat(row[10]).isEmpty();
+    }
+
     private VerticalConfig verticalConfig(String id, String... criteria) {
         VerticalConfig config = new VerticalConfig();
         config.setId(id);

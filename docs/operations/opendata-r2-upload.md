@@ -10,7 +10,9 @@ Les zips open data (`gtin.zip`, `isbn.zip`) sont servis depuis un bucket Cloudfl
 | `open-data-config.public-base-url` (`OPEN_DATA_PUBLIC_BASE_URL`) | front-api | `downloadUrl` = `{base}/{nom}`, ex. `https://data.nudger.fr/gtin-open-data.zip` ; lignes, date, taille et sha256 lus dans `{base}/manifest.json` |
 | `open-data-config.redirect-base-url` (`OPEN_DATA_REDIRECT_BASE_URL`) | ui | `GET`/`HEAD` sur `/opendata/{gtin,isbn}-open-data.zip` répondent 301 vers `{base}/{nom}` |
 
-Activation en prod : lot 0c (GOU-2247), une fois les fichiers sur R2 et vérifiés.
+Activation en prod (lot 0c, GOU-2247) : variables d'environnement GitHub `OPEN_DATA_PUBLIC_BASE_URL` et
+`OPEN_DATA_REDIRECT_BASE_URL` = `https://data.nudger.fr`, rendues par `serviceSecrets.yml` (voir
+`prod-service-secrets.md`) ; beta vide.
 
 Depuis GOU-2290, `ui` ne sert plus aucun fichier (le flux bridé est retiré) : il n'y a plus de retour au comportement
 d'avant. Vides, ces propriétés donnent :

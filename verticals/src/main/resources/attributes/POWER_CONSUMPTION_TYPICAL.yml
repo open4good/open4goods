@@ -23,6 +23,9 @@ participateInScores:
   - ENERGY_CONSUMPTION
 participateInACV:
   - USE
+suffix:
+  default: "W"
+  fr: "W"
 faIcon: "mdi-power-plug"
 
 referentials:

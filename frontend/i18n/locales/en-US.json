@@ -2606,7 +2606,8 @@
           "conflicts": "Conflicts detected",
           "noConflicts": "No conflicts detected"
         },
-        "tooltipAriaLabel": "View sourcing details"
+        "tooltipAriaLabel": "View sourcing details",
+        "license": "License: {license}"
       },
       "audit": {
         "title": "Attribute sourcing audit",
@@ -2650,6 +2651,11 @@
         "scrollLeft": "Scroll left",
         "scrollRight": "Scroll right"
       }
+    },
+    "sources": {
+      "title": "Data sources",
+      "subtitle": "The information on this page comes from these sources. Their license and credit line are shown when they state them.",
+      "license": "License: {license}"
     },
     "hero": {
       "aiSummary": {

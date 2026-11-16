@@ -147,6 +147,7 @@ public class ProductMappingService {
     private final ProductSeoMetaService productSeoMetaService;
     private final OfferFreshnessService offerFreshnessService;
     private final AmazonSearchLinkService amazonSearchLinkService;
+    private final DatasourceAttributionService datasourceAttributionService;
 
     public ProductMappingService(ProductRepository repository,
             ApiProperties apiProperties,
@@ -158,7 +159,8 @@ public class ProductMappingService {
             ProductTimelineService productTimelineService,
             ProductSeoMetaService productSeoMetaService,
             OfferFreshnessService offerFreshnessService,
-            AmazonSearchLinkService amazonSearchLinkService) {
+            AmazonSearchLinkService amazonSearchLinkService,
+            DatasourceAttributionService datasourceAttributionService) {
         this.repository = repository;
         this.apiProperties = apiProperties;
         this.verticalsConfigService = verticalsConfigService;
@@ -170,6 +172,7 @@ public class ProductMappingService {
         this.productSeoMetaService = productSeoMetaService;
         this.offerFreshnessService = offerFreshnessService;
         this.amazonSearchLinkService = amazonSearchLinkService;
+        this.datasourceAttributionService = datasourceAttributionService;
         if (this.referenceCache == null) {
             logger.warn("Cache {} is not configured; product reference caching disabled.",
                     CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME);
@@ -893,7 +896,9 @@ public class ProductMappingService {
     }
 
     /**
-     * Map datasource statistics associated with the product.
+     * Map datasource statistics associated with the product, and describe its sources (portal URL, licence and
+     * attribution, GOU-2302). The sources are the keys of {@code datasourceCodes} without the technical completion
+     * keys, read here rather than from {@code Product.sources}, which is only written on full indexation.
      */
     private ProductDatasourcesDto mapDatasources(Product product) {
         Map<String, Long> datasourceCodes = new LinkedHashMap<>();
@@ -905,7 +910,8 @@ public class ProductMappingService {
             });
         }
 
-        return new ProductDatasourcesDto(datasourceCodes, product.getDescriptionsByDatasource(), resolveFavicons(product));
+        return new ProductDatasourcesDto(datasourceCodes, product.getDescriptionsByDatasource(), resolveFavicons(product),
+                datasourceAttributionService.describe(datasourceCodes.keySet()));
     }
 
     private Map<String, String> resolveFavicons(Product product) {
