@@ -82,7 +82,8 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	 * <p>The vertical is set when {@link VerticalsConfigService#getVerticalForCategories(Map, String)}
 	 * returns a match, and cleared only when it does not (no categories, no matching
 	 * category, or an excluding token; with the vote, no vertical with more votes for
-	 * than against). It is never unset on the basis of transient
+	 * than against, or an EPREL group that belongs to a vertical no category matches).
+	 * It is never unset on the basis of transient
 	 * data such as offer names, so a correctly-categorized product keeps a stable
 	 * vertical (and therefore a stable URL) across re-aggregations.
 	 *

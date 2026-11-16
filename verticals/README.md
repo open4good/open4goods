@@ -81,8 +81,25 @@ Choices open at review:
   broken by the number of votes for, then by id.
 - **One vote per datasource name.** The legacy and current names of one merchant (`darty.com` and
   `Darty FR`) are two voters. Alternative: one vote per distinct category.
-- **A tie loses.** One row against one row is no evidence; the historical rule already drops the vertical
-  when that row carries an excluding token. Alternative: a tie falls back to the historical rule.
+- **The vote moves the severity in both directions.** Compared with the historical rule:
+  - *looser on excluding tokens*: one row with an excluding token (`ACCESSOIRE`, `PIECES DETACHEE`, `CABLE`,
+    `MEUBLE`, `QUINCAILLERIE`...) was a veto, it is now one vote against. A phone case filed as a phone by two
+    marketplaces and as `ACCESSOIRES TELEPHONE > COQUE` by a third goes from no vertical to `smartphones`; the
+    same for a USB cable;
+  - *stricter on nature markers that are not excluding tokens* (`PIECE DETACHEE` singular, `HOUSSE`,
+    `PRODUIT(S) D'ENTRETIEN`, `PRODUIT ENTRETIEN`): one such row did nothing, it is now one vote against, so
+    a product with a single row for its vertical loses it on the tie. A real dishwasher with one dishwasher
+    row and one `PIECE DETACHEE LAVE-VAISSELLE > PANIER` row goes from `dishwasher` to no vertical, which
+    undoes the 4e.4 decision (GOU-2236) to keep the singular out of the excluding tokens; the same for a real
+    TV or phone with one row for and one `INFORMATIQUE > COMPOSANT - PIECE DETACHEE > ...` row, or a fridge
+    with one `HOUSSE` row. EPREL-confirmed products are not affected (step 1).
+
+  Unchanged: the air conditioners under `ENTRETIEN DE LA MAISON > ...` (no marker, the row abstains) and the
+  EPREL-confirmed fridges under `... > PORTE-SAVON`. The activation PR must rewrite
+  `SparePartsCategoriesTest#singularSparePartCategoryKeepsTheVertical`, which asserts the historical result.
+- **A tie loses.** One row against one row is no evidence. The historical rule already drops the vertical
+  when that row carries an excluding token, but kept it when the row only carried a nature marker (see the
+  stricter case above). Alternative: a tie falls back to the historical rule.
 - **EPREL group of an unmatched vertical.** Step 2 keeps every EPREL-confirmed product in its vertical.
   The historical rule moves such a product to the vertical of its first matching category. Alternative:
   drop step 2 and accept that move.
