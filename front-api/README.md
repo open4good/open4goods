@@ -182,6 +182,38 @@ networks, merchants without an active offer and duplicate domains.
   feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
   whose last offer predates it are missing and a warning is logged.
 
+## Source attribution
+
+`datasources.sources` of a product (GOU-2302) lists each source once: `name`,
+`portalUrl`, `license`, `licenseUrl` and `attribution`, sorted by name. The
+attribute sourcing (`ProductSourcedAttributeDto.datasourceName`) references it
+by name; the frontend sourcing tooltip and the "Sources" block of the product
+page read it.
+
+- **Sources**: the keys of `datasourceCodes` without
+  `Product.TECHNICAL_DATASOURCE_CODES`, read on the product itself
+  (`Product.sources` is only written on full indexation).
+- **Licence fields**: stated in the datasource configurations
+  (`DataSourceProperties`, open4goods-config `datasources/*.yml`), which only the
+  api loads. `DatasourceAttributionService` reads `GET /datasources` with the
+  `front.affiliation-partners` base URL and API key, keeps these five fields,
+  re-keys them by `name` (the api keys them by file name) and never logs the
+  response body.
+- **Credited sources only**: a source whose datasource file declares a
+  `license` or an `attribution` gets its declared `portalUrl`, `license`,
+  `licenseUrl` and `attribution`. Any other source gets its name only, every
+  other field `null`, whatever its file holds: no link without a declared licence
+  or attribution (`amazon.fr.yml` holds an affiliation `portalUrl` and declares
+  neither, so it gets its name only), and no link is taken from the affiliation
+  partners. The rule is enforced here, not left to the frontend. Do not declare an
+  `attribution` in a merchant file: its `portalUrl` would then be shown as is.
+- **Never guessed**: a blank or missing field is `null` and only absolute
+  `http(s)` URLs are exposed. The frontend shows a source's link and licence only
+  for credited sources (no "unknown licence", no merchant link).
+- **When**: at startup then hourly, never in a user request. On failure the
+  previous snapshot is kept; until the first success the sources are listed
+  without licence.
+
 ## Google CSS dry run
 
 `front.css.*` (`CssProperties`, disabled by default) prepares the product pages sent to Google by the CSS API

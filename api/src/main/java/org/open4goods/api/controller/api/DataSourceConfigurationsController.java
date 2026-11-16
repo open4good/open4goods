@@ -21,6 +21,12 @@ import jakarta.validation.constraints.NotBlank;
 
 /**
  * Admin endpoints for inspecting datasource (feed provider) configurations.
+ * <p>
+ * {@code GET /datasources} is also consumed by {@code front-api} via {@code DatasourceAttributionService}, which reads
+ * the {@code name}, {@code portalUrl}, {@code license}, {@code licenseUrl} and {@code attribution} of each entry to
+ * credit the sources on the product page (GOU-2302): do not rename the path or these properties without updating
+ * that client.
+ * </p>
  */
 @RestController
 @PreAuthorize("hasAuthority('" + RolesConstants.ROLE_ADMIN + "')")

@@ -156,6 +156,7 @@ models/ProductScoreDto.ts
 models/ProductScoresDto.ts
 models/ProductSearchRequestDto.ts
 models/ProductSearchResponseDto.ts
+models/ProductSourceDto.ts
 models/ProductSourcedAttributeDto.ts
 models/ProductTimelineDto.ts
 models/ProductTimelineEventDto.ts
