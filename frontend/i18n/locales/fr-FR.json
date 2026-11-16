@@ -45,6 +45,7 @@
   "blog": {
     "article": {
       "back": "Retour",
+      "draftBanner": "Brouillon : cet article n'est pas publié. Il n'est visible que sur la bêta, pour relecture.",
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",

@@ -592,6 +592,10 @@ export default defineNuxtConfig({
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
+    // Blog drafts (`draft: true`) are served at their URL for review, with a banner and noindex,
+    // but stay out of the listings, sitemap and RSS. Read at runtime: NUXT_BLOG_SHOW_DRAFTS=true
+    // in open4goods-config's configs/beta/frontend/.env only, never on prod.
+    blogShowDrafts: false,
     // Shared secret used by front-api to sign JWTs (front.security.jwt-secret /
     // FRONT_SECURITY_JWT_SECRET, same .env as front-api). Server-only: lets the
     // frontend verify the access token's signature before trusting its roles

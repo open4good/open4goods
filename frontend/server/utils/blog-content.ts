@@ -123,23 +123,47 @@ function renderBody(raw: string, slug: string): string {
 }
 
 /**
- * All published, non-draft posts from the `blog` Nuxt Content collection, newest first -- the same
- * ordering BlogService.updateBlogPosts() used (sorted by creation date descending).
+ * BlogPostDto plus `draft`, set only when a draft is served for review (see findBlogDocBySlug).
+ * The generated BlogPostDto mirrors front-api and has no such field.
  */
-export async function listBlogDocs(event: H3Event): Promise<BlogContentDoc[]> {
+export type BlogArticleDto = BlogPostDto & { draft?: boolean }
+
+async function queryBlogDocs(
+  event: H3Event,
+  includeDrafts: boolean
+): Promise<BlogContentDoc[]> {
   const all = (await queryCollection(event, 'blog').all()) as unknown as Array<
     BlogContentDoc & { path: string }
   >
   return all
-    .filter(doc => doc.published && !doc.draft)
+    .filter(doc => doc.published && (includeDrafts || !doc.draft))
     .sort((a, b) => (toEpochMs(b.date) ?? 0) - (toEpochMs(a.date) ?? 0))
+}
+
+/**
+ * All published, non-draft posts from the `blog` Nuxt Content collection, newest first -- the same
+ * ordering BlogService.updateBlogPosts() used (sorted by creation date descending). Every listing
+ * (articles, tags, RSS, sitemap) goes through it, so a draft never appears in one.
+ */
+export async function listBlogDocs(event: H3Event): Promise<BlogContentDoc[]> {
+  return queryBlogDocs(event, false)
+}
+
+export interface FindBlogDocOptions {
+  /**
+   * Also return a `draft: true` post, so that it can be reviewed at its URL. Only the article route
+   * sets it, from the `blogShowDrafts` runtime config (NUXT_BLOG_SHOW_DRAFTS=true on beta).
+   * A post with `published: false` is never returned.
+   */
+  includeDrafts?: boolean
 }
 
 export async function findBlogDocBySlug(
   event: H3Event,
-  slug: string
+  slug: string,
+  { includeDrafts = false }: FindBlogDocOptions = {}
 ): Promise<BlogContentDoc | null> {
-  const docs = await listBlogDocs(event)
+  const docs = await queryBlogDocs(event, includeDrafts)
   return docs.find(doc => slugFromPath(doc.path) === slug) ?? null
 }
 

@@ -72,6 +72,34 @@ describe('blog-content', () => {
       const notFound = await findBlogDocBySlug(fakeEvent, 'does-not-exist')
       expect(notFound).toBeNull()
     })
+
+    const draftAndUnpublished = () =>
+      queryCollectionMock.mockReturnValue({
+        all: vi.fn().mockResolvedValue([
+          doc({ path: '/blog/fr/en-relecture', draft: true }),
+          doc({ path: '/blog/fr/retire', draft: true, published: false }),
+        ]),
+      })
+
+    it('does not find a draft by default (prod: 404)', async () => {
+      draftAndUnpublished()
+
+      expect(await findBlogDocBySlug(fakeEvent, 'en-relecture')).toBeNull()
+    })
+
+    it('finds a draft with includeDrafts (beta review), never an unpublished post', async () => {
+      draftAndUnpublished()
+
+      const found = await findBlogDocBySlug(fakeEvent, 'en-relecture', { includeDrafts: true })
+      expect(found?.draft).toBe(true)
+      expect(await findBlogDocBySlug(fakeEvent, 'retire', { includeDrafts: true })).toBeNull()
+    })
+
+    it('keeps drafts out of listBlogDocs', async () => {
+      draftAndUnpublished()
+
+      expect(await listBlogDocs(fakeEvent)).toEqual([])
+    })
   })
 
   describe('toBlogPostDto', () => {

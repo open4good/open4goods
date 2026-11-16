@@ -203,6 +203,22 @@ passing `vertical` for standalone docs pages where no guide context exists.
 > (`frontend/.claude/prompts/buying-guide-author.md`), which orchestrates SEO
 > research and produces a guide under `docs/fr/<verticalHomeUrl>/`.
 
+## Blog drafts
+
+A blog post with `draft: true` is reviewed on beta before it is published:
+
+| Where                                      | prod (default) | beta (`NUXT_BLOG_SHOW_DRAFTS=true`)                         |
+| ------------------------------------------ | -------------- | ----------------------------------------------------------- |
+| `/blog/<slug>`                             | 404            | rendered, with a "Brouillon" banner and `noindex, nofollow` |
+| `/api/blog/articles/<slug>`                | 404            | `draft: true`, `Cache-Control: private, no-store`           |
+| `/blog`, tags, home carousel, RSS, sitemap | not listed     | not listed                                                  |
+
+The flag is the server-only runtime config `blogShowDrafts`, set by
+`NUXT_BLOG_SHOW_DRAFTS=true` in open4goods-config's
+`configs/beta/frontend/.env` only (beta is behind HTTP Basic Auth). A post with
+`published: false` is never served. Publishing a reviewed draft is a one-line
+change: `draft: false`, with `date` and `updatedAt` set to the publication day.
+
 ## Product widgets in blog articles
 
 Blog posts live in `content/blog/fr/*.md`. Their body is rendered to HTML by
