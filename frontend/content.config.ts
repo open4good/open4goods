@@ -23,6 +23,20 @@ export default defineContentConfig({
         draft: z.boolean().default(false),
         published: z.boolean().default(true),
         image: z.string().optional(),
+        // Input of `pnpm blog:cover <slug>`, which draws `image` (scripts/blog-cover/blog-cover.mjs
+        // validates it further). Not read by the site itself.
+        cover: z
+          .object({
+            kicker: z.string().optional(),
+            title: z.string(),
+            figure: z.string().optional(),
+            caption: z.string().optional(),
+            source: z.string().optional(),
+            icon: z.string().optional(),
+            ratio: z.number().min(0).max(1).optional(),
+            ratioLabel: z.string().optional(),
+          })
+          .optional(),
         // Filled by Nuxt Content with the source file's raw Markdown, so the deployed .output bundle
         // can render BlogPostDto.body without content/ next to it (see server/utils/blog-content.ts).
         rawbody: z.string(),

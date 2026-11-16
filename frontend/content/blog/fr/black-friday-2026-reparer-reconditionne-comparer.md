@@ -9,6 +9,16 @@ date: 2026-11-15T17:39:42Z
 updatedAt: 2026-11-15T17:39:42Z
 draft: false
 published: true
+image: /images/blog/black-friday-2026-reparer-reconditionne-comparer/cover.png
+cover:
+  kicker: "Black Friday 2026"
+  title: "Avant d'acheter : réparer, reconditionné ou comparer"
+  figure: "31 %"
+  caption: "des téléviseurs ont une note de réparabilité sous 7/10"
+  source: "Données Nudger, 270 modèles, relevé du 15/11/2026"
+  icon: tv
+  ratio: 0.31
+  ratioLabel: "près de 1 téléviseur sur 3"
 ---
 
 Le Black Friday tombe le vendredi 27 novembre 2026. Téléviseurs et gros électroménager font partie des achats les plus attendus. Avant de remplacer un appareil, trois questions permettent souvent d'éviter un achat, ou de mieux le choisir.
