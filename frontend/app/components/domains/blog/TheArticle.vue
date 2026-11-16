@@ -20,6 +20,8 @@ interface BlogArticle extends BlogPostDto {
    * Legacy field kept for backward compatibility with earlier API payloads
    */
   content?: string
+  /** Set by /api/blog/articles/{slug} only when a draft is served for review (beta). */
+  draft?: boolean
 }
 
 const props = defineProps<{
@@ -262,6 +264,9 @@ useSeoMeta({
     () => updatedDate.value?.iso ?? publishedDate.value?.iso
   ),
   ogUrl: canonicalUrl,
+  robots: computed(() =>
+    article.value.draft ? 'noindex, nofollow' : undefined
+  ),
 })
 
 useHead(() => ({
@@ -306,6 +311,16 @@ useHead(() => ({
     itemscope
     itemtype="https://schema.org/BlogPosting"
   >
+    <v-alert
+      v-if="article.draft"
+      type="warning"
+      variant="tonal"
+      class="mb-6"
+      data-test="article-draft-banner"
+    >
+      {{ t('blog.article.draftBanner') }}
+    </v-alert>
+
     <header class="article-header">
       <nav
         v-if="categories.length"
