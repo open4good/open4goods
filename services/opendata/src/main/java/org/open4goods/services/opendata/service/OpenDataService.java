@@ -770,7 +770,9 @@ public class OpenDataService implements HealthIndicator {
      * @return the closed writers, in the order of {@code datasetDefinitions}
      */
     List<DatasetWriter> writeDatasets(List<DatasetDefinition> datasetDefinitions) throws IOException, InterruptedException {
-        int pageSize = Math.max(1, openDataConfig.getExportPageSize());
+        int pageSize = Math.max(1, !impactDatasets().isEmpty()
+                ? Math.min(openDataConfig.getExportPageSize(), openDataConfig.getImpactExportPageSize())
+                : openDataConfig.getExportPageSize());
         Duration pause = openDataConfig.getPagePause() == null ? Duration.ZERO : openDataConfig.getPagePause();
         if (pause.compareTo(MAX_PAGE_PAUSE) > 0) {
             throw new IllegalArgumentException("open-data-config.page-pause must not exceed " + MAX_PAGE_PAUSE);

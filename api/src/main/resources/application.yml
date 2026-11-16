@@ -181,6 +181,8 @@ open-data-config:
   generation-zone: Europe/Paris
   # ~0.7 KB per projected product: 2000 per page is ~1.5 MB per Elasticsearch response (100 MB buffer, GOU-2249).
   export-page-size: 2000
+  # Used instead when an impact dataset is active: its sources weigh tens of KB per product (GOU-2327).
+  impact-export-page-size: 500
   # Pause after each page, to leave Elasticsearch to the site search.
   page-pause: 50ms
   # Free space required before a pass, as a multiple of the published zips (GOU-823).

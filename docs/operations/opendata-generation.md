@@ -125,6 +125,6 @@ Pour le compte rendu d'un passage complet :
 
 - durée : `finishedAt - startedAt` du `GET /opendata/generation`, ou `opendata_generation_duration_seconds` ;
 - lignes : `rows` du statut et des manifests ;
-- taille maximale d'une réponse ES : `export-page-size` fois le poids du plus gros document projeté. Le mesurer sur un
+- taille maximale d'une réponse ES : `export-page-size` (`impact-export-page-size` avec un jeu impact) fois le poids du plus gros document projeté. Le mesurer sur un
   échantillon (`_source` limité à `EXPORT_SOURCE_FIELDS`, tri par taille d'`offerNames`) ;
 - latence p95 de la recherche du site pendant le passage, comparée à une nuit sans passage (métriques de front-api).

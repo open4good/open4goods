@@ -519,7 +519,8 @@ class OpenDataServiceTest {
         assertThat(produced).allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
         ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
         verify(productRepository).exportAll(fields.capture(), anyInt());
-        assertThat(fields.getValue()).contains("attributes.indexed.WARRANTY")
+        assertThat(fields.getValue()).contains("attributes.indexed.WARRANTY.value", "attributes.indexed.WARRANTY.source.dataSourcename")
+                .doesNotContain("attributes.indexed.WARRANTY")
                 .noneMatch(field -> field.toLowerCase(Locale.ROOT).contains("decitre"))
                 .noneMatch(field -> field.contains("ATTRIBUTS") || field.contains("LIVRES ORIGINE") || field.contains("PROPRIETAIRE"));
     }

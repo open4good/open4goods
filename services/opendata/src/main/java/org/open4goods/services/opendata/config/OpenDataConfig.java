@@ -108,6 +108,13 @@ public class OpenDataConfig {
     private int exportPageSize = 2000;
 
     /**
+     * Products per Elasticsearch page when at least one impact dataset is active. The impact projection carries the
+     * sources of every criterion, a few tens of KB per product, so the page stays smaller than {@link #exportPageSize}
+     * (GOU-2327: 2000 per page reached 104.86 MB). Never raise the buffer instead.
+     */
+    private int impactExportPageSize = 500;
+
+    /**
      * Pause after each page, to leave Elasticsearch to the site search. Zero disables it. Must stay well below the
      * scroll keep-alive.
      */
@@ -311,6 +318,14 @@ public class OpenDataConfig {
 
     public void setExportPageSize(int exportPageSize) {
         this.exportPageSize = exportPageSize;
+    }
+
+    public int getImpactExportPageSize() {
+        return impactExportPageSize;
+    }
+
+    public void setImpactExportPageSize(int impactExportPageSize) {
+        this.impactExportPageSize = impactExportPageSize;
     }
 
     public Duration getPagePause() {
