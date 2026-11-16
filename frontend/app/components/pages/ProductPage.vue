@@ -54,19 +54,15 @@
       <div
         v-else-if="product"
         class="product-page__layout"
-        :class="{ 'product-page__layout--nav-collapsed': isNavCollapsed }"
+        :class="{ 'product-page__layout--nav-collapsed': navCollapsed }"
       >
-        <aside
-          class="product-page__nav"
-          :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
-        >
+        <aside class="product-page__nav">
           <ProductSummaryNavigation
             :sections="navigableSections"
             :admin-sections="adminNavigableSections"
             :admin-title="$t('product.navigation.adminPanel.title')"
             :admin-helper="$t('product.navigation.adminPanel.helper')"
             :active-section="activeSection"
-            :orientation="orientation"
             :aria-label="$t('product.navigation.label')"
             @navigate="scrollToSection"
             @collapse-change="handleNavCollapseChange"
@@ -236,7 +232,6 @@ import {
   ref,
   watch,
 } from 'vue'
-import { useDisplay } from 'vuetify'
 import { createError } from 'h3'
 import {
   mdiAlertCircleOutline,
@@ -265,6 +260,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY } from '~/constants/product-navigation'
 import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 import { resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
 import type { ScoreView } from '~/components/product/impact/impact-types'
@@ -333,7 +329,6 @@ const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const { y: scrollY } = useWindowScroll()
-const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
 
@@ -1978,14 +1973,12 @@ const sections = computed<NavigableSection[]>(() => [
 const navigableSections = computed(() => primarySections.value)
 const adminNavigableSections = computed(() => adminSections.value)
 
-const orientation = computed<'vertical' | 'horizontal'>(() =>
-  display.mdAndDown.value ? 'horizontal' : 'vertical'
-)
-
+// The navigation layout (sticky sidebar or horizontal bar) is driven by CSS media
+// queries only, so the server HTML never depends on the viewport. Binding a
+// layout class to `useDisplay` (0px wide during SSR and hydration) rendered the
+// horizontal bar first on desktop and shifted the page (CLS).
+// The collapsed grid only applies from the `lg` breakpoint (see the styles).
 const navCollapsed = ref(false)
-const isNavCollapsed = computed(
-  () => navCollapsed.value && orientation.value === 'vertical'
-)
 
 const handleNavCollapseChange = (collapsed: boolean) => {
   navCollapsed.value = collapsed
@@ -2138,7 +2131,10 @@ const scrollToSection = async (sectionId: string) => {
 
   activeSection.value = targetId
 
-  const offset = orientation.value === 'horizontal' ? 96 : 120
+  const offset = window.matchMedia?.(PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY)
+    .matches
+    ? 96
+    : 120
   const top = element.getBoundingClientRect().top + window.scrollY - offset
   window.scrollTo({ top, behavior: 'smooth' })
 }
@@ -2611,9 +2607,15 @@ useHead(() => {
   gap: 2rem;
 }
 
-.product-page__layout--nav-collapsed {
-  grid-template-columns: minmax(40px, 40px) minmax(0, 1fr);
-  gap: 1rem;
+@media (min-width: 1280px) {
+  .product-page__layout--nav-collapsed {
+    grid-template-columns: minmax(40px, 40px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .product-page__layout--nav-collapsed .product-page__nav {
+    width: 40px;
+  }
 }
 
 .product-page__nav {
@@ -2621,17 +2623,6 @@ useHead(() => {
   top: 108px; /* 64px header + 44px banner */
   align-self: start;
   height: fit-content;
-}
-
-.product-page__layout--nav-collapsed .product-page__nav {
-  width: 40px;
-}
-
-.product-page__nav--mobile {
-  position: static;
-  top: auto;
-  transform: none;
-  align-self: stretch;
 }
 
 .product-page__content {
@@ -2754,7 +2745,8 @@ useHead(() => {
   margin-inline-start: 0.5rem;
 }
 
-@media (max-width: 1280px) {
+/* PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY (~/constants/product-navigation). */
+@media (max-width: 1279.98px) {
   .product-page__layout {
     grid-template-columns: minmax(0, 1fr);
   }
