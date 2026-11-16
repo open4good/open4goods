@@ -699,11 +699,20 @@ attributesConfig:
 
 # Merged with the _default.yml tokens. Fnac GEM categories also hold hoods and hobs (GOU-2255).
 # Tokens are searched as substrings in every category of the product: none may appear in an oven category.
+# Microwaves and fryers entered through the Fnac GEM category (GOU-2376). The microwave tokens carry a separator
+# because real oven categories contain "MICRO-ONDES" ("FOUR ET MICRO-ONDES", "FOUR, MICRO-ONDES").
 excludingTokensFromCategoriesMatching:
   - HOTTE
   - TABLE DE CUISSON
   - PLAQUE DE CUISSON
   - PLAQUES DE CUISSON
+  - MICRO ONDES
+  - "> MICRO-ONDES"
+  - "| MICRO-ONDES"
+  - FOUR MICRO-ONDES
+  - MICROWAVE
+  - FRITEUSE
+  - AIRFRYER
 
 matchingCategories:
   darty.com:
@@ -770,8 +779,8 @@ matchingCategories:
     - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
   Référentiel produits Electro Depot:
     - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  # The bare "ELECTROMENAGER" category of Rakuten is the whole appliance catalogue (GOU-2376): not matched.
   rakuten.com-csv.yml:
-    - "ELECTROMENAGER"
     - "ELECTROMENAGER | FOUR"
     - "ELECTROMENAGER | CUISINIERE"
   Ubaldi:
@@ -780,8 +789,6 @@ matchingCategories:
     - "367 | COOKERS & OVENS | FOUR"
   Back Market FR:
     - "HOME & GARDEN > KITCHEN & DINING > KITCHEN APPLIANCES > OVENS"
-  Joom FR:
-    - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES, OVENS & FRYERS"
   e.leclerc:
     - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR > FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
   E.Leclerc FR:

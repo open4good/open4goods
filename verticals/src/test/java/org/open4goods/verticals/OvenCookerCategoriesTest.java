@@ -49,6 +49,50 @@ class OvenCookerCategoriesTest {
         assertThat(classify("rakuten.com-csv.yml", RAKUTEN_CATEGORY)).isEqualTo("oven");
     }
 
+    /** The bare Rakuten and the Joom catch-all categories held blenders, pans, barbecues (GOU-2376). */
+    @Test
+    void catchAllCategoriesDoNotClassifyAsOven() {
+        assertThat(classify("rakuten.com-csv.yml", "ELECTROMENAGER")).isNull();
+        assertThat(classify("Joom FR", "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES, OVENS & FRYERS"))
+                .isNull();
+        assertThat(classify("rakuten.com-csv.yml", "ELECTROMENAGER | FOUR")).isEqualTo("oven");
+    }
+
+    /** Microwaves and fryers filed under the Fnac GEM category are not ovens (GOU-2376). */
+    @Test
+    void microwavesAndFryersAreExcluded() {
+        Map<String, String> categories = new LinkedHashMap<>();
+        categories.put("Fnac FR", "362 | COOKING | PETIT MENAGER & CUISINE - CUISSON GEM");
+        assertThat(service.getVerticalForCategories(categories)).isNotNull();
+
+        for (String microwave : new String[] {
+                "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MICRO-ONDES | PETIT APPAREIL DE CUISSON | MICRO-ONDES",
+                "GROS ELECTROMENAGER / MICRO ONDES / MICRO-ONDES COMBINE | MICRO ONDES | MICRO-ONDES COMBINE",
+                "GROS ELECTROMENAGER > MICRO-ONDES ENCASTRABLE", "ELECTROMENAGER | MICRO-ONDES",
+                "FOUR MICRO-ONDES", "HOME APPLIANCES > KITCHEN APPLIANCES > MICROWAVE OVENS & ROASTERS",
+                "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > FRITEUSE ELECTRIQUE | FRITEUSE ELECTRIQUE",
+                "PETIT ELECTROMENAGER CUISINE / FRITEUSE / AIRFRYER | FRITEUSE | AIRFRYER" }) {
+            Map<String, String> product = new LinkedHashMap<>(categories);
+            product.put("Other", microwave);
+            assertThat(service.getVerticalForCategories(product)).as(microwave).isNull();
+        }
+    }
+
+    /** Oven categories that mention microwaves stay ovens. */
+    @Test
+    void ovenCategoriesMentioningMicrowavesStayOven() {
+        assertThat(classify("Electrodepot - Guides et Comparateurs", "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"))
+                .isEqualTo("oven");
+        Map<String, String> miniOven = new LinkedHashMap<>();
+        miniOven.put("Cdiscount FR", "ELECTROMENAGER | ELECTROMENAGER > PETIT APPAREIL DE CUISSON > MINI-FOUR - ROTISSOIRE"
+                + " | PETIT APPAREIL DE CUISSON | MINI-FOUR - ROTISSOIRE");
+        miniOven.put("Carrefour", "CUISINE > MINI-FOUR ET MICRO-ONDES > MINI FOURS");
+        assertThat(service.getVerticalForCategories(miniOven)).isNotNull();
+        // EPREL-confirmed ovens stay protected (GOU-1700)
+        miniOven.put("Other", "FOUR MICRO-ONDES");
+        assertThat(service.getVerticalForCategories(miniOven, "ovens")).isNotNull();
+    }
+
     /** The lookup is an exact (datasource config name, category) match, no normalisation: each Fnac format has its own entry. */
     @Test
     void fnacCategoriesClassifyAsOven() {
