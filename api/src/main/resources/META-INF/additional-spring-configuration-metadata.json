@@ -1,6 +1,12 @@
 {
   "properties": [
     {
+      "name": "open-data-config.impact-export-page-size",
+      "type": "java.lang.Integer",
+      "description": "Products per Elasticsearch page when at least one impact dataset is active (its sources weigh tens of KB per product). export-page-size applies otherwise. Never raise the client buffer instead (GOU-2327).",
+      "defaultValue": 500
+    },
+    {
       "name": "api.product-index-mapping.retry-delay",
       "type": "java.time.Duration",
       "description": "Delay before the second attempt to create the products index or put its mapping at api startup, doubled before the third and last one (ProductIndexMappingRunner).",

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.open4goods.model.Localisable;
@@ -112,10 +113,16 @@ final class ImpactDataset {
     }
 
     /**
-     * @return the {@code _source} fields the rows read, on top of those of the GTIN and ISBN datasets
+     * @return the {@code _source} fields the rows read, on top of those of the GTIN and ISBN datasets: the value of
+     *         each criterion and, per source, the datasource name, raw and cleaned values (GOU-2327). Never the whole
+     *         {@code attributes.indexed.<criterion>}, whose sources weigh tens of KB per product.
      */
     List<String> sourceFields() {
-        return criteria.stream().map(key -> "attributes.indexed." + key).toList();
+        return criteria.stream().flatMap(key -> Stream.of(
+                "attributes.indexed." + key + ".value",
+                "attributes.indexed." + key + ".source.dataSourcename",
+                "attributes.indexed." + key + ".source.value",
+                "attributes.indexed." + key + ".source.cleanedValue")).toList();
     }
 
     boolean accepts(Product product) {

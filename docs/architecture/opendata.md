@@ -23,7 +23,7 @@ flowchart LR
   du buffer de réponse Elasticsearch (GOU-2249).
 - **Lecture** : `ProductRepository.exportAll(fields, pageSize)` (scroll), `_source` limité à
   `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un échantillon de prod de
-  200 produits, contre environ 21 Ko complet). Pages de `export-page-size` (2000, environ 1,5 Mo par réponse) et pause
+  200 produits, contre environ 21 Ko complet). Pages de `export-page-size` (2000, environ 1,5 Mo par réponse) ou, quand un jeu impact est actif, de `impact-export-page-size` (500 ; projection limitée à `value` et `source.{dataSourcename,value,cleanedValue}` de chaque critère, GOU-2327) et pause
   `page-pause` (50 ms) après chaque page. Les seules clés d'attribut lues sont les 5 clés ISBN et les critères des jeux
   impact (`attributes.indexed.{CRITERE}`, GOU-2250) ; pas de clé Decitre (GOU-2262). Ne relève jamais le buffer du client.
 - **Écriture** : un passage écrit dans `opendata/tmp/`, sur le même disque. Il échoue avant toute lecture si l'espace
