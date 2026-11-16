@@ -34,6 +34,15 @@ début à la fin du passage, publication R2 comprise, échec ou interruption com
 le Beta Build ne redémarre pas l'api (`DEFERRED: api restart deferred`). Le marqueur est partagé avec le batch : le
 fichier ne disparaît qu'à la fin du dernier des deux. Voir `ci-workflows-status.md`.
 
+## Jeu impact refusé (GOU-2308)
+
+Le garde-fou de lignes (`min-rows-ratio`, 0,9) s'applique jeu par jeu. Un jeu **impact** sous le seuil est isolé : son
+zip et son manifest publiés restent ceux du passage précédent (le manifest précédent reste listé dans `manifest.json`),
+et GTIN, ISBN et les autres jeux impact sont rafraîchis et publiés. `impact-all.zip` est reconstruit sans le jeu
+refusé. Le log `ERROR` `Open data impact dataset not published, the previous version stays` donne la cause, le passage
+est en `FAILED` (`error` : `Datasets not published: <jeux et causes>`), la health `openDataService` passe DOWN et la métrique
+`outcome="partial"` est incrémentée. Un jeu GTIN ou ISBN sous le seuil fait toujours échouer tout le passage.
+
 ## Surveillance
 
 - Log `ERROR` `Open data generation failed, the published files and manifests are unchanged`, avec la cause.

@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.localization.DomainLanguage;
@@ -124,7 +125,7 @@ final class ImpactDataset {
         row[0] = StringUtils.defaultString(product.gtin());
         row[1] = StringUtils.defaultString(product.brand());
         row[2] = StringUtils.defaultString(product.model());
-        row[3] = StringUtils.defaultString(product.shortestOfferName());
+        row[3] = StringUtils.defaultString(OpenDataService.exportName(product));
         row[4] = vertical;
         String slug = ProductCanonicalUrl.fullSlug(product, verticalConfig, DomainLanguage.fr);
         row[5] = StringUtils.isBlank(slug) || siteBaseUrl.isEmpty() ? "" : siteBaseUrl + slug;
@@ -154,25 +155,23 @@ final class ImpactDataset {
     }
 
     /**
-     * @return the datasources that contributed the published value, or all contributors when none matches it
+     * @return the datasources whose value is the published one; empty when none matches it (never all contributors)
      */
     private static String sourcesOf(IndexedAttribute attribute) {
         String published = attribute.getValue().trim();
         Set<String> matching = new TreeSet<>();
-        Set<String> all = new TreeSet<>();
         if (attribute.getSource() != null) {
             for (SourcedAttribute source : attribute.getSource()) {
                 if (StringUtils.isBlank(source.getDataSourcename())) {
                     continue;
                 }
-                all.add(source.getDataSourcename());
                 String value = source.getCleanedValue() != null ? source.getCleanedValue() : source.getValue();
                 if (value != null && StringUtils.normalizeSpace(value).equalsIgnoreCase(StringUtils.normalizeSpace(published))) {
                     matching.add(source.getDataSourcename());
                 }
             }
         }
-        return String.join(SOURCE_SEPARATOR, matching.isEmpty() ? all : matching);
+        return String.join(SOURCE_SEPARATOR, matching);
     }
 
     /**
@@ -184,14 +183,22 @@ final class ImpactDataset {
     }
 
     private static String unitOf(AttributeConfig config) {
-        if (config == null || config.getSuffix() == null) {
+        if (config == null) {
             return "";
         }
-        String suffix = config.getSuffix().get("default");
-        if (suffix == null) {
-            suffix = config.getSuffix().get("fr");
+        String unit = firstOf(config.getSuffix());
+        return unit.isEmpty() ? firstOf(config.getUnit()) : unit;
+    }
+
+    private static String firstOf(Localisable<String, String> values) {
+        if (values == null) {
+            return "";
         }
-        return StringUtils.defaultString(suffix).trim();
+        String value = values.get("default");
+        if (value == null) {
+            value = values.get("fr");
+        }
+        return StringUtils.defaultString(value).trim();
     }
 
     private static String labelOf(AttributeConfig config, String criterion) {

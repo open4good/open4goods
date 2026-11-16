@@ -404,6 +404,9 @@ public class OpenDataService implements HealthIndicator {
         this.passEndHook = onEnd == null ? () -> { } : onEnd;
     }
 
+    /** Datasets of the last pass refused by the row guard (GOU-2308), with the reason of each. */
+    private volatile List<String> refusedDatasets = List.of();
+
     private boolean acquire() {
         if (!generationEnabled) {
             LOGGER.warn("Open data generation skipped: open-data-config.generation-enabled is false");
@@ -446,6 +449,12 @@ public class OpenDataService implements HealthIndicator {
             status = new OpenDataGenerationStatus(State.SUCCEEDED, startedAt, finishedAt, finishedAt, null, rows);
             outcome = "success";
             LOGGER.info("Open data generation succeeded in {}: {}", Duration.between(startedAt, finishedAt), rows);
+            if (!refusedDatasets.isEmpty()) {
+                LOGGER.error("Open data generation published with refused datasets: {}", refusedDatasets);
+                status = new OpenDataGenerationStatus(State.FAILED, startedAt, finishedAt, finishedAt,
+                        "Datasets not published: " + String.join("; ", refusedDatasets), rows);
+                outcome = "partial";
+            }
         } catch (Exception e) {
             LOGGER.error("Open data generation failed, the published files and manifests are unchanged", e);
             status = new OpenDataGenerationStatus(State.FAILED, startedAt, Instant.now(), previous.lastSuccessAt(),
@@ -505,13 +514,35 @@ public class OpenDataService implements HealthIndicator {
         for (DatasetWriter writer : writers) {
             manifests.add(buildManifest(writer, indexCounts.getOrDefault(writer.definition().id(), 0L)));
         }
+        refusedDatasets = List.of();
+        List<String> refused = new ArrayList<>();
+        List<DatasetManifest> carried = new ArrayList<>();
+        List<DatasetDefinition> kept = new ArrayList<>();
+        List<DatasetManifest> keptManifests = new ArrayList<>();
         for (int i = 0; i < manifests.size(); i++) {
-            checkRows(manifests.get(i), datasets.get(i));
+            DatasetDefinition definition = datasets.get(i);
+            try {
+                checkRows(manifests.get(i), definition);
+            } catch (OpenDataGenerationException e) {
+                // A failing impact dataset is isolated (GOU-2308): GTIN, ISBN and the other impact datasets still
+                // refresh. The refused one keeps its published zip and manifest.
+                if (!definition.id().startsWith("impact-")) {
+                    throw e;
+                }
+                LOGGER.error("Open data impact dataset not published, the previous version stays: {}", e.getMessage());
+                refused.add(e.getMessage());
+                manifestStore.readDataset(definition.manifestFile()).ifPresent(carried::add);
+                continue;
+            }
+            kept.add(definition);
+            keptManifests.add(manifests.get(i));
         }
+        refusedDatasets = List.copyOf(refused);
 
-        datasets = new ArrayList<>(datasets);
+        datasets = new ArrayList<>(kept);
+        manifests = new ArrayList<>(keptManifests);
         addGlobalImpactDataset(datasets, manifests);
-        publish(datasets, manifests);
+        publish(datasets, manifests, carried);
         return manifests;
     }
 
@@ -792,14 +823,17 @@ public class OpenDataService implements HealthIndicator {
      * Writes the manifests in the temporary folder, then renames atomically the zips, the per-dataset manifests and
      * {@code manifest.json}, in that order.
      */
-    private void publish(List<DatasetDefinition> datasets, List<DatasetManifest> manifests) throws IOException {
+    private void publish(List<DatasetDefinition> datasets, List<DatasetManifest> manifests,
+            List<DatasetManifest> carried) throws IOException {
         Path tmpDirectory = openDataConfig.tmpDirectory();
         for (int i = 0; i < datasets.size(); i++) {
             manifestStore.write(manifests.get(i), tmpDirectory.resolve(datasets.get(i).manifestFile().getName()).toFile());
         }
         File tmpManifest = tmpDirectory.resolve(openDataConfig.manifestFile().getName()).toFile();
+        List<DatasetManifest> listed = new ArrayList<>(manifests);
+        listed.addAll(carried);
         manifestStore.write(new OpenDataManifest(OpenDataManifest.SCHEMA_VERSION, now(), OpenDataManifest.LICENSE,
-                manifests), tmpManifest);
+                listed), tmpManifest);
 
         for (DatasetDefinition dataset : datasets) {
             OpenDataManifestStore.moveAtomically(dataset.zipFile().toPath(), dataset.finalZipFile().toPath());
