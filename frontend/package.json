@@ -11,6 +11,7 @@
     "generate": "NODE_OPTIONS='--max-old-space-size=6144' nuxt generate",
     "lint": "eslint . && pnpm lint:forbidden",
     "lint:forbidden": "node scripts/lint-forbidden.js",
+    "blog:cover": "node scripts/blog-cover/generate-blog-cover.mjs",
     "lint:fix": "eslint . --fix && prettier --write .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -114,7 +115,8 @@
     "vitest": "3.2.7",
     "vue-router": "5.3.1",
     "vue-tsc": "3.3.11",
-    "vuetify": "4.2.3"
+    "vuetify": "4.2.3",
+    "yaml": "2.9.1"
   },
   "packageManager": "pnpm@10.34.6",
   "engines": {

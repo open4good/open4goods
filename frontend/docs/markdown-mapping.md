@@ -237,3 +237,50 @@ validated values only; `TheArticle.vue` splits the sanitized body on these
 markers (and on `[assistant]`) and renders `GuideProductGrid` in their place
 (`shared/utils/blog-product-widget.ts`). The rest of the body is unchanged and
 still sanitized by DOMPurify.
+
+## Blog cover
+
+A post's `image` (shown on its card, at the top of the article and as its
+og:image) is generated from a `cover:` block in its frontmatter, with the
+"data cover" template: a 1600x900 PNG in the Nudger colours, written to
+`public/images/blog/<slug>/cover.png`.
+
+```yaml
+image: /images/blog/<slug>/cover.png
+cover:
+  kicker: 'Black Friday 2026'
+  title: "Avant d'acheter : réparer, reconditionné ou comparer"
+  figure: '31 %'
+  caption: 'des téléviseurs ont une note de réparabilité sous 7/10'
+  source: 'Données Nudger, 270 modèles, relevé du 15/11/2026'
+  icon: tv
+  ratio: 0.31
+  ratioLabel: 'près de 1 téléviseur sur 3'
+```
+
+| Field        | Required      | Notes                                                                                                                                                 |
+| ------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`      | yes           | Short title, at most 2 lines with a `figure`, 4 without.                                                                                              |
+| `kicker`     | no            | Pill above the title, upper-cased. Defaults to the post's first tag.                                                                                  |
+| `figure`     | no            | Key figure taken from the article (and its `sources`), drawn large.                                                                                   |
+| `caption`    | with `figure` | What the figure measures, at most 2 lines (3 without a figure, as a subtitle).                                                                        |
+| `source`     | no            | One line: source and date of the figure.                                                                                                              |
+| `icon`       | no            | `tv`, `washing-machine`, `dishwasher`, `fridge`, `oven`, `dryer`, `air-conditioner`, `smartphone`, `laptop`, `repair`, `recycle` or `leaf` (default). |
+| `ratio`      | no            | 0 to 1: draws 10 icons with `round(ratio x 10)` highlighted instead of one large icon.                                                                |
+| `ratioLabel` | no            | One line under the icons, only with `ratio`.                                                                                                          |
+
+Generate it from `frontend/`:
+
+```bash
+pnpm blog:cover <slug>                    # writes public/images/blog/<slug>/cover.png
+pnpm blog:cover <slug> --out /tmp/c.png   # preview elsewhere
+```
+
+The script (`scripts/blog-cover/`) uses only `sharp`, the repository's Hanken
+Grotesk font and `@mdi/js` icons, so it renders the same everywhere. Text and
+icons stay inside a safe area (150 px on the sides, 80 px at the top, 100 px at
+the bottom), because the blog cards and social previews crop the cover. It never
+truncates: a text that does not fit its zone stops it with an error naming the
+field to shorten. Commit the PNG with the post.
+`scripts/blog-cover/blog-cover.spec.ts` checks that every post with a `cover:`
+block has a valid spec and its generated file as `image`.
