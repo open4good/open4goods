@@ -430,8 +430,7 @@ public class CategoryMappingService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         return new AttributesConfigDto(configs,
-                defaultSet(attributesConfig.getFeaturedValues()),
-                defaultSet(attributesConfig.getExclusions()));
+                defaultSet(attributesConfig.getFeaturedValues()));
     }
 
     /**
