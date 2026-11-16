@@ -17,7 +17,8 @@ import org.slf4j.Logger;
  *
  * <p>The vertical association is a deterministic function of the product's
  * accumulated categories: it is resolved through
- * {@link VerticalsConfigService#getVerticalForCategories(Map, String)}. Keeping it
+ * {@link VerticalsConfigService#getVerticalForCategories(Map, String)}, by a vote
+ * between datasources when {@code categoryVoteEnabled} is on (GOU-2256). Keeping it
  * stable matters for SEO — an unstable vertical changes the canonical product URL
  * and triggers 301 redirects. The product EPREL group never assigns a vertical,
  * but it protects a vertical it confirms from category noise (GOU-1700).
@@ -80,7 +81,9 @@ public class TaxonomyRealTimeAggregationService extends AbstractAggregationServi
 	 *
 	 * <p>The vertical is set when {@link VerticalsConfigService#getVerticalForCategories(Map, String)}
 	 * returns a match, and cleared only when it does not (no categories, no matching
-	 * category, or an excluding token). It is never unset on the basis of transient
+	 * category, or an excluding token; with the vote, no vertical with more votes for
+	 * than against, or an EPREL group that belongs to a vertical no category matches).
+	 * It is never unset on the basis of transient
 	 * data such as offer names, so a correctly-categorized product keeps a stable
 	 * vertical (and therefore a stable URL) across re-aggregations.
 	 *
