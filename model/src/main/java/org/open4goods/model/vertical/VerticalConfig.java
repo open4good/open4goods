@@ -187,6 +187,14 @@ public class VerticalConfig {
 	private double natureMinMarkedCategoryShare = 0d;
 
 	/**
+	 * Resolves the vertical of a product by a vote between its datasources
+	 * instead of "first matching category, single excluding token veto"
+	 * (GOU-2256). Read from {@code _default.yml} only; false keeps the
+	 * historical rule. See {@code VerticalsConfigService#getVerticalForCategories}.
+	 */
+	private boolean categoryVoteEnabled = false;
+
+	/**
 	 * The set of datasourcenames that will be excluded in generation of categories
 	 * matching
 	 */
@@ -1108,6 +1116,14 @@ public class VerticalConfig {
 
 	public void setNatureMinMarkedCategoryShare(double natureMinMarkedCategoryShare) {
 		this.natureMinMarkedCategoryShare = natureMinMarkedCategoryShare;
+	}
+
+	public boolean isCategoryVoteEnabled() {
+		return categoryVoteEnabled;
+	}
+
+	public void setCategoryVoteEnabled(boolean categoryVoteEnabled) {
+		this.categoryVoteEnabled = categoryVoteEnabled;
 	}
 
 	public Set<String> getGenerationExcludedFromAttributesMatching() {

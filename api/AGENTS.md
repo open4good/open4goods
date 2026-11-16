@@ -367,6 +367,12 @@ porté par une autre datasource, ni une catégorie qui ne correspond plus ne la 
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
 
+Avec `categoryVoteEnabled: true` dans `verticals/_default.yml` (GOU-2256, désactivé par défaut), la verticale sort
+d'un vote entre datasources au lieu de "première catégorie trouvée, un seul jeton d'exclusion suffit" : une
+verticale gagne si ses voix pour dépassent strictement ses voix contre, et le groupe EPREL garde la priorité. Règle,
+choix ouverts et populations touchées : [verticals/README.md](../verticals/README.md). La `nature` est calculée
+après, sans changement.
+
 Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) avec
 `VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
 `verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
