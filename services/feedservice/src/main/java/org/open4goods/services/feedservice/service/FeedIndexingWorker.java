@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -302,6 +304,15 @@ public class FeedIndexingWorker implements Runnable {
 	 */
 	private final Map<String, String> resolvedKeysCache = new java.util.HashMap<>();
 
+	/** Compiled {@link CsvDataSourceProperties#getTrackedUrlPattern()} regular expressions, by source. */
+	private static final Map<String, Pattern> TRACKED_URL_PATTERNS = new ConcurrentHashMap<>();
+
+	/** Lines of the current feed url whose untracked url was rewritten with the tracking link template. */
+	private int trackingRewrittenItems;
+
+	/** Lines of the current feed url rejected because their url is untracked and no tracking link template applies. */
+	private int untrackedRejectedItems;
+
 	/**
 	 * Global cache shared across all worker threads: raw CSV header → comparable (lower-case,
 	 * accent-stripped, alphanumeric-only) form.
@@ -376,6 +387,8 @@ public class FeedIndexingWorker implements Runnable {
 		
 		for (String url : urls) {
 			resolvedKeysCache.clear();
+			trackingRewrittenItems = 0;
+			untrackedRejectedItems = 0;
 			// Feed URLs can carry API keys (Awin, Effinity): logs, stats and health details only use this label
 			String feedLabel = loggableFeedUrl(url);
 			dedicatedLogger.warn("STARTING FEED URL {} - {}", feedLabel, dsProperties);
@@ -474,7 +487,8 @@ public class FeedIndexingWorker implements Runnable {
 				deleteTemporaryFile(url, destFile, dedicatedLogger);
 			}
 
-			dedicatedLogger.warn("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}) - {}", dsConfName, okItems, errorItems, validationFailedItems, excludedItems, feedLabel);
+			dedicatedLogger.warn("Done: {} (imported: {}, errors: {}, not_validable: {}, excluded: {}, tracking_rewritten: {}, untracked_rejected: {}) - {}",
+					dsConfName, okItems, errorItems, validationFailedItems, excludedItems, trackingRewrittenItems, untrackedRejectedItems, feedLabel);
 		}
 		dedicatedLogger.info("End CSV feed indexing for {}", dsConfName);
 	}
@@ -610,6 +624,7 @@ public class FeedIndexingWorker implements Runnable {
 	    importAllAttributes(dataFragment, item, config);
 	    completionService.complete(dataFragment, datasourceConfigName, config, dedicatedLogger);
 	    enforceAffiliatedUrl(dataFragment);
+	    enforceTrackedUrl(dataFragment, config);
 	    dataFragment.validate(config.getValidationFields());
 	    
 	    return dataFragment;
@@ -1191,6 +1206,37 @@ public class FeedIndexingWorker implements Runnable {
 	    if (StringUtils.isEmpty(dataFragment.getAffiliatedUrl())) {
 	    	dataFragment.setAffiliatedUrl(dataFragment.getUrl());
 	    }
+	}
+
+	/**
+	 * Guarantees that an offer of a datasource declaring {@link CsvDataSourceProperties#getTrackedUrlPattern()} is
+	 * never published with an untracked direct link: an url that does not match the pattern is rewritten with
+	 * {@link CsvDataSourceProperties#getTrackingLinkTemplate()}, or the line is rejected when no usable template is set.
+	 *
+	 * @param dataFragment DataFragment whose final url (after {@link #enforceAffiliatedUrl(DataFragment)}) is checked
+	 * @param config DataSourceProperties for configuration settings
+	 * @throws ValidationException if the url is untracked and cannot be tracked
+	 */
+	void enforceTrackedUrl(DataFragment dataFragment, DataSourceProperties config) throws ValidationException {
+	    CsvDataSourceProperties csvProperties = config.getCsvDatasource();
+	    String url = dataFragment.getUrl();
+	    if (StringUtils.isBlank(csvProperties.getTrackedUrlPattern()) || StringUtils.isEmpty(url)) {
+	        return;
+	    }
+	    Pattern tracked = TRACKED_URL_PATTERNS.computeIfAbsent(csvProperties.getTrackedUrlPattern(), Pattern::compile);
+	    if (tracked.matcher(url).find()) {
+	        return;
+	    }
+	    String template = csvProperties.getTrackingLinkTemplate();
+	    if (StringUtils.contains(template, CsvDataSourceProperties.TRACKING_LINK_PLACEHOLDER)) {
+	        String trackedUrl = template.replace(CsvDataSourceProperties.TRACKING_LINK_PLACEHOLDER, URLEncoder.encode(url, StandardCharsets.UTF_8));
+	        dataFragment.setUrl(trackedUrl);
+	        dataFragment.setAffiliatedUrl(trackedUrl);
+	        trackingRewrittenItems++;
+	        return;
+	    }
+	    untrackedRejectedItems++;
+	    throw new ValidationException("Untracked url and no tracking link template");
 	}
 
 	/**
