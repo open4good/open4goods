@@ -202,10 +202,11 @@ page read it.
 - **Credited sources only**: a source whose datasource file declares a
   `license` or an `attribution` gets its declared `portalUrl`, `license`,
   `licenseUrl` and `attribution`. Any other source gets its name only, every
-  other field `null`, whatever its file holds: a merchant never gets a link, even
-  with a datasource file (`amazon.fr.yml` holds an affiliation `portalUrl`), and
-  no link is taken from the affiliation partners. The rule is enforced here, not
-  left to the data or to the frontend.
+  other field `null`, whatever its file holds: no link without a declared licence
+  or attribution (`amazon.fr.yml` holds an affiliation `portalUrl` and declares
+  neither, so it gets its name only), and no link is taken from the affiliation
+  partners. The rule is enforced here, not left to the frontend. Do not declare an
+  `attribution` in a merchant file: its `portalUrl` would then be shown as is.
 - **Never guessed**: a blank or missing field is `null` and only absolute
   `http(s)` URLs are exposed. The frontend shows a source's link and licence only
   for credited sources (no "unknown licence", no merchant link).
