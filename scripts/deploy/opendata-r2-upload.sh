@@ -81,9 +81,9 @@ for entry in "${entries[@]}"; do
   staging=".staging/${key}"
   # The overall budget bounds every transfer: `timeout` kills rclone (and the stage is deleted by the trap).
   left="$(remaining)" || exit 1
-  # Manifests are small and must follow a new pass quickly (same 300 s as the manifests of the publisher).
-  cache="public, max-age=86400"
-  if [ "${ctype}" = "application/json" ]; then cache="public, max-age=300"; fi
+  # Zips and manifests: 300 s, as the runbook and the publisher. Keys are fixed, so a long cache would serve the old
+  # zip while the manifest already announces the new sha256.
+  cache="public, max-age=300"
   hdrs=(
     --header-upload "Content-Type: ${ctype}"
     --header-upload "Content-Disposition: attachment; filename=\"${key}\""

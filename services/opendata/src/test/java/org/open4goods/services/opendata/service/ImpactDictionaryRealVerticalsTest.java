@@ -29,7 +29,18 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  */
 class ImpactDictionaryRealVerticalsTest {
 
-    private static final Path DICTIONARY = Path.of("../../docs/architecture/opendata-impact-dictionary.md");
+    private static final Path DICTIONARY = findDictionary();
+
+    /** Walks up from the working directory to the repository root, so the test does not depend on where it runs. */
+    private static Path findDictionary() {
+        for (Path dir = Path.of("").toAbsolutePath(); dir != null; dir = dir.getParent()) {
+            Path candidate = dir.resolve("docs/architecture/opendata-impact-dictionary.md");
+            if (Files.exists(candidate)) {
+                return candidate;
+            }
+        }
+        throw new IllegalStateException("opendata-impact-dictionary.md introuvable depuis " + Path.of("").toAbsolutePath());
+    }
 
     /** Tokens that a parser strips because they are the unit of the value. */
     private static final Set<String> UNIT_TOKENS = Set.of("W", "KW", "KWH", "KWH/H", "KG", "G", "DB", "L", "CM", "MM", "KM",
