@@ -1,7 +1,6 @@
 package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -45,6 +44,17 @@ class DatasourceAttributionServiceTest {
                 "licenseUrl": "javascript:alert(1)",
                 "attribution": null
               },
+              "amazon.fr.yml": {
+                "name": "amazon.fr",
+                "portalUrl": "https://www.amazon.fr/b?_encoding=UTF8&tag=nudger-21&node=10737150031",
+                "favico": "https://cdn.icon-icons.com/icons2/413/PNG/256/Amazon_41192.png"
+              },
+              "open-prices.yml": {
+                "name": "open-prices",
+                "portalUrl": "https://prices.openfoodfacts.org/",
+                "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+                "attribution": "Open Food Facts contributors"
+              },
               "unnamed.yml": {
                 "license": "Licence Ouverte 2.0"
               }
@@ -78,20 +88,28 @@ class DatasourceAttributionServiceTest {
                 new ProductSourceDto("unknown.example", null, null, null, null));
     }
 
-    /** Merchant feeds have no datasource file: no link is taken from their affiliation partner (GOU-2302). */
+    /**
+     * Only a source declaring a licence or an attribution gets its link (GOU-2302): a merchant gets its name only,
+     * even when its datasource file holds a portal URL (an affiliation link for {@code amazon.fr.yml}), and no link is
+     * ever taken from the affiliation partners.
+     */
     @Test
-    void onlyThePortalDeclaredInTheDatasourceFileIsExposed() {
+    void onlyTheSourcesDeclaringALicenceOrAnAttributionGetTheirLink() {
         server.expect(requestTo("http://api.test/datasources"))
                 .andRespond(withSuccess(CONFIGS, MediaType.APPLICATION_JSON));
 
         service.refresh();
 
-        assertThat(service.describe(List.of("darty.com", "data-gouv", "icecat.biz")))
-                .extracting(ProductSourceDto::name, ProductSourceDto::portalUrl)
+        assertThat(service.describe(List.of("amazon.fr", "darty.com", "data-gouv", "icecat.biz", "open-prices")))
                 .containsExactly(
-                        tuple("darty.com", null),
-                        tuple("data-gouv", "https://www.data.gouv.fr/"),
-                        tuple("icecat.biz", null));
+                        new ProductSourceDto("amazon.fr", null, null, null, null),
+                        new ProductSourceDto("darty.com", null, null, null, null),
+                        new ProductSourceDto("data-gouv", "https://www.data.gouv.fr/", "Licence Ouverte 2.0",
+                                "https://www.etalab.gouv.fr/licence-ouverte-open-licence/",
+                                "Producteurs, via data.gouv.fr"),
+                        new ProductSourceDto("icecat.biz", null, null, null, null),
+                        new ProductSourceDto("open-prices", "https://prices.openfoodfacts.org/", null,
+                                "https://opendatacommons.org/licenses/odbl/1-0/", "Open Food Facts contributors"));
     }
 
     @Test

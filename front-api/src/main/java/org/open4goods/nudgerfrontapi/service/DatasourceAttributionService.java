@@ -35,9 +35,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * the api, it only lacks the licences until the next successful refresh.
  * </p>
  * <p>
- * Only what the datasource file states is exposed: a source without file (merchant feeds) or without a field gets
- * {@code null}, nothing is guessed nor taken from the affiliation partners (no merchant link, GOU-2302). Only absolute
- * {@code http(s)} URLs are kept.
+ * Only a source whose datasource file declares a {@code license} or an {@code attribution} is credited: it gets its
+ * portal URL, licence and attribution as declared. Any other source gets its name only, every other field
+ * {@code null}, whatever its file holds: a merchant (for instance {@code amazon.fr.yml}, whose {@code portalUrl} is an
+ * affiliation link) or a source without file never gets a link (GOU-2302). Nothing is guessed nor taken from the
+ * affiliation partners, and only absolute {@code http(s)} URLs are kept.
  * </p>
  */
 @Service
@@ -130,11 +132,12 @@ public class DatasourceAttributionService {
 
     /**
      * @param name   source name
-     * @param config its datasource configuration, or null when the api does not know it (merchant feeds)
-     * @return the description; every field but the name is null without configuration
+     * @param config its datasource configuration, or null when the api does not know it
+     * @return the description; every field but the name is null unless the configuration declares a licence or an
+     *         attribution, so that no merchant link is ever exposed
      */
     private static ProductSourceDto describe(String name, DatasourceConfig config) {
-        if (config == null) {
+        if (config == null || !config.declaresAttribution()) {
             return new ProductSourceDto(name, null, null, null, null);
         }
         return new ProductSourceDto(name, config.portalUrl(), config.license(), config.licenseUrl(),
@@ -196,6 +199,14 @@ public class DatasourceAttributionService {
         DatasourceConfig normalized() {
             return new DatasourceConfig(text(name), httpUrl(portalUrl), text(license), httpUrl(licenseUrl),
                     text(attribution));
+        }
+
+        /**
+         * @return whether this (normalized) configuration declares a licence or an attribution, the only sources
+         *         credited with their link
+         */
+        boolean declaresAttribution() {
+            return license != null || attribution != null;
         }
     }
 }

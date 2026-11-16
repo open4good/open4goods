@@ -334,11 +334,13 @@ Détail :
 - **Livré par GOU-2302 (P0-4, 2/2)** : `ProductDatasourcesDto.sources` décrit une fois chaque source
   du produit (`name`, `portalUrl`, `license`, `licenseUrl`, `attribution`, `null` quand la source ne
   le dit pas). front-api lit ces champs par `GET /datasources` de l'api (`DatasourceAttributionService`,
-  rafraîchi toutes les heures) ; seul le `portalUrl` du YAML de la source est exposé, jamais celui
-  d'un partenaire d'affiliation. Seules les sources qui déclarent une `license` ou une `attribution`
-  sont créditées : l'infobulle `ProductAttributeSourcingLabel` (retrouvée par `datasourceName`)
-  montre leur lien et leur licence, et la fiche produit les liste en bas de page (rendu SSR). Les
-  autres gardent leur nom seul dans l'infobulle et le bloc n'est pas rendu sans source créditée.
+  rafraîchi toutes les heures). Seules les sources dont le YAML déclare une `license` ou une
+  `attribution` sont créditées, et la règle est appliquée par front-api : les autres, marchands
+  compris (le `portalUrl` d'`amazon.fr.yml` est un lien d'affiliation), sortent avec leur nom seul,
+  et aucun lien n'est pris chez un partenaire d'affiliation. L'infobulle
+  `ProductAttributeSourcingLabel` (retrouvée par `datasourceName`) montre leur lien et leur
+  licence, et la fiche produit les liste en bas de page (rendu SSR). Les autres gardent leur nom
+  seul dans l'infobulle et le bloc n'est pas rendu sans source créditée.
   Aucune source n'en déclare aujourd'hui (`amazon.fr.yml`, `icecat.biz.yml`) : l'affichage
   apparaîtra quand les YAML des sources de référence (EPREL, RappelConso...) déclareront
   `license`/`attribution`. `icecat.biz.miss` rejoint `Product.TECHNICAL_DATASOURCE_CODES`. Le lien
