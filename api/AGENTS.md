@@ -377,7 +377,9 @@ Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) av
 `VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
 `verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
 `sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
-marqueur : champ absent. `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
+marqueur : champ absent. Les marqueurs de composant PC (`BOITIER PC`, `COMPOSANT PC`, `COMPOSANTS PC`,
+`INFORMATIQUE | COMPOSANTS |`, GOU-2317) ne servent qu'au vote des verticales : ils sont aussi des fragments neutres,
+donc la nature ne change pas (`PcComponentMarkersTest` dans `verticals`). `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
 normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il sera fixé d'après le dry-run de la reprise
 (GOU-2234), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
 catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à

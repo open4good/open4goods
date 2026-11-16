@@ -3,11 +3,14 @@ package org.open4goods.verticals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,43 +21,34 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 /**
  * Vertical resolution by a vote between datasources (GOU-2256), against the real vertical configurations.
  *
- * <p>Fixtures use the GTINs of the card. Their categories are <b>reconstructed</b>, not copied from Elasticsearch:
- * the public API does not expose merchant categories. The rows that give the wrong vertical are real
- * {@code matchingCategories} entries of the vertical cited by the card; the PC component rows use the three forms
- * the card quotes ({@code ... > COMPOSANT - PIECE DETACHEE > ...}, {@code BOITIER PC ...},
- * {@code INFORMATIQUE ET BUREAU > COMPOSANT PC ...}). Only the first form carries a marker
- * ({@code PIECE DETACHEE}, a spare part marker of {@code _default.yml}); the two others abstain. Each fixture names
- * the unknown that decides its result: the replay of the real rows is step 1 of the CTO measure.
+ * <p>The eleven products of the card are replayed on their <b>real</b> categories:
+ * {@value #REAL_CATEGORIES} holds the {@code categoriesByDatasources} read by the CTO in {@code products-moustik} on
+ * 16/11/2026 (document {@code fixtures} of GOU-2317), in their index order, and the EPREL group
+ * {@code electronicdisplays} of the two TVs, in the export format of {@link CategoryVoteReplay}. The other cases are
+ * built from real {@code matchingCategories} entries to pin each rule of the vote.
  *
  * <p>Two service instances: {@code historical} keeps {@code _default.yml} as shipped (flag off), {@code vote} has
  * its own default configuration with the flag switched on.
  */
 class CategoryVoteTest {
 
+    /** Real categories of the products of the card, export format of {@link CategoryVoteReplay}. */
+    static final String REAL_CATEGORIES = "/category-vote/real-categories-2026-11-16.json";
+
     /** Smartphone rows ({@code matchingCategories.all} of smartphones). */
-    private static final String CDISCOUNT_PHONE = "TELEPHONE PORTABLE";
     private static final String CDISCOUNT_SMARTPHONE = "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | "
             + "TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | SMARTPHONE";
     private static final String FNAC_MOBILE_PHONES = "348 | MOBILE PHONES | SYSTEME PC & APPAREIL PORTABLE > "
             + "APPAREIL MOBILE > TELEPHONE MOBILE";
-    private static final String LECLERC_SMARTPHONE = "HIGH-TECH | HIGH-TECH>SMARTPHONE - TELEPHONIE>SMARTPHONE>"
-            + "SMARTPHONE ANDROID | SMARTPHONE - TELEPHONIE | SMARTPHONE";
 
     /** Rows matched per datasource. */
     private static final String RAKUTEN_DISHWASHER = "ELECTROMENAGER | LAVE-VAISSELLE";
     private static final String CDISCOUNT_DISHWASHER = "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > "
             + "LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE";
-    private static final String RAKUTEN_REFRIGERATOR = "ELECTROMENAGER | REFRIGERATEUR";
-    private static final String FNAC_REFRIGERATOR = "PETIT MENAGER & CUISINE - FROID";
     private static final String DARTY_REFRIGERATOR = "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE | "
             + "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE";
-    private static final String RAKUTEN_TV = "HIFI | TELEVISION";
-    private static final String DARTY_TV_OLED = "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TELEVISEUR | TV OLED";
-    private static final String BOULANGER_TV = "TV - IMAGE - SON | TELEVISEUR";
     private static final String CDISCOUNT_TV_LED = "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | "
             + "TELEVISEUR | TELEVISEUR LED";
-    private static final String LECLERC_TV_HISENSE = "HIGH-TECH | HIGH-TECH>TV - CINEMA>TELEVISEURS - TELEVISIONS - TV>"
-            + "TV HISENSE | TV - CINEMA | TELEVISEURS - TELEVISIONS - TV";
     private static final String RAKUTEN_WASHING_MACHINE = "ELECTROMENAGER | LAVE-LINGE";
     private static final String DARTY_WASHING_MACHINE = "GROS ELECTROMENAGER | GROS ELECTROMENAGER>LAVE-LINGE>"
             + "LAVE-LINGE HUBLOT | LAVE-LINGE | GROS ELECTROMENAGER";
@@ -67,6 +61,7 @@ class CategoryVoteTest {
 
     private static VerticalsConfigService historical;
     private static VerticalsConfigService vote;
+    private static Map<String, CategoryVoteReplay.ExportedProduct> realCategories;
 
     @BeforeAll
     static void setUp() throws Exception {
@@ -75,15 +70,37 @@ class CategoryVoteTest {
         vote = new VerticalsConfigService(new SerialisationService(), mock(GoogleTaxonomyService.class),
                 new PathMatchingResourcePatternResolver());
         vote.getDefaultConfig().setCategoryVoteEnabled(true);
+        realCategories = readRealCategories();
     }
 
-    /** A PC component row in the marked form of the card: votes against every vertical. */
-    private static String markedComponent(String leaf) {
-        return "INFORMATIQUE > COMPOSANT - PIECE DETACHEE > " + leaf;
+    /**
+     * @return the real categories of the card, by GTIN, in the order of the file
+     * @throws IOException when the resource cannot be read
+     */
+    static Map<String, CategoryVoteReplay.ExportedProduct> readRealCategories() throws IOException {
+        try (InputStream input = CategoryVoteTest.class.getResourceAsStream(REAL_CATEGORIES)) {
+            assertThat(input).as(REAL_CATEGORIES).isNotNull();
+            return CategoryVoteReplay.readExport(input);
+        }
     }
 
-    /** A case: the categories, the result of the historical rule and the result of the vote. */
-    private record Case(String name, Map<String, String> categories, String historicalVertical, String votedVertical) {
+    /**
+     * A case: the categories, the EPREL group, the result of the historical rule and the result of the vote.
+     */
+    private record Case(String name, Map<String, String> categories, String eprelGroup, String historicalVertical,
+            String votedVertical) {
+
+        Case(String name, Map<String, String> categories, String historicalVertical, String votedVertical) {
+            this(name, categories, null, historicalVertical, votedVertical);
+        }
+    }
+
+    /** A product of the card, on its real categories and EPREL group. */
+    private static Case real(String gtin, String name, String historicalVertical, String votedVertical) {
+        CategoryVoteReplay.ExportedProduct product = realCategories.get(gtin);
+        assertThat(product).as("%s %s in %s", name, gtin, REAL_CATEGORIES).isNotNull();
+        return new Case(name + " " + gtin, new LinkedHashMap<>(product.categoriesByDatasources()),
+                product.eprelGroup(), historicalVertical, votedVertical);
     }
 
     private static Map<String, String> categories(String... datasourceAndCategory) {
@@ -100,73 +117,34 @@ class CategoryVoteTest {
     }
 
     /**
-     * M.RED MR-036 PC case (3700755601091), in smartphones because Cdiscount FR and Fnac FR file it as a phone while
-     * four other sources say PC case. Unknown that decides: how many of the four rows are in the marked form. The
-     * fixture assumes two; with one, see {@link #unmarkedComponentRowsAbstain()}.
-     */
-    private static Map<String, String> mredCase() {
-        return categories(
-                "Cdiscount FR", CDISCOUNT_PHONE,
-                "Fnac FR", FNAC_MOBILE_PHONES,
-                "rakuten.com-csv.yml", markedComponent("BOITIER PC"),
-                "alternate FR", markedComponent("BOITIER PC"),
-                "grosbill.com", "BOITIER PC",
-                "E.Leclerc FR", "INFORMATIQUE ET BUREAU > COMPOSANT PC > BOITIER PC");
-    }
-
-    /**
-     * The false positives of the card: each holds one row matching the cited vertical and at least as many rows in
-     * the marked form. Unknown that decides: that number of marked rows (the brief places the RAM, the PC cases and
-     * the watercooling kits among the products of the marked form).
+     * The false positives of the card: a few rows file them in a vertical, the PC component rows outvote them. The
+     * historical results are those of the CTO replay. G.Skill already has no vertical with the historical rule (the
+     * {@code PIECES DETACHEES} token of a Darty row, lot 4e.4). Lian-Li had two tv rows against the two
+     * {@code COMPOSANT - PIECE DETACHEE} rows of {@code cdiscount.com} and {@code Cdiscount FR} (two voters), a tie;
+     * its {@code INFORMATIQUE | COMPOSANTS | BOITIER} row now adds a vote against. Zalman needs the PC component
+     * markers of GOU-2317 ({@code BOITIER PC}, {@code INFORMATIQUE | COMPOSANTS |}).
      */
     private static List<Case> falsePositives() {
         return List.of(
-                new Case("M.RED MR-036 3700755601091", mredCase(), "smartphones", null),
-                new Case("G.Skill RAM 4713294230263", categories(
-                        "rakuten.com-csv.yml", RAKUTEN_DISHWASHER,
-                        "alternate FR", markedComponent("MEMOIRE PC"),
-                        "grosbill.com", "INFORMATIQUE ET BUREAU > COMPOSANT PC > MEMOIRE PC"), "dishwasher", null),
-                new Case("Intel Arc A750 4710483940316", categories(
-                        "Cdiscount FR", CDISCOUNT_DISHWASHER,
-                        "rakuten.com-csv.yml", markedComponent("CARTE GRAPHIQUE")), "dishwasher", null),
-                new Case("NZXT Kraken", categories(
-                        "Joom FR", "SMARTPHONES",
-                        "rakuten.com-csv.yml", markedComponent("WATERCOOLING")), "smartphones", null),
-                new Case("ASRock DeskMeet 4710483944697", categories(
-                        "rakuten.com-csv.yml", RAKUTEN_REFRIGERATOR,
-                        "alternate FR", markedComponent("BAREBONE")), "refrigerator", null),
-                new Case("Zalman P10", categories(
-                        "Fnac FR", FNAC_REFRIGERATOR,
-                        "rakuten.com-csv.yml", markedComponent("BOITIER PC"),
-                        "grosbill.com", "BOITIER PC"), "refrigerator", null),
-                new Case("Lian-Li HydroShift 4718466015754", categories(
-                        "rakuten.com-csv.yml", RAKUTEN_TV,
-                        "alternate FR", markedComponent("WATERCOOLING")), "tv", null));
+                real("3700755601091", "M.RED MR-036", "smartphones", null),
+                real("4713294230263", "G.Skill RAM", null, null),
+                real("4710483940316", "Intel Arc A750", "dishwasher", null),
+                real("5056547202259", "NZXT Kraken", "smartphones", null),
+                real("4710483944697", "ASRock DeskMeet", "refrigerator", null),
+                real("4718466015754", "Lian-Li HydroShift", "tv", null),
+                real("8800263650385", "Zalman P10", "refrigerator", null));
     }
 
     /**
-     * The real products of the card with one wrong "composant" row. Unknown that decides: at least two of their
-     * rows match their vertical (no EPREL data on these products).
+     * The real products of the card, each with one wrong {@code COMPOSANT - PIECE DETACHEE} row. The two TVs carry the
+     * EPREL group {@code electronicdisplays} of tv.
      */
     private static List<Case> realProducts() {
         return List.of(
-                new Case("Xiaomi 14T 6941812790625", categories(
-                        "Cdiscount FR", CDISCOUNT_SMARTPHONE,
-                        "Fnac FR", FNAC_MOBILE_PHONES,
-                        "E.Leclerc FR", LECLERC_SMARTPHONE,
-                        "rakuten.com-csv.yml", markedComponent("PROCESSEUR")), "smartphones", "smartphones"),
-                new Case("Huawei Nova 13 Pro 6942103145452", categories(
-                        "Cdiscount FR", CDISCOUNT_SMARTPHONE,
-                        "Joom FR", "SMARTPHONES",
-                        "rakuten.com-csv.yml", markedComponent("CARTE MERE")), "smartphones", "smartphones"),
-                new Case("Samsung OLED TQ83S95F 8806097077350", categories(
-                        "Darty FR", DARTY_TV_OLED,
-                        "Boulanger - Référentiel produits", BOULANGER_TV,
-                        "rakuten.com-csv.yml", markedComponent("CARTE MERE")), "tv", "tv"),
-                new Case("Hisense 50E77NQ 6942351402390", categories(
-                        "Cdiscount FR", CDISCOUNT_TV_LED,
-                        "E.Leclerc FR", LECLERC_TV_HISENSE,
-                        "rakuten.com-csv.yml", markedComponent("PROCESSEUR")), "tv", "tv"));
+                real("6941812790625", "Xiaomi 14T", "smartphones", "smartphones"),
+                real("6942103145452", "Huawei Nova 13 Pro", "smartphones", "smartphones"),
+                real("8806097077350", "Samsung OLED TQ83S95F", "tv", "tv"),
+                real("6942351402390", "Hisense 50E77NQ", "tv", "tv"));
     }
 
     /** Other cases whose result changes or must not change with the vote. */
@@ -231,7 +209,8 @@ class CategoryVoteTest {
     @Test
     void flagOffKeepsTheHistoricalResults() {
         for (Case c : allCases()) {
-            assertThat(classify(historical, c.categories(), null)).as(c.name()).isEqualTo(c.historicalVertical());
+            assertThat(classify(historical, c.categories(), c.eprelGroup())).as(c.name())
+                    .isEqualTo(c.historicalVertical());
         }
         // The historical rule depends on the map order
         Map<String, String> reversed = categories("Darty FR", DARTY_REFRIGERATOR, "Cdiscount FR", CDISCOUNT_DISHWASHER);
@@ -241,12 +220,20 @@ class CategoryVoteTest {
     @Test
     void falsePositivesLoseTheirVertical() {
         for (Case c : falsePositives()) {
-            assertThat(classify(vote, c.categories(), null)).as(c.name()).isNull();
+            assertThat(classify(vote, c.categories(), c.eprelGroup())).as(c.name()).isNull();
         }
     }
 
     @Test
     void realProductsWithOneComponentRowKeepTheirVertical() {
+        for (Case c : realProducts()) {
+            assertThat(classify(vote, c.categories(), c.eprelGroup())).as(c.name()).isEqualTo(c.votedVertical());
+        }
+    }
+
+    /** The real products keep their vertical on their votes alone: the EPREL group of the TVs is not what saves them. */
+    @Test
+    void realProductsKeepTheirVerticalWithoutEprel() {
         for (Case c : realProducts()) {
             assertThat(classify(vote, c.categories(), null)).as(c.name()).isEqualTo(c.votedVertical());
         }
@@ -255,27 +242,53 @@ class CategoryVoteTest {
     @Test
     void otherCasesFollowTheVote() {
         for (Case c : otherCases()) {
-            assertThat(classify(vote, c.categories(), null)).as(c.name()).isEqualTo(c.votedVertical());
+            assertThat(classify(vote, c.categories(), c.eprelGroup())).as(c.name()).isEqualTo(c.votedVertical());
         }
     }
 
     /**
-     * The limit of the rule: {@code BOITIER PC} and {@code ... COMPOSANT PC ...} carry no marker of
-     * {@code _default.yml}, so they abstain. With a single marked row, M.RED keeps smartphones (2 for, 1 against).
+     * The known limit of GOU-2256, lifted by GOU-2317: the PC component categories without {@code PIECE DETACHEE}
+     * ({@code BOITIER PC}, {@code ... COMPOSANT PC ...}, {@code ... COMPOSANTS PC ...},
+     * {@code INFORMATIQUE | COMPOSANTS | ...}) now vote against. Zalman P10 had one refrigerator row for, and two such
+     * rows that abstained: it kept refrigerator; it now loses it two against one.
      */
     @Test
-    void unmarkedComponentRowsAbstain() {
-        Map<String, String> oneMarkedRow = mredCase();
-        oneMarkedRow.put("alternate FR", "BOITIER PC");
+    void pcComponentRowsVoteAgainst() {
+        Map<String, String> zalman = falsePositives().getLast().categories();
+        assertThat(zalman).hasSize(3);
+        assertThat(classify(vote, zalman, null)).isNull();
 
-        assertThat(classify(vote, oneMarkedRow, null)).isEqualTo("smartphones");
+        // Each form alone against one refrigerator row: one for, one against, the tie loses
+        for (String component : List.of("BOITIER PC", "INFORMATIQUE ET BUREAU > COMPOSANT PC > BOITIER PC",
+                "INFORMATIQUE / COMPOSANTS PC / CARTE GRAPHIQUE | INFORMATIQUE>COMPOSANTS PC>CARTE GRAPHIQUE | "
+                        + "COMPOSANTS PC | CARTE GRAPHIQUE",
+                "INFORMATIQUE | COMPOSANTS | BOITIER")) {
+            Map<String, String> tie = categories("Cdiscount FR", zalman.get("Cdiscount FR"), "grosbill.com", component);
+            assertThat(classify(vote, tie, null)).as(component).isNull();
+            assertThat(classify(historical, tie, null)).as("historical, %s", component).isEqualTo("refrigerator");
+        }
     }
 
+    /** No generic {@code COMPOSANT} token: the PC component markers name the PC, or the Rakuten computing branch. */
+    @Test
+    void noGenericComponentMarker() {
+        for (String marker : List.of("COMPOSANT", "COMPOSANTS", "COMPOSANT - ", "INFORMATIQUE")) {
+            assertThat(vote.getDefaultConfig().getSparePartCategoryMarkers()).as(marker).doesNotContain(marker);
+            assertThat(vote.getDefaultConfig().getAccessoryCategoryMarkers()).as(marker).doesNotContain(marker);
+        }
+        assertThat(vote.carriesNatureMarker("TV - VIDEO - SON > COMPOSANTS AUDIO")).isFalse();
+    }
+
+    /**
+     * The vote decides on the bag of votes, not on the order of the map. Every order is tried up to six rows; beyond,
+     * the real products have up to ten rows (3.6 M orders), so the identity, every rotation of it and of its reverse,
+     * and 50 seeded shuffles.
+     */
     @Test
     void resultDoesNotDependOnTheMapOrder() {
         for (Case c : allCases()) {
-            for (Map<String, String> permutation : permutations(c.categories())) {
-                assertThat(classify(vote, permutation, null)).as("%s, order %s", c.name(), permutation.keySet())
+            for (Map<String, String> order : orders(c.categories())) {
+                assertThat(classify(vote, order, c.eprelGroup())).as("%s, order %s", c.name(), order.keySet())
                         .isEqualTo(c.votedVertical());
             }
         }
@@ -341,34 +354,58 @@ class CategoryVoteTest {
     }
 
     /**
-     * The vote does not touch the nature of 4e: {@code COMPOSANT - PIECE DETACHEE} stays a neutral fragment there,
-     * so a PC component left without vertical still gets no nature.
+     * The vote does not touch the nature of 4e: {@code COMPOSANT - PIECE DETACHEE} and the PC component markers are
+     * neutral fragments there, so a PC component left without vertical still gets no nature. Proof over every real
+     * category: {@code PcComponentMarkersTest}.
      */
     @Test
     void componentRowsVoteAgainstButStayNeutralForTheNature() {
-        Map<String, String> ram = falsePositives().get(1).categories();
-
-        assertThat(classify(vote, ram, null)).isNull();
-        assertThat(vote.getNatureForCategories(ram.values())).isNull();
+        for (Case c : List.of(falsePositives().get(2), falsePositives().getLast())) {
+            assertThat(classify(vote, c.categories(), null)).as(c.name()).isNull();
+            assertThat(vote.getNatureForCategories(c.categories().values())).as(c.name()).isNull();
+        }
     }
 
-    private static List<Map<String, String>> permutations(Map<String, String> categories) {
-        List<Map<String, String>> permutations = new ArrayList<>();
-        permute(new ArrayList<>(categories.entrySet()), 0, permutations);
-        return permutations;
+    /** Every order up to six entries, a bounded sample beyond. */
+    private static List<Map<String, String>> orders(Map<String, String> categories) {
+        List<Map.Entry<String, String>> entries = new ArrayList<>(categories.entrySet());
+        List<Map<String, String>> orders = new ArrayList<>();
+        if (entries.size() <= 6) {
+            permute(entries, 0, orders);
+            return orders;
+        }
+        List<Map.Entry<String, String>> reversed = new ArrayList<>(entries);
+        Collections.reverse(reversed);
+        for (List<Map.Entry<String, String>> base : List.of(entries, reversed)) {
+            for (int shift = 0; shift < base.size(); shift++) {
+                List<Map.Entry<String, String>> rotation = new ArrayList<>(base);
+                Collections.rotate(rotation, shift);
+                orders.add(asMap(rotation));
+            }
+        }
+        Random random = new Random(2317);
+        for (int i = 0; i < 50; i++) {
+            List<Map.Entry<String, String>> shuffled = new ArrayList<>(entries);
+            Collections.shuffle(shuffled, random);
+            orders.add(asMap(shuffled));
+        }
+        return orders;
     }
 
-    private static void permute(List<Map.Entry<String, String>> entries, int from,
-            List<Map<String, String>> permutations) {
+    private static Map<String, String> asMap(List<Map.Entry<String, String>> entries) {
+        Map<String, String> map = new LinkedHashMap<>();
+        entries.forEach(entry -> map.put(entry.getKey(), entry.getValue()));
+        return map;
+    }
+
+    private static void permute(List<Map.Entry<String, String>> entries, int from, List<Map<String, String>> orders) {
         if (from == entries.size()) {
-            Map<String, String> permutation = new LinkedHashMap<>();
-            entries.forEach(entry -> permutation.put(entry.getKey(), entry.getValue()));
-            permutations.add(permutation);
+            orders.add(asMap(entries));
             return;
         }
         for (int i = from; i < entries.size(); i++) {
             Collections.swap(entries, from, i);
-            permute(entries, from + 1, permutations);
+            permute(entries, from + 1, orders);
             Collections.swap(entries, from, i);
         }
     }
