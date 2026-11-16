@@ -52,6 +52,11 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
  * {@code isbn-manifest.json}, then {@code manifest.json} last, the validation point;</li>
  * <li>only then are the temporary objects (of this pass and of an interrupted one) deleted.</li>
  * </ol>
+ * A dataset carried from a previous pass (an impact dataset refused by the row guard, GOU-2308) is listed in the local
+ * {@code manifest.json} with its local version. When the public zip on R2 is another version (a previous publication
+ * failed), that local version is sent like the new datasets, so that {@code manifest.json} on R2 never announces a zip
+ * that R2 does not serve (GOU-2314). Its manifest is written again in both cases.
+ * <p>
  * A failure before step 4 leaves every public object untouched. Any failure is logged at ERROR, counted
  * ({@code opendata_publication_*}) and turns the open data health DOWN through {@link OpenDataService#health()}.
  */
@@ -141,13 +146,25 @@ public class OpenDataPublisher {
     }
 
     /**
-     * Publishes the datasets and {@code globalManifest}. Never throws: a failure is logged at ERROR, counted and kept in
-     * {@link #status()}.
+     * Publishes the datasets and {@code globalManifest}, with no carried dataset.
      *
+     * @see #publish(List, List, Path)
+     */
+    public boolean publish(List<Dataset> datasets, Path globalManifest) {
+        return publish(datasets, List.of(), globalManifest);
+    }
+
+    /**
+     * Publishes the datasets, the carried ones and {@code globalManifest}. Never throws: a failure is logged at ERROR,
+     * counted and kept in {@link #status()}.
+     *
+     * @param datasets       datasets of this pass, always sent
+     * @param carried        datasets kept from a previous pass, sent only when R2 serves another version of their zip
+     * @param globalManifest local {@code manifest.json}, listing both
      * @return true when {@code manifest.json} was written and the temporary objects deleted; false when the publication
      *         is disabled or failed
      */
-    public boolean publish(List<Dataset> datasets, Path globalManifest) {
+    public boolean publish(List<Dataset> datasets, List<Dataset> carried, Path globalManifest) {
         if (!isEnabled()) {
             LOGGER.info("Open data publication skipped: open-data-config.publication.enabled is false");
             return false;
@@ -159,7 +176,7 @@ public class OpenDataPublisher {
         Timer.Sample sample = Timer.start(meterRegistry);
         String outcome = "failure";
         try (OpenDataStorage storage = storageFactory.apply(publication())) {
-            long bucketBytes = publish(storage, datasets, globalManifest);
+            long bucketBytes = publish(storage, datasets, carried, globalManifest);
             Instant finishedAt = Instant.now();
             status = new OpenDataPublicationStatus(State.SUCCEEDED, startedAt, finishedAt, finishedAt, null, bucketBytes);
             outcome = "success";
@@ -180,7 +197,7 @@ public class OpenDataPublisher {
     /**
      * @return the size of the bucket after the publication
      */
-    long publish(OpenDataStorage storage, List<Dataset> datasets, Path globalManifest)
+    long publish(OpenDataStorage storage, List<Dataset> datasets, List<Dataset> carried, Path globalManifest)
             throws IOException, OpenDataPublicationException {
         Publication publication = publication();
         String stagingPrefix = publication.getStagingPrefix();
@@ -188,14 +205,31 @@ public class OpenDataPublisher {
             throw new OpenDataPublicationException("open-data-config.publication.staging-prefix must end with /");
         }
         checkLocalFiles(datasets);
+        List<StoredObject> objects = storage.list("");
+        List<Dataset> sent = new ArrayList<>(datasets);
+        List<Dataset> manifestOnly = new ArrayList<>();
+        for (Dataset dataset : carried) {
+            if (isPublic(storage, dataset.manifest())) {
+                manifestOnly.add(dataset);
+            } else {
+                LOGGER.warn("Open data publication: R2 does not serve the carried version of {} (sha256 {}), sent again",
+                        dataset.manifest().id(), dataset.manifest().sha256());
+                sent.add(dataset);
+            }
+        }
+        checkLocalFiles(sent);
+        datasets = sent;
         byte[] global = Files.readAllBytes(globalManifest);
         List<byte[]> manifests = new ArrayList<>();
         for (Dataset dataset : datasets) {
             manifests.add(Files.readAllBytes(dataset.manifestFile()));
         }
+        List<byte[]> carriedManifests = new ArrayList<>();
+        for (Dataset dataset : manifestOnly) {
+            carriedManifests.add(Files.readAllBytes(dataset.manifestFile()));
+        }
 
-        List<StoredObject> objects = storage.list("");
-        checkBudget(objects, datasets, manifests, global, globalManifest, stagingPrefix,
+        checkBudget(objects, datasets, manifests, manifestOnly, carriedManifests, global, globalManifest, stagingPrefix,
                 publication.getMaxBucketSize().toBytes());
         Set<String> toDelete = new LinkedHashSet<>();
         objects.stream().map(StoredObject::key).filter(key -> key.startsWith(stagingPrefix)).forEach(toDelete::add);
@@ -230,6 +264,10 @@ public class OpenDataPublisher {
             }
             for (int i = 0; i < datasets.size(); i++) {
                 storage.put(manifests.get(i), datasets.get(i).manifestFile().getFileName().toString(), jsonHeaders());
+            }
+            for (int i = 0; i < manifestOnly.size(); i++) {
+                storage.put(carriedManifests.get(i), manifestOnly.get(i).manifestFile().getFileName().toString(),
+                        jsonHeaders());
             }
             storage.put(global, globalManifest.getFileName().toString(), jsonHeaders());
         } catch (IOException | OpenDataPublicationException | RuntimeException e) {
@@ -279,7 +317,8 @@ public class OpenDataPublisher {
      * temporary) plus the new zips and manifests. During the upload the temporary copies also count, for a few hours.
      */
     private static void checkBudget(List<StoredObject> objects, List<Dataset> datasets, List<byte[]> manifests,
-            byte[] global, Path globalManifest, String stagingPrefix, long maxBytes) throws OpenDataPublicationException {
+            List<Dataset> manifestOnly, List<byte[]> carriedManifests, byte[] global, Path globalManifest,
+            String stagingPrefix, long maxBytes) throws OpenDataPublicationException {
         Set<String> replaced = new LinkedHashSet<>();
         long added = global.length;
         replaced.add(globalManifest.getFileName().toString());
@@ -287,6 +326,10 @@ public class OpenDataPublisher {
             replaced.add(datasets.get(i).manifest().file());
             replaced.add(datasets.get(i).manifestFile().getFileName().toString());
             added += datasets.get(i).manifest().bytes() + manifests.get(i).length;
+        }
+        for (int i = 0; i < manifestOnly.size(); i++) {
+            replaced.add(manifestOnly.get(i).manifestFile().getFileName().toString());
+            added += carriedManifests.get(i).length;
         }
         long current = objects.stream().mapToLong(StoredObject::bytes).sum();
         long kept = objects.stream()
@@ -323,6 +366,13 @@ public class OpenDataPublisher {
                     manifest.id(), stagingKey, remote, bytes, manifest.sha256(), manifest.bytes()));
         }
         LOGGER.info("Open data publication: {} read back, sha256 {} matches the manifest", stagingKey, remote);
+    }
+
+    /** @return true when the public zip has the size and sha256 of {@code manifest} */
+    private static boolean isPublic(OpenDataStorage storage, DatasetManifest manifest) throws IOException {
+        Optional<StoredObject> object = storage.head(manifest.file());
+        return object.isPresent() && object.get().bytes() == manifest.bytes()
+                && manifest.sha256() != null && manifest.sha256().equals(object.get().sha256());
     }
 
     private static void checkPublicZip(OpenDataStorage storage, DatasetManifest manifest)

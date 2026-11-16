@@ -49,7 +49,9 @@ ne publie rien.
 Les clés publiques sont les mêmes à chaque passage. Un zip n'est donc jamais écrit sur sa clé publique : il passe
 par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
 
-1. **Contrôles locaux** : chaque zip a la taille et un sha256 valide de son manifest.
+1. **Contrôles locaux** : chaque zip a la taille et un sha256 valide de son manifest. Un jeu reporté (jeu impact
+   refusé) n'est renvoyé que si le zip public n'a pas le sha256 de son manifest local (publication précédente en
+   échec, GOU-2314) ; son manifest est toujours réécrit.
 2. **Garde-fou budgétaire** : la taille du bucket après la publication (objets conservés, hors clés remplacées et
    temporaires, plus les nouveaux zips et manifests) ne doit pas dépasser `max-bucket-size` (9 Go, unités binaires de
    Spring). Sinon refus, rien n'est envoyé. Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
@@ -157,8 +159,9 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
   `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
 - **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
 - Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
-- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
-  (`impact-all`, lignes = somme des jeux).
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact, avec son manifest (`impact-all`, lignes =
+  somme des jeux). Un jeu refusé par le garde-fou y figure par son zip encore publié (GOU-2314) ; si tous le sont,
+  `impact-all` reste celui du passage précédent.
 - **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
 - **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
   `impact-*-manifest.json`.

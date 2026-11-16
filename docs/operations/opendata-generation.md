@@ -38,23 +38,32 @@ fichier ne disparaît qu'à la fin du dernier des deux. Voir `ci-workflows-statu
 
 Le garde-fou de lignes (`min-rows-ratio`, 0,9) s'applique jeu par jeu. Un jeu **impact** sous le seuil est isolé : son
 zip et son manifest publiés restent ceux du passage précédent (le manifest précédent reste listé dans `manifest.json`),
-et GTIN, ISBN et les autres jeux impact sont rafraîchis et publiés. `impact-all.zip` est reconstruit sans le jeu
-refusé. Le log `ERROR` `Open data impact dataset not published, the previous version stays` donne la cause, le passage
+et GTIN, ISBN et les autres jeux impact sont rafraîchis et publiés. `impact-all.zip` est reconstruit avec le CSV du
+zip encore publié pour chaque jeu refusé, et ses lignes comptent celles du manifest reporté (GOU-2314) : il reste
+cohérent avec les zips par verticale. Si tous les jeux impact sont refusés, `impact-all.zip` et son manifest restent
+ceux du passage précédent, toujours listés dans `manifest.json`. Le log `ERROR` `Open data impact dataset not published, the previous version stays` donne la cause, le passage
 est en `FAILED` (`error` : `Datasets not published: <jeux et causes>`), la health `openDataService` passe DOWN et la métrique
 `outcome="partial"` est incrémentée. Un jeu GTIN ou ISBN sous le seuil fait toujours échouer tout le passage.
+
+Sur R2, la publication du passage compare chaque jeu reporté au zip public (taille et métadonnée `sha256`). Si R2 sert
+une autre version (une publication précédente a échoué), la version locale reportée est renvoyée avec les nouveaux
+jeux : `manifest.json` sur R2 n'annonce jamais un zip que R2 ne sert pas. Sinon seul son manifest est réécrit.
 
 ## Surveillance
 
 - Log `ERROR` `Open data generation failed, the published files and manifests are unchanged`, avec la cause.
-- Health `openDataService` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`),
-  UNKNOWN si un zip publié manque, UP sinon.
+- Health `openDataService` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`) ou une
+  publication R2 en échec (`publicationError`, affiché aussi quand le passage a échoué), UNKNOWN si un zip publié
+  manque, UP sinon.
 - Métriques Micrometer (noms Prometheus) :
-  - `opendata_generation_runs_total{outcome="success|failure"}` ;
+  - `opendata_generation_runs_total{outcome="success|partial|failure"}` (`partial` : jeux impact refusés, les autres
+    publiés) ;
   - `opendata_generation_duration_seconds{outcome}` ;
   - `opendata_generation_failed` (1 si le dernier passage du processus a échoué) ;
   - `opendata_generation_running` ;
   - `opendata_generation_last_success_timestamp_seconds` (NaN sans succès depuis le démarrage) ;
-  - `opendata_dataset_rows{dataset="gtin|isbn"}`.
+  - `opendata_dataset_rows{dataset}` (`gtin`, `isbn`, `impact-{verticale}`, `impact-all` ; un jeu refusé garde la
+    valeur de son dernier passage publié par le processus).
 - Publication sur R2 (GOU-2289, si `open-data-config.publication.enabled`) :
   - `opendata_publication_runs_total{outcome="success|failure"}` ;
   - `opendata_publication_duration_seconds{outcome}` ;

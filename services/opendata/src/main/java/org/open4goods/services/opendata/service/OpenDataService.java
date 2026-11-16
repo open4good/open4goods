@@ -139,9 +139,11 @@ public class OpenDataService implements HealthIndicator {
     );
 
     /**
-     * Only {@code _source} fields read by the export (GOU-2248): about 0.7 KB per product instead of about 21 KB for
-     * a complete product, whose {@code attributes} and offers made a page of 5000 exceed the 100 MB response buffer of
-     * the Elasticsearch client (GOU-2249). No other attribute key is read, in particular no Decitre key (GOU-2262).
+     * {@code _source} fields read for the GTIN and ISBN datasets (GOU-2248): about 0.7 KB per product instead of about
+     * 21 KB for a complete product, whose {@code attributes} and offers made a page of 5000 exceed the 100 MB response
+     * buffer of the Elasticsearch client (GOU-2249). The only other fields of the projection are the
+     * {@code attributes.indexed} criteria of the impact datasets ({@link #exportFields(List)}); no Decitre key is read
+     * (GOU-2262).
      */
     static final String[] EXPORT_SOURCE_FIELDS = exportSourceFields();
 
@@ -278,16 +280,19 @@ public class OpenDataService implements HealthIndicator {
     @Override
     public Health health() {
         OpenDataGenerationStatus current = status;
-        if (current.state() == State.FAILED) {
-            return withStatusDetails(Health.down(), current)
-                    .withDetail("error", StringUtils.defaultString(current.error()))
-                    .build();
-        }
         OpenDataPublicationStatus publication = publisher.status();
-        if (publication.state() == State.FAILED) {
-            return withStatusDetails(Health.down(), current)
-                    .withDetail("publicationError", StringUtils.defaultString(publication.error()))
-                    .build();
+        boolean generationFailed = current.state() == State.FAILED;
+        boolean publicationFailed = publication.state() == State.FAILED;
+        if (generationFailed || publicationFailed) {
+            // Both errors are shown: a failed generation must not hide that R2 still serves an older version.
+            Health.Builder down = withStatusDetails(Health.down(), current);
+            if (generationFailed) {
+                down.withDetail("error", StringUtils.defaultString(current.error()));
+            }
+            if (publicationFailed) {
+                down.withDetail("publicationError", StringUtils.defaultString(publication.error()));
+            }
+            return down.build();
         }
         if (!openDataConfig.isbnZipFile().exists() || !openDataConfig.gtinZipFile().exists()) {
             return withStatusDetails(Health.unknown(), current)
@@ -422,7 +427,10 @@ public class OpenDataService implements HealthIndicator {
     /**
      * Runs one pass, then the R2 publication when enabled. Any failure of the pass is logged at ERROR, counted, and
      * exposed by {@link #health()} and {@link #status()}; the published files and manifests are then unchanged and
-     * nothing is sent. A failure of the publication has its own status and metrics ({@link OpenDataPublisher}).
+     * nothing is sent. A partial pass (GOU-2308), where the row guard refused only impact datasets, publishes and sends
+     * the other datasets; each refused one keeps its previous version, listed in {@code manifest.json}. Its outcome is
+     * {@code partial} and its state {@link State#FAILED}, with the refused datasets in the error. A failure of the
+     * publication has its own status and metrics ({@link OpenDataPublisher}).
      */
     private boolean runPass() {
         passStartHook.run();
@@ -439,9 +447,11 @@ public class OpenDataService implements HealthIndicator {
         status = new OpenDataGenerationStatus(State.RUNNING, startedAt, null, previous.lastSuccessAt(), null, previous.rows());
         Timer.Sample sample = Timer.start(meterRegistry);
         String outcome = "failure";
+        Generation generation;
         List<DatasetManifest> published;
         try {
-            published = generate();
+            generation = generate();
+            published = generation.published();
             Map<String, Long> rows = new LinkedHashMap<>();
             published.forEach(manifest -> rows.put(manifest.id(), manifest.rows()));
             Instant finishedAt = Instant.now();
@@ -469,13 +479,14 @@ public class OpenDataService implements HealthIndicator {
             meterRegistry.counter("opendata.generation.runs", OUTCOME_TAG, outcome).increment();
         }
         if (publisher.isEnabled()) {
-            publisher.publish(publicationDatasets(published), openDataConfig.manifestFile().toPath());
+            publisher.publish(publicationDatasets(published), publicationDatasets(generation.carried()),
+                    openDataConfig.manifestFile().toPath());
         }
         return true;
     }
 
     /**
-     * @return the datasets just published locally, in the order of the manifests (the global impact zip comes last)
+     * @return the local files of {@code manifests}, in their order (the global impact zip is the one without definition)
      */
     private List<OpenDataPublisher.Dataset> publicationDatasets(List<DatasetManifest> manifests) {
         List<DatasetDefinition> definitions = datasetDefinitions();
@@ -493,12 +504,27 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * Writes both datasets in the temporary folder, checks them, then publishes them: zips first, per-dataset
+     * Manifests of a pass.
+     *
+     * @param published manifests written by this pass, in the order of {@link #datasetDefinitions()}, the global impact
+     *                  zip last
+     * @param carried   manifests of the previous version of the refused impact datasets, still listed in
+     *                  {@code manifest.json}; the one of {@code impact-all} when every impact dataset was refused
+     */
+    record Generation(List<DatasetManifest> published, List<DatasetManifest> carried) {
+    }
+
+    /** CSV of an impact dataset copied into {@code impact-all.zip}: from this pass, or still published when refused. */
+    private record ImpactPart(String filename, File zip, DatasetManifest manifest) {
+    }
+
+    /**
+     * Writes the datasets in the temporary folder, checks them, then publishes them: zips first, per-dataset
      * manifests next, {@code manifest.json} last.
      *
-     * @return the published manifests, in the order of {@link #datasetDefinitions()}
+     * @return the published and carried manifests
      */
-    List<DatasetManifest> generate() throws IOException, OpenDataGenerationException, InterruptedException {
+    Generation generate() throws IOException, OpenDataGenerationException, InterruptedException {
         List<DatasetDefinition> datasets = datasetDefinitions();
         prepareTmpDirectory();
         checkFreeSpace(datasets);
@@ -519,50 +545,63 @@ public class OpenDataService implements HealthIndicator {
         List<DatasetManifest> carried = new ArrayList<>();
         List<DatasetDefinition> kept = new ArrayList<>();
         List<DatasetManifest> keptManifests = new ArrayList<>();
+        List<ImpactPart> impactParts = new ArrayList<>();
+        boolean impactKept = false;
         for (int i = 0; i < manifests.size(); i++) {
             DatasetDefinition definition = datasets.get(i);
+            boolean impact = definition.id().startsWith("impact-");
             try {
                 checkRows(manifests.get(i), definition);
             } catch (OpenDataGenerationException e) {
                 // A failing impact dataset is isolated (GOU-2308): GTIN, ISBN and the other impact datasets still
-                // refresh. The refused one keeps its published zip and manifest.
-                if (!definition.id().startsWith("impact-")) {
+                // refresh. The refused one keeps its published zip and manifest, and its CSV stays in impact-all.
+                if (!impact) {
                     throw e;
                 }
                 LOGGER.error("Open data impact dataset not published, the previous version stays: {}", e.getMessage());
                 refused.add(e.getMessage());
-                manifestStore.readDataset(definition.manifestFile()).ifPresent(carried::add);
+                Optional<DatasetManifest> previous = manifestStore.readDataset(definition.manifestFile());
+                previous.ifPresent(carried::add);
+                if (previous.isPresent() && definition.finalZipFile().isFile()) {
+                    impactParts.add(new ImpactPart(definition.filename(), definition.finalZipFile(), previous.get()));
+                }
                 continue;
             }
             kept.add(definition);
             keptManifests.add(manifests.get(i));
+            if (impact) {
+                impactKept = true;
+                impactParts.add(new ImpactPart(definition.filename(), definition.zipFile(), manifests.get(i)));
+            }
         }
         refusedDatasets = List.copyOf(refused);
 
         datasets = new ArrayList<>(kept);
         manifests = new ArrayList<>(keptManifests);
-        addGlobalImpactDataset(datasets, manifests);
+        if (impactKept) {
+            addGlobalImpactDataset(datasets, manifests, impactParts);
+        } else if (!refused.isEmpty()) {
+            // Every impact dataset refused: the published impact-all is unchanged, its manifest stays listed.
+            manifestStore.readDataset(openDataConfig.impactManifestFile("all")).ifPresent(carried::add);
+        }
         publish(datasets, manifests, carried);
-        return manifests;
+        return new Generation(manifests, List.copyOf(carried));
     }
 
     /**
-     * Adds the global impact zip ({@code impact-all.zip}, GOU-2240): the CSV of every impact dataset of the pass in one
-     * archive, with its own manifest entry. Nothing is added when the pass has no impact dataset.
+     * Adds the global impact zip ({@code impact-all.zip}, GOU-2240): the CSV of every impact dataset in one archive,
+     * with its own manifest entry. A refused impact dataset gives the CSV of its zip still published and the rows of its
+     * carried manifest, so that {@code impact-all} always matches the per-vertical zips.
      */
-    private void addGlobalImpactDataset(List<DatasetDefinition> datasets, List<DatasetManifest> manifests)
-            throws IOException {
-        List<DatasetDefinition> impacts = datasets.stream().filter(d -> d.id().startsWith("impact-")).toList();
-        if (impacts.isEmpty()) {
-            return;
-        }
+    private void addGlobalImpactDataset(List<DatasetDefinition> datasets, List<DatasetManifest> manifests,
+            List<ImpactPart> impacts) throws IOException {
         String id = "impact-all";
         File tmpZip = openDataConfig.tmpImpactZipFile("all");
         MessageDigest digest = newSha256();
         try (OutputStream out = new DigestOutputStream(new FileOutputStream(tmpZip), digest);
                 ZipOutputStream zip = new ZipOutputStream(out)) {
-            for (DatasetDefinition impact : impacts) {
-                try (ZipFile source = new ZipFile(impact.zipFile())) {
+            for (ImpactPart impact : impacts) {
+                try (ZipFile source = new ZipFile(impact.zip())) {
                     zip.putNextEntry(new ZipEntry(impact.filename()));
                     try (InputStream in = source.getInputStream(source.getEntry(impact.filename()))) {
                         in.transferTo(zip);
@@ -573,11 +612,9 @@ public class OpenDataService implements HealthIndicator {
         }
         long rows = 0;
         long indexCount = 0;
-        for (DatasetManifest manifest : manifests) {
-            if (manifest.id().startsWith("impact-")) {
-                rows += manifest.rows();
-                indexCount += manifest.indexCount();
-            }
+        for (ImpactPart impact : impacts) {
+            rows += impact.manifest().rows();
+            indexCount += impact.manifest().indexCount();
         }
         String publicFilename = openDataConfig.impactPublicFilename("all");
         datasets.add(new DatasetDefinition(id, null, tmpZip, openDataConfig.impactZipFile("all"),
@@ -635,8 +672,10 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * @return one impact dataset per enabled vertical that declares at least one criterion (GOU-2250). The list comes
-     *         from the vertical YAML: a new vertical gives a new dataset, with no list in this class.
+     * @return one impact dataset per enabled vertical with at least one criterion (GOU-2250), with no list in this class.
+     *         The criteria are {@link VerticalConfig#getAvailableImpactScoreCriterias()}: {@link VerticalsConfigService}
+     *         takes them from {@code impactscores/{vertical}.yml} ({@code aiResult.availableCriterias}) when that file
+     *         declares them, from the vertical YAML otherwise.
      */
     List<ImpactDataset> impactDatasets() {
         if (verticalsConfigService == null) {
