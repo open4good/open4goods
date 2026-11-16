@@ -104,7 +104,10 @@ son `id`. Les champs inconnus sont ignorés (ajout compatible du contrat).
   manifests sur R2). Un seul appelant relit ; les autres reçoivent la lecture précédente pendant ce temps. Délais :
   `connect-timeout` 2 s, `read-timeout` 3 s.
 - **Santé** `openDataManifest` : `UNKNOWN` si la base est vide ; `DEGRADED` si le manifest est illisible, si `gtin` ou
-  `isbn` manque ou n'a pas de date valide, ou si un jeu a plus de `front.opendata.max-age` (8 jours) ; `UP` sinon.
+  `isbn` manque, ou si un jeu quelconque du manifest (`impact-*` compris) n'a pas de date valide ou a plus de
+  `front.opendata.max-age` (8 jours) ; `UP` sinon. Un jeu impact refusé par le contrôle de lignes garde son ancien
+  `generatedAt` (isolation GOU-2308) : il passe la santé en `DEGRADED` au bout de 8 jours même si `gtin` et `isbn`
+  sont frais. Le détail `problems` dit quel jeu est en cause.
   `DEGRADED` est un statut personnalisé hors de l'ordre d'agrégation : comme `ALERT` et `WARN` de `impactScoreGuard`
   (api), il ne passe jamais la santé globale de front-api en DOWN, ce qui bloquerait ses redémarrages pour un
   fichier en retard. Écart voulu avec le "DOWN" de GOU-2239 point 6.

@@ -69,7 +69,8 @@ est en `FAILED` (`error` : `Datasets not published: <jeux et causes>`), la healt
   - `opendata_dataset_age_seconds{dataset="gtin|isbn|impact-..."}` (Micrometer `opendata.dataset.age`) : maintenant
     moins le `generatedAt` du jeu, NaN si inconnu. **Alerte Ops : au-delà de 691 200 s (8 jours).**
   - Health `openDataManifest` de front-api : `DEGRADED` si le manifest est illisible (404, réseau, JSON invalide), si
-    `gtin` ou `isbn` manque, ou si un jeu a plus de 8 jours (`front.opendata.max-age`) ; détails `state`,
+    `gtin` ou `isbn` manque, ou si un jeu (`impact-*` compris) n'a pas de date valide ou a plus de 8 jours
+    (`front.opendata.max-age`), par exemple un jeu impact refusé et reporté ; lire `problems` ; détails `state`,
     `datasetAgeSeconds`, `problems`. `UNKNOWN` tant que `open-data-config.public-base-url` est vide (bêta). Ce statut
     ne change pas la santé globale de front-api, et `/actuator/health/openDataManifest` répond **200** même en
     `DEGRADED` : une alerte sur ce point doit lire le champ JSON `status`, pas le code HTTP.
