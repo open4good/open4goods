@@ -59,4 +59,9 @@ parser:
       - "KW"
       - "KWH/H"
       - "KWH"
+    # EPREL sends the hourly consumption of air conditioners without a unit, in kWh/60 min (GOU-2315):
+    # "1.1" is read as 1,100 W. Remove these entries to read the values as they are.
+    sourceUnits:
+      "COOLINGCHARACTERISTICS-HOURLYELECTRICITYCONSUMPTION": "kWh/h"
+      "HOURLY ELECTRICITY CONSUMPTION": "kWh/h"
     

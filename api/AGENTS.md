@@ -378,6 +378,14 @@ catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à 
 jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
 à `nature`. Ce champ ne change ni la verticale ni le score.
 
+Un attribut `NUMERIC` de suffixe `W` (`POWER_CONSUMPTION_*`, `OVEN_POWER`) est indexé en watts : `parseValue`
+convertit d'abord les kW, mW et les énergies par heure (`0,85 kWh/h` donne 850). Une énergie (`0,5 kWh`, `84 kWh/an`)
+n'est pas une puissance : la valeur est refusée, donc absente. Une valeur sans unité est lue en watts, sauf si
+`parser.sourceUnits` donne l'unité de son attribut brut : `POWER_CONSUMPTION_TYPICAL` lit en kWh/h la consommation
+horaire EPREL des climatiseurs (`COOLINGCHARACTERISTICS-HOURLYELECTRICITYCONSUMPTION`, GOU-2315). Retirer l'entrée
+rend l'ancienne lecture. Une source qui ne se lit plus ne vote pas : sa `cleanedValue` est vidée, l'ancienne ne reste
+pas. Les valeurs déjà indexées sont relues au batch de 13 h, qui réagrège chaque verticale.
+
 ### Slug produit figé
 
 `NamesAggregationService` (GOU-1708) ne génère le slug (`names.url`, base du `fullSlug` de front-api) que s'il
