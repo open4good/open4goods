@@ -51,6 +51,12 @@ const routeMock = {
 }
 
 const useAsyncDataMock = vi.hoisted(() => vi.fn())
+const displayMock = vi.hoisted(() => ({ mdAndDown: { value: false } }))
+
+vi.mock('vuetify', async importOriginal => ({
+  ...(await importOriginal<typeof import('vuetify')>()),
+  useDisplay: () => displayMock,
+}))
 
 // Mocks
 mockNuxtImport('useI18n', () => () => ({
@@ -165,6 +171,31 @@ describe('Uncategorized Product Page', () => {
     // We want to verify that we are handling it.
     // For now let's just log what we have or assert existence.
     expect(breadcrumbs).toBeDefined()
+  })
+
+  it('renders the same navigation layout markup whatever the viewport reported by useDisplay', async () => {
+    // useDisplay reports a 0px width on the server: any layout class bound to it
+    // differs between the server HTML and the hydrated desktop page (CLS).
+    const renderNavigationLayout = async (mdAndDown: boolean) => {
+      displayMock.mdAndDown.value = mdAndDown
+      const wrapper = await mountProductPage()
+      const markup = {
+        layout: wrapper.find('.product-page__layout').classes(),
+        nav: wrapper.find('.product-page__nav').classes(),
+        orientation: wrapper
+          .findComponent({ name: 'ProductSummaryNavigation-stub' })
+          .attributes('orientation'),
+      }
+      wrapper.unmount()
+      return markup
+    }
+
+    const mobile = await renderNavigationLayout(true)
+    const desktop = await renderNavigationLayout(false)
+
+    expect(desktop.layout).toContain('product-page__layout')
+    expect(desktop).toEqual(mobile)
+    expect(desktop.orientation).toBeUndefined()
   })
 
   it('redirects to canonical URL when accessing via pure GTIN', async () => {
