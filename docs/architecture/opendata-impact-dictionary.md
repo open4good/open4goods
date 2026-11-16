@@ -18,7 +18,7 @@ Ce dictionnaire est dérivé des YAML `verticals/` et `attributes/` (ordre des c
 | `offers_count` | Nombre d'offres marchandes |
 | `last_updated` | Dernière modification, ISO 8601 UTC |
 
-Pour chaque critère : une colonne de valeur `{critere}` (suffixée de l'unité quand elle existe, ex. `warranty_year`) et une colonne `{critere}_source` (sources qui portent la valeur publiée, séparées par ` | ` ; vide quand aucune source ne porte exactement cette valeur). Date de la source : non disponible dans l'index, voir `last_updated`.
+Pour chaque critère : une colonne de valeur `{critere}` (suffixée de l'unité quand elle existe, ex. `warranty_year`) et une colonne `{critere}_source` (sources qui portent la valeur publiée, séparées par ` | ` ; vide quand aucune source ne porte cette valeur). Comparaison : texte normalisé ; pour `WARRANTY` (années) et `WEIGHT` (kg), la valeur brute de la source est d'abord convertie dans l'unité publiée (« 24 mois » = 2, « 52000 g » = 52, « 5,20 kg » = 5.2), comparée à 2 décimales. Les parsers d'agrégation sont dans le module `api`, inaccessible d'ici : cette conversion en reprend les unités courantes (GOU-2313). Date de la source : non disponible dans l'index, voir `last_updated`.
 
 ## air-conditioner (`impact-air-conditioner.zip`)
 
