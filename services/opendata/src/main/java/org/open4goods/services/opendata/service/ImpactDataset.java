@@ -152,7 +152,7 @@ final class ImpactDataset {
             }
             int column = valueColumns[i];
             row[column] = attribute.getValue().trim();
-            row[column + 1] = sourcesOf(attribute);
+            row[column + 1] = sourcesOf(criteria.get(i), attribute);
         }
         return row;
     }
@@ -160,7 +160,7 @@ final class ImpactDataset {
     /**
      * @return the datasources whose value is the published one; empty when none matches it (never all contributors)
      */
-    private static String sourcesOf(IndexedAttribute attribute) {
+    private static String sourcesOf(String criterion, IndexedAttribute attribute) {
         String published = attribute.getValue().trim();
         Set<String> matching = new TreeSet<>();
         if (attribute.getSource() != null) {
@@ -168,8 +168,10 @@ final class ImpactDataset {
                 if (StringUtils.isBlank(source.getDataSourcename())) {
                     continue;
                 }
-                String value = source.getCleanedValue() != null ? source.getCleanedValue() : source.getValue();
-                if (value != null && StringUtils.normalizeSpace(value).equalsIgnoreCase(StringUtils.normalizeSpace(published))) {
+                // The raw value is the one the aggregation parsers read; the generic cleaned one may differ (GOU-2313).
+                String value = source.getValue() != null ? source.getValue() : source.getCleanedValue();
+                if (SourceValueComparator.matches(criterion, value, published)
+                        || SourceValueComparator.matches(criterion, source.getCleanedValue(), published)) {
                     matching.add(source.getDataSourcename());
                 }
             }
