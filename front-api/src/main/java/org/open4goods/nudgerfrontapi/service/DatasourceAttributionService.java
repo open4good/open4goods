@@ -9,9 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
-import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourceDto;
@@ -37,9 +35,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * the api, it only lacks the licences until the next successful refresh.
  * </p>
  * <p>
- * Merchant feeds have no datasource file: their portal URL comes from the affiliation partners
- * ({@link AffiliationPartnerService}). Licence fields are never guessed: a source that does not state them gets
- * {@code null}. Only {@code http(s)} URLs are exposed, since partner URLs come from the affiliation networks.
+ * Only what the datasource file states is exposed: a source without file (merchant feeds) or without a field gets
+ * {@code null}, nothing is guessed nor taken from the affiliation partners (no merchant link, GOU-2302). Only absolute
+ * {@code http(s)} URLs are kept.
  * </p>
  */
 @Service
@@ -54,30 +52,25 @@ public class DatasourceAttributionService {
             String.CASE_INSENSITIVE_ORDER.thenComparing(Comparator.naturalOrder());
 
     private final RestClient restClient;
-    private final AffiliationPartnerService affiliationPartnerService;
     /** Datasource configurations by matching key ({@link #key(String)}), never partially loaded. */
     private final AtomicReference<Map<String, DatasourceConfig>> configs = new AtomicReference<>(Map.of());
 
     /**
      * Builds the service against the api configured for the affiliation partners.
      *
-     * @param restClientBuilder         Spring's RestClient builder
-     * @param partnersProperties        api base URL and API key
-     * @param affiliationPartnerService source of the merchant portal URLs
+     * @param restClientBuilder  Spring's RestClient builder
+     * @param partnersProperties api base URL and API key
      */
     @Autowired
     public DatasourceAttributionService(RestClient.Builder restClientBuilder,
-            AffiliationPartnersProperties partnersProperties,
-            AffiliationPartnerService affiliationPartnerService) {
+            AffiliationPartnersProperties partnersProperties) {
         this(restClientBuilder.baseUrl(partnersProperties.getApiBaseUrl())
-                        .defaultHeader(UrlConstants.APIKEY_PARAMETER, partnersProperties.getApiKey())
-                        .build(),
-                affiliationPartnerService);
+                .defaultHeader(UrlConstants.APIKEY_PARAMETER, partnersProperties.getApiKey())
+                .build());
     }
 
-    DatasourceAttributionService(RestClient restClient, AffiliationPartnerService affiliationPartnerService) {
+    DatasourceAttributionService(RestClient restClient) {
         this.restClient = restClient;
-        this.affiliationPartnerService = affiliationPartnerService;
     }
 
     /**
@@ -127,42 +120,25 @@ public class DatasourceAttributionService {
             return List.of();
         }
         Map<String, DatasourceConfig> current = configs.get();
-        Map<String, String> partnerPortals = partnerPortalsByName(affiliationPartnerService.getPartners());
         return datasourceNames.stream()
                 .filter(StringUtils::hasText)
                 .distinct()
                 .sorted(BY_NAME)
-                .map(name -> describe(name, current.get(key(name)), partnerPortals.get(key(name))))
+                .map(name -> describe(name, current.get(key(name))))
                 .toList();
     }
 
     /**
-     * @param name          source name
-     * @param config        its datasource configuration, or null when the api does not know it
-     * @param partnerPortal portal URL of the affiliation partner of the same name, or null
-     * @return the description, the configured portal URL winning over the partner one
+     * @param name   source name
+     * @param config its datasource configuration, or null when the api does not know it (merchant feeds)
+     * @return the description; every field but the name is null without configuration
      */
-    private static ProductSourceDto describe(String name, DatasourceConfig config, String partnerPortal) {
+    private static ProductSourceDto describe(String name, DatasourceConfig config) {
         if (config == null) {
-            return new ProductSourceDto(name, partnerPortal, null, null, null);
+            return new ProductSourceDto(name, null, null, null, null);
         }
-        String portalUrl = config.portalUrl() != null ? config.portalUrl() : partnerPortal;
-        return new ProductSourceDto(name, portalUrl, config.license(), config.licenseUrl(), config.attribution());
-    }
-
-    /**
-     * @param partners affiliation partners, may be null
-     * @return the http(s) portal URL of each partner by matching key
-     */
-    private static Map<String, String> partnerPortalsByName(Collection<AffiliationPartner> partners) {
-        if (partners == null) {
-            return Map.of();
-        }
-        return partners.stream()
-                .filter(partner -> partner != null && StringUtils.hasText(partner.getName()))
-                .filter(partner -> httpUrl(partner.getPortalUrl()) != null)
-                .collect(Collectors.toMap(partner -> key(partner.getName()),
-                        partner -> httpUrl(partner.getPortalUrl()), (first, second) -> first));
+        return new ProductSourceDto(name, config.portalUrl(), config.license(), config.licenseUrl(),
+                config.attribution());
     }
 
     /**
@@ -174,7 +150,7 @@ public class DatasourceAttributionService {
     }
 
     /**
-     * @param value a URL from the configuration or an affiliation network
+     * @param value a URL from the configuration
      * @return the trimmed URL when it is an absolute http(s) URL, null otherwise (blank, relative,
      *         {@code javascript:}...)
      */
@@ -195,7 +171,7 @@ public class DatasourceAttributionService {
 
     /**
      * @param datasourceName a source name
-     * @return the key matching the names of the configurations, the partners and the products
+     * @return the key matching the names of the configurations and of the products
      */
     private static String key(String datasourceName) {
         return datasourceName.trim().toLowerCase(Locale.ROOT);

@@ -1,5 +1,9 @@
 <template>
-  <section class="product-sources" :aria-labelledby="headingId">
+  <section
+    v-if="displayedSources.length"
+    class="product-sources"
+    :aria-labelledby="headingId"
+  >
     <ProductSectionHeader
       :title="t('product.sources.title')"
       :subtitle="t('product.sources.subtitle')"
@@ -50,6 +54,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProductSectionHeader from '~/components/product/ProductSectionHeader.vue'
+import { attributedProductSources } from '~/composables/useProductSources'
 import type { ProductSourceDto } from '~~/shared/api-client'
 
 type DisplayedSource = {
@@ -62,7 +67,10 @@ type DisplayedSource = {
 
 const props = withDefaults(
   defineProps<{
-    /** Sources of the product (`datasources.sources`), already sorted. */
+    /**
+     * Sources of the product (`datasources.sources`), already sorted. Only those
+     * declaring a licence or an attribution are listed.
+     */
     sources?: readonly ProductSourceDto[] | null
     headingId?: string
   }>(),
@@ -79,9 +87,10 @@ const text = (value: string | null | undefined) => {
   return trimmed.length ? trimmed : null
 }
 
-// A source that states no licence shows its name only: nothing is guessed.
+// Only the sources declaring a licence or an attribution are credited: no
+// merchant link, no "unknown licence". Without any, nothing is rendered.
 const displayedSources = computed<DisplayedSource[]>(() =>
-  (props.sources ?? []).flatMap(source => {
+  attributedProductSources(props.sources).flatMap(source => {
     const name = text(source?.name)
     if (!name) {
       return []

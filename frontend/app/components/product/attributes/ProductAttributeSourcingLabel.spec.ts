@@ -294,7 +294,7 @@ describe('ProductAttributeSourcingLabel', () => {
             'https://www.etalab.gouv.fr/licence-ouverte-open-licence/',
           attribution: 'Producteurs, via data.gouv.fr',
         },
-        { name: 'rakuten.com' },
+        { name: 'rakuten.com', portalUrl: 'https://www.rakuten.com/' },
       ])
 
       const rows = wrapper.findAll('.v-table-stub tbody tr')
@@ -320,15 +320,25 @@ describe('ProductAttributeSourcingLabel', () => {
       expect(
         rows[1].find('.product-attribute-sourcing__source-license').exists()
       ).toBe(false)
+      // A source without licence nor attribution keeps its plain name.
+      expect(rows[1].find('a').exists()).toBe(false)
+      expect(rows[1].text()).toContain('rakuten.com')
       expect(
         wrapper.find('.v-tooltip-stub').attributes('data-interactive')
       ).toBe('true')
     })
 
-    it('shows no licence when the source states none', () => {
+    it('shows no link nor licence when the source states none', () => {
       const wrapper = mountComponent(sourcing, '7.9', {}, [
-        { name: 'fr-indice-durabilite', license: null, licenseUrl: null },
-        { name: 'rakuten.com' },
+        {
+          name: 'fr-indice-durabilite',
+          portalUrl: 'https://www.data.gouv.fr/fr/datasets/indice/',
+          license: '  ',
+          licenseUrl:
+            'https://www.etalab.gouv.fr/licence-ouverte-open-licence/',
+          attribution: null,
+        },
+        { name: 'rakuten.com', portalUrl: 'https://www.rakuten.com/' },
       ])
 
       const rows = wrapper.findAll('.v-table-stub tbody tr')
@@ -337,13 +347,30 @@ describe('ProductAttributeSourcingLabel', () => {
       expect(
         wrapper.find('.product-attribute-sourcing__source-license').exists()
       ).toBe(false)
-      expect(
-        wrapper.find('.product-attribute-sourcing__source-link').exists()
-      ).toBe(false)
+      expect(wrapper.find('a').exists()).toBe(false)
       expect(wrapper.text()).not.toMatch(/license/i)
       expect(
         wrapper.find('.v-tooltip-stub').attributes('data-interactive')
       ).toBe('false')
+    })
+
+    it('links a source that declares only an attribution, without licence', () => {
+      const wrapper = mountComponent(sourcing, '7.9', {}, [
+        {
+          name: 'fr-indice-durabilite',
+          portalUrl: 'https://www.data.gouv.fr/fr/datasets/indice/',
+          attribution: 'Producteurs, via data.gouv.fr',
+        },
+      ])
+
+      const rows = wrapper.findAll('.v-table-stub tbody tr')
+      expect(
+        rows[0].find('a.product-attribute-sourcing__source-link').exists()
+      ).toBe(true)
+      expect(
+        rows[0].find('.product-attribute-sourcing__source-license').exists()
+      ).toBe(false)
+      expect(rows[1].find('a').exists()).toBe(false)
     })
 
     it('keeps the plain source names outside a product page', () => {

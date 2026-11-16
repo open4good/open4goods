@@ -56,19 +56,49 @@ describe('ProductSourcesSection', () => {
     )
   })
 
-  it('shows only the name of a source without licence nor attribution', () => {
+  it('lists only the sources declaring a licence or an attribution', () => {
     const wrapper = mountSection([
-      { name: 'rakuten.com', license: '  ', attribution: null },
-      { name: '  ' },
+      {
+        name: 'fr-indice-durabilite',
+        portalUrl: 'https://www.data.gouv.fr/fr/datasets/indice/',
+        license: 'Licence Ouverte 2.0',
+      },
+      { name: 'rakuten.com', portalUrl: 'https://www.rakuten.com/' },
+      { name: 'open-prices', attribution: 'Open Food Facts contributors' },
     ])
 
     const items = wrapper.findAll('[data-testid="product-source"]')
-    expect(items).toHaveLength(1)
-    expect(items[0].text()).toBe('rakuten.com')
-    expect(items[0].find('a').exists()).toBe(false)
-    expect(wrapper.find('.product-sources__license').exists()).toBe(false)
-    expect(wrapper.find('.product-sources__attribution').exists()).toBe(false)
-    expect(wrapper.text()).not.toMatch(/license/i)
+    expect(
+      items.map(item => item.find('.product-sources__name').text())
+    ).toEqual(['fr-indice-durabilite', 'open-prices'])
+    expect(items[0].get('a.product-sources__name').attributes('href')).toBe(
+      'https://www.data.gouv.fr/fr/datasets/indice/'
+    )
+    expect(items[1].find('a').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('rakuten.com')
+    expect(wrapper.find('a[href="https://www.rakuten.com/"]').exists()).toBe(
+      false
+    )
+  })
+
+  it('renders nothing when no source declares a licence or an attribution', () => {
+    const wrapper = mountSection([
+      {
+        name: 'rakuten.com',
+        portalUrl: 'https://www.rakuten.com/',
+        license: '  ',
+        attribution: null,
+      },
+      { name: 'icecat.biz' },
+    ])
+
+    expect(wrapper.find('section').exists()).toBe(false)
+    expect(wrapper.find('h2').exists()).toBe(false)
+    expect(wrapper.text()).toBe('')
+  })
+
+  it('renders nothing without sources', () => {
+    expect(mountSection(null).find('section').exists()).toBe(false)
   })
 
   it('shows an unlinked licence when the source gives no licence URL', () => {

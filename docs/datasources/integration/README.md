@@ -37,7 +37,7 @@ lang: fr
 | Plan 05 (EPREL smartphones) | avancé par le programme ImpactScore : hypothèse `productGroup` infirmée (GOU-2042), champs EPREL mappés dont les cycles de batterie x100 (GOU-1891, #3596), table Apple (#3606). Appariement au 2026-11-12 : 939 smartphones sur 14 589 (6,4 %), Apple 27 sur 1 689, Samsung 382 sur 3 668 ; mesure complète après le batch du 2026-11-17 (GOU-2048). Restent : règle Samsung `/DS`, filtre `deviceType`, attribution (P0-4), colonnes d'export. |
 | Plan 01 (indice de durabilité) | lecture marchande seulement : attribut `DURABILITY_INDEX` (GOU-1892), critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (GOU-2041). L'import du fichier data.gouv n'est pas commencé. |
 | P0-1 | livré (GOU-2296) : `BatchService.clean()` supprimé ; `POST /batch/tweak` et `cleanAiData()` supprimés ensuite. |
-| P0-4 | livré (GOU-2301, GOU-2302) : champ `sources`, licence des datasources, source des scores, licence et attribution affichées sur la fiche produit. `sourceAttributions` (lien et date de l'enregistrement) reporté à P0-5. |
+| P0-4 | livré (GOU-2301, GOU-2302) : champ `sources`, licence des datasources, source des scores, licence et attribution affichées sur la fiche produit. Rien n'est affiché tant qu'aucune source ne déclare `license` ou `attribution` dans son YAML, ce qui est le cas aujourd'hui : l'affichage apparaîtra avec les sources de référence (EPREL, RappelConso...) qui les déclareront. `sourceAttributions` (lien et date de l'enregistrement) reporté à P0-5. |
 | P0-2, P0-3, P0-5 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
 | Plans 02 à 04, 06 à 15 | non démarrés ; 09 et 10 en attente (Q2). |
 
@@ -333,12 +333,16 @@ Détail :
   nomme les datasources de la valeur retenue.
 - **Livré par GOU-2302 (P0-4, 2/2)** : `ProductDatasourcesDto.sources` décrit une fois chaque source
   du produit (`name`, `portalUrl`, `license`, `licenseUrl`, `attribution`, `null` quand la source ne
-  le dit pas) ; l'infobulle `ProductAttributeSourcingLabel` la retrouve par `datasourceName` et
-  montre la licence et le lien, la fiche produit liste les sources en bas de page (rendu SSR). front-api
-  lit les licences par `GET /datasources` de l'api (`DatasourceAttributionService`, rafraîchi toutes
-  les heures) ; le lien d'un marchand vient de son partenaire d'affiliation. `icecat.biz.miss`
-  rejoint `Product.TECHNICAL_DATASOURCE_CODES`. Le lien vers l'enregistrement et sa date attendent
-  `sourceAttributions` (P0-5).
+  le dit pas). front-api lit ces champs par `GET /datasources` de l'api (`DatasourceAttributionService`,
+  rafraîchi toutes les heures) ; seul le `portalUrl` du YAML de la source est exposé, jamais celui
+  d'un partenaire d'affiliation. Seules les sources qui déclarent une `license` ou une `attribution`
+  sont créditées : l'infobulle `ProductAttributeSourcingLabel` (retrouvée par `datasourceName`)
+  montre leur lien et leur licence, et la fiche produit les liste en bas de page (rendu SSR). Les
+  autres gardent leur nom seul dans l'infobulle et le bloc n'est pas rendu sans source créditée.
+  Aucune source n'en déclare aujourd'hui (`amazon.fr.yml`, `icecat.biz.yml`) : l'affichage
+  apparaîtra quand les YAML des sources de référence (EPREL, RappelConso...) déclareront
+  `license`/`attribution`. `icecat.biz.miss` rejoint `Product.TECHNICAL_DATASOURCE_CODES`. Le lien
+  vers l'enregistrement et sa date attendent `sourceAttributions` (P0-5).
 - **`sourceAttributions` est reporté à P0-5** : la projection est la seule à l'écrire, et il n'y a pas de
   champ sans écrivain. La description ci-dessous reste la cible.
 - **Produit** (à créer, P0-5) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par

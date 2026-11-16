@@ -145,7 +145,10 @@ import type { PropType, Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { mdiInformation } from '@mdi/js'
 import { usePluralizedTranslation } from '~/composables/usePluralizedTranslation'
-import { useProductSources } from '~/composables/useProductSources'
+import {
+  declaresAttribution,
+  useProductSources,
+} from '~/composables/useProductSources'
 import type {
   ProductAttributeSourceDto,
   ProductSourceDto,
@@ -176,6 +179,13 @@ const { t, n } = useI18n()
 const { translatePlural } = usePluralizedTranslation()
 // Licence and portal of each source, provided by the product page (GOU-2302).
 const resolveProductSource = useProductSources()
+
+// Only a source declaring a licence or an attribution gets its link and
+// licence; any other keeps its plain name.
+const attributedSource = (name: string | null | undefined) => {
+  const source = resolveProductSource(name)
+  return declaresAttribution(source) ? source : undefined
+}
 
 const tooltipContentClass =
   'product-attribute-sourcing__tooltip-overlay' as const
@@ -285,7 +295,7 @@ type SourceRow = {
 const sourceRows = computed<SourceRow[]>(() =>
   normalizedSources.value.map(source => ({
     source,
-    details: resolveProductSource(source.datasourceName),
+    details: attributedSource(source.datasourceName),
   }))
 )
 

@@ -199,11 +199,12 @@ page read it.
   `front.affiliation-partners` base URL and API key, keeps these five fields,
   re-keys them by `name` (the api keys them by file name) and never logs the
   response body.
-- **Portal URL**: the configured one, else the portal URL of the affiliation
-  partner of the same name (merchant feeds have no datasource file). Only
-  absolute `http(s)` URLs are exposed.
-- **Never guessed**: a blank or missing field is `null`; the frontend shows
-  nothing for it (no "unknown licence").
+- **Portal URL**: only the one declared in the datasource file. Merchant feeds
+  have no datasource file and get `null`: no link is taken from the affiliation
+  partners. Only absolute `http(s)` URLs are exposed.
+- **Never guessed**: a blank or missing field is `null`. The frontend shows a
+  source, its link and its licence only when it declares a `license` or an
+  `attribution` (no "unknown licence", no merchant link).
 - **When**: at startup then hourly, never in a user request. On failure the
   previous snapshot is kept; until the first success the sources are listed
   without licence.

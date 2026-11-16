@@ -2,8 +2,6 @@ package org.open4goods.nudgerfrontapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -17,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.UrlConstants;
 import org.open4goods.nudgerfrontapi.dto.product.ProductSourceDto;
 import org.springframework.http.MediaType;
@@ -54,17 +51,15 @@ class DatasourceAttributionServiceTest {
             }
             """;
 
-    private AffiliationPartnerService partnerService;
     private RestClient.Builder builder;
     private MockRestServiceServer server;
     private DatasourceAttributionService service;
 
     @BeforeEach
     void setUp() {
-        partnerService = mock(AffiliationPartnerService.class);
         builder = RestClient.builder().baseUrl("http://api.test").defaultHeader(UrlConstants.APIKEY_PARAMETER, "key");
         server = MockRestServiceServer.bindTo(builder).build();
-        service = new DatasourceAttributionService(builder.build(), partnerService);
+        service = new DatasourceAttributionService(builder.build());
     }
 
     @Test
@@ -83,23 +78,20 @@ class DatasourceAttributionServiceTest {
                 new ProductSourceDto("unknown.example", null, null, null, null));
     }
 
+    /** Merchant feeds have no datasource file: no link is taken from their affiliation partner (GOU-2302). */
     @Test
-    void merchantFeedsTakeThePortalOfTheirAffiliationPartner() {
+    void onlyThePortalDeclaredInTheDatasourceFileIsExposed() {
         server.expect(requestTo("http://api.test/datasources"))
                 .andRespond(withSuccess(CONFIGS, MediaType.APPLICATION_JSON));
-        given(partnerService.getPartners()).willReturn(List.of(
-                partner("Darty.com", "https://www.darty.com"),
-                partner("data-gouv", "https://partner.example"),
-                partner("evil.example", "javascript:alert(1)")));
 
         service.refresh();
 
-        assertThat(service.describe(List.of("darty.com", "data-gouv", "evil.example")))
+        assertThat(service.describe(List.of("darty.com", "data-gouv", "icecat.biz")))
                 .extracting(ProductSourceDto::name, ProductSourceDto::portalUrl)
                 .containsExactly(
-                        tuple("darty.com", "https://www.darty.com"),
+                        tuple("darty.com", null),
                         tuple("data-gouv", "https://www.data.gouv.fr/"),
-                        tuple("evil.example", null));
+                        tuple("icecat.biz", null));
     }
 
     @Test
@@ -134,12 +126,5 @@ class DatasourceAttributionServiceTest {
         assertThat(DatasourceAttributionService.httpUrl(" HTTPS://www.data.gouv.fr/x ")).isEqualTo(
                 "HTTPS://www.data.gouv.fr/x");
         assertThat(DatasourceAttributionService.httpUrl("http://example.org")).isEqualTo("http://example.org");
-    }
-
-    private static AffiliationPartner partner(String name, String portalUrl) {
-        AffiliationPartner partner = new AffiliationPartner();
-        partner.setName(name);
-        partner.setPortalUrl(portalUrl);
-        return partner;
     }
 }

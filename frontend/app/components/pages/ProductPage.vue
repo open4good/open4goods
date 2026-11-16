@@ -196,13 +196,14 @@
           </section>
 
           <!-- Last public section, rendered from the SSR payload: it never
-               pushes content already displayed (CLS, GOU-2302). -->
+               pushes content already displayed (CLS, GOU-2302). Absent when
+               no source declares a licence or an attribution. -->
           <section
-            v-if="product.datasources?.sources?.length"
+            v-if="attributedSources.length"
             :id="sectionIds.sources"
             class="product-page__section"
           >
-            <ProductSourcesSection :sources="product.datasources.sources" />
+            <ProductSourcesSection :sources="attributedSources" />
           </section>
 
           <section
@@ -279,7 +280,10 @@ import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
-import { provideProductSources } from '~/composables/useProductSources'
+import {
+  attributedProductSources,
+  provideProductSources,
+} from '~/composables/useProductSources'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from 'vue-i18n'
 import { buildCategoryHash } from '~/utils/_category-filter-state'
@@ -447,6 +451,11 @@ const product = computed(() => productData.value)
 
 // Licence and portal of each source, read by every sourcing tooltip (GOU-2302).
 provideProductSources(() => product.value?.datasources?.sources)
+// Sources credited in the "Sources" block: those declaring a licence or an
+// attribution only.
+const attributedSources = computed(() =>
+  attributedProductSources(product.value?.datasources?.sources)
+)
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`

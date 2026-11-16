@@ -93,8 +93,7 @@ class ProductMappingServiceTest {
                 Caffeine.newBuilder().maximumSize(100).build());
         when(cacheManager.getCache(CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME)).thenReturn(referenceCache);
         offerFreshnessService = new OfferFreshnessService(new OfferFreshnessProperties());
-        datasourceAttributionService = new DatasourceAttributionService(mock(RestClient.class),
-                mock(AffiliationPartnerService.class));
+        datasourceAttributionService = new DatasourceAttributionService(mock(RestClient.class));
         service = newService(datasourceAttributionService);
     }
 
@@ -211,8 +210,7 @@ class ProductMappingServiceTest {
                   }
                 }
                 """, MediaType.APPLICATION_JSON));
-        DatasourceAttributionService attributionService = new DatasourceAttributionService(builder.build(),
-                mock(AffiliationPartnerService.class));
+        DatasourceAttributionService attributionService = new DatasourceAttributionService(builder.build());
         attributionService.refresh();
         server.verify();
 
