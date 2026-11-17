@@ -9,7 +9,9 @@
   "prCreation": "immediate",
   "ignorePaths": ["ui/**"],
   "automerge": false,
-  "dependencyDashboard": true,
+  "dependencyDashboard": {
+    "enabled": true
+  },
   "separateMultipleMajor": true,
 
   "major": {
