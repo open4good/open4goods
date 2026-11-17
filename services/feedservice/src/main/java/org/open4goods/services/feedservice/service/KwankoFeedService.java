@@ -58,7 +58,7 @@ public class KwankoFeedService extends AbstractFeedService
     static final String KWANKO_TRACKED_URL_PATTERN =
             "^(?i:https?://(?:[^/?#]*\\.)?(?:metaffiliation|netaffiliation|kwanko)\\.com)(?:[:/?#]|$)"
             + "|[?&=/]P[0-9A-F]+S[0-9]+U[0-9A-Za-z]+V[0-9]+(?:[&#/]|$)";
-    private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "Product URL", "url", "URL", "link", "merchant_deep_link"};
+    private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "page url", "Product URL", "url", "URL", "link", "merchant_deep_link"};
     private static final String[] KWANKO_TRACKED_URL_COLUMNS = {"tracking_url", "tracked_url", "deeplink", "tracking_link", "merchant_deep_link", "URL"};
     private static final String[] KWANKO_NAME_COLUMNS = {"product_name", "Product name", "Name", "name", "title", "Title", "product_title"};
     private static final String[] KWANKO_PRICE_COLUMNS = {"price", "Price", "Current price", "product_price", "sale_price", "search_price", "price_vat_inc", "StrikePrice"};
