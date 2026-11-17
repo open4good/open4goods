@@ -8,6 +8,7 @@ import org.open4goods.model.product.ProductPartialUpdateHolder;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.elasticsearch.BulkFailureException;
 /**
  * Worker thread that asynchronously dequeue the DataFragments from the file queue. It
  * @author goulven
@@ -61,6 +62,10 @@ public class PartialProductIndexationWorker implements Runnable {
 					
 					logger.info ("{} has indexed {} products. {} Remaining in queue",workerName,  buffer.size(), service.getPartialProductQueue().size());
 				}
+			} catch (final BulkFailureException e) {
+				// Only the failed elements are lost: the others of the bulk are written. No stack, the ids tell enough
+				logger.warn("{}: {} products not written by the partial bulk (id={}), they stay stale until the next update",
+						workerName, e.getFailedDocuments() == null ? 0 : e.getFailedDocuments().size(), e.getFailedDocuments());
 			} catch (final Exception e) {
 				logger.error("Error while dequeing DataFragments",e);
 			}

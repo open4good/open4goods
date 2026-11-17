@@ -247,6 +247,7 @@ class ProductRepositoryTest
         assertThat(updates.getFirst().getDocument()).isNull();
         assertThat(updates.getFirst().getScript()).isEqualTo(ProductRepository.PARTIAL_UPDATE_SCRIPT);
         assertThat(updates.getFirst().getLang()).isEqualTo("painless");
+        assertThat(updates.getFirst().getRetryOnConflict()).isEqualTo(3);
         assertThat(updates.getFirst().getParams().get("changes"))
                 .isEqualTo(Map.of("lastChange", 1L, "offersCount", 2, "price", "updated"));
     }
