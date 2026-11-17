@@ -51,7 +51,7 @@ services:
 # API (Backend)
 ###################################################################
   api:
-    image: eclipse-temurin:25.0.5_8-jre@sha256:ecdc0adb37bde1a281c4d245a3cd535004b1fc8322d560f5b09463b248c81df0
+    image: eclipse-temurin:25.0.5_8-jre@sha256:945247f9d092703e0c6be92243ef3c51640229e23ab34d353c8dcdc73e6cd4e6
     container_name: api
     volumes:
       - ./api/target/api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -73,7 +73,7 @@ services:
 # Front API (Backend for Frontend)
 ###################################################################
   front-api:
-    image: eclipse-temurin:25.0.5_8-jre@sha256:ecdc0adb37bde1a281c4d245a3cd535004b1fc8322d560f5b09463b248c81df0
+    image: eclipse-temurin:25.0.5_8-jre@sha256:945247f9d092703e0c6be92243ef3c51640229e23ab34d353c8dcdc73e6cd4e6
     container_name: front-api
     volumes:
       - ./front-api/target/front-api-0.0.1-SNAPSHOT.jar:/app/app.jar
@@ -95,7 +95,7 @@ services:
 # Frontend (SSR)
 ###################################################################
   frontend-ssr:
-    image: node:24@sha256:8fa96264f302f58bbb13aa7339c541547b56975766ce956c875da149452a3e40
+    image: node:24@sha256:9d266751ca3d7fdbe651c878ffd5ad0a42fed49a18c283509267c97f025b7496
     container_name: frontend-ssr
     working_dir: /usr/src/app
     volumes:
