@@ -94,6 +94,7 @@ public class FeedIndexingWorker implements Runnable {
 	        "product_url",
 	        "product URL",
 	        "product page URL",
+	        "page url",
 	        "url",
 	        "URL",
 	        "link",

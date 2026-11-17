@@ -122,6 +122,27 @@ class FeedIndexingWorkerTrackedUrlTest {
         assertThat(doneMessage()).contains("imported: 3", "tracking_rewritten: 0", "untracked_rejected: 0");
     }
 
+    /**
+     * The Kwanko "Vevor FR" feed names its url column {@code page url} (GOU-2391): its rows were all rejected as not_validable.
+     */
+    @Test
+    void pageUrlColumnIsRecognisedAsProductUrl() throws Exception {
+        csvService = mock(FeedIndexingService.class);
+        when(csvService.createDatasourceLogger(anyString(), any(), anyString())).thenReturn(dedicatedLogger);
+        when(csvService.detectSchema(any(File.class), any(Charset.class)))
+                .thenReturn(CsvSchema.emptySchema().withHeader().withColumnSeparator(','));
+        DataSourceProperties ds = kwankoDatasource(CLICK_TEMPLATE);
+        ds.setName("vevorfr");
+        ds.setDatasourceConfigName("Vevor FR");
+        ds.getCsvDatasource().getDatasourceUrls().clear();
+        ds.getCsvDatasource().getDatasourceUrls().add(Path.of(getClass().getResource("/kwanko/vevorfr-sample.csv").toURI()).toString());
+
+        newWorker().fetch(ds);
+
+        assertThat(indexedFragments()).hasSize(2).allSatisfy(fragment -> assertThat(fragment.getUrl()).startsWith(TRACKED_URL.substring(0, 40)));
+        assertThat(doneMessage()).contains("imported: 2", "not_validable: 0");
+    }
+
     private List<DataFragment> indexedFragments() throws Exception {
         ArgumentCaptor<DataFragment> fragments = ArgumentCaptor.forClass(DataFragment.class);
         verify(indexer, atLeastOnce()).index(fragments.capture(), anyString());
