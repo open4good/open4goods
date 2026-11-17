@@ -264,6 +264,9 @@ public class ProductRepository {
 
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
+	/** Retries done by Elasticsearch on a version conflict of a scripted update (see {@link IndexationConfig}) */
+	private int updateRetryOnConflict = 3;
+
 	public ProductRepository() {
 
 
@@ -284,6 +287,7 @@ public class ProductRepository {
 	public ProductRepository(IndexationConfig indexationConfig, ElasticsearchOperations elasticsearchOperations) {
 
 		this.elasticsearchOperations = elasticsearchOperations;
+		this.updateRetryOnConflict = indexationConfig.getUpdateRetryOnConflict();
 
 		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
 		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
@@ -1955,6 +1959,7 @@ public class ProductRepository {
 						.withScript(CLEAR_SCORES_SCRIPT)
 						.withLang("painless")
 						.withParams(params)
+						.withRetryOnConflict(updateRetryOnConflict)
 						.withIndex(CURRENT_INDEX.getIndexName())
 						.build())
 				.toList();
@@ -1980,6 +1985,7 @@ public class ProductRepository {
 	                .withScript(PARTIAL_UPDATE_SCRIPT)
 	                .withLang("painless")
 	                .withParams(Map.of("changes", product.getChanges()))
+	                .withRetryOnConflict(updateRetryOnConflict)
 	                .withIndex(CURRENT_INDEX.getIndexName())
 	                .build())
 	        .collect(Collectors.toList());
