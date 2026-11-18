@@ -106,8 +106,9 @@ natureNeutralCategoryFragments:
   - "INFORMATIQUE | COMPOSANTS |"
 
 # Minimum share (0 to 1) of a product's distinct categories that must carry a marker for the nature
-# to be set. 0: one marked category is enough. Set after the dry-run of the recovery (GOU-2234).
-natureMinMarkedCategoryShare: 0
+# to be set. 0.5: at least half of them. Chosen after the production dry-run of the recovery (GOU-2284):
+# 0 marked 380 806 more products (5.8 %), nearly all false positives.
+natureMinMarkedCategoryShare: 0.5
 
 # Vertical of a product decided by a vote between its datasources (GOU-2256), instead of the first
 # matching category with a single excluding token as veto. On a vertical, each datasource votes against

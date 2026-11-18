@@ -182,7 +182,7 @@ public class VerticalConfig {
 	/**
 	 * Minimum share (0 to 1) of a product's distinct normalised merchant
 	 * categories that must carry a nature marker for the nature to be set
-	 * (GOU-2233, measure 7 of GOU-2226). 0 means one marked category is enough.
+	 * (GOU-2233, measure 7 of GOU-2226). 0 means one marked category is enough; the value of _default.yml is 0.5.
 	 */
 	private double natureMinMarkedCategoryShare = 0d;
 
