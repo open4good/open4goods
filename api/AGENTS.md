@@ -295,7 +295,7 @@ Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
 
 1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
 2. Lancer le dry-run et publier son résultat sur GOU-2234.
-3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+3. `natureMinMarkedCategoryShare` est fixé à 0,5 dans `_default.yml` (GOU-2430) ; l'écriture attend le déploiement de ce changement.
 4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
    fenêtres de 13 h et de 23 h.
 
@@ -379,9 +379,9 @@ Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) av
 `sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
 marqueur : champ absent. Les marqueurs de composant PC (`BOITIER PC`, `COMPOSANT PC`, `COMPOSANTS PC`,
 `INFORMATIQUE | COMPOSANTS |`, GOU-2317) ne servent qu'au vote des verticales : ils sont aussi des fragments neutres,
-donc la nature ne change pas (`PcComponentMarkersTest` dans `verticals`). `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
-normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il sera fixé d'après le dry-run de la reprise
-(GOU-2234), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
+donc la nature ne change pas (`PcComponentMarkersTest` dans `verticals`). `natureMinMarkedCategoryShare` (0,5 par défaut, GOU-2284) est la part minimale des catégories distinctes
+normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il a été fixé d'après le dry-run de la reprise
+(GOU-2234, GOU-2284 : 0 marquait 5,8 % de produits en plus, presque tous des faux positifs), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
 catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à
 jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
 à `nature`. Ce champ ne change ni la verticale ni le score.
