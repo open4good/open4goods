@@ -98,6 +98,9 @@ natureNeutralCategoryFragments:
   - PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES
   # Shoes (about 224 K products), not accessories
   - CHAUSSURES - ACCESSOIRES
+  # Beds filed by Fnac under this accessory category (about 33 K products, GOU-2431): not accessories.
+  # The accessory rows of the other merchants (pillows, mattress protectors, bed feet) keep their marker.
+  - PETIT MENAGER & CUISINE - ACCESSOIRES LITERIE
   # The PC component markers of the vote (GOU-2317): a PC component is neither a spare part nor an accessory.
   # Each one is written exactly as in sparePartCategoryMarkers (PcComponentMarkersTest).
   - BOITIER PC
