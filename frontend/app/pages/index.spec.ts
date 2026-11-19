@@ -417,6 +417,17 @@ mockNuxtImport('useI18n', () => () => ({
   availableLocales: ['fr-FR', 'en-US'],
 }))
 
+const smAndDownMock = ref(false)
+
+vi.mock('vuetify', async importOriginal => {
+  const actual = await importOriginal<typeof import('vuetify')>()
+
+  return {
+    ...actual,
+    useDisplay: () => ({ ...actual.useDisplay(), smAndDown: smAndDownMock }),
+  }
+})
+
 mockNuxtImport('useRouter', () => () => ({
   push: routerPush,
   replace: routerReplace,
@@ -677,6 +688,7 @@ describe('Home page', () => {
     fetchSpy.mockClear()
     fetchCategoriesMock.mockClear()
     fetchArticlesMock.mockClear()
+    smAndDownMock.value = false
   })
 
   afterAll(() => {
@@ -694,6 +706,33 @@ describe('Home page', () => {
     expect(heroSubtitle.text()).toBe(
       (messages['home.hero.titleSubtitle'] as string[])[0]
     )
+  })
+
+  // GOU-2458: the layout must not depend on the User-Agent, or hydration
+  // swaps the structure when the viewport disagrees with it (CLS 1.77).
+  it('switches the mobile landing and the desktop hero by CSS only', async () => {
+    const wrapper = await mountHomePage()
+
+    const desktopHero = wrapper.find('.home-page__desktop-hero')
+    expect(desktopHero.exists()).toBe(true)
+    expect(desktopHero.classes()).toEqual(
+      expect.arrayContaining(['d-none', 'd-md-block'])
+    )
+    expect(desktopHero.find('.home-hero').exists()).toBe(true)
+    // Already `display: none` on desktop, dropped after hydration.
+    expect(wrapper.find('.pwa-landing').exists()).toBe(false)
+  })
+
+  it('renders the mobile landing, hidden from md up, on small screens', async () => {
+    smAndDownMock.value = true
+
+    const wrapper = await mountHomePage()
+
+    const landing = wrapper.find('.pwa-landing')
+    expect(landing.exists()).toBe(true)
+    expect(landing.classes()).toContain('d-md-none')
+    expect(wrapper.find('.home-page__desktop-hero').exists()).toBe(true)
+    expect(wrapper.find('.home-hero').exists()).toBe(false)
   })
 
   it('registers FAQ structured data in head tags', async () => {

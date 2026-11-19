@@ -64,45 +64,23 @@ const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
 
-const MOBILE_USER_AGENT_PATTERN =
-  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
-
-const resolveUserAgentFromHeader = (
-  headerValue: string | string[] | undefined
-): string | null => {
-  if (!headerValue) {
-    return null
-  }
-
-  if (Array.isArray(headerValue)) {
-    return headerValue[0] ?? null
-  }
-
-  return headerValue
-}
-
-const initialIsMobileLayout = useState<boolean>(
-  'home-page-initial-is-mobile-layout',
-  () => {
-    if (import.meta.server) {
-      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
-      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
-
-      return userAgent ? MOBILE_USER_AGENT_PATTERN.test(userAgent) : false
-    }
-
-    return display.smAndDown.value
-  }
-)
-
+// The mobile landing and the desktop hero are both server-rendered and
+// switched by the Vuetify display classes (`d-md-none`, `d-none d-md-block`),
+// whose breakpoint matches `smAndDown`. Choosing the layout from the
+// User-Agent swapped the structure at hydration whenever the viewport
+// disagreed with it (desktop UA at 390 px: CLS 1.77, GOU-2458).
 const isHydrated = ref(false)
 
 onMounted(() => {
   isHydrated.value = true
 })
 
-const isMobileLayout = computed(() =>
-  isHydrated.value ? display.smAndDown.value : initialIsMobileLayout.value
+const isMobileLayout = computed(() => display.smAndDown.value)
+
+// Hidden by CSS until hydration, then dropped on desktop: the swap moves
+// nothing, as the landing is already `display: none` there.
+const shouldRenderMobileLanding = computed(
+  () => !isHydrated.value || isMobileLayout.value
 )
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
@@ -530,7 +508,8 @@ const normalizeVerticalHomeUrl = (
 }
 
 const blogDateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, {
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
       dateStyle: 'medium',
       timeZone: 'UTC',
     })
@@ -791,8 +770,9 @@ useHead(() => ({
 <template>
   <div>
     <PwaMobileLanding
-      v-if="isMobileLayout"
+      v-if="shouldRenderMobileLanding"
       v-model:search-query="searchQuery"
+      class="d-md-none"
       :verticals="rawCategories"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       @submit="handleSearchSubmit"
@@ -800,31 +780,33 @@ useHead(() => ({
       @select-product="handleProductSuggestion"
     />
     <div class="home-page">
-      <ClientOnly>
-        <HomeHeroSection
-          v-if="!isMobileLayout"
-          v-model:search-query="searchQuery"
-          :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-          :verticals="rawCategories"
-          :partners-count="heroPartnersCount"
-          :open-data-millions="openDataMillions"
-          :products-count="productsCount"
-          :categories-count="categoriesCount"
-          :impact-score-products-count="impactScoreProductsCount"
-          :impact-score-categories-count="impactScoreCategoriesCount"
-          :products-without-vertical-count="productsWithoutVerticalCount"
-          :reviewed-products-count="reviewedProductsCount"
-          :ai-summary-remaining-credits="aiSummaryRemainingCredits"
-          :should-reduce-motion="shouldReduceMotion"
-          hero-background-i18n-key="hero.background"
-          @submit="handleSearchSubmit"
-          @select-category="handleCategorySuggestion"
-          @select-product="handleProductSuggestion"
-        />
-        <template #fallback>
-          <HomeHeroFallback v-if="!isMobileLayout" />
-        </template>
-      </ClientOnly>
+      <div class="home-page__desktop-hero d-none d-md-block">
+        <ClientOnly>
+          <HomeHeroSection
+            v-if="!isMobileLayout"
+            v-model:search-query="searchQuery"
+            :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+            :verticals="rawCategories"
+            :partners-count="heroPartnersCount"
+            :open-data-millions="openDataMillions"
+            :products-count="productsCount"
+            :categories-count="categoriesCount"
+            :impact-score-products-count="impactScoreProductsCount"
+            :impact-score-categories-count="impactScoreCategoriesCount"
+            :products-without-vertical-count="productsWithoutVerticalCount"
+            :reviewed-products-count="reviewedProductsCount"
+            :ai-summary-remaining-credits="aiSummaryRemainingCredits"
+            :should-reduce-motion="shouldReduceMotion"
+            hero-background-i18n-key="hero.background"
+            @submit="handleSearchSubmit"
+            @select-category="handleCategorySuggestion"
+            @select-product="handleProductSuggestion"
+          />
+          <template #fallback>
+            <HomeHeroFallback />
+          </template>
+        </ClientOnly>
+      </div>
       <div class="home-page__sections">
         <ParallaxWidget
           class="home-page__parallax"
