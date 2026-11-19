@@ -1556,6 +1556,8 @@ public class SearchService {
 	 * in order and serves the requested slice; only that slice is then fetched in full. {@code totalElements} is
 	 * exact when every candidate was read, otherwise it is the Elasticsearch total scaled by the share of
 	 * displayable candidates read. Pages beyond {@code longTailMaxCandidates} candidates are not reachable.
+	 * Displayable candidates whose names put the object of the query after another head noun
+	 * ({@link GlobalSearchRelevance#isForeignHeadProduct}) join the accessories, merged by score.
 	 * </p>
 	 *
 	 * @param sanitizedQuery sanitized query string
@@ -1579,6 +1581,14 @@ public class SearchService {
 		SearchHits<Product> candidates = searchCandidates(globalSearchRelevance.rank(longTailQuery, sanitizedQuery),
 				candidatesToRead);
 		List<SearchHit<Product>> displayable = displayableCandidates(candidates);
+		List<SearchHit<Product>> foreignHeads = List.of();
+		if (accessoryQuery != null) {
+			// Names "<part> <query object>" that Elasticsearch cannot tell (GOU-2474): set apart in Java.
+			Map<Boolean, List<SearchHit<Product>>> split = displayable.stream().collect(Collectors.partitioningBy(
+					hit -> globalSearchRelevance.isForeignHeadProduct(sanitizedQuery, hit.getContent())));
+			foreignHeads = split.get(true);
+			displayable = split.get(false);
+		}
 
 		int from = pageNumber * pageSize;
 		List<SearchHit<Product>> pageCandidates = from >= displayable.size() ? List.of()
@@ -1591,8 +1601,10 @@ public class SearchService {
 			List<SearchHit<Product>> displayableAccessories = displayableCandidates(searchCandidates(
 					globalSearchRelevance.rank(accessories, sanitizedQuery),
 					accessoryLimit * globalSearchRelevance.overRead()));
-			accessoryCandidates = displayableAccessories.subList(0,
-					Math.min(accessoryLimit, displayableAccessories.size()));
+			accessoryCandidates = Stream.concat(displayableAccessories.stream(), foreignHeads.stream())
+					.sorted(Comparator.comparing(SearchHit<Product>::getScore).reversed())
+					.limit(accessoryLimit)
+					.toList();
 		}
 
 		Map<String, SearchHit<Product>> products = fetchProducts(Stream

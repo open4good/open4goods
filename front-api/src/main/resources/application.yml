@@ -104,6 +104,93 @@ front:
     long-tail-max-candidates: 1200
     min-title-words: 3
     min-title-word-length: 3
+    # Long tail rule relative to the query (GOU-2474): a product without merchant category whose
+    # names hold the object of the query (query without brands, articles, modifiers, numbers) but
+    # never at their head ("Ressort Lave-linge - Twinstar", "Roue Panier Lave-vaisselle Bosch" for
+    # lave-linge / lave-vaisselle) is set apart with the accessories. The head is the first word
+    # left once brands (product BRAND and known-brands), articles, words holding a digit,
+    # parenthesised parts and head-modifiers are skipped.
+    foreign-head-enabled: true
+    foreign-head-uncategorized-only: true
+    head-modifiers:
+      - mini
+      - petit
+      - petite
+      - compact
+      - compacte
+      - grand
+      - grande
+      - machine
+      - nouveau
+      - nouvelle
+      - neuf
+      - reconditionné
+      - série
+      - series
+      - gamme
+      - lot
+      - pack
+      - smart
+      - robot
+      - combiné
+    known-brands:
+      - aeg
+      - amica
+      - apple
+      - asus
+      - beko
+      - bosch
+      - brandt
+      - candy
+      - cello
+      - de dietrich
+      - delonghi
+      - dyson
+      - electrolux
+      - essentielb
+      - fagor
+      - gorenje
+      - grundig
+      - haier
+      - hisense
+      - honor
+      - hoover
+      - hotpoint
+      - huawei
+      - indesit
+      - jvc
+      - kenwood
+      - krups
+      - lenovo
+      - lg
+      - liebherr
+      - loewe
+      - miele
+      - motorola
+      - moulinex
+      - neff
+      - nokia
+      - oneplus
+      - oppo
+      - panasonic
+      - philips
+      - polaroid
+      - proline
+      - qilive
+      - realme
+      - rowenta
+      - samsung
+      - sharp
+      - siemens
+      - smeg
+      - sony
+      - tcl
+      - tefal
+      - thomson
+      - toshiba
+      - vestel
+      - whirlpool
+      - xiaomi
   cache:
     path: ./cache
     one-minute-ttl: 1m

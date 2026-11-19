@@ -139,6 +139,116 @@ class GlobalSearchRelevanceTest {
         assertThat(withPhrases.accessoryQuery("tv").toString()).contains("meuble tv");
     }
 
+    @Test
+    void namesPuttingTheQueryObjectAfterAnotherHeadAreForeign() throws Exception {
+        GlobalSearchRelevance shipped = shipped();
+
+        assertThat(shipped.isForeignHeadName("lave-linge", "Ressort Lave-linge - Twinstar", "TWINSTAR")).isTrue();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Roulement Lave-Linge 6206ZZ - Blomberg", null)).isTrue();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Klixon (92212687) lave-linge candy", null)).isTrue();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Coussins Lave-linge, 4 Tapis Anti-vibrations", null))
+                .isTrue();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Bouton Lave-linge Whirlpool 481010", null)).isTrue();
+        for (String query : List.of("lave-vaisselle", "lave-vaisselle bosch", "Lave Vaisselle")) {
+            assertThat(shipped.isForeignHeadName(query, "Roue Panier Lave-vaisselle Bosch", "BOSCH")).isTrue();
+            assertThat(shipped.isForeignHeadName(query, "Vanne-aquastop Lave Vaisselle Bosch", null)).isTrue();
+            assertThat(shipped.isForeignHeadName(query, "Palier Maintien Grille Lave Vaisselle Bosch", null)).isTrue();
+            assertThat(shipped.isForeignHeadName(query, "Interrupteur Lave-vaisselle Bosch 00611463", null)).isTrue();
+        }
+    }
+
+    @Test
+    void namesStartingWithTheQueryObjectAreKept() throws Exception {
+        GlobalSearchRelevance shipped = shipped();
+
+        assertThat(shipped.isForeignHeadName("lave-linge", "Samsung Lave-linge WW10T654DLH", "SAMSUNG")).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Samsung Lave-linge WW10T654DLH", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Lave-linge hublot Samsung WW10T654DLH", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "WW10T654DLH Lave-linge Samsung", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Mini lave-linge pliable", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Lot de 2 lave-linge Candy", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-vaisselle", "Lave-vaisselle Bosch SMS4HVI33E", "BOSCH")).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-vaisselle bosch", "Bosch Série 4 Lave-vaisselle SMS4HVI33E",
+                "BOSCH")).isFalse();
+        assertThat(shipped.isForeignHeadName("téléviseur", "Téléviseur LG OLED55C3", "LG")).isFalse();
+        assertThat(shipped.isForeignHeadName("televiseurs", "Téléviseur LG OLED55C3", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("lave-linge", "Sèche-linge Bosch WTH85", null)).isFalse();
+    }
+
+    @Test
+    void nothingIsForeignWhenTheQueryNamesThePart() throws Exception {
+        GlobalSearchRelevance shipped = shipped();
+
+        assertThat(shipped.isForeignHeadName("ressort lave-linge", "Ressort Lave-linge - Twinstar", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("ressort lave-linge", "Lave-linge Samsung WW10T654DLH", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("roue panier lave-vaisselle", "Roue Panier Lave-vaisselle Bosch",
+                "BOSCH")).isFalse();
+        assertThat(shipped.isForeignHeadName("roue panier lave-vaisselle", "Lave-vaisselle Bosch SMS4HVI33E", null))
+                .isFalse();
+        assertThat(shipped.isForeignHeadName("moteur lave-linge", "Moteur Lave-linge Beko", null)).isFalse();
+        assertThat(shipped.isForeignHeadName("samsung", "Coque Samsung Galaxy S23", "SAMSUNG")).isFalse();
+    }
+
+    @Test
+    void realProductsOfTheSurveyAreNeverForeign() throws Exception {
+        GlobalSearchProperties properties = configuredProperties();
+        // Checked without the category guard: the rule alone keeps them (GOU-2226, mesure 7.1).
+        properties.setForeignHeadUncategorizedOnly(false);
+        GlobalSearchRelevance relevance = new GlobalSearchRelevance(properties,
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+        List<Product> washers = List.of(
+                product(3615993792572L, "ELECTROLUX", "lave linge hublot electrolux EW7F3816DB",
+                        "Lave linge hublot EW7F3816DB Reconditionné"),
+                product(3615993777517L, "SAMSUNG", "Lave-linge Samsung WW10T654DLH", "Lave-linge WW10T654DLH"),
+                product(3615993764777L, "LG", "Lave-linge F964V42IXRS", "Lave-linge LG F964V42IXRS"));
+        List<Product> fridges = List.of(
+                product(641094245375L, "TEFCOLD", "Réfrigérateur Médical MSU400 - TEFCOLD"),
+                product(641094916763L, "MATERIEL CHR PRO", "Réfrigérateur Vitré Fs890h - Tefcold"),
+                product(641094212339L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FS1202S TEFCOLD"),
+                product(641094319151L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FSC1600H - TEFCOLD"),
+                product(641094732769L, "TEFCOLD", "Réfrigérateur Vitré UR400G - TEFCOLD"));
+        List<Product> phones = List.of(
+                product(3402203136888L, "XIAOMI", "Smartphone C21 3Go/32Go Smartphone 6000mAh 6.5 Double carte SIM",
+                        "xiaomi poco m5 smartphone 4go+128go noir"),
+                product(3770030120005L, "BINOM", "Smartphone - Binom - SX1 - Interface simplifiée",
+                        "Smartphone 4G Binom SX1"),
+                product(5908235978536L, "MAXCOM", "Smartphone senior - MAXCOM - MS601 - 4G LTE - Double SIM"),
+                product(3666373808086L, "REALME", "Smartphone Telephone Realme 9 Pro 128Gb Sunrise Blue"));
+        Product cello = product(5060750403310L, "CELLO",
+                "Téléviseur combiné - Cello - C3224WSF TRAV - 12 volts - Bluetooth",
+                "Televiseur combine Cello - C3224WSF TRAV");
+
+        washers.forEach(p -> assertThat(relevance.isForeignHeadProduct("lave-linge", p)).isFalse());
+        fridges.forEach(p -> assertThat(relevance.isForeignHeadProduct("réfrigérateur", p)).isFalse());
+        phones.forEach(p -> assertThat(relevance.isForeignHeadProduct("smartphone", p)).isFalse());
+        assertThat(relevance.isForeignHeadProduct("téléviseur", cello)).isFalse();
+        assertThat(relevance.isForeignHeadProduct("tv", cello)).isFalse();
+    }
+
+    @Test
+    void foreignHeadProductNeedsNoCategoryAndNoNameWithTheObjectAtItsHead() throws Exception {
+        GlobalSearchRelevance shipped = shipped();
+        Product spring = product(3380585143031L, "TWINSTAR", "Ressort Lave-linge - Twinstar");
+        Product categorized = product(3380585143032L, "TWINSTAR", "Ressort Lave-linge - Twinstar");
+        categorized.setDatasourceCategories(Set.of("ELECTROMENAGER > LAVAGE"));
+        Product mixed = product(3402203136888L, "XIAOMI", "xiaomi poco m5 smartphone 4go+128go noir",
+                "Smartphone C21 3Go/32Go");
+
+        assertThat(shipped.isForeignHeadProduct("lave-linge", spring)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("lave-linge", categorized)).isFalse();
+        assertThat(shipped.isForeignHeadProduct("smartphone", mixed)).isFalse();
+        assertThat(shipped.isForeignHeadProduct("ressort lave-linge", spring)).isFalse();
+        GlobalSearchProperties disabled = configuredProperties();
+        disabled.setForeignHeadEnabled(false);
+        assertThat(new GlobalSearchRelevance(disabled, new OfferFreshnessService(new OfferFreshnessProperties()))
+                .isForeignHeadProduct("lave-linge", spring)).isFalse();
+    }
+
+    private static GlobalSearchRelevance shipped() throws Exception {
+        return new GlobalSearchRelevance(configuredProperties(),
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+    }
+
     private static GlobalSearchRelevance configured() {
         return new GlobalSearchRelevance(
                 properties(List.of("moteur", "module", "insertion", "meuble tv", "thermostat pour",

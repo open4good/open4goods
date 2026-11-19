@@ -95,6 +95,28 @@ configured under `front.global-search` (GOU-2029). They never reach
   demoted because of `nature`. Otherwise accessories are demoted in the category groups
   (`boosting`, `accessory-negative-boost`) and leave the long tail for the
   additive `accessoryResults` field (at most `accessory-results-limit`).
+- **Foreign head names** (GOU-2474, long tail only): spare parts sold without
+  merchant category name the object after the part ("Ressort Lave-linge -
+  Twinstar", "Roue Panier Lave-vaisselle Bosch"), with neither `pour` nor
+  `de`. The object of the query is the query without its leading and trailing
+  brands (product `BRAND` and `known-brands`), articles, `head-modifiers`
+  (`mini`, `compact`, `machine`, `série`, `lot`...) and words holding a digit
+  (`lave-vaisselle bosch` gives `lave vaisselle`); the head of a name is its
+  first word once the same words and the parenthesised parts are skipped
+  ("Bosch Série 4 Lave-vaisselle ..." and "WW10T654DLH Lave-linge Samsung"
+  start with their object). A long tail candidate is set apart when one of its
+  offer names holds the object after another head and none starts with it, so
+  "xiaomi poco m5 smartphone" does not set apart a product also named
+  "Smartphone C21". The check runs in Java on the candidates read (the index
+  cannot express it); with `foreign-head-uncategorized-only` (default) only
+  products without `datasourceCategories` are checked. A query naming the part
+  (`ressort lave-linge`) has that part as object, so nothing is set apart; a
+  query naming an accessory term disables the rule as above. The products set
+  apart join `accessoryResults`, merged by score with the Elasticsearch
+  accessories. `foreign-head-enabled: false` turns the rule off. Vertical
+  groups and `nature` are not affected. Known limit: a name that starts with
+  the object ("Téléviseur Intelligent Lg, Téléviseur Infrarouge" for a remote)
+  is kept.
 - **Long tail** (`missingVerticalResults`, products without a vertical): only
   products with a fresh offer (`OfferFreshnessService`), an image and a
   readable title. The index holds neither `coverImagePath` nor an indexed

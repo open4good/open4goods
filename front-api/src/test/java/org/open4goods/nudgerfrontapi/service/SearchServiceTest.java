@@ -612,6 +612,26 @@ class SearchServiceTest {
     }
 
     @Test
+    void globalSearch_setsForeignHeadNamesApartFromTheLongTail() throws Exception {
+        Product washer = GlobalSearchRelevanceTest.displayable(1, "Lave-linge Samsung WW10T654DLH", now());
+        Product spring = GlobalSearchRelevanceTest.displayable(2, "Ressort Lave-linge - Twinstar", now());
+        Product categorized = GlobalSearchRelevanceTest.displayable(3, "Roulement Lave-linge 6206ZZ", now());
+        categorized.setDatasourceCategories(Set.of("GROS ELECTROMENAGER / LAVE-LINGE"));
+        Product filter = GlobalSearchRelevanceTest.displayable(4, "Filtre pour lave-linge", now());
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(spring, washer, categorized), List.of(filter));
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("lave-linge", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L, 3L);
+        assertThat(result.missingVerticalTotalElements()).isEqualTo(2);
+        // Merged by score: the spring (3.0) before the filter (1.0).
+        assertThat(gtins(result.accessoryResults())).containsExactly(2L, 4L);
+        NativeQuery longTail = queries.stream().filter(SearchServiceTest::isLongTailQuery).findFirst().orElseThrow();
+        assertThat(longTail.getSourceFilter().getIncludes()).contains("datasourceCategories");
+    }
+
+    @Test
     void globalSearch_accessoryResultsAreBounded() throws Exception {
         List<Product> accessories = new java.util.ArrayList<>();
         for (long id = 100; id < 112; id++) {
