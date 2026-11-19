@@ -605,10 +605,14 @@ const scrollToNext = () => {
 .home-hero__panel-bottom
   margin-top: auto
 
-// Réserve la hauteur du wizard (506 à 534 px mesurés dès 840 px, 300 px dès 1280 px),
-// commune au fallback et au wizard hydraté, pour éviter le CLS à l'hydratation.
+// Reserves the wizard height (506-534 px measured from 840 px up to Vuetify's `lg`
+// breakpoint at 1145 px, 300 px beyond), shared by the fallback and the hydrated
+// wizard, to avoid CLS on hydration. 1145 px matches `useDisplay().mobile`.
 .home-hero__wizard-slot
   min-height: 320px
+
+.home-hero__wizard-fallback
+  flex: 1
 
 @media (max-width: 959px)
   .home-hero
@@ -641,16 +645,18 @@ const scrollToNext = () => {
   .home-hero__inner
     height: 100%
 
-@media (min-width: 840px) and (max-width: 1279px)
+@media (min-width: 840px) and (max-width: 1144.98px)
   .home-hero__wizard-slot
-    min-height: 540px
+    // the wizard is capped at the viewport height minus 32 px
+    min-height: min(540px, calc(100vh - 32px))
+
+@media (min-width: 1145px)
+  .home-hero__wizard-slot
+    min-height: 300px
 
 @media (min-width: 1280px)
   .home-hero__panel-grid
     grid-template-columns: 1fr
-
-  .home-hero__wizard-slot
-    min-height: 300px
 
 @media (min-width: 90rem)
   .home-hero__panel
