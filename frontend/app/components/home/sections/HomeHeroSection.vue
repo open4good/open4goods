@@ -370,14 +370,13 @@ const scrollToNext = () => {
                     />
                   </div>
 
-                  <div class="d-flex flex-column ga-4">
+                  <div class="home-hero__wizard-slot d-flex flex-column ga-4">
                     <ClientOnly>
                       <NudgeToolWizard :verticals="wizardVerticals" />
                       <template #fallback>
                         <v-skeleton-loader
                           class="home-hero__wizard-fallback"
                           type="card"
-                          height="320"
                         />
                       </template>
                     </ClientOnly>
@@ -606,6 +605,11 @@ const scrollToNext = () => {
 .home-hero__panel-bottom
   margin-top: auto
 
+// Réserve la hauteur du wizard (506 à 534 px mesurés dès 840 px, 300 px dès 1280 px),
+// commune au fallback et au wizard hydraté, pour éviter le CLS à l'hydratation.
+.home-hero__wizard-slot
+  min-height: 320px
+
 @media (max-width: 959px)
   .home-hero
     min-height: auto
@@ -637,9 +641,16 @@ const scrollToNext = () => {
   .home-hero__inner
     height: 100%
 
+@media (min-width: 840px) and (max-width: 1279px)
+  .home-hero__wizard-slot
+    min-height: 540px
+
 @media (min-width: 1280px)
   .home-hero__panel-grid
     grid-template-columns: 1fr
+
+  .home-hero__wizard-slot
+    min-height: 300px
 
 @media (min-width: 90rem)
   .home-hero__panel
