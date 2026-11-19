@@ -863,6 +863,32 @@
       "defaultValue": 3
     },
     {
+      "name": "front.global-search.foreign-head-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Sets apart from the long tail the products whose offer names hold the object of the query after another head noun (\"Ressort Lave-linge\" for lave-linge), GOU-2474.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.global-search.foreign-head-uncategorized-only",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Applies the foreign head rule only to products without merchant category (datasourceCategories).",
+      "defaultValue": true
+    },
+    {
+      "name": "front.global-search.head-modifiers",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Words skipped before the head of an offer name and around the object of the query (mini, compact, lot...)."
+    },
+    {
+      "name": "front.global-search.known-brands",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Known brands skipped before the head of an offer name and around the object of the query."
+    },
+    {
       "name": "front.css.enabled",
       "type": "java.lang.Boolean",
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.CssProperties",

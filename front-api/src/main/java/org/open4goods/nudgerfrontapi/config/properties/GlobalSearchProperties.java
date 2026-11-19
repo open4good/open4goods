@@ -63,6 +63,25 @@ public class GlobalSearchProperties {
     /** Minimum length of the alphabetic word (other than the brand) a readable offer name must hold. */
     private int minTitleWordLength = 3;
 
+    /**
+     * Long tail rule relative to the query (GOU-2474): a product whose offer names hold the object of the query
+     * ({@code lave-linge}) but never as the head of the name ({@code Ressort Lave-linge - Twinstar}) is set apart
+     * with the accessories.
+     */
+    private boolean foreignHeadEnabled = true;
+
+    /** Applies the foreign head rule only to the products without merchant category ({@code datasourceCategories}). */
+    private boolean foreignHeadUncategorizedOnly = true;
+
+    /**
+     * Words skipped before the head of an offer name and around the object of the query, besides brands, articles
+     * and words holding a digit ({@code mini}, {@code compact}, {@code lot}...).
+     */
+    private List<String> headModifiers = new ArrayList<>();
+
+    /** Known brands skipped before the head of an offer name and around the object of the query. */
+    private List<String> knownBrands = new ArrayList<>();
+
     public List<String> getAccessoryTerms() {
         return accessoryTerms;
     }
@@ -157,5 +176,37 @@ public class GlobalSearchProperties {
 
     public void setMinTitleWordLength(int minTitleWordLength) {
         this.minTitleWordLength = minTitleWordLength;
+    }
+
+    public boolean isForeignHeadEnabled() {
+        return foreignHeadEnabled;
+    }
+
+    public void setForeignHeadEnabled(boolean foreignHeadEnabled) {
+        this.foreignHeadEnabled = foreignHeadEnabled;
+    }
+
+    public boolean isForeignHeadUncategorizedOnly() {
+        return foreignHeadUncategorizedOnly;
+    }
+
+    public void setForeignHeadUncategorizedOnly(boolean foreignHeadUncategorizedOnly) {
+        this.foreignHeadUncategorizedOnly = foreignHeadUncategorizedOnly;
+    }
+
+    public List<String> getHeadModifiers() {
+        return headModifiers;
+    }
+
+    public void setHeadModifiers(List<String> headModifiers) {
+        this.headModifiers = headModifiers == null ? new ArrayList<>() : headModifiers;
+    }
+
+    public List<String> getKnownBrands() {
+        return knownBrands;
+    }
+
+    public void setKnownBrands(List<String> knownBrands) {
+        this.knownBrands = knownBrands == null ? new ArrayList<>() : knownBrands;
     }
 }
