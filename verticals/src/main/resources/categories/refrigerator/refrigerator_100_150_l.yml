@@ -1,0 +1,97 @@
+# Search-intent subcategory for the refrigerator vertical.
+# Maintained: 2026-11-19 by Growth (GOU-2423).
+# Intent: choosing a refrigerator by total volume for a single person (100 to 150 litres).
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 90 days to 2026-11-17): no impression yet on the
+#     exact question; neighbouring queries "consommation frigo" 28 impr.
+#     (position 69) and "classe energetique frigo" 9 impr. (position 25.6).
+#     The question "quel volume de frigo selon le nombre de personnes" is a new
+#     query (non mesuré).
+#   - Google Autocomplete: non mesuré (no direct access); web search
+#     (2026-11-19) shows the household-size question answered by Que Choisir,
+#     Conforama, Darty and others.
+#   - Reference rule (UFC-Que Choisir, read 2026-11-19): 100 to 150 L for one
+#     person, then about 50 L per extra person. Que Choisir : 100 à 150 L pour une personne seule.
+# Feasibility:
+#   - Matching products with at least one offer: 190 (Elasticsearch
+#     products-moustik, vertical refrigerator, offersCount >= 1, checked
+#     2026-11-19; products without a TOTAL_VOLUME value are not counted).
+#   - Filter checked on the range aggregation of
+#     attributes.indexed.TOTAL_VOLUME.numericValue (lower bound included,
+#     upper bound excluded).
+#   - Overlaps the generic subsets volume_small / volume_medium / volume_large
+#     of verticals/refrigerator.yml (260 / 360 L bounds): different pages, no
+#     shared slug.
+# Rationale:
+#   - Answers the household-size question with a deterministic volume filter,
+#     so the practical sheet can link each answer to a matching listing.
+id: "refrigerator_100_150_l"
+slug:
+  en: "100-150-litre-refrigerator"
+  fr: "refrigerateur-100-150-litres"
+h1Title:
+  en: "100 to 150 litre refrigerators"
+  fr: "Réfrigérateurs de 100 à 150 litres"
+description:
+  en: |-
+    Compare **refrigerators of 100 to 150 litres** for a single person, with energy
+    use, noise and Impact Score data to compare models.
+  fr: |-
+    Comparez les **réfrigérateurs de 100 à 150 litres** pour une personne seule, avec la
+    consommation, le bruit et l'Impact Score pour comparer les modèles.
+metaTitle:
+  en: "Refrigerators 100 to 150 litres: compare models | Nudger"
+  fr: "Réfrigérateurs 100 à 150 litres : comparer | Nudger"
+metaDescription:
+  en: "Compare refrigerators of 100 to 150 litres by energy use, noise, warranty and Impact Score before choosing the right volume."
+  fr: "Comparez les réfrigérateurs de 100 à 150 litres selon la consommation, le bruit, la garantie et l'Impact Score avant de choisir le bon volume."
+metaOpenGraphTitle:
+  en: "Compare refrigerators of 100 to 150 litres"
+  fr: "Comparer les réfrigérateurs de 100 à 150 litres"
+metaOpenGraphDescription:
+  en: "A focused selection of refrigerators of 100 to 150 litres with practical comparison data."
+  fr: "Une sélection ciblée de réfrigérateurs de 100 à 150 litres avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-fridge-outline"
+  title:
+    en: "Volume for a single person"
+    fr: "Volume pour une personne seule"
+  body:
+    en: |-
+      This page lists refrigerators of 100 to 150 litres (total volume).
+    fr: |-
+      Cette page ne liste que des réfrigérateurs de 100 à 150 litres (volume total), le plus souvent un format compact (table top ou une porte).
+readMore:
+  title:
+    en: "How to choose a refrigerator volume for a single person?"
+    fr: "Quel volume de réfrigérateur choisir pour une personne seule ?"
+  shortText:
+    en: |-
+      A common rule is 100 to 150 L for one person, then about 50 L per extra
+      person. This page lists only models of 100 to 150 litres so you compare like for like.
+    fr: |-
+      Une règle courante : 100 à 150 L pour une personne seule, puis environ
+      50 L par personne en plus. Cette page ne liste que des modèles de
+      100 à 150 litres, pour comparer à volume égal.
+  longText:
+    en: |-
+      Once the volume is set, compare yearly energy use, noise and warranty.
+      An appliance larger than needed uses more energy, so do not over-size.
+
+      Nudger keeps this page on a bounded total-volume range. Each product stays
+      comparable on Impact Score, offers and technical attributes.
+    fr: |-
+      Une fois le volume fixé, comparez la consommation annuelle, le bruit et la
+      garantie. Un appareil plus grand que nécessaire consomme davantage : mieux
+      vaut ne pas surdimensionner.
+
+      Nudger garde cette page sur une plage de volume total bornée. Chaque
+      produit reste comparable sur l'Impact Score, les offres et les
+      caractéristiques techniques.
+activatedFilters:
+  - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "100"
+  - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
+    operator: "LOWER_THAN"
+    value: "150"
