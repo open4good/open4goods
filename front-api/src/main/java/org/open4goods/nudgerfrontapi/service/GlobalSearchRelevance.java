@@ -247,9 +247,9 @@ final class GlobalSearchRelevance {
 	/**
 	 * Long tail rule relative to the query (GOU-2474): the product is set apart when one of its offer names holds the
 	 * object of the query after its head ({@code Ressort Lave-linge - Twinstar} for {@code lave-linge}) and none
-	 * starts with it. See {@link #isForeignHeadName(String, String, String)}. Only products without merchant category
-	 * are checked unless {@link GlobalSearchProperties#isForeignHeadUncategorizedOnly()} is off; nothing is set
-	 * apart when the query asks for an accessory.
+	 * starts with it. See {@link #isForeignHeadName(String, String, String)}. Categorized products are checked too
+	 * (GOU-2497) unless {@link GlobalSearchProperties#isForeignHeadUncategorizedOnly()} is on; nothing is set apart
+	 * when the query asks for an accessory.
 	 *
 	 * @param query   sanitized user query
 	 * @param product long tail candidate read with {@link #candidateSourceFilter()}

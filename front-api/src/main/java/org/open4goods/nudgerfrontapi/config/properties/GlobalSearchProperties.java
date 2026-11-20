@@ -70,8 +70,12 @@ public class GlobalSearchProperties {
      */
     private boolean foreignHeadEnabled = true;
 
-    /** Applies the foreign head rule only to the products without merchant category ({@code datasourceCategories}). */
-    private boolean foreignHeadUncategorizedOnly = true;
+    /**
+     * Applies the foreign head rule only to the products without merchant category ({@code datasourceCategories}).
+     * Off since GOU-2497: categorized parts carry categories without accessory marker ({@code KIT DE SUPERPOSITION},
+     * {@code ANTENNE}), so every long tail candidate is checked; on restores the GOU-2474 behaviour.
+     */
+    private boolean foreignHeadUncategorizedOnly = false;
 
     /**
      * Words skipped before the head of an offer name and around the object of the query, besides brands, articles
