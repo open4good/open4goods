@@ -108,8 +108,11 @@ configured under `front.global-search` (GOU-2029). They never reach
   offer names holds the object after another head and none starts with it, so
   "xiaomi poco m5 smartphone" does not set apart a product also named
   "Smartphone C21". The check runs in Java on the candidates read (the index
-  cannot express it); with `foreign-head-uncategorized-only` (default) only
-  products without `datasourceCategories` are checked. A query naming the part
+  cannot express it). Every long tail candidate is checked, with or without
+  `datasourceCategories` (GOU-2497: "Kit de superposition lave-linge" in
+  `KIT DE SUPERPOSITION`, "Wewoo Connecteur TV" in `ANTENNE` carry no
+  accessory marker); `foreign-head-uncategorized-only: true` restores the
+  GOU-2474 scope (products without category only). A query naming the part
   (`ressort lave-linge`) has that part as object, so nothing is set apart; a
   query naming an accessory term disables the rule as above. The products set
   apart join `accessoryResults`, merged by score with the Elasticsearch

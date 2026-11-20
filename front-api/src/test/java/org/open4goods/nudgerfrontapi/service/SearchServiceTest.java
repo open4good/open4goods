@@ -614,21 +614,44 @@ class SearchServiceTest {
     @Test
     void globalSearch_setsForeignHeadNamesApartFromTheLongTail() throws Exception {
         Product washer = GlobalSearchRelevanceTest.displayable(1, "Lave-linge Samsung WW10T654DLH", now());
+        washer.setDatasourceCategories(Set.of(
+                "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"));
         Product spring = GlobalSearchRelevanceTest.displayable(2, "Ressort Lave-linge - Twinstar", now());
-        Product categorized = GlobalSearchRelevanceTest.displayable(3, "Roulement Lave-linge 6206ZZ", now());
-        categorized.setDatasourceCategories(Set.of("GROS ELECTROMENAGER / LAVE-LINGE"));
+        // Categorized part without accessory marker in its category (GOU-2497).
+        Product stackingKit = GlobalSearchRelevanceTest.displayable(3,
+                "Kit de superposition lave-linge seche-linge unite de rangement au-dessus du lave-linge", now());
+        stackingKit.setDatasourceCategories(Set.of("ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > KIT DE"
+                + " SUPERPOSITION | LAVAGE-SECHAGE | KIT DE SUPERPOSITION"));
         Product filter = GlobalSearchRelevanceTest.displayable(4, "Filtre pour lave-linge", now());
-        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(spring, washer, categorized), List.of(filter));
+        Product dryer = GlobalSearchRelevanceTest.displayable(5, "Lave-linge séchant LG F964V42IXRS", now());
+        dryer.setDatasourceCategories(Set.of(
+                "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE SECHANT | LAVE-LINGE | LAVE-LINGE SECHANT"));
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(spring, washer, stackingKit, dryer),
+                List.of(filter));
 
         GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("lave-linge", DomainLanguage.fr, null,
                 org.springframework.data.domain.Sort.unsorted(), null);
 
-        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L, 3L);
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L, 5L);
         assertThat(result.missingVerticalTotalElements()).isEqualTo(2);
-        // Merged by score: the spring (3.0) before the filter (1.0).
-        assertThat(gtins(result.accessoryResults())).containsExactly(2L, 4L);
+        // Merged by score: the spring (4.0) and the kit (2.0) before the filter (1.0).
+        assertThat(gtins(result.accessoryResults())).containsExactly(2L, 3L, 4L);
         NativeQuery longTail = queries.stream().filter(SearchServiceTest::isLongTailQuery).findFirst().orElseThrow();
         assertThat(longTail.getSourceFilter().getIncludes()).contains("datasourceCategories");
+    }
+
+    @Test
+    void globalSearch_queryNamingAnAccessoryKeepsCategorizedForeignHeadNames() throws Exception {
+        Product stackingKit = GlobalSearchRelevanceTest.displayable(3,
+                "Kit de superposition lave-linge seche-linge unite de rangement au-dessus du lave-linge", now());
+        stackingKit.setDatasourceCategories(Set.of("ELECTROMENAGER > LAVAGE-SECHAGE > KIT DE SUPERPOSITION"));
+        stubGlobalSearch(List.of(), List.of(stackingKit), List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("filtre lave-linge", DomainLanguage.fr,
+                null, org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(3L);
+        assertThat(result.accessoryResults()).isEmpty();
     }
 
     @Test

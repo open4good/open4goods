@@ -189,53 +189,169 @@ class GlobalSearchRelevanceTest {
         assertThat(shipped.isForeignHeadName("samsung", "Coque Samsung Galaxy S23", "SAMSUNG")).isFalse();
     }
 
+    /**
+     * The 13 real products of the long tail survey (GOU-2226, releve-longue-traine and mesure 7.1), with their offer
+     * names and merchant categories as indexed on 20/11/2026: the shipped rule checks categorized products since
+     * GOU-2497 and keeps them all.
+     */
     @Test
     void realProductsOfTheSurveyAreNeverForeign() throws Exception {
-        GlobalSearchProperties properties = configuredProperties();
-        // Checked without the category guard: the rule alone keeps them (GOU-2226, mesure 7.1).
-        properties.setForeignHeadUncategorizedOnly(false);
-        GlobalSearchRelevance relevance = new GlobalSearchRelevance(properties,
-                new OfferFreshnessService(new OfferFreshnessProperties()));
+        GlobalSearchRelevance shipped = shipped();
+        String washerCategory = "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT";
         List<Product> washers = List.of(
-                product(3615993792572L, "ELECTROLUX", "lave linge hublot electrolux EW7F3816DB",
-                        "Lave linge hublot EW7F3816DB Reconditionné"),
-                product(3615993777517L, "SAMSUNG", "Lave-linge Samsung WW10T654DLH", "Lave-linge WW10T654DLH"),
-                product(3615993764777L, "LG", "Lave-linge F964V42IXRS", "Lave-linge LG F964V42IXRS"));
+                categorized(product(3615993792572L, "ELECTROLUX", "lave linge hublot electrolux EW7F3816DB",
+                        "Lave linge hublot EW7F3816DB Reconditionné", "lave linge hublot EW7F3816DB",
+                        "Lave linge hublot Electrolux EW7F3816DB Reconditionné"),
+                        "363 | LAUNDRY & CLEANING | PETIT MENAGER & CUISINE LAVAGE", washerCategory),
+                categorized(product(3615993777517L, "SAMSUNG", "Lave-linge Samsung WW10T654DLH",
+                        "Lave-linge WW10T654DLH"), washerCategory),
+                categorized(product(3615993764777L, "LG", "Lave-linge F964V42IXRS", "Lave-linge LG F964V42IXRS"),
+                        "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE SECHANT | LAVE-LINGE | LAVE-LINGE SECHANT"));
+        String fridgeCategory = "GROS ELECTROMENAGER / REFRIGERATEUR / REFRIGERATEUR 1 PORTE | REFRIGERATEUR"
+                + " | REFRIGERATEUR 1 PORTE";
+        String kitchenFurniture = "MAISON ET DECORATION > MOBILIER ET DECORATION > CUISINE > MEUBLES DE CUISINE";
         List<Product> fridges = List.of(
-                product(641094245375L, "TEFCOLD", "Réfrigérateur Médical MSU400 - TEFCOLD"),
-                product(641094916763L, "MATERIEL CHR PRO", "Réfrigérateur Vitré Fs890h - Tefcold"),
-                product(641094212339L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FS1202S TEFCOLD"),
-                product(641094319151L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FSC1600H - TEFCOLD"),
-                product(641094732769L, "TEFCOLD", "Réfrigérateur Vitré UR400G - TEFCOLD"));
+                categorized(product(641094245375L, "TEFCOLD", "Réfrigérateur Médical MSU400 - TEFCOLD",
+                        "Réfrigérateur Médical Msu400 - Tefcold", "Réfrigérateur Médical MSU400 TEFCOLD",
+                        "Réfrigérateur Médical MSU400"), fridgeCategory, kitchenFurniture),
+                categorized(product(641094916763L, "MATERIEL CHR PRO", "Réfrigérateur Vitré Fs890h - Tefcold",
+                        "Réfrigérateur Vitré FS890H - TEFCOLD", "Réfrigérateur Vitré FS890H",
+                        "Réfrigérateur Vitré FS890H TEFCOLD"), fridgeCategory, kitchenFurniture),
+                categorized(product(641094212339L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FS1202S TEFCOLD",
+                        "Réfrigérateur Vitré FS1202S - TEFCOLD", "Réfrigérateur Vitré Fs1202s - Tefcold",
+                        "Réfrigérateur Vitré FS1202S"), fridgeCategory, kitchenFurniture),
+                categorized(product(641094319151L, "MATERIEL CHR PRO", "Réfrigérateur Vitré FSC1600H - TEFCOLD",
+                        "Réfrigérateur Vitré FSC1600H TEFCOLD", "Réfrigérateur Vitré Fsc1600h - Tefcold",
+                        "Réfrigérateur Vitré FSC1600H"),
+                        "ELECTROMENAGER | ELECTROMENAGER > SERVICE - CONSERVATION > BUFFET REFRIGERE - VITRINE"
+                                + " REFRIGEREE | SERVICE - CONSERVATION | BUFFET REFRIGERE - VITRINE REFRIGEREE",
+                        kitchenFurniture),
+                categorized(product(641094732769L, "TEFCOLD", "Réfrigérateur Vitré UR400G TEFCOLD",
+                        "Réfrigérateur Vitré UR400G - TEFCOLD", "Réfrigérateur Vitré UR400G",
+                        "Réfrigérateur Vitré Ur400g - Tefcold"), fridgeCategory, kitchenFurniture));
+        String phoneCategory = "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | TELEPHONE MOBILE | SMARTPHONE";
         List<Product> phones = List.of(
-                product(3402203136888L, "XIAOMI", "Smartphone C21 3Go/32Go Smartphone 6000mAh 6.5 Double carte SIM",
-                        "xiaomi poco m5 smartphone 4go+128go noir"),
-                product(3770030120005L, "BINOM", "Smartphone - Binom - SX1 - Interface simplifiée",
-                        "Smartphone 4G Binom SX1"),
-                product(5908235978536L, "MAXCOM", "Smartphone senior - MAXCOM - MS601 - 4G LTE - Double SIM"),
-                product(3666373808086L, "REALME", "Smartphone Telephone Realme 9 Pro 128Gb Sunrise Blue"));
-        Product cello = product(5060750403310L, "CELLO",
-                "Téléviseur combiné - Cello - C3224WSF TRAV - 12 volts - Bluetooth",
-                "Televiseur combine Cello - C3224WSF TRAV");
+                categorized(product(3402203136888L, "XIAOMI",
+                        "Smartphone C21 3Go/32Go Smartphone 6000mAh 6.5 Double carte SIM - Bleu",
+                        "Smartphone Realme C21 3Go/32Go Smartphone 6000mAh 6.5 Double carte SIM - Bleu",
+                        "xiaomi poco m5 smartphone 4go+128go noir"), phoneCategory),
+                categorized(product(3770030120005L, "BINOM",
+                        "Smartphone - Binom - SX1 - Interface simplifiée - Bouton dalerte - Écran 5 pouces",
+                        "Smartphone pour sénior 4G SX1 - Noir - Binom", "Smartphone 4G Binom SX1",
+                        "Smartphone 4G SX1"), phoneCategory),
+                categorized(product(5908235978536L, "MAXCOM",
+                        "Smartphone senior - telephone portable senior Smartphone pour seniors MS601 4G",
+                        "Smartphone senior - telephone portable senior Maxcom Smartphone pour seniors MS601 4G",
+                        "Smartphone senior - MAXCOM - MS601 - 4G LTE - Double SIM - Batterie 4000 mAh"),
+                        phoneCategory),
+                categorized(product(3666373808086L, "REALME", "Smartphone Telephone Realme 9 Pro 128Gb Sunrise Blue",
+                        "Smartphone Telephone 9 Pro 128Gb Sunrise Blue",
+                        "Smartphone Realme Smartphone Telephone 9 Pro 128Gb Sunrise Blue"), phoneCategory));
+        String tvCategory = "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR COMBINE | TELEVISEUR"
+                + " | TELEVISEUR COMBINE";
+        List<Product> televisions = List.of(
+                categorized(product(5060750403310L, "CELLO",
+                        "Téléviseur combiné - Cello - C3224WSF TRAV - 12 volts - Bluetooth - Haute résolution",
+                        "Televiseur combine Cello - C3224WSF TRAV"), tvCategory),
+                // Brand "MOBIL VISION" written in one word: kept through known-brands (GOU-2497).
+                categorized(product(3700282202655L, "MOBIL VISION",
+                        "MOBILVISION Téléviseur Camping-car DVD 18,5\"\" 47cm - TVWS19DVD",
+                        "MOBILVISION Téléviseur Camping-car DVD 18 5 47cm - TVWS19DVD",
+                        "MOBILVISION Téléviseur Camping-car DVD 185 47cm - TVWS19DVD"), tvCategory));
 
-        washers.forEach(p -> assertThat(relevance.isForeignHeadProduct("lave-linge", p)).isFalse());
-        fridges.forEach(p -> assertThat(relevance.isForeignHeadProduct("réfrigérateur", p)).isFalse());
-        phones.forEach(p -> assertThat(relevance.isForeignHeadProduct("smartphone", p)).isFalse());
-        assertThat(relevance.isForeignHeadProduct("téléviseur", cello)).isFalse();
-        assertThat(relevance.isForeignHeadProduct("tv", cello)).isFalse();
+        washers.forEach(p -> assertThat(shipped.isForeignHeadProduct("lave-linge", p)).as(p.gtin()).isFalse());
+        fridges.forEach(p -> assertThat(shipped.isForeignHeadProduct("réfrigérateur", p)).as(p.gtin()).isFalse());
+        phones.forEach(p -> assertThat(shipped.isForeignHeadProduct("smartphone", p)).as(p.gtin()).isFalse());
+        televisions.forEach(p -> {
+            assertThat(shipped.isForeignHeadProduct("téléviseur", p)).as(p.gtin()).isFalse();
+            assertThat(shipped.isForeignHeadProduct("tv", p)).as(p.gtin()).isFalse();
+        });
+
+        // False positives of the GOU-2497 measure, kept through known-brands (prefix "INN" of INNOVTEC, Tassimo).
+        Product tablet = categorized(product(5437387340316L, "INNOVTEC",
+                "INN Tablette 10,1 pouces 4 core 5G 3+32go android14,0 6000mah ordinateur tablette tablette tactile"
+                        + " fineset légères tablette tactile"),
+                "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > TABLETTE > TABLETTE TACTILE | TABLETTE | TABLETTE");
+        Product coffeeMachine = categorized(product(7016829437388L, "COMPTOIR DES PARISIENNES",
+                "Tassimo Machine À Café Machine À Café Noir[J1]"),
+                "ELECTROMENAGER | ELECTROMENAGER > PETIT DEJEUNER - CAFE > MACHINE A CAFE DOSETTE - CAPSULE");
+        assertThat(shipped.isForeignHeadProduct("tablette", tablet)).isFalse();
+        assertThat(shipped.isForeignHeadProduct("machine à café", coffeeMachine)).isFalse();
+    }
+
+    /**
+     * Intruders of the prod survey after v1.0.87 (GOU-2495): parts and accessories whose merchant category carries no
+     * accessory marker, with their offer names and categories as indexed on 20/11/2026.
+     */
+    @Test
+    void categorizedPartsOfTheProdSurveyAreForeign() throws Exception {
+        GlobalSearchRelevance shipped = shipped();
+        Product stackingKit = categorized(product(1794897165957L, "TTLIFE",
+                "Kit de superposition lave-linge seche-linge unite de rangement au-dessus du lave-linge support"
+                        + " lave-linge etagere lave-linge"),
+                "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > KIT DE SUPERPOSITION | LAVAGE-SECHAGE"
+                        + " | KIT DE SUPERPOSITION");
+        Product button = categorized(product(3380585685395L, "OCE", "ocean, bouton lave-linge poussoir",
+                "Ocean - bouton Lave-Linge poussoir", "Bouton Lave-Linge poussoir - Ocean",
+                "Ocean, Bouton Lave-linge Poussoir", "bouton lave-linge poussoir - ocean"),
+                "ELECTRICITE ET DOMOTIQUE > INTERRUPTEURS ET PRISES > INTERRUPTEUR COMPOSABLE > BOUTON D'ARRET"
+                        + " D'URGENCE COMPOSABLE");
+        Product tap = categorized(product(8435196712345L, "INYECTOMETAL", "Robinet Lave-vaisselle - Inyectometal",
+                "Robinet lave-vaisselle Inyectometal", "Robinet Lave-vaisselle Inyectometal"),
+                "422 | BATHROOMS & ACCESSORIES | SALLE DE BAIN ET WC | SALLE DE BAIN ET WC > ROBINETTERIE > ROBINET"
+                        + " DE MACHINE A LAVER | ROBINET DE MACHINE A LAVER");
+        Product connector = categorized(product(3615610054717L, "WE", "Wewoo Connecteur TV", "Antenne Connecteur TV",
+                "antenne tv / tnt wewoo antenne connecteur tv", "Antenne TV / TNT Wewoo Antenne connecteur tv"),
+                "ANTENNE");
+        Product cabinet = categorized(product(6949821506084L, "LEFT GIRL",
+                "Armoire TV armoire TV suspendue Lowboard armoire TV 160x305x34cm noir Meuble TVTable TVArmoire TV"
+                        + " pour salon"),
+                "MEUBLE | MEUBLE > MEUBLE DE SEJOUR - ENTREE > MEUBLE TV - MEUBLE HI-FI | MEUBLE DE SEJOUR - ENTREE"
+                        + " | MEUBLE TV - MEUBLE HI-FI");
+        Product receiver = categorized(product(8912360480915L, "ALLAUVE",
+                "Récepteur Audio Bluetooth Pour Avion Et Téléviseur"),
+                "ELECTRICITE ET DOMOTIQUE > GAINES ET CABLES ELECTRIQUES > COURANT FAIBLE > ADAPTATEUR ET CONNECTEUR"
+                        + " POUR CABLE COURANT FAIBLE");
+        Product organiser = categorized(product(4811630258305L, "WOVTE",
+                "Organisateur de réfrigérateur, tiroir de réfrigérateur, réfrigérateur transparent suspendu coulissant"
+                        + " pour congélateur, cuisine,",
+                "Organisateur de réfrigérateur tiroir de réfrigérateur réfrigérateur transparent suspendu coulissant"
+                        + " pour congélateur cuisine"),
+                "ELECTROMENAGER | ELECTROMENAGER > FROID > REFRIGERATEUR TIROIR | FROID | REFRIGERATEUR TIROIR");
+
+        assertThat(shipped.isForeignHeadProduct("lave-linge", stackingKit)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("lave-linge", button)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("lave-vaisselle", tap)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("tv", connector)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("tv", cabinet)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("téléviseur", receiver)).isTrue();
+        assertThat(shipped.isForeignHeadProduct("réfrigérateur", organiser)).isTrue();
+        // A query naming an accessory is not touched (queryMentionsAccessory).
+        Product cover = categorized(product(3380585000001L, "QILIVE", "Housse de climatiseur mobile Qilive"), // illustrative name
+                "CLIMATISATION > ACCESSOIRES CLIMATISEUR");
+        assertThat(shipped.queryMentionsAccessory("housse climatiseur")).isTrue();
+        assertThat(shipped.isForeignHeadProduct("housse climatiseur", cover)).isFalse();
+        assertThat(shipped.isForeignHeadProduct("housse climatiseur", stackingKit)).isFalse();
+        // foreign-head-uncategorized-only: true restores the GOU-2474 scope.
+        GlobalSearchProperties uncategorizedOnly = configuredProperties();
+        uncategorizedOnly.setForeignHeadUncategorizedOnly(true);
+        GlobalSearchRelevance previous = new GlobalSearchRelevance(uncategorizedOnly,
+                new OfferFreshnessService(new OfferFreshnessProperties()));
+        assertThat(previous.isForeignHeadProduct("lave-linge", stackingKit)).isFalse();
+        assertThat(previous.isForeignHeadProduct("tv", connector)).isFalse();
     }
 
     @Test
-    void foreignHeadProductNeedsNoCategoryAndNoNameWithTheObjectAtItsHead() throws Exception {
+    void foreignHeadProductNeedsNoNameWithTheObjectAtItsHead() throws Exception {
         GlobalSearchRelevance shipped = shipped();
         Product spring = product(3380585143031L, "TWINSTAR", "Ressort Lave-linge - Twinstar");
-        Product categorized = product(3380585143032L, "TWINSTAR", "Ressort Lave-linge - Twinstar");
-        categorized.setDatasourceCategories(Set.of("ELECTROMENAGER > LAVAGE"));
+        Product categorized = categorized(product(3380585143032L, "TWINSTAR", "Ressort Lave-linge - Twinstar"),
+                "ELECTROMENAGER > LAVAGE");
         Product mixed = product(3402203136888L, "XIAOMI", "xiaomi poco m5 smartphone 4go+128go noir",
                 "Smartphone C21 3Go/32Go");
 
         assertThat(shipped.isForeignHeadProduct("lave-linge", spring)).isTrue();
-        assertThat(shipped.isForeignHeadProduct("lave-linge", categorized)).isFalse();
+        assertThat(shipped.isForeignHeadProduct("lave-linge", categorized)).isTrue();
         assertThat(shipped.isForeignHeadProduct("smartphone", mixed)).isFalse();
         assertThat(shipped.isForeignHeadProduct("ressort lave-linge", spring)).isFalse();
         GlobalSearchProperties disabled = configuredProperties();
@@ -383,6 +499,11 @@ class GlobalSearchRelevanceTest {
             product.getAttributes().getReferentielAttributes().put(ReferentielKey.BRAND, brand);
         }
         product.setOfferNames(new java.util.LinkedHashSet<>(List.of(offerNames)));
+        return product;
+    }
+
+    static Product categorized(Product product, String... categories) {
+        product.setDatasourceCategories(new java.util.LinkedHashSet<>(List.of(categories)));
         return product;
     }
 

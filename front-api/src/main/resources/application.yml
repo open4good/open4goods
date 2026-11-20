@@ -104,14 +104,17 @@ front:
     long-tail-max-candidates: 1200
     min-title-words: 3
     min-title-word-length: 3
-    # Long tail rule relative to the query (GOU-2474): a product without merchant category whose
-    # names hold the object of the query (query without brands, articles, modifiers, numbers) but
-    # never at their head ("Ressort Lave-linge - Twinstar", "Roue Panier Lave-vaisselle Bosch" for
-    # lave-linge / lave-vaisselle) is set apart with the accessories. The head is the first word
-    # left once brands (product BRAND and known-brands), articles, words holding a digit,
-    # parenthesised parts and head-modifiers are skipped.
+    # Long tail rule relative to the query (GOU-2474): a product whose names hold the object of the
+    # query (query without brands, articles, modifiers, numbers) but never at their head ("Ressort
+    # Lave-linge - Twinstar", "Roue Panier Lave-vaisselle Bosch" for lave-linge / lave-vaisselle) is
+    # set apart with the accessories. The head is the first word left once brands (product BRAND and
+    # known-brands), articles, words holding a digit, parenthesised parts and head-modifiers are
+    # skipped. Since GOU-2497 the rule also checks the products with a merchant category, whose
+    # category often carries no accessory marker ("Kit de superposition lave-linge" in
+    # KIT DE SUPERPOSITION, "Wewoo Connecteur TV" in ANTENNE); true restores the GOU-2474 scope
+    # (products without category only).
     foreign-head-enabled: true
-    foreign-head-uncategorized-only: true
+    foreign-head-uncategorized-only: false
     head-modifiers:
       - mini
       - petit
@@ -158,6 +161,7 @@ front:
       - hotpoint
       - huawei
       - indesit
+      - inn
       - jvc
       - kenwood
       - krups
@@ -166,6 +170,7 @@ front:
       - liebherr
       - loewe
       - miele
+      - mobilvision
       - motorola
       - moulinex
       - neff
@@ -184,6 +189,7 @@ front:
       - siemens
       - smeg
       - sony
+      - tassimo
       - tcl
       - tefal
       - thomson
