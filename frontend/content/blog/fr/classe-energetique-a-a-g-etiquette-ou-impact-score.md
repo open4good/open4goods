@@ -6,9 +6,9 @@ language: fr
 tags:
   - "Impact environnemental"
   - "Consommation responsable"
-date: 2026-11-19T09:00:00Z
-updatedAt: 2026-11-19T09:00:00Z
-draft: true
+date: 2026-11-20T09:00:00Z
+updatedAt: 2026-11-20T09:00:00Z
+draft: false
 image: /images/blog/classe-energetique-a-a-g-etiquette-ou-impact-score/cover.png
 cover:
   kicker: "Classe énergétique"
