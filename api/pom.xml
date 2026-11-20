@@ -151,7 +151,7 @@
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>elasticsearch-rest-client</artifactId>
-            <version>8.19.24</version>
+            <version>8.19.25</version>
             <scope>test</scope>
         </dependency>
 
@@ -254,7 +254,7 @@
         <dependency>
             <groupId>com.google.auth</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
-            <version>1.57.0</version>
+            <version>1.58.0</version>
         </dependency>
     </dependencies>
 

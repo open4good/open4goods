@@ -13,7 +13,7 @@
 
   <properties>
     <!-- S3 API of Cloudflare R2 (GOU-2289). Checked on Maven Central, 15/11/2026. -->
-    <awssdk.version>2.59.1</awssdk.version>
+    <awssdk.version>2.59.2</awssdk.version>
   </properties>
 
   <dependencies>
