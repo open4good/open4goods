@@ -244,7 +244,7 @@ front:
   # redirect (GOU-2522): Awin clickref, TradeTracker r, Effiliation effi_id, Kwanko argsite (mclic
   # links only). Off by default; a network is switched on by a separate change after a test sale.
   affiliation-click-ref:
-    awin-enabled: ${FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED:false}
+    awin-enabled: ${FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED:true}
     tradetracker-enabled: ${FRONT_AFFILIATION_CLICK_REF_TRADETRACKER_ENABLED:false}
     effiliation-enabled: ${FRONT_AFFILIATION_CLICK_REF_EFFILIATION_ENABLED:false}
     kwanko-enabled: ${FRONT_AFFILIATION_CLICK_REF_KWANKO_ENABLED:false}

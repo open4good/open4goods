@@ -3,6 +3,10 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ClassPathResource;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -133,5 +137,21 @@ class AffiliationClickRefServiceTest {
     void aUrlWithoutQueryShouldGetOne() {
         assertThat(AffiliationClickRefService.setParameter("https://x.example/p#f", "r", "1", java.util.Set.of()))
                 .isEqualTo("https://x.example/p?r=1#f");
+    }
+
+    @Test
+    void shippedDefaultsShouldEnableAwinOnly() throws Exception {
+        StandardEnvironment environment = new StandardEnvironment();
+        environment.getPropertySources().addLast(new YamlPropertySourceLoader()
+                .load("application", new ClassPathResource("application.yml")).get(0));
+        AffiliationClickRefProperties properties = Binder.get(environment)
+                .bind("front.affiliation-click-ref", AffiliationClickRefProperties.class).get();
+        AffiliationClickRefService service = new AffiliationClickRefService(properties);
+
+        assertThat(service.withClickRef("https://www.awin1.com/pclick.php?p=1&a=2&m=3", ID))
+                .isEqualTo("https://www.awin1.com/pclick.php?p=1&a=2&m=3&clickref=" + ID);
+        assertThat(properties.isTradetrackerEnabled()).isFalse();
+        assertThat(properties.isEffiliationEnabled()).isFalse();
+        assertThat(properties.isKwankoEnabled()).isFalse();
     }
 }
