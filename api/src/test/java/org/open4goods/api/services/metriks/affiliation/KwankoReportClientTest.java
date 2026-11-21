@@ -46,10 +46,10 @@ class KwankoReportClientTest {
         List<AffiliationReportTransaction> transactions = client.fetchTransactions(START, END, AffiliationMetriksService.ZONE);
 
         assertThat(transactions).containsExactly(
-                new AffiliationReportTransaction(LocalDate.of(2026, 10, 21), AffiliationReportStatus.VALIDATED, new BigDecimal("6.00"), "EUR"),
-                new AffiliationReportTransaction(LocalDate.of(2026, 10, 16), AffiliationReportStatus.PENDING, new BigDecimal("1.4"), "EUR"),
-                new AffiliationReportTransaction(LocalDate.of(2026, 10, 19), AffiliationReportStatus.DECLINED, new BigDecimal("5.0"), "EUR"),
-                new AffiliationReportTransaction(LocalDate.of(2026, 10, 22), AffiliationReportStatus.VALIDATED, new BigDecimal("2.5"), "EUR"));
+                new AffiliationReportTransaction(LocalDate.of(2026, 10, 21), AffiliationReportStatus.VALIDATED, new BigDecimal("6.00"), "EUR", "1", null, null),
+                new AffiliationReportTransaction(LocalDate.of(2026, 10, 16), AffiliationReportStatus.PENDING, new BigDecimal("1.4"), "EUR", "1", null, null),
+                new AffiliationReportTransaction(LocalDate.of(2026, 10, 19), AffiliationReportStatus.DECLINED, new BigDecimal("5.0"), "EUR", "1", null, null),
+                new AffiliationReportTransaction(LocalDate.of(2026, 10, 22), AffiliationReportStatus.VALIDATED, new BigDecimal("2.5"), "EUR", "2", null, null));
     }
 
     @Test

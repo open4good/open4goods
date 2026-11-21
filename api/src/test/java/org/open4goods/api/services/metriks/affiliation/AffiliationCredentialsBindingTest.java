@@ -149,5 +149,10 @@ class AffiliationCredentialsBindingTest {
         AffiliationClickStatsService affiliationClickStatsService() {
             return AffiliationTestSupport.noClicks();
         }
+
+        @Bean
+        MerchantDatasourceResolver merchantDatasourceResolver() {
+            return MerchantDatasourceResolver.none();
+        }
     }
 }

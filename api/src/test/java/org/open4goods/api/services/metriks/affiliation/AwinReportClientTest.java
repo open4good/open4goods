@@ -70,6 +70,36 @@ class AwinReportClientTest {
     }
 
     @Test
+    void fetchTransactions_fillsTheAdvertiserNameFromTheProgrammes() throws Exception {
+        FakeHttp http = new FakeHttp(request -> response(200, request.uri().getPath().endsWith("/programmes")
+                ? "[{\"id\":10001,\"name\":\"Marchand A\"},{\"id\":10002,\"name\":\"Marchand B\"}]"
+                : fixture("awin-transactions.json")));
+        AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
+
+        List<AffiliationReportTransaction> transactions = client.fetchTransactions(START, END, AffiliationMetriksService.ZONE);
+
+        assertThat(transactions.get(0).advertiserName()).isEqualTo("Marchand A");
+        assertThat(transactions.get(1).advertiserName()).isEqualTo("Marchand B");
+        // 10003 is not in the programmes: the id remains, the name is absent.
+        assertThat(transactions).anyMatch(t -> "10003".equals(t.advertiserId()) && t.advertiserName() == null);
+        assertThat(http.requests).anyMatch(r -> r.uri().getPath().equals("/publishers/100000/programmes"));
+        assertThat(http.requests.stream().map(r -> r.uri().toString()).toList()).noneMatch(u -> u.contains("awin-token-value"));
+    }
+
+    @Test
+    void fetchTransactions_keepsTheTransactionsWhenTheProgrammesCannotBeRead() throws Exception {
+        FakeHttp http = new FakeHttp(request -> response(request.uri().getPath().endsWith("/programmes") ? 503 : 200,
+                request.uri().getPath().endsWith("/programmes") ? "[]" : fixture("awin-transactions.json")));
+        AwinReportClient client = new AwinReportClient("100000", "awin-token-value", http.client);
+
+        List<AffiliationReportTransaction> transactions = client.fetchTransactions(START, END, AffiliationMetriksService.ZONE);
+
+        assertThat(transactions).hasSize(7);
+        assertThat(transactions.get(0).advertiserId()).isEqualTo("10001");
+        assertThat(transactions.get(0).advertiserName()).isNull();
+    }
+
+    @Test
     void fetchTransactions_failsWhenOneChunkFails() {
         java.util.concurrent.atomic.AtomicInteger calls = new java.util.concurrent.atomic.AtomicInteger();
         FakeHttp http = new FakeHttp(request -> response(calls.incrementAndGet() == 1 ? 200 : 503, "[]"));
@@ -88,7 +118,7 @@ class AwinReportClientTest {
 
         assertThat(transactions).hasSize(7);
         assertThat(transactions.get(0)).isEqualTo(new AffiliationReportTransaction(LocalDate.of(2026, 10, 20),
-                AffiliationReportStatus.VALIDATED, new BigDecimal("4.5"), "EUR"));
+                AffiliationReportStatus.VALIDATED, new BigDecimal("4.5"), "EUR", "10001", null, "anon-1"));
         // 2026-10-14 22:30 UTC is 2026-10-15 00:30 in Paris.
         assertThat(transactions.get(1).transactionDate()).isEqualTo(LocalDate.of(2026, 10, 15));
         assertThat(transactions.get(1).status()).isEqualTo(AffiliationReportStatus.PENDING);

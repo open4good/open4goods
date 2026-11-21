@@ -29,7 +29,7 @@ class AffiliationMetriksServiceTest {
      */
     private static AwinReportClient awin() {
         return new AwinReportClient("100000", "awin-token-value",
-                new FakeHttp(request -> response(200, request.uri().getQuery().contains("endDate=2026-10-21T21:59:59")
+                new FakeHttp(request -> response(200, request.uri().getPath().endsWith("/programmes") ? "[]" : request.uri().getQuery().contains("endDate=2026-10-21T21:59:59")
                         ? fixture("awin-transactions.json") : "[]")).client);
     }
 
@@ -44,7 +44,7 @@ class AffiliationMetriksServiceTest {
     private static Map<String, MetriksEvent> collect(AffiliationReportClient... clients) {
         List<MetriksEvent> events = new AffiliationMetriksService(List.of(clients), AffiliationTestSupport.noClicks(),
                 CLOCK).collectEvents();
-        return events.stream().filter(event -> !event.getId().contains(".clicks")).collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
+        return events.stream().filter(event -> !event.getId().contains(".clicks") && !event.getId().contains(".merchants.")).collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
                 (a, b) -> { throw new IllegalStateException("duplicate id " + a.getId()); }, java.util.LinkedHashMap::new));
     }
 

@@ -157,7 +157,9 @@ public class KwankoReportClient extends AbstractAffiliationReportClient {
             if (status != AffiliationReportStatus.DECLINED && (amount == null || currency == null)) {
                 throw failure("commission incomplète (montant ou devise absent)");
             }
-            transactions.add(new AffiliationReportTransaction(date, status, amount, currency));
+            JsonNode campaign = node.path("campaign");
+            transactions.add(new AffiliationReportTransaction(date, status, amount, currency,
+                    textOrNull(campaign.path("id")), textOrNull(campaign.path("name")), null));
         }
         return transactions;
     }
