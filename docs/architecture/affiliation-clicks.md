@@ -173,10 +173,11 @@ the destination (`ued`, `p` on `cread.php`, `u`, `url`) are kept byte for byte.
 An existing reference is replaced; the reference never goes after the destination
 parameter.
 
-Each network is switched off by default
+Awin is switched on by default since 2026-11-21 (GOU-2526); TradeTracker, Effiliation
+and Kwanko are switched off by default
 (`front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled`,
 env `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`): the redirect is then exactly
-the token URL. A network is switched on by a separate change, after a test click
+the token URL (`FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED=false` switches Awin off again). A network is switched on by a separate change, after a test click
 on a real link in beta and a test sale showing the reference in its report.
 
 ## Metriks events
