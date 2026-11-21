@@ -240,6 +240,15 @@ front:
     tag: nudger-21
     url-template: "https://www.amazon.fr/s?k={gtin}&tag={tag}"
 
+  # Id of the AffiliationClick written into the network's reference parameter of the /contrib/
+  # redirect (GOU-2522): Awin clickref, TradeTracker r, Effiliation effi_id, Kwanko argsite (mclic
+  # links only). Off by default; a network is switched on by a separate change after a test sale.
+  affiliation-click-ref:
+    awin-enabled: ${FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED:false}
+    tradetracker-enabled: ${FRONT_AFFILIATION_CLICK_REF_TRADETRACKER_ENABLED:false}
+    effiliation-enabled: ${FRONT_AFFILIATION_CLICK_REF_EFFILIATION_ENABLED:false}
+    kwanko-enabled: ${FRONT_AFFILIATION_CLICK_REF_KWANKO_ENABLED:false}
+
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"

@@ -320,6 +320,17 @@ retries; neither the startup nor the redirects are affected. See
 - `front.affiliation-clicks-mapping.enabled` - toggle (default `true`,
   `FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED`; `false` in the `local` profile).
 
+## Affiliation click reference
+
+`/contrib/` redirects can carry the `AffiliationClick` id in the network's
+reference parameter (Awin `clickref`, TradeTracker `r`, Effiliation `effi_id`,
+Kwanko `argsite` on `mclic` links), so that sales can be joined to clicks
+(GOU-2522). All off by default: the redirect is then the token URL. See
+[docs/architecture/affiliation-clicks.md](../docs/architecture/affiliation-clicks.md).
+
+- `front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled` -
+  per network (default `false`, `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`).
+
 ## Google Indexation
 
 The front API can notify the Google Indexing API after AI review generation
