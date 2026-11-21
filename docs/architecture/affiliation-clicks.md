@@ -152,7 +152,33 @@ were not touched by this change. Their purge (board approval 2f4935d1) runs in
 front-api at startup, see `ContributionVoteIpUaPurgeService` and the front-api
 README, "Contribution votes ip/ua purge" (GOU-1230).
 
-## Metriks events
+## Click reference in the redirect (GOU-2522)
+
+To join a sale reported by a network to its click, `AffiliationService.trackRedirect`
+can write the `id` of the `AffiliationClick` (a random UUID, no personal data) into
+the publisher reference parameter of the target network
+(`AffiliationClickRefService`). The id is written even when the click could not be
+saved; the legacy `ContributionVote` keeps the URL of the token.
+
+| Network | Parameter | Source of the name |
+|---|---|---|
+| Awin | `clickref` | Awin Link Builder API and "Click appends" docs; reported as `clickRef` (feedservice) |
+| TradeTracker | `r` | TradeTracker FAQ (reference / sub-id, name not public); built by `TradeTrackerFeedService`, reported as `reference` |
+| Effiliation | `effi_id` | No public doc; reported as `effiId` (feedservice) |
+| Kwanko | `argsite`, `mclic` links only | No public doc; reported in `argsites` (feedservice). A bare token link on a merchant domain (`?P...V4`) is unchanged |
+| Amazon, other | none | No sub-id per click: URL unchanged |
+
+Only that parameter changes: other query pairs, the fragment and the encoding of
+the destination (`ued`, `p` on `cread.php`, `u`, `url`) are kept byte for byte.
+An existing reference is replaced; the reference never goes after the destination
+parameter.
+
+Each network is switched off by default
+(`front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled`,
+env `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`): the redirect is then exactly
+the token URL. A network is switched on by a separate change, after a test click
+on a real link in beta and a test sale showing the reference in its report.
+
 
 Added after the commission events of `/api/metriks/affiliation`:
 

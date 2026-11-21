@@ -90,6 +90,30 @@
       "defaultValue": "https://www.amazon.fr/s?k={gtin}&tag={tag}"
     },
     {
+      "name": "front.affiliation-click-ref.awin-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the clickref parameter of Awin redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.tradetracker-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the r parameter of TradeTracker redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.effiliation-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the effi_id parameter of Effiliation redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.kwanko-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the argsite parameter of Kwanko mclic redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
       "name": "front.affiliation-partners.api-base-url",
       "type": "java.lang.String",
       "description": "Base URL of the backend exposing affiliation partner data."

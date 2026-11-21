@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.open4goods.nudgerfrontapi.config.properties.AffiliationClickRefProperties;
 import org.open4goods.nudgerfrontapi.service.exception.InvalidAffiliationTokenException;
 import org.open4goods.services.contribution.model.AffiliationClick;
 import org.open4goods.services.contribution.model.ContributionVote;
@@ -45,7 +46,53 @@ class AffiliationServiceTest {
     @BeforeEach
     void setUp() {
         affiliationService = new AffiliationService(new SerialisationService(), contributionVoteRepository,
-                affiliationClickRepository);
+                affiliationClickRepository, new AffiliationClickRefService(new AffiliationClickRefProperties()));
+    }
+
+    private AffiliationService serviceWithAwinClickRef() {
+        AffiliationClickRefProperties properties = new AffiliationClickRefProperties();
+        properties.setAwinEnabled(true);
+        return new AffiliationService(new SerialisationService(), contributionVoteRepository,
+                affiliationClickRepository, new AffiliationClickRefService(properties));
+    }
+
+    @Test
+    void trackRedirectShouldKeepTheTokenUrlWhenTheClickRefIsSwitchedOff() {
+        String token = affiliationService.encryptAffiliationLink("darty.com", AWIN_URL, "0123456789012");
+
+        assertEquals(AWIN_URL, affiliationService.trackRedirect(token, null, null));
+    }
+
+    @Test
+    void trackRedirectShouldWriteTheClickIdIntoTheAwinClickRef() {
+        AffiliationService service = serviceWithAwinClickRef();
+        String token = service.encryptAffiliationLink("darty.com", AWIN_URL, "0123456789012");
+
+        String url = service.trackRedirect(token, null, null);
+
+        ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
+        verify(affiliationClickRepository).save(clickCaptor.capture());
+        String clickId = clickCaptor.getValue().getId();
+        assertEquals("https://www.awin1.com/cread.php?awinmid=1&awinaffid=2&clickref=" + clickId, url);
+        // The legacy vote keeps the URL of the token.
+        ArgumentCaptor<ContributionVote> voteCaptor = ArgumentCaptor.forClass(ContributionVote.class);
+        verify(contributionVoteRepository).save(voteCaptor.capture());
+        assertEquals(AWIN_URL, voteCaptor.getValue().getUrl());
+    }
+
+    @Test
+    void trackRedirectShouldWriteTheGeneratedClickIdEvenWhenTheClickIsNotSaved() {
+        AffiliationService service = serviceWithAwinClickRef();
+        String token = service.encryptAffiliationLink("darty.com", AWIN_URL);
+        ArgumentCaptor<AffiliationClick> clickCaptor = ArgumentCaptor.forClass(AffiliationClick.class);
+        doThrow(new RuntimeException("Elasticsearch unavailable")).when(affiliationClickRepository)
+                .save(clickCaptor.capture());
+
+        String url = service.trackRedirect(token, null, null);
+
+        assertThat(clickCaptor.getValue().getId()).isNotBlank();
+        assertEquals("https://www.awin1.com/cread.php?awinmid=1&awinaffid=2&clickref=" + clickCaptor.getValue().getId(),
+                url);
     }
 
     @Test
