@@ -42,6 +42,8 @@ public class AffiliationClickStatsService {
     public static final int TOP_MERCHANTS = 20;
     /** Number of rows of the top origins. */
     public static final int TOP_ORIGINS = 50;
+    /** Largest number of (merchant, network) pairs read by {@link #countByMerchant(long, long)}. */
+    public static final int MAX_MERCHANT_PAIRS = 5000;
 
     private static final String AGG_NETWORKS = "networks";
     private static final String AGG_SHORT = "short";
@@ -147,6 +149,44 @@ public class AffiliationClickStatsService {
             throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
         }
         return new ClickCounts(perNetwork(aggregate(aggregations, AGG_NETWORKS)), hits.getTotalHits());
+    }
+
+    /**
+     * Counts the clicks of {@code [start, end)} per (merchant, network) pair, every pair, with a single aggregation
+     * request.
+     *
+     * @param start start of the window, epoch milliseconds, inclusive
+     * @param end   end of the window, epoch milliseconds, exclusive
+     * @return the clicks of each pair, most clicked first
+     * @throws IllegalStateException when there are more than {@value #MAX_MERCHANT_PAIRS} pairs (never truncated)
+     * @throws RuntimeException      when Elasticsearch cannot answer (unreachable, missing index...)
+     */
+    public List<MerchantClicks> countByMerchant(long start, long end) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(tsRange(start, end))
+                .withAggregation(AGG_TOP, Aggregation.of(a -> a.multiTerms(m -> m
+                        .terms(MultiTermLookup.of(t -> t.field(AffiliationClick.FIELD_MERCHANT)),
+                                MultiTermLookup.of(t -> t.field(AffiliationClick.FIELD_NETWORK)))
+                        .size(MAX_MERCHANT_PAIRS))))
+                .withMaxResults(0)
+                .build();
+        SearchHits<AffiliationClick> hits = elasticsearchOperations.search(query, AffiliationClick.class,
+                IndexCoordinates.of(AffiliationClick.INDEX_NAME));
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) hits.getAggregations();
+        if (aggregations == null) {
+            throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
+        }
+        var multiTerms = aggregate(aggregations, AGG_TOP).multiTerms();
+        if (multiTerms.sumOtherDocCount() > 0) {
+            throw new IllegalStateException("More than " + MAX_MERCHANT_PAIRS + " (merchant, network) pairs in "
+                    + AffiliationClick.INDEX_NAME);
+        }
+        List<MerchantClicks> clicks = new ArrayList<>();
+        for (MultiTermsBucket bucket : multiTerms.buckets().array()) {
+            List<FieldValue> key = bucket.key();
+            clicks.add(new MerchantClicks(key.get(0).stringValue(), key.get(1).stringValue(), bucket.docCount()));
+        }
+        return List.copyOf(clicks);
     }
 
     /**

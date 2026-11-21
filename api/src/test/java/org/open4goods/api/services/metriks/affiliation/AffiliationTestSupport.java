@@ -70,6 +70,18 @@ final class AffiliationTestSupport {
             return stats;
         }
 
+        /** Answer of {@link #countByMerchant}, given the window bounds {start, end}; no click by default. */
+        java.util.function.BiFunction<Long, Long, List<AffiliationClickStats.MerchantClicks>> merchantClicks =
+                (start, end) -> List.of();
+
+        @Override
+        public List<AffiliationClickStats.MerchantClicks> countByMerchant(long start, long end) {
+            if (countFailure != null) {
+                throw countFailure;
+            }
+            return merchantClicks.apply(start, end);
+        }
+
         @Override
         public ClickCounts count(long start, long end) {
             countCalls.add(new long[] {start, end});
