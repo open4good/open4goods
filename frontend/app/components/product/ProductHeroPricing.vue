@@ -135,10 +135,7 @@ import { useDisplay } from 'vuetify'
 import { mdiBasketOffOutline, mdiTagOutline, mdiRecycleVariant } from '@mdi/js'
 import { useAnalytics } from '~/composables/useAnalytics'
 import { useProductPriceTrend } from '~/composables/useProductPriceTrend'
-import {
-  resolveOfferHref,
-  withAffiliationContent,
-} from '~/utils/_product-pricing'
+import { resolveOfferHref } from '~/utils/_product-pricing'
 import { useAffiliationContentPath } from '~/composables/useAffiliationContentPath'
 import type { ProductDto } from '~~/shared/api-client'
 import ProductHeroPricingPanel from '~/components/product/ProductHeroPricingPanel.vue'
@@ -316,19 +313,13 @@ const createMerchant = (offer: AggregatedOffer | null) => {
     return null
   }
 
-  const affiliationLink = offer.affiliationToken
-    ? withAffiliationContent(
-        `/contrib/${offer.affiliationToken}`,
-        affiliationContentPath.value
-      )
-    : null
-  const url = affiliationLink ?? offer.url ?? null
+  const url = resolveOfferHref(offer, affiliationContentPath.value) ?? null
 
   return {
     name: offer.datasourceName,
     url,
     favicon: offer.favicon ?? null,
-    clientOnly: Boolean(affiliationLink),
+    clientOnly: Boolean(offer.affiliationToken),
   }
 }
 
