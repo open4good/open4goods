@@ -44,7 +44,7 @@ class AffiliationMetriksServiceTest {
     private static Map<String, MetriksEvent> collect(AffiliationReportClient... clients) {
         List<MetriksEvent> events = new AffiliationMetriksService(List.of(clients), AffiliationTestSupport.noClicks(),
                 CLOCK).collectEvents();
-        return events.stream().filter(event -> !event.getId().contains(".clicks") && !event.getId().contains(".merchants.")).collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
+        return events.stream().filter(event -> !event.getId().contains(".clicks") && !event.getId().contains(".merchants.") && !event.getId().contains(".sales.by_origin.")).collect(Collectors.toMap(MetriksEvent::getId, Function.identity(),
                 (a, b) -> { throw new IllegalStateException("duplicate id " + a.getId()); }, java.util.LinkedHashMap::new));
     }
 

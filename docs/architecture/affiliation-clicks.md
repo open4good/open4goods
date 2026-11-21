@@ -227,6 +227,7 @@ declined) change with time.
 | Clicks | `affiliation.<awin\|effiliation\|kwanko\|tradetracker\|amazon\|other\|total>.clicks.<window>` | 7 x 4 = 28 |
 | Tops | `affiliation.clicks.top_merchants.28d`, `affiliation.clicks.top_origins.28d` | 2 |
 | Merchants | `affiliation.merchants.sales` | 1 |
+| Sales by origin | `affiliation.sales.by_origin.28d` | 1 |
 
 Each commission network is read once, over the 56 days `[D-56, D-1]`, and the
 four windows are derived from that single read. The Awin transactions API
@@ -263,6 +264,24 @@ identifier, `null` when unknown or when several advertisers share the datasource
 - A network in error is one row `{merchant: null, network, status: "error", error}`, never partial rows; when the
   clicks cannot be read the event has no row. The event is then in `error` (`value` `null`), the rows of the
   healthy networks stay under `params.rows`.
+
+### Sales attached to their click (GOU-2523)
+
+`affiliation.sales.by_origin.28d` (window `[D-28, D-1]`, `unit` `count`, `value` = number of rows) attaches each sale
+to the click it comes from, through the `clickRef` of the transaction (the id of an `AffiliationClick`, injected in
+the tracking link by `AffiliationClickRefService`, GOU-2522). Rows are in `params.rows`:
+
+- one row per origin with at least one attached sale, most sales first: `origin` (`contentPath` of the click,
+  otherwise its `originPath`, otherwise `(none)`), `attributed` (`true`), `sales`, `commissionValidated`,
+  `commissionPending` (EUR), `clicks` (clicks of the same origin over the same 28 days, `AffiliationClickStatsService.countByOrigin`)
+  and `gtins` (the 10 most sold products of the origin, `{gtin, sales}`; a click without gtin adds none);
+- one last row `{origin: null, attributed: false}` with the sales that cannot be attached (no `clickRef`, or no click
+  with that id in `affiliation-clicks`, read by ids in batches of 500): counted, never spread over the origins; its
+  `clicks` is `null`.
+
+Declined sales are ignored. A network in error is left out and puts the event in `error` (`value` `null`, rows of the
+healthy networks kept); when the clicks cannot be read the event is in `error` with no row (message with the
+exception type only). A network that does not echo the click reference sends all its sales to the unattached row.
 
 ## Kwanko revenues (GOU-1379)
 
