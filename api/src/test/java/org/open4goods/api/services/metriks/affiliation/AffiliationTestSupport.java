@@ -82,6 +82,37 @@ final class AffiliationTestSupport {
             return merchantClicks.apply(start, end);
         }
 
+        /** Clicks of {@link #findByIds}, by id. */
+        Map<String, org.open4goods.services.contribution.model.AffiliationClick> byId = Map.of();
+        /** Ids asked to {@link #findByIds}. */
+        final List<java.util.Collection<String>> idCalls = new ArrayList<>();
+        /** Answer of {@link #countByOrigin}. */
+        List<AffiliationClickStats.OriginClicks> originClicks = List.of();
+
+        @Override
+        public Map<String, org.open4goods.services.contribution.model.AffiliationClick> findByIds(
+                java.util.Collection<String> ids) {
+            idCalls.add(ids);
+            if (countFailure != null) {
+                throw countFailure;
+            }
+            Map<String, org.open4goods.services.contribution.model.AffiliationClick> found = new java.util.LinkedHashMap<>();
+            ids.forEach(id -> {
+                if (byId.containsKey(id)) {
+                    found.put(id, byId.get(id));
+                }
+            });
+            return found;
+        }
+
+        @Override
+        public List<AffiliationClickStats.OriginClicks> countByOrigin(long start, long end) {
+            if (countFailure != null) {
+                throw countFailure;
+            }
+            return originClicks;
+        }
+
         @Override
         public ClickCounts count(long start, long end) {
             countCalls.add(new long[] {start, end});

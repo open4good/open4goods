@@ -251,7 +251,7 @@ class AffiliationClickMetriksTest {
     void clickFailure_doesNotTouchTheCommissionEvents() {
         List<MetriksEvent> all = collectAll(new FakeClickStats(null, new IllegalStateException("boom")));
 
-        all.stream().filter(event -> !event.getId().contains(".clicks") && !event.getId().contains(".merchants."))
+        all.stream().filter(event -> !event.getId().contains(".clicks") && !event.getId().contains(".merchants.") && !event.getId().contains(".sales.by_origin."))
                 .forEach(event -> assertThat(event.getStatus()).as(event.getId()).isEqualTo("ok"));
     }
 }
