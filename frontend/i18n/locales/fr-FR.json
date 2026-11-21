@@ -1517,15 +1517,13 @@
         "columnName": "Colonne",
         "download": {
           "direct": {
-            "concurrent": "Jusqu'à {value} téléchargements simultanés",
-            "concurrentUnknown": "Limite de téléchargements simultanés",
+            "checksum": "SHA-256 : {value}",
             "cta": {
               "ariaLabel": "Lancer le téléchargement direct depuis Nudger",
               "label": "Télécharger depuis nudger.fr"
             },
             "description": "Récupérez le fichier ZIP directement sur l'infrastructure de Nudger.",
-            "speed": "Débit limité à {value} par client",
-            "speedUnknown": "Débit limité par client",
+            "resume": "Reprise possible si le téléchargement est interrompu",
             "title": "Téléchargement direct depuis Nudger"
           },
           "fast": {
@@ -1536,7 +1534,6 @@
               "label": "Télécharger sur data.gouv.fr"
             },
             "description": "Téléchargement via le portail open data officiel de l'État français.",
-            "speed": "Infrastructure haut débit",
             "title": "Téléchargement depuis data.gouv.fr"
           }
         },
@@ -1613,7 +1610,7 @@
           "fast": {
             "highlight": "Pensé pour la distribution, l'économie circulaire et les usages grand public"
           },
-          "subtitle": "Choisissez le site adapté à votre bande passante.",
+          "subtitle": "Choisissez le site de téléchargement qui vous convient.",
           "title": "Options de téléchargement"
         },
         "faq": {
@@ -1733,7 +1730,7 @@
           "fast": {
             "highlight": "Pensé pour les usages culturels, bibliothèques et acteurs du livre"
           },
-          "subtitle": "Sélectionnez le site adapté à votre bande passante.",
+          "subtitle": "Sélectionnez le site de téléchargement qui vous convient.",
           "title": "Options de téléchargement"
         },
         "faq": {

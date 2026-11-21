@@ -23,31 +23,17 @@ import jakarta.validation.constraints.NotNull;
 public class OpenDataConfig {
 
     /**
-     * Maximum download speed per client in kilobytes.
-     */
-    private int downloadSpeedKb = 256;
-
-    /**
-     * Maximum concurrent downloads allowed.
-     */
-    private int concurrentDownloads = 4;
-
-    /**
      * Flag indicating whether scheduled generation is allowed.
      */
     private Boolean generationEnabled = false;
 
     /**
-     * Public base URL (for example {@code https://data.nudger.fr}) used by front-api to build dataset download
-     * links. Empty keeps the legacy {@code api.resource-root-path} based links.
+     * Public base URL of the published files (for example {@code https://data.nudger.fr}). front-api builds the
+     * download links and reads {@code {public-base-url}/manifest.json} from it (GOU-2290); empty: no link and no
+     * manifest read. The api writes it in the {@code url} of the manifests.
      */
     private String publicBaseUrl = "";
 
-    /**
-     * Base URL the ui application redirects (HTTP 301) dataset downloads to. Empty keeps the throttled local
-     * stream.
-     */
-    private String redirectBaseUrl = "";
 
     /**
      * Root folder where OpenData assets are stored.
@@ -146,24 +132,6 @@ public class OpenDataConfig {
      */
     private Localisable<String, String> baseUrls = new Localisable<>();
 
-    public int getDownloadSpeedKb() {
-        return downloadSpeedKb;
-    }
-
-    public void setDownloadSpeedKb(int downloadSpeedKb) {
-        this.downloadSpeedKb = downloadSpeedKb;
-    }
-
-    public int getConcurrentDownloads() {
-        return concurrentDownloads;
-    }
-
-    public void setConcurrentDownloads(int concurrentDownloads) {
-        this.concurrentDownloads = concurrentDownloads;
-    }
-
-
-
     public Boolean getGenerationEnabled() {
 		return generationEnabled;
 	}
@@ -182,14 +150,6 @@ public class OpenDataConfig {
 
     public void setPublicBaseUrl(String publicBaseUrl) {
         this.publicBaseUrl = publicBaseUrl;
-    }
-
-    public String getRedirectBaseUrl() {
-        return redirectBaseUrl;
-    }
-
-    public void setRedirectBaseUrl(String redirectBaseUrl) {
-        this.redirectBaseUrl = redirectBaseUrl;
     }
 
     public String getRootFolder() {

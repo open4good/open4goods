@@ -7,12 +7,21 @@ Les zips open data (`gtin.zip`, `isbn.zip`) sont servis depuis un bucket Cloudfl
 
 | Propriété | Module | Effet quand renseignée |
 |---|---|---|
-| `open-data-config.public-base-url` (`OPEN_DATA_PUBLIC_BASE_URL`) | front-api | `downloadUrl` = `{base}/{nom}`, ex. `https://data.nudger.fr/gtin-open-data.zip` |
+| `open-data-config.public-base-url` (`OPEN_DATA_PUBLIC_BASE_URL`) | front-api | `downloadUrl` = `{base}/{nom}`, ex. `https://data.nudger.fr/gtin-open-data.zip` ; lignes, date, taille et sha256 lus dans `{base}/manifest.json` |
 | `open-data-config.redirect-base-url` (`OPEN_DATA_REDIRECT_BASE_URL`) | ui | `GET`/`HEAD` sur `/opendata/{gtin,isbn}-open-data.zip` répondent 301 vers `{base}/{nom}` |
 
-Vides : comportement inchangé. Un `HEAD` n'ouvre jamais le flux bridé. Activation en prod (lot 0c, GOU-2247) : variables
-d'environnement GitHub `OPEN_DATA_PUBLIC_BASE_URL` et `OPEN_DATA_REDIRECT_BASE_URL` = `https://data.nudger.fr`, rendues
-par `serviceSecrets.yml` (voir `prod-service-secrets.md`) ; beta vide.
+Activation en prod (lot 0c, GOU-2247) : variables d'environnement GitHub `OPEN_DATA_PUBLIC_BASE_URL` et
+`OPEN_DATA_REDIRECT_BASE_URL` = `https://data.nudger.fr`, rendues par `serviceSecrets.yml` (voir
+`prod-service-secrets.md`) ; beta vide.
+
+Depuis GOU-2290, `ui` ne sert plus aucun fichier (le flux bridé est retiré) : il n'y a plus de retour au comportement
+d'avant. Vides, ces propriétés donnent :
+- front-api : `downloadUrl` à `null` (bouton de téléchargement désactivé), aucun manifest lu, lignes, date, taille et
+  sha256 à `null`, health `openDataManifest` `UNKNOWN` ;
+- ui : 404 sur `/opendata/{gtin,isbn}-open-data.zip`.
+
+Retirer en prod le fichier rendu de l'une de ces propriétés coupe donc le téléchargement depuis nudger.fr ; les
+miroirs (data.gouv.fr, Zenodo, Kaggle) restent.
 
 ## Workflow `📤 Open data → R2` (`opendataR2Upload.yml`)
 

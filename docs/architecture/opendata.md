@@ -12,13 +12,15 @@ flowchart LR
   API -- zips + manifests, manifest.json en dernier --> DISK[/opt/open4goods/opendata]
   API -- après le passage, S3 multipart, si publication.enabled --> R2[(R2 nudger-opendata, data.nudger.fr)]
   DISK -. lot 0, envoi manuel opendataR2Upload.yml .-> R2
-  UI[ui : /opendata/*.zip] -- 301 si redirect-base-url --> R2
-  FAPI[front-api /api/opendata/*] --> FE[pages /opendata]
+  UI[ui : /opendata/*.zip] -- 301 si redirect-base-url, sinon 404 --> R2
+  R2 -- manifest.json, cache 5 min --> FAPI[front-api /api/opendata/*]
+  FAPI --> FE[pages /opendata]
 ```
 
 - **Génération dans `api` uniquement** (GOU-2248) : `OpenDataGenerationScheduler` (cron
-  `open-data-config.generation-cron`, par défaut dimanche 01:30 Europe/Paris) et `POST /opendata/generate`. `ui` et
-  `front-api` ont `generation-enabled: false` et `OpenDataService` n'a plus de `@Scheduled` : seul `api` génère.
+  `open-data-config.generation-cron`, par défaut dimanche 01:30 Europe/Paris) et `POST /opendata/generate`.
+  `front-api` a `generation-enabled: false`, `ui` n'a plus la dépendance `opendata` (GOU-2290) et `OpenDataService`
+  n'a plus de `@Scheduled` : seul `api` génère.
   Avant, la génération tournait dans `ui` 8 h après chaque démarrage et échouait depuis juin sur la limite de 100 Mo
   du buffer de réponse Elasticsearch (GOU-2249).
 - **Lecture** : `ProductRepository.exportAll(fields, pageSize)` (scroll), `_source` limité à
@@ -78,6 +80,49 @@ Identifiants : `R2_ACCOUNT_ID` (variable), `R2_ACCESS_KEY_ID` et `R2_SECRET_ACCE
 GitHub `prod`, rendus pour `api` par `scripts/deploy/render-service-secrets.sh` dans son config tree
 (`open-data-config.publication.*`). Ils ne sont ni dans le code ni dans `open4goods-config`. L'environnement `beta` ne
 les a pas.
+
+## Lecture du manifest par front-api (GOU-2290)
+
+`/api/opendata/*` lit `{open-data-config.public-base-url}/manifest.json` (`OpenDataManifestService`), jamais les
+comptes live de l'index : l'index et le fichier divergent (ISBN au 15/11 : 10,1 M dans l'index, 8,7 M dans le fichier).
+Seul `manifest.json` est lu (écrit en dernier, ses entrées sont cohérentes entre elles) ; chaque jeu y est cherché par
+son `id`. Les champs inconnus sont ignorés (ajout compatible du contrat).
+
+| Champ de l'API | Source dans le manifest |
+|---|---|
+| `recordCount`, `recordCountValue` | `rows` de l'entrée du jeu |
+| `lastUpdated` | `generatedAt` de l'entrée, formaté dans la langue demandée, fuseau Europe/Paris |
+| `fileSize` | `bytes` |
+| `sha256` | `sha256` |
+| `downloadUrl` | `{public-base-url}/{gtin,isbn}-open-data.zip` (configuration, pas le manifest) |
+| overview `totalProductCount`, `datasetCount`, `totalDatasetSize` | sommes des entrées `gtin` et `isbn` seulement : les jeux impact décrivent les mêmes produits |
+
+- **Base vide** (bêta, local) : aucun appel HTTP. Les champs issus du manifest valent `null`, `downloadUrl` aussi (`ui`
+  ne sert plus les fichiers) ; `headers` reste rempli. Les endpoints répondent 200.
+- **Manifest absent (404), illisible ou réseau en échec** : jamais de 500. Les champs valent `null`, ou les valeurs du
+  dernier manifest lu avec succès par le processus. Un WARN est écrit quand la cause change, pas à chaque lecture ;
+  un INFO au retour.
+- **Cache** : une lecture, réussie ou non, sert `front.opendata.manifest-cache-ttl` (5 min, comme le `max-age=300` des
+  manifests sur R2). Un seul appelant relit ; les autres reçoivent la lecture précédente pendant ce temps. Délais :
+  `connect-timeout` 2 s, `read-timeout` 3 s.
+- **Santé** `openDataManifest` : `UNKNOWN` si la base est vide ; `DEGRADED` si le manifest est illisible, si `gtin` ou
+  `isbn` manque, ou si un jeu quelconque du manifest (`impact-*` compris) n'a pas de date valide ou a plus de
+  `front.opendata.max-age` (8 jours) ; `UP` sinon. Un jeu impact refusé par le contrôle de lignes garde son ancien
+  `generatedAt` (isolation GOU-2308) : il passe la santé en `DEGRADED` au bout de 8 jours même si `gtin` et `isbn`
+  sont frais. Le détail `problems` dit quel jeu est en cause.
+  `DEGRADED` est un statut personnalisé hors de l'ordre d'agrégation : comme `ALERT` et `WARN` de `impactScoreGuard`
+  (api), il ne passe jamais la santé globale de front-api en DOWN, ce qui bloquerait ses redémarrages pour un
+  fichier en retard. Écart voulu avec le "DOWN" de GOU-2239 point 6.
+- **Métrique** `opendata.dataset.age{dataset}` (Prometheus `opendata_dataset_age_seconds`) : maintenant moins le
+  `generatedAt` de chaque jeu du manifest (`gtin`, `isbn`, `impact-*`), calculé à la lecture, donc croissant entre
+  deux lectures ; NaN si inconnu. Ops branche l'alerte au-delà de 691 200 s (8 jours), sur
+  `/actuator/metrics/opendata.dataset.age?tag=dataset:gtin` ou sur le `status` JSON de la santé (le code HTTP reste
+  200 en `DEGRADED`).
+
+`ui` ne génère ni ne sert aucun fichier (plus de dépendance `opendata`) : `GET`/`HEAD` sur
+`/opendata/{gtin,isbn}-open-data.zip` répondent 301 vers `{open-data-config.redirect-base-url}/{nom}`, ou 404 si la
+base est vide (`OpenDataRedirectProperties`). Le flux bridé (`ThrottlingInputStream`, `limitedRateStream`,
+`download-speed-kb`, `concurrent-downloads`) et `downloadLimits` de l'overview sont retirés.
 
 ## Fichiers publiés
 

@@ -1642,15 +1642,13 @@
         "columnName": "Column",
         "download": {
           "direct": {
-            "concurrent": "Up to {value} simultaneous downloads",
-            "concurrentUnknown": "Concurrent downloads limited",
+            "checksum": "SHA-256: {value}",
             "cta": {
               "ariaLabel": "Start the direct download from Nudger",
               "label": "Download from nudger.fr"
             },
             "description": "Retrieve the ZIP file directly from Nudger's infrastructure.",
-            "speed": "Limited to {value} per client",
-            "speedUnknown": "Download speed limited per client",
+            "resume": "Resumable if the download is interrupted",
             "title": "Direct download from Nudger"
           },
           "fast": {
@@ -1661,8 +1659,7 @@
               "label": "Download from data.gouv.fr"
             },
             "description": "Download via the official open data portal hosted by the French government.",
-            "speed": "High bandwidth infrastructure",
-            "title": "Fast mirror (data.gouv.fr)"
+            "title": "Download from data.gouv.fr"
           }
         },
         "placeholder": "-",
@@ -1738,7 +1735,7 @@
           "fast": {
             "highlight": "Curated for broad retail and circular economy use cases"
           },
-          "subtitle": "Choose the mirror that matches your bandwidth and automation needs.",
+          "subtitle": "Choose the mirror that matches your automation needs.",
           "title": "Download options"
         },
         "faq": {
@@ -1858,7 +1855,7 @@
           "fast": {
             "highlight": "Mirror maintained for open culture and library reuse"
           },
-          "subtitle": "Pick the mirror that suits your workflow and traffic needs.",
+          "subtitle": "Pick the mirror that suits your workflow.",
           "title": "Download options"
         },
         "faq": {
