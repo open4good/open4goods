@@ -179,6 +179,7 @@ env `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`): the redirect is then exact
 the token URL. A network is switched on by a separate change, after a test click
 on a real link in beta and a test sale showing the reference in its report.
 
+## Metriks events
 
 Added after the commission events of `/api/metriks/affiliation`:
 

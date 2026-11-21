@@ -331,6 +331,7 @@ Kwanko `argsite` on `mclic` links), so that sales can be joined to clicks
 - `front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled` -
   per network (default `false`, `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`).
 
+## Google Indexation
 
 The front API can notify the Google Indexing API after AI review generation
 succeeds. The integration is disabled by default and must be enabled explicitly.
