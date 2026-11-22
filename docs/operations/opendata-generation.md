@@ -12,6 +12,21 @@ Exploitation du passage hebdomadaire qui produit `gtin.zip`, `isbn.zip` et leurs
   `local` et `dev`) coupe toute génération.
 - Un seul passage à la fois ; il tourne sur le thread `opendata-generation`, hors du planificateur.
 
+## Suivre un passage en cours
+
+Deux lectures successives (GOU-2556) : la passe principale (GTIN, ISBN, tout le catalogue), puis la passe impact
+(verticales impact seulement). Chacune écrit dans `nohup-api.log`, au niveau INFO (logger
+`org.open4goods.services.opendata`, gardé en INFO par `application.yml` malgré le WARN de `org.open4goods`), une ligne
+au plus toutes les 5 minutes (`progress-log-interval`) :
+
+```text
+Open data main pass: 1200000 / 4800000 products read (25.0 %), 40000 products/min, 0h30m00s elapsed, about 1h30m00s left
+```
+
+```bash
+grep "Open data .* pass:" /opt/open4goods/logs/nohup-api.log | tail -n 3
+```
+
 ## Relance manuelle
 
 Clé `admin-key` (secret `O4G_INTERNAL_API_KEY`), brute dans l'en-tête `Authorization`, hors de la fenêtre batch :
@@ -125,6 +140,9 @@ Pour le compte rendu d'un passage complet :
 
 - durée : `finishedAt - startedAt` du `GET /opendata/generation`, ou `opendata_generation_duration_seconds` ;
 - lignes : `rows` du statut et des manifests ;
-- taille maximale d'une réponse ES : `export-page-size` (`impact-export-page-size` avec un jeu impact) fois le poids du plus gros document projeté. Le mesurer sur un
+- durée de chaque passe : dernière ligne `Open data main pass: ... done` et `Open data impact pass: ... done` de
+  `nohup-api.log` ;
+- taille maximale d'une réponse ES : `export-page-size` (passe principale) ou `impact-export-page-size` (passe impact)
+  fois le poids du plus gros document projeté. Le mesurer sur un
   échantillon (`_source` limité à `EXPORT_SOURCE_FIELDS`, tri par taille d'`offerNames`) ;
 - latence p95 de la recherche du site pendant le passage, comparée à une nuit sans passage (métriques de front-api).

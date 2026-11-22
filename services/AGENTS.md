@@ -246,7 +246,8 @@ or a provider/feed name; see the
 **Purpose**: Generates the public GTIN and ISBN datasets (CSV in ZIP, ODbL) and their manifests.
 
 **Key Responsibilities**:
-- Export the products from Elasticsearch with a minimal `_source` projection and bounded pages
+- Export the products from Elasticsearch with a minimal `_source` projection and bounded pages: a GTIN/ISBN pass over
+  the whole catalogue, then an impact pass over the impact verticals only (GOU-2556), with INFO progress lines
 - Write the zips in a temporary folder, check disk space and the row guard, then publish atomically
 - Write `gtin-manifest.json`, `isbn-manifest.json` and `manifest.json` last (rows, bytes, sha256, fill rates)
 - Expose the generation status, health and metrics; generation runs in the api only (GOU-2248)

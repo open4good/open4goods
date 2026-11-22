@@ -23,6 +23,8 @@ logging:
     org.open4goods.api.services.ProductIndexMappingRunner: INFO
     # GOU-2099: same for the batch durations, per vertical, per phase and per completion service.
     org.open4goods.api.services.BatchService.timings: INFO
+    # GOU-2556: progress lines and row counts of the weekly open data pass.
+    org.open4goods.services.opendata: INFO
   file:
     max-history: 5
     max-size: 200MB
@@ -179,12 +181,16 @@ open-data-config:
   # the schedule; POST /opendata/generate stays available.
   generation-cron: ${OPEN_DATA_GENERATION_CRON:0 30 1 * * SUN}
   generation-zone: Europe/Paris
-  # ~0.7 KB per projected product: 2000 per page is ~1.5 MB per Elasticsearch response (100 MB buffer, GOU-2249).
+  # GTIN and ISBN pass over the whole catalogue, without any impact field (GOU-2556): ~0.7 KB per projected product,
+  # 2000 per page is ~1.5 MB per Elasticsearch response (100 MB buffer, GOU-2249).
   export-page-size: 2000
-  # Used instead when an impact dataset is active: its sources weigh tens of KB per product (GOU-2327).
+  # Impact pass, after it: only the products of the impact verticals, whose criteria sources weigh tens of KB per
+  # product (GOU-2327).
   impact-export-page-size: 500
   # Pause after each page, to leave Elasticsearch to the site search.
   page-pause: 50ms
+  # One INFO progress line per pass at most every 5 minutes: products read, expected total, %, rate, elapsed time.
+  progress-log-interval: 5m
   # Free space required before a pass, as a multiple of the published zips (GOU-823).
   min-free-space-ratio: 1.5
   # A dataset with fewer rows than 90 % of the published manifest or of the index count is refused.

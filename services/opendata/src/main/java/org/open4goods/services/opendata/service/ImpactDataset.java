@@ -38,6 +38,14 @@ final class ImpactDataset {
     static final String[] COMMON_HEADER = {"gtin", "brand", "model", "name", "vertical", "nudger_url",
             "eprel_registration_number", "offers_count", "last_updated"};
 
+    /**
+     * {@code _source} fields of the {@link #COMMON_HEADER} columns (GOU-2556): {@code gtin}, brand and model from the id
+     * and the referential attributes, the name from the offer names, the URL from {@code names.url}. The impact pass
+     * reads them with the {@link #sourceFields()} of each impact vertical.
+     */
+    static final List<String> COMMON_SOURCE_FIELDS = List.of("id", "vertical", "externalIds.eprel", "names.url",
+            "lastChange", "offersCount", "offerNames", "attributes.referentielAttributes");
+
     private static final String SOURCE_SEPARATOR = " | ";
 
     private final String vertical;
@@ -113,7 +121,7 @@ final class ImpactDataset {
     }
 
     /**
-     * @return the {@code _source} fields the rows read, on top of those of the GTIN and ISBN datasets: the value of
+     * @return the {@code _source} fields the rows read, on top of {@link #COMMON_SOURCE_FIELDS}: the value of
      *         each criterion and, per source, the datasource name, raw and cleaned values (GOU-2327). Never the whole
      *         {@code attributes.indexed.<criterion>}, whose sources weigh tens of KB per product.
      */

@@ -3,6 +3,7 @@ package org.open4goods.services.opendata.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -23,6 +24,7 @@ import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
@@ -240,6 +242,67 @@ class OpenDataServiceTest {
                 .contains("id", "offerNames", "attributes.referentielAttributes", "price.minPrice.price",
                         "attributes.indexed.EDITEUR", "attributes.all.NB DE PAGES")
                 .doesNotContain("attributes", "price", "offers");
+    }
+
+    @Test
+    void mainPassShouldReadNoImpactFieldWithTheMainPage() throws Exception {
+        // GOU-2556: the criteria sources weigh tens of KB per product; the scroll of the whole catalogue never reads them.
+        openDataConfig.setExportPageSize(2000);
+        openDataConfig.setImpactExportPageSize(500);
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "CLASSE_ENERGY", "WARRANTY")));
+        when(productRepository.countItemsByVertical("oven")).thenReturn(0L);
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        exportReturns();
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
+        verify(productRepository).exportAll(fields.capture(), Mockito.eq(2000));
+        assertThat(fields.getValue()).containsExactly(OpenDataService.EXPORT_SOURCE_FIELDS)
+                .noneMatch(field -> field.startsWith("attributes.indexed.") && field.contains(".source"))
+                .noneMatch(field -> field.contains("WARRANTY") || field.contains("CLASSE_ENERGY"));
+    }
+
+    @Test
+    void impactPassShouldReadOnlyTheImpactVerticalsWithTheImpactPage() throws Exception {
+        openDataConfig.setExportPageSize(2000);
+        openDataConfig.setImpactExportPageSize(500);
+        when(verticalsConfigService.getConfigsWithoutDefault(true))
+                .thenReturn(List.of(verticalConfig("oven", "WARRANTY"), verticalConfig("tv", "REPAIRABILITY_INDEX")));
+        when(productRepository.countItemsByVertical("oven")).thenReturn(1L);
+        when(productRepository.countItemsByVertical("tv")).thenReturn(1L);
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        Product oven = impactProduct("1234567890123", "oven", "WARRANTY", "2", "eprel");
+        Product tv = impactProduct("1234567890135", "tv", "REPAIRABILITY_INDEX", "7.1", "icecat.biz");
+        Product book = buildProduct("9781234567890", BarcodeType.ISBN_13);
+        exportReturns(oven, tv, book);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Collection<String>> verticals = ArgumentCaptor.forClass(Collection.class);
+        ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
+        verify(productRepository).exportAllInVerticals(verticals.capture(), fields.capture(), Mockito.eq(500));
+        assertThat(verticals.getValue()).containsExactly("oven", "tv");
+        assertThat(fields.getValue())
+                .contains("id", "vertical", "names.url", "offerNames", "attributes.referentielAttributes",
+                        "attributes.indexed.WARRANTY.value", "attributes.indexed.REPAIRABILITY_INDEX.source.cleanedValue")
+                .doesNotContain("attributes.indexed.WARRANTY", "attributes", "offers", "price.minPrice.price",
+                        "attributes.indexed.EDITEUR");
+        assertThat(readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv")).hasSize(2);
+        assertThat(readZipLines(openDataConfig.impactZipFile("tv"), "impact-tv.csv")).hasSize(2);
+        assertThat(readZipLines(openDataConfig.isbnZipFile(), ISBN_CSV)).hasSize(2);
+    }
+
+    @Test
+    void withoutImpactDatasetThereShouldBeNoImpactPass() throws Exception {
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+        exportReturns(buildProduct("1234567890123", BarcodeType.GTIN_13));
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        verify(productRepository, never()).exportAllInVerticals(anyCollection(), any(String[].class), anyInt());
     }
 
     @Test
@@ -518,7 +581,7 @@ class OpenDataServiceTest {
         produced.add(Files.readString(openDataConfig.impactManifestFile("all").toPath()));
         assertThat(produced).allSatisfy(content -> assertThat(content.toLowerCase(Locale.ROOT)).doesNotContain("decitre"));
         ArgumentCaptor<String[]> fields = ArgumentCaptor.forClass(String[].class);
-        verify(productRepository).exportAll(fields.capture(), anyInt());
+        verify(productRepository).exportAllInVerticals(anyCollection(), fields.capture(), anyInt());
         assertThat(fields.getValue()).contains("attributes.indexed.WARRANTY.value", "attributes.indexed.WARRANTY.source.dataSourcename")
                 .doesNotContain("attributes.indexed.WARRANTY")
                 .noneMatch(field -> field.toLowerCase(Locale.ROOT).contains("decitre"))
@@ -819,8 +882,16 @@ class OpenDataServiceTest {
         assertThat(meterRegistry.get("opendata.generation.failed").gauge().value()).isEqualTo(1);
     }
 
+    /**
+     * Main pass: every product. Impact pass: the products of the requested verticals, as the {@code terms} query does.
+     */
     private void exportReturns(Product... products) {
         when(productRepository.exportAll(any(String[].class), anyInt())).thenReturn(Stream.of(products));
+        lenient().when(productRepository.exportAllInVerticals(anyCollection(), any(String[].class), anyInt()))
+                .thenAnswer(invocation -> {
+                    Collection<String> verticals = invocation.getArgument(0);
+                    return Stream.of(products).filter(product -> verticals.contains(product.getVertical()));
+                });
     }
 
     private Snapshot snapshot() throws Exception {

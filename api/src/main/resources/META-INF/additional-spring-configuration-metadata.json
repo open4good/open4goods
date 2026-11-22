@@ -3,8 +3,14 @@
     {
       "name": "open-data-config.impact-export-page-size",
       "type": "java.lang.Integer",
-      "description": "Products per Elasticsearch page when at least one impact dataset is active (its sources weigh tens of KB per product). export-page-size applies otherwise. Never raise the client buffer instead (GOU-2327).",
+      "description": "Products per Elasticsearch page of the impact pass, which reads only the products of the impact verticals after the GTIN and ISBN pass (its sources weigh tens of KB per product, GOU-2556). The GTIN and ISBN pass uses export-page-size. Never raise the client buffer instead (GOU-2327).",
       "defaultValue": 500
+    },
+    {
+      "name": "open-data-config.progress-log-interval",
+      "type": "java.time.Duration",
+      "description": "Shortest delay between two INFO progress lines of an open data pass: products read, expected total, percentage, rate and elapsed time (GOU-2556).",
+      "defaultValue": "5m"
     },
     {
       "name": "api.product-index-mapping.retry-delay",

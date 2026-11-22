@@ -108,9 +108,10 @@ public class OpenDataConfig {
     private int exportPageSize = 2000;
 
     /**
-     * Products per Elasticsearch page when at least one impact dataset is active. The impact projection carries the
-     * sources of every criterion, a few tens of KB per product, so the page stays smaller than {@link #exportPageSize}
-     * (GOU-2327: 2000 per page reached 104.86 MB). Never raise the buffer instead.
+     * Products per Elasticsearch page of the impact pass, which reads only the products of the impact verticals after
+     * the GTIN and ISBN pass (GOU-2556). The impact projection carries the sources of every criterion, a few tens of KB
+     * per product, so the page stays smaller than {@link #exportPageSize} (GOU-2327: 2000 per page reached 104.86 MB).
+     * Never raise the buffer instead.
      */
     private int impactExportPageSize = 500;
 
@@ -119,6 +120,12 @@ public class OpenDataConfig {
      * scroll keep-alive.
      */
     private Duration pagePause = Duration.ofMillis(50);
+
+    /**
+     * Shortest delay between two progress lines of a pass (products read, expected total, percentage, rate, elapsed
+     * time), logged at INFO (GOU-2556). Zero logs one line per page.
+     */
+    private Duration progressLogInterval = Duration.ofMinutes(5);
 
     /**
      * Free space required before a pass, as a multiple of the size of the files currently published (GOU-823).
@@ -334,6 +341,14 @@ public class OpenDataConfig {
 
     public void setPagePause(Duration pagePause) {
         this.pagePause = pagePause;
+    }
+
+    public Duration getProgressLogInterval() {
+        return progressLogInterval;
+    }
+
+    public void setProgressLogInterval(Duration progressLogInterval) {
+        this.progressLogInterval = progressLogInterval;
     }
 
     public double getMinFreeSpaceRatio() {
