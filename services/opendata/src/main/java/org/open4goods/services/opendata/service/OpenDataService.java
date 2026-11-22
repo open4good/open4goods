@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -141,9 +143,9 @@ public class OpenDataService implements HealthIndicator {
     /**
      * {@code _source} fields read for the GTIN and ISBN datasets (GOU-2248): about 0.7 KB per product instead of about
      * 21 KB for a complete product, whose {@code attributes} and offers made a page of 5000 exceed the 100 MB response
-     * buffer of the Elasticsearch client (GOU-2249). The only other fields of the projection are the
-     * {@code attributes.indexed} criteria of the impact datasets ({@link #exportFields(List)}); no Decitre key is read
-     * (GOU-2262).
+     * buffer of the Elasticsearch client (GOU-2249). This is the whole projection of the main pass: the criteria of the
+     * impact datasets are read by the impact pass only ({@link #impactExportFields(List)}, GOU-2556); no Decitre key is
+     * read (GOU-2262).
      */
     static final String[] EXPORT_SOURCE_FIELDS = exportSourceFields();
 
@@ -533,8 +535,9 @@ public class OpenDataService implements HealthIndicator {
         for (DatasetDefinition dataset : datasets) {
             indexCounts.put(dataset.id(), dataset.indexCount().getAsLong());
         }
+        Long catalog = aggregatedDataRepository.countMainIndex();
 
-        List<DatasetWriter> writers = writeDatasets(datasets);
+        List<DatasetWriter> writers = writeDatasets(datasets, indexCounts, catalog == null ? 0 : catalog);
 
         List<DatasetManifest> manifests = new ArrayList<>();
         for (DatasetWriter writer : writers) {
@@ -549,7 +552,7 @@ public class OpenDataService implements HealthIndicator {
         boolean impactKept = false;
         for (int i = 0; i < manifests.size(); i++) {
             DatasetDefinition definition = datasets.get(i);
-            boolean impact = definition.id().startsWith("impact-");
+            boolean impact = isImpact(definition);
             try {
                 checkRows(manifests.get(i), definition);
             } catch (OpenDataGenerationException e) {
@@ -712,12 +715,16 @@ public class OpenDataService implements HealthIndicator {
         return barcodeType != null && types.contains(barcodeType);
     }
 
+    private static boolean isImpact(DatasetDefinition definition) {
+        return definition.id().startsWith("impact-");
+    }
+
     /**
-     * @return the projection of a pass: the GTIN and ISBN fields, plus the criteria attributes of the impact datasets
+     * @return the projection of the impact pass: the common columns, plus the criteria attributes of {@code impacts}
      */
-    private String[] exportFields(List<DatasetDefinition> datasets) {
-        Set<String> fields = new java.util.LinkedHashSet<>(Arrays.asList(EXPORT_SOURCE_FIELDS));
-        for (ImpactDataset impact : impactDatasets()) {
+    static String[] impactExportFields(List<ImpactDataset> impacts) {
+        Set<String> fields = new java.util.LinkedHashSet<>(ImpactDataset.COMMON_SOURCE_FIELDS);
+        for (ImpactDataset impact : impacts) {
             fields.addAll(impact.sourceFields());
         }
         return fields.toArray(new String[0]);
@@ -765,43 +772,77 @@ public class OpenDataService implements HealthIndicator {
     }
 
     /**
-     * Streams the projected products page by page into the dataset writers, pausing between pages.
+     * Streams the projected products page by page into the dataset writers, pausing between pages, in two reads
+     * (GOU-2556): the main pass over the whole catalogue for GTIN and ISBN, with {@link #EXPORT_SOURCE_FIELDS} only
+     * and pages of {@code export-page-size}; then the impact pass over the products of the impact verticals only, with
+     * their criteria and pages of {@code impact-export-page-size}.
      *
+     * @param indexCounts products counted in the index per dataset at the start of the pass, for the progress lines
+     * @param catalog     products counted in the whole index, for the progress lines of the main pass
      * @return the closed writers, in the order of {@code datasetDefinitions}
      */
-    List<DatasetWriter> writeDatasets(List<DatasetDefinition> datasetDefinitions) throws IOException, InterruptedException {
-        int pageSize = Math.max(1, !impactDatasets().isEmpty()
-                ? Math.min(openDataConfig.getExportPageSize(), openDataConfig.getImpactExportPageSize())
-                : openDataConfig.getExportPageSize());
+    List<DatasetWriter> writeDatasets(List<DatasetDefinition> datasetDefinitions, Map<String, Long> indexCounts,
+            long catalog) throws IOException, InterruptedException {
         Duration pause = openDataConfig.getPagePause() == null ? Duration.ZERO : openDataConfig.getPagePause();
         if (pause.compareTo(MAX_PAGE_PAUSE) > 0) {
             throw new IllegalArgumentException("open-data-config.page-pause must not exceed " + MAX_PAGE_PAUSE);
         }
 
-        try (DatasetWriterManager manager = new DatasetWriterManager(datasetDefinitions)) {
+        List<DatasetDefinition> main = datasetDefinitions.stream().filter(d -> !isImpact(d)).toList();
+        List<DatasetDefinition> impact = datasetDefinitions.stream().filter(OpenDataService::isImpact).toList();
+
+        Map<String, DatasetWriter> written = new HashMap<>();
+        int mainPageSize = Math.max(1, openDataConfig.getExportPageSize());
+        scroll("main", main, catalog, mainPageSize, pause,
+                () -> aggregatedDataRepository.exportAll(EXPORT_SOURCE_FIELDS, mainPageSize))
+                .forEach(writer -> written.put(writer.definition().id(), writer));
+
+        if (!impact.isEmpty()) {
+            Set<String> ids = new HashSet<>(impact.stream().map(DatasetDefinition::id).toList());
+            List<ImpactDataset> impacts = impactDatasets().stream()
+                    .filter(dataset -> ids.contains("impact-" + dataset.vertical()))
+                    .toList();
+            List<String> verticals = impacts.stream().map(ImpactDataset::vertical).toList();
+            String[] fields = impactExportFields(impacts);
+            long expected = impact.stream().mapToLong(d -> indexCounts.getOrDefault(d.id(), 0L)).sum();
+            int impactPageSize = Math.max(1, openDataConfig.getImpactExportPageSize());
+            scroll("impact", impact, expected, impactPageSize, pause,
+                    () -> aggregatedDataRepository.exportAllInVerticals(verticals, fields, impactPageSize))
+                    .forEach(writer -> written.put(writer.definition().id(), writer));
+        }
+        return datasetDefinitions.stream().map(definition -> written.get(definition.id())).toList();
+    }
+
+    /**
+     * One Elasticsearch read of a pass, into the writers of {@code definitions}.
+     *
+     * @return the closed writers, in the order of {@code definitions}
+     */
+    private List<DatasetWriter> scroll(String pass, List<DatasetDefinition> definitions, long expected, int pageSize,
+            Duration pause, Supplier<Stream<Product>> read) throws IOException, InterruptedException {
+        try (DatasetWriterManager manager = new DatasetWriterManager(definitions)) {
             List<DatasetWriter> writers = manager.writers();
-            long read = 0;
-            try (Stream<Product> stream = aggregatedDataRepository.exportAll(exportFields(datasetDefinitions), pageSize)) {
+            ExportProgress progress = new ExportProgress(pass, expected, openDataConfig.getProgressLogInterval());
+            long count = 0;
+            try (Stream<Product> stream = read.get()) {
                 Iterator<Product> products = stream.iterator();
                 while (products.hasNext()) {
                     Product product = products.next();
-                    read++;
+                    count++;
                     for (DatasetWriter writer : writers) {
                         if (writer.definition().selector().test(product)) {
                             writer.write(product);
                         }
                     }
-                    if (read % pageSize == 0) {
+                    if (count % pageSize == 0) {
                         if (!pause.isZero()) {
                             Thread.sleep(pause);
                         }
-                        if (read % (pageSize * 500L) == 0) {
-                            LOGGER.info("Open data generation: {} products read", read);
-                        }
+                        progress.update(count);
                     }
                 }
             }
-            LOGGER.info("Open data generation: {} products read", read);
+            progress.finish(count);
             manager.close();
             manager.writers().forEach(writer ->
                     LOGGER.info("{} rows exported in {}.", writer.count(), writer.definition().filename()));

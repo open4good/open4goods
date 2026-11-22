@@ -321,9 +321,15 @@ GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services
   le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
 - `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
   est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
-- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size` (`impact-export-page-size`, 500, quand un jeu impact est actif), avec `page-pause`.
-  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+- Lecture ES projetée en deux passes, avec `page-pause` (GOU-2556) : passe principale GTIN/ISBN sur tout le catalogue
+  (`OpenDataService.EXPORT_SOURCE_FIELDS` seuls, pages de `export-page-size`, 2000), puis passe impact limitée aux
+  verticales impact (`ProductRepository.exportAllInVerticals`, `terms` sur `vertical` ; colonnes communes et
+  `ImpactDataset.sourceFields()`, pages de `impact-export-page-size`, 500). N'ajoute aucun critère impact à la passe
+  principale, ni l'objet `attributes` complet ni une clé Decitre à une projection, et ne relève pas le buffer du client
   ES (GOU-2249).
+- Progression : une ligne INFO par passe au plus toutes les `progress-log-interval` (5 min) avec produits lus, total
+  attendu, %, débit et durée (`Open data main pass: ...`, `Open data impact pass: ...`). `application.yml` garde
+  `org.open4goods.services.opendata` en INFO : beta et prod passent `org.open4goods` en WARN.
 - Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
   `opendata_generation_failed`.
 - Publication sur R2 (GOU-2289, `OpenDataPublisher`) après un passage réussi, si

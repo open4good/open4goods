@@ -21,11 +21,22 @@ flowchart LR
   `front-api` ont `generation-enabled: false` et `OpenDataService` n'a plus de `@Scheduled` : seul `api` génère.
   Avant, la génération tournait dans `ui` 8 h après chaque démarrage et échouait depuis juin sur la limite de 100 Mo
   du buffer de réponse Elasticsearch (GOU-2249).
-- **Lecture** : `ProductRepository.exportAll(fields, pageSize)` (scroll), `_source` limité à
-  `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un échantillon de prod de
-  200 produits, contre environ 21 Ko complet). Pages de `export-page-size` (2000, environ 1,5 Mo par réponse) ou, quand un jeu impact est actif, de `impact-export-page-size` (500 ; projection limitée à `value` et `source.{dataSourcename,value,cleanedValue}` de chaque critère, GOU-2327) et pause
-  `page-pause` (50 ms) après chaque page. Les seules clés d'attribut lues sont les 5 clés ISBN et les critères des jeux
-  impact (`attributes.indexed.{CRITERE}`, GOU-2250) ; pas de clé Decitre (GOU-2262). Ne relève jamais le buffer du client.
+- **Lecture** en deux passes (GOU-2556), pause `page-pause` (50 ms) après chaque page :
+  1. passe principale (GTIN, ISBN) : `ProductRepository.exportAll(fields, pageSize)` (scroll de tout le catalogue),
+     `_source` limité à `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un
+     échantillon de prod de 200 produits, contre environ 21 Ko complet), pages de `export-page-size` (2000, environ
+     1,5 Mo par réponse). Aucun critère impact n'y est lu ;
+  2. passe impact, après elle : `ProductRepository.exportAllInVerticals(verticals, fields, pageSize)` (`terms` sur
+     `vertical`, seulement les verticales des jeux impact), `_source` limité aux colonnes communes
+     (`ImpactDataset.COMMON_SOURCE_FIELDS`) et à `value` et `source.{dataSourcename,value,cleanedValue}` de chaque
+     critère (GOU-2327), pages de `impact-export-page-size` (500).
+
+  Avant GOU-2556, un seul scroll lisait les critères de toutes les verticales sur tout le catalogue, par pages de 500 :
+  plus de 17 h 30 le 22/11. Les seules clés d'attribut lues sont les 5 clés ISBN et les critères des jeux impact
+  (`attributes.indexed.{CRITERE}`, GOU-2250) ; pas de clé Decitre (GOU-2262). Ne relève jamais le buffer du client.
+- **Progression** : une ligne INFO par passe au plus toutes les `progress-log-interval` (5 min), puis une ligne finale
+  (`..., done`) : produits lus, total attendu (compte de l'index au début du passage), %, débit en produits/min, durée
+  écoulée et estimation du reste.
 - **Écriture** : un passage écrit dans `opendata/tmp/`, sur le même disque. Il échoue avant toute lecture si l'espace
   libre est inférieur à `min-free-space-ratio` (1,5) fois la taille des zips publiés. Le sha256, les lignes et le
   remplissage des colonnes sont calculés pendant l'écriture.

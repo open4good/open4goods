@@ -441,6 +441,34 @@ public class ProductRepository {
                 return iterator.stream().onClose(iterator::close)
                                 .map(SearchHit::getContent);
         }
+
+        /**
+         * Export the products of the given verticals ({@code terms} on {@code vertical}), restricted to the given source
+         * fields, with a configurable page size (open data impact pass, GOU-2556).
+         *
+         * @param verticals     vertical identifiers; none gives an empty stream, without any request
+         * @param includeFields source fields to fetch (all fields when null or empty)
+         * @param pageSize      the page size to use when streaming products
+         * @return stream of (partial) products whose {@code vertical} is one of {@code verticals}
+         */
+        public Stream<Product> exportAllInVerticals(Collection<String> verticals, String[] includeFields, int pageSize) {
+                if (verticals == null || verticals.isEmpty()) {
+                        return Stream.empty();
+                }
+                NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(new Criteria("vertical").in(verticals)));
+                if (includeFields != null && includeFields.length > 0) {
+                        queryBuilder = queryBuilder.withSourceFilter(customSourceFilter(includeFields, null));
+                }
+
+                NativeQuery query = queryBuilder
+                		.withPageable(PageRequest.of(0, pageSize))
+                		.build();
+
+                var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
+                return iterator.stream().onClose(iterator::close)
+                                .map(SearchHit::getContent);
+        }
 	/**
 	 * @deprecated ambiguous pagination and the {@code indexName} argument is ignored. Prefer
 	 * repository methods that accept a {@link Pageable}.
