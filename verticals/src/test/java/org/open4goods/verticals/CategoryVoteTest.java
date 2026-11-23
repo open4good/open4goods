@@ -35,6 +35,9 @@ class CategoryVoteTest {
     /** Real categories of the products of the card, export format of {@link CategoryVoteReplay}. */
     static final String REAL_CATEGORIES = "/category-vote/real-categories-2026-11-16.json";
 
+    /** Real categories of the measure of 23/11/2026 (GOU-2317), export format of {@link CategoryVoteReplay}. */
+    static final String EXCLUDING_TOKENS = "/category-vote/excluding-tokens-2026-11-23.json";
+
     /** Smartphone rows ({@code matchingCategories.all} of smartphones). */
     private static final String CDISCOUNT_SMARTPHONE = "TELEPHONIE ET MOBILITE / TELEPHONE MOBILE / SMARTPHONE | "
             + "TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>SMARTPHONE | TELEPHONE MOBILE | SMARTPHONE";
@@ -79,8 +82,12 @@ class CategoryVoteTest {
      * @throws IOException when the resource cannot be read
      */
     static Map<String, CategoryVoteReplay.ExportedProduct> readRealCategories() throws IOException {
-        try (InputStream input = CategoryVoteTest.class.getResourceAsStream(REAL_CATEGORIES)) {
-            assertThat(input).as(REAL_CATEGORIES).isNotNull();
+        return readExport(REAL_CATEGORIES);
+    }
+
+    private static Map<String, CategoryVoteReplay.ExportedProduct> readExport(String resource) throws IOException {
+        try (InputStream input = CategoryVoteTest.class.getResourceAsStream(resource)) {
+            assertThat(input).as(resource).isNotNull();
             return CategoryVoteReplay.readExport(input);
         }
     }
@@ -310,6 +317,29 @@ class CategoryVoteTest {
                 "ManoMano FR", "ELECTROMENAGER > PIECE DETACHEE LAVE-VAISSELLE > PANIER");
         for (Map<String, String> order : orders(sparePart)) {
             assertThat(classify(vote, order, null)).as("order %s", order.keySet()).isNull();
+        }
+    }
+
+    /**
+     * Excluding tokens of GOU-2317 on real products of the measure ({@value #EXCLUDING_TOKENS}). Three PC monitors
+     * or signage displays that Cdiscount and Rakuten file as TVs (Philips 8712581774455, iiyama 4948570121823, Samsung
+     * 8806094916119) and a power bank filed under Darty {@code TELEPHONE MOBILE} (8720249803386) gained a vertical by
+     * the vote: they now get none, as with the historical rule. Three real TVs with a monitor-like row keep tv under
+     * both rules: RueDuCommerce {@code ECRAN PC} (Fox Spirit 3601600010610), Cdiscount {@code ECRAN ORDINATEUR} (LG
+     * hotel TV 8806087971811) and alternate {@code TV & MONITEUR > TV} (8806094859423).
+     */
+    @Test
+    void excludingTokensOfTheMeasure() throws IOException {
+        Map<String, CategoryVoteReplay.ExportedProduct> products = readExport(EXCLUDING_TOKENS);
+        for (String gtin : List.of("8712581774455", "4948570121823", "8806094916119", "8720249803386")) {
+            Map<String, String> categories = products.get(gtin).categoriesByDatasources();
+            assertThat(classify(historical, categories, null)).as("historical %s", gtin).isNull();
+            assertThat(classify(vote, categories, null)).as("vote %s", gtin).isNull();
+        }
+        for (String gtin : List.of("3601600010610", "8806087971811", "8806094859423")) {
+            Map<String, String> categories = products.get(gtin).categoriesByDatasources();
+            assertThat(classify(historical, categories, null)).as("historical %s", gtin).isEqualTo("tv");
+            assertThat(classify(vote, categories, null)).as("vote %s", gtin).isEqualTo("tv");
         }
     }
 

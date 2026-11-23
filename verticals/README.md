@@ -141,7 +141,8 @@ Outside four populations, the vote gives the historical result:
   another vertical: they get none (their current vertical stays when EPREL confirms it).
 
 Tests: `CategoryVoteTest` (the eleven products of the card on their real categories, read in
-`products-moustik` on 16/11/2026, and one case per rule), `PcComponentMarkersTest` (nature and historical rule
+`products-moustik` on 16/11/2026, the excluding tokens of the measure on real products read on 23/11/2026, and
+one case per rule), `PcComponentMarkersTest` (nature and historical rule
 unchanged by the PC component markers), `CategoryVoteReplayTest` (this module) and
 `TaxonomyRealTimeAggregationServiceCategoryVoteTest` (`api`).
 
@@ -208,15 +209,41 @@ products, not a random draw): 1,500 products per vertical (all 1,412 air conditi
 vertical per vertical with a `datasourceCategories` value of its `matchingCategories` (435 for dishwashers). On
 both: 0 difference outside the populations, 0 EPREL-confirmed product lost.
 
-- With vertical (10,412): 23 differences. 20 are right: 11 dishwashers filed as washing machines move to
+- With vertical (10,412): 26 differences. 20 are right: 11 dishwashers filed as washing machines move to
   dishwasher, 1 dishwasher to washing-machine, 1 oven/dishwasher combo to dishwasher (EPREL `dishwashers2019`),
   1 refrigerator to air-conditioner, 3 PC components, 2 cleaning products and ASRock leave their vertical.
   2 real air coolers are lost (a misfiled PC component row), 1 dryer moves from refrigerator to washing-machine.
-- Without vertical (3,407), population (b): 130 products gain a vertical. Most are right (about 43 real phones
-  that one `AUTRES ACCESSOIRES SMARTPHONE` row excluded, dishwashers, washing machines, ovens). About 25 are
-  wrong: 17 PC or digital signage monitors gain `tv` (Cdiscount `TELEVISEUR LCD` and Rakuten
-  `HIFI | TELEVISION` against Fnac `ACCESSOIRES POUR TELEVISEURS`), about 8 cases, chargers or cables gain
-  `smartphones`.
+  The 3 others are signage displays or an interactive whiteboard (BenQ RE7503A, Samsung QM32C, LG 32SM5J) that
+  the tv excluding tokens below remove from the historical rule, while the vote keeps them in `tv` (population
+  (b)).
+- Without vertical (3,407), population (b): 115 products gain a vertical, about 100 rightly (real phones that
+  one `AUTRES ACCESSOIRES SMARTPHONE` row excluded, dishwashers, washing machines, ovens, 7 real TVs).
+
+**Monitors and accessories of population (b)** (GOU-2317 review). Before the tokens below, 18 PC monitors,
+signage displays or interactive whiteboards gained `tv` in the sample without vertical: Cdiscount
+`TELEVISEUR LCD` / `TELEVISEUR LED` and Rakuten `HIFI | TELEVISION` outvoted Fnac `ACCESSOIRES POUR TELEVISEURS`.
+`tv.yml` now excludes the merchant forms that name a monitor: Darty `MONITEUR SEMI PRO` and
+`INFORMATIQUE / ECRAN / ECRAN PC`, GrosBill `ECRAN PC >`, `AFFICHAGE DYNAMIQUE >` and `AFFICHAGE COLLABORATIF >`,
+Carrefour `> ECRAN PC`, Inmac `IT | MONITEURS | MONITEUR `, Joom and Back Market `MONITORS`. Measured on the same
+two samples:
+
+- 14 of the 18 no longer gain `tv`. 4 signage displays keep it (Philips 65BDL3117P and 43BDL3117P, LG 55EF5K-L,
+  Sony FW-55BZ40H): their `tv` rows come twice, from `cdiscount.com` and `Cdiscount FR` or from `rueducommerce.fr`
+  and `RueDuCommerce FR`, and no remaining row of theirs names a monitor without naming real TVs too.
+- With vertical: 0 real TV lost, under the vote and under the historical rule. 6 monitors, signage displays or
+  whiteboards leave `tv` under both rules, and the 3 above under the historical rule only. A Philips signage
+  display of the sample without vertical leaves `tv` too. No other vertical changes.
+- Rejected forms, each costing a real TV under the historical rule, where an excluding token removes the
+  vertical: bare `MONITEUR` (alternate `TV & MONITEUR > TV` is a tv category, Inmac `IT | MONITEURS | TV HOTEL`),
+  bare `ECRAN PC` (RueDuCommerce files Fox Spirit TVs there), Cdiscount `ECRAN ORDINATEUR` (LG 43LT340C hotel
+  TV), icecat `ECRANS PLATS DE PC` (LG 28TK410V monitor TV), `AFFICHAGES DE MESSAGES` and
+  `ECRAN D'AFFICHAGE DYNAMIQUE` (Samsung and Sony business TVs), Rakuten `INFORMATIQUE | ECRAN` (a Silver TV).
+
+`smartphones` gained 51 products, 36 real phones. `smartphones.yml` excludes `BATTERIE EXTERNE` (a power bank
+filed under Darty `TELEPHONE MOBILE`). Accepted residue, no safe token: a car charger, a phone bag and two cases,
+and 10 GTINs shared by an old Nokia, BlackBerry or Sony phone and an iPhone spare part (`3663448...`). Rejected
+forms: `CHARGEUR` (11 real phones in `products-moustik` carry a charger row: Redmi Note 15 sold "chargeur non
+inclus") and `COQUE ET ETUI` (a real Xiaomi Mi 10).
 
 ## Contributing new verticals
 

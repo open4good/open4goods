@@ -633,6 +633,11 @@ attributesConfig:
     - key: DEPTH
     - key: DATA_QUALITY
 
+# On top of the _default.yml tokens. Power banks filed under Darty "TELEPHONE MOBILE" (GOU-2317).
+# No CHARGEUR: merchants file real phones sold without charger under charger categories.
+excludingTokensFromCategoriesMatching:
+  - BATTERIE EXTERNE
+
 matchingCategories:
   all:
     - "TEL-PDA | TELEPHONES-MOBILES"
