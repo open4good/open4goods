@@ -255,9 +255,9 @@ public class CategoriesController {
         }
 
         Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term,
-                List.of(condition), null, null);
+                List.of(condition), null, null, null, null);
         Filter taxonomyFilter = new Filter(FilterField.vertical.fieldPath(), FilterOperator.term,
-                verticalIds, null, null);
+                verticalIds, null, null, null, null);
         FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter), List.of());
 
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,

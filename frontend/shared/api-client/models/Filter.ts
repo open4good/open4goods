@@ -38,17 +38,29 @@ export interface Filter {
    */
   terms?: Array<string>
   /**
-   * Inclusive lower bound used when the operator is <code>range</code>.
+   * Lower bound used when the operator is <code>range</code>. Inclusive unless <code>minExclusive</code> is true.
    * @type {number}
    * @memberof Filter
    */
   min?: number
   /**
-   * Inclusive upper bound used when the operator is <code>range</code>.
+   * Upper bound used when the operator is <code>range</code>. Inclusive unless <code>maxExclusive</code> is true.
    * @type {number}
    * @memberof Filter
    */
   max?: number
+  /**
+   * When true, the <code>range</code> lower bound is exclusive: the field must be strictly greater than min. Omitted or false keeps it inclusive.
+   * @type {boolean}
+   * @memberof Filter
+   */
+  minExclusive?: boolean
+  /**
+   * When true, the <code>range</code> upper bound is exclusive: the field must be strictly lower than max. Omitted or false keeps it inclusive.
+   * @type {boolean}
+   * @memberof Filter
+   */
+  maxExclusive?: boolean
 }
 
 /**
@@ -87,6 +99,10 @@ export function FilterFromJSONTyped(
     terms: json['terms'] == null ? undefined : json['terms'],
     min: json['min'] == null ? undefined : json['min'],
     max: json['max'] == null ? undefined : json['max'],
+    minExclusive:
+      json['minExclusive'] == null ? undefined : json['minExclusive'],
+    maxExclusive:
+      json['maxExclusive'] == null ? undefined : json['maxExclusive'],
   }
 }
 
@@ -108,5 +124,7 @@ export function FilterToJSONTyped(
     terms: value['terms'],
     min: value['min'],
     max: value['max'],
+    minExclusive: value['minExclusive'],
+    maxExclusive: value['maxExclusive'],
   }
 }

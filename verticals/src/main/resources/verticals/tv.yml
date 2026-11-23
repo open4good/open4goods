@@ -419,7 +419,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "500"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -442,7 +442,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1000"
       image: "example-image.png"
       url:
@@ -450,13 +450,13 @@ nudgeToolConfig:
         fr: "haut-de-gamme"
       caption:
         en: "Premium TVs"
-        fr: "Les TV dont le prix est supérieur à 1000€."
+        fr: "Les TV dont le prix est supérieur ou égal à 1000€."
       title:
-        en: "> 1000 €"
-        fr: "> 1000 €"
+        en: "≥ 1000 €"
+        fr: "≥ 1000 €"
       description:
-        en: "TVs priced over €1000."
-        fr: "Les TV dont le prix est supérieur à 1000€."
+        en: "TVs priced at €1000 or more."
+        fr: "Les TV dont le prix est supérieur ou égal à 1000€."
 
     ################
     # Screen Size
@@ -485,7 +485,7 @@ nudgeToolConfig:
       group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "32"
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
           operator: "LOWER_THAN"
@@ -508,21 +508,21 @@ nudgeToolConfig:
       group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "55"
       image: "large-screen.png"
       url:
         en: "large-screens"
         fr: "grands-ecrans"
       caption:
-        en: 'Large screens (> 55")'
-        fr: "Diagonale > 55 pouces"
+        en: 'Large screens (≥ 55")'
+        fr: "Diagonale ≥ 55 pouces"
       title:
         en: "Large Screen TVs"
         fr: "Grands écrans"
       description:
-        en: "TVs with a screen size greater than 55 inches."
-        fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+        en: "TVs with a screen size of 55 inches or more."
+        fr: "Les TV avec une taille d'écran supérieure ou égale à 55 pouces."
 
 # Fast filters; with classical attributes range values for the product category page
 subsets:
@@ -619,7 +619,7 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "500"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
@@ -642,21 +642,21 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "1000"
     image: "example-image.png"
     url:
       en: "premium-price"
       fr: "haut-de-gamme"
     caption:
-      en: "> 1000 €"
-      fr: "> 1000 €"
+      en: "≥ 1000 €"
+      fr: "≥ 1000 €"
     title:
       en: "Premium TVs"
-      fr: "> 1000 €"
+      fr: "≥ 1000 €"
     description:
-      en: "TVs priced over €1000."
-      fr: "Les TV dont le prix est supérieur à 1000€."
+      en: "TVs priced at €1000 or more."
+      fr: "Les TV dont le prix est supérieur ou égal à 1000€."
 
   ################
   # Screen Size
@@ -685,7 +685,7 @@ subsets:
     group: "screen_size"
     criterias:
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "32"
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
         operator: "LOWER_THAN"
@@ -708,21 +708,21 @@ subsets:
     group: "screen_size"
     criterias:
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "55"
     image: "large-screen.png"
     url:
       en: "large-screens"
       fr: "grands-ecrans"
     caption:
-      en: 'Large screens (> 55")'
-      fr: 'Grands écrans (> 55")'
+      en: 'Large screens (≥ 55")'
+      fr: 'Grands écrans (≥ 55")'
     title:
       en: "Large Screen TVs"
       fr: "Grands écrans"
     description:
-      en: "TVs with a screen size larger than 55 inches."
-      fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+      en: "TVs with a screen size of 55 inches or more."
+      fr: "Les TV avec une taille d'écran supérieure ou égale à 55 pouces."
 
 ##############################################################################
 # Custom search filters : the following filters

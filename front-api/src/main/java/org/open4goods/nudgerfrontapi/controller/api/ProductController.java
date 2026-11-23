@@ -807,7 +807,8 @@ public class ProductController {
             }
             String mapping = filter.field().trim();
             
-            sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max()));
+            sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max(),
+                    filter.minExclusive(), filter.maxExclusive()));
         }
         return Validation.ok(sanitized.isEmpty() ? List.of() : List.copyOf(sanitized));
     }

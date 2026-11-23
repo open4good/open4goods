@@ -39,6 +39,7 @@ import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -745,5 +746,87 @@ class SearchServiceTest {
 
     private static long now() {
         return System.currentTimeMillis();
+    }
+
+    private static final String WEIGHT_FIELD = "attributes.indexed.WEIGHT.numericValue";
+
+    /**
+     * Runs a search with the given filters and returns the Elasticsearch query sent to the repository.
+     */
+    private String searchQueryWithFilters(FilterRequestDto filters) {
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+
+        searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, filters);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        return ((NativeQuery) queryCaptor.getValue()).getQuery().toString();
+    }
+
+    @Test
+    void search_exclusiveUpperBoundExcludesTheBoundValue() {
+        // LOWER_THAN 8 (subcategory "moins de 8 kg"): a product weighing exactly 8 kg must not match (GOU-2586)
+        FilterRequestDto.Filter lowerThan8 = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, null, 8.0, null, true);
+
+        String query = searchQueryWithFilters(new FilterRequestDto(List.of(lowerThan8), null));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"lt\":8.0}}}")
+                .doesNotContain("\"lte\":8.0");
+    }
+
+    @Test
+    void search_exclusiveBoundsInAShouldGroupUseGtAndLt() {
+        FilterRequestDto.Filter between8And10 = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 10.0, true, true);
+
+        String query = searchQueryWithFilters(
+                new FilterRequestDto(null, List.of(new FilterRequestDto.FilterGroup(null, List.of(between8And10)))));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"gt\":8.0,\"lt\":10.0}}}");
+    }
+
+    @Test
+    void search_rangeBoundsStayInclusiveByDefault() {
+        // Manual range sliders send neither minExclusive nor maxExclusive
+        FilterRequestDto.Filter slider = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 10.0, null, null);
+        FilterRequestDto.Filter explicitInclusive = new FilterRequestDto.Filter("price.minPrice.price",
+                FilterRequestDto.FilterOperator.range, null, 100.0, 500.0, false, false);
+
+        String query = searchQueryWithFilters(new FilterRequestDto(List.of(slider, explicitInclusive), null));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"gte\":8.0,\"lte\":10.0}}}")
+                .contains("{\"range\":{\"price.minPrice.price\":{\"gte\":100.0,\"lte\":500.0}}}");
+    }
+
+    @Test
+    void normalizeFilters_keepsTheStricterBoundWhenMergingRanges() {
+        FilterRequestDto merged = searchService.normalizeFilters(new FilterRequestDto(List.of(
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        null, null),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        true, null),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, null, 9.0,
+                        null, true)), null));
+
+        // Same lower bound: the exclusive one wins. Lower upper bound: it replaces 10 with its own exclusivity.
+        assertThat(merged.filters()).containsExactly(new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 9.0, true, true));
+    }
+
+    @Test
+    void normalizeFilters_dropsTheExclusivityOfAReplacedBound() {
+        FilterRequestDto merged = searchService.normalizeFilters(new FilterRequestDto(List.of(
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        true, true),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 9.0, 9.5,
+                        null, null)), null));
+
+        assertThat(merged.filters()).containsExactly(new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 9.0, 9.5, null, null));
     }
 }

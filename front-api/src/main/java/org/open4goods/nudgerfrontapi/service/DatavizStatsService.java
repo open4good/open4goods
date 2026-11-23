@@ -341,6 +341,8 @@ public class DatavizStatsService {
                 FilterRequestDto.FilterOperator.range,
                 null,
                 1d,
+                null,
+                null,
                 null));
 
         // Apply overrides from request
@@ -353,7 +355,9 @@ public class DatavizStatsService {
                             FilterRequestDto.FilterOperator.range,
                             null,
                             override.min(),
-                            override.max()));
+                            override.max(),
+                            null,
+                            null));
                 }
             }
         }
@@ -371,6 +375,8 @@ public class DatavizStatsService {
                         FilterRequestDto.FilterOperator.range,
                         null,
                         1d,
+                        null,
+                        null,
                         null)
         ), null);
     }

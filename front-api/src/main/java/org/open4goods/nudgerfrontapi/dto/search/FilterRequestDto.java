@@ -40,6 +40,12 @@ public record FilterRequestDto(
 
     /**
      * Describes a single filter clause sent by the client.
+     *
+     * <p>{@code range} bounds are inclusive by default. {@code minExclusive} and
+     * {@code maxExclusive} make a bound strict, so that the vertical subset
+     * operators {@code GREATER_THAN} / {@code LOWER_THAN} keep their meaning
+     * ({@code LOWER_THAN 8} must exclude 8, GOU-2586). {@code null} means
+     * {@code false}.</p>
      */
     public record Filter(
             @Schema(description = "Field mapping targeted by the filter.", example = "price.minPrice.price")
@@ -49,10 +55,16 @@ public record FilterRequestDto(
             @Schema(description = "Exact values accepted when the operator is <code>term</code>. Multiple values are combined with OR semantics.",
                     example = "[\"Fairphone\",\"Samsung\"]")
             List<String> terms,
-            @Schema(description = "Inclusive lower bound used when the operator is <code>range</code>.", example = "100.0")
+            @Schema(description = "Lower bound used when the operator is <code>range</code>. Inclusive unless <code>minExclusive</code> is true.", example = "100.0")
             Double min,
-            @Schema(description = "Inclusive upper bound used when the operator is <code>range</code>.", example = "500.0")
-            Double max) {
+            @Schema(description = "Upper bound used when the operator is <code>range</code>. Inclusive unless <code>maxExclusive</code> is true.", example = "500.0")
+            Double max,
+            @Schema(description = "When true, the <code>range</code> lower bound is exclusive: the field must be strictly greater than min. Omitted or false keeps it inclusive.",
+                    example = "false")
+            Boolean minExclusive,
+            @Schema(description = "When true, the <code>range</code> upper bound is exclusive: the field must be strictly lower than max. Omitted or false keeps it inclusive.",
+                    example = "true")
+            Boolean maxExclusive) {
     }
 
     /**
@@ -129,7 +141,7 @@ public record FilterRequestDto(
     public enum FilterOperator {
         @Schema(description = "Matches documents where the field equals one of the provided terms.")
         term,
-        @Schema(description = "Matches documents where the field is within the inclusive range defined by min and/or max.")
+        @Schema(description = "Matches documents where the field is within the range defined by min and/or max. Bounds are inclusive unless minExclusive / maxExclusive is true.")
         range,
         @Schema(description = "Matches documents where the ranking field is within the percentile range. Uses min as fromPercent and max as toPercent.")
         rankingPercentile,

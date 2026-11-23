@@ -474,6 +474,38 @@ class ProductControllerIT {
     }
 
     @Test
+    void productsEndpointKeepsExclusiveRangeBounds() throws Exception {
+        var product = new ProductDto(0L, null, null, null, null, null, null, null, null, null, null, null, null);
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(product));
+        given(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), any(FilterRequestDto.class)))
+                .willReturn(new ProductSearchResponseDto(page, List.of()));
+
+        // Sub-category "8-9 kg": GREATER_THAN_OR_EQUAL 8 and LOWER_THAN 10 (GOU-2586)
+        mockMvc.perform(post("/products")
+                        .content("{\"filters\": {\"filters\": [{\"field\":\"attributes.indexed.WASHING_CAPACITY.numericValue\","
+                                + "\"operator\":\"range\",\"min\":8,\"max\":10,\"maxExclusive\":true}],"
+                                + " \"filterGroups\": [{\"should\": [{\"field\":\"price.minPrice.price\",\"operator\":\"range\","
+                                + "\"min\":450,\"minExclusive\":true}]}]}}")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<FilterRequestDto> captor = ArgumentCaptor.forClass(FilterRequestDto.class);
+        then(searchService).should().searchProducts(any(Pageable.class), any(Locale.class), anySet(), nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class), nullable(String.class), captor.capture());
+
+        Filter capacity = captor.getValue().filters().get(0);
+        assertThat(capacity.min()).isEqualTo(8.0);
+        assertThat(capacity.minExclusive()).isNull();
+        assertThat(capacity.max()).isEqualTo(10.0);
+        assertThat(capacity.maxExclusive()).isTrue();
+        Filter price = captor.getValue().filterGroups().get(0).should().get(0);
+        assertThat(price.minExclusive()).isTrue();
+        assertThat(price.maxExclusive()).isNull();
+    }
+
+    @Test
     void componentsEndpointReturnsList() throws Exception {
         mockMvc.perform(get("/products/fields/components")
                         .param("domainLanguage", "fr")
