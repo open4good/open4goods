@@ -1007,7 +1007,7 @@ public class SearchService {
 	}
 
 	private void rebuildVerticalSuggestions() {
-		List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault().stream()
+		List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault(true).stream()
 				.flatMap(config -> buildSuggestionsForConfig(config).stream()).toList();
 		verticalSuggestions = List.copyOf(entries);
 	}
@@ -1540,6 +1540,11 @@ public class SearchService {
 		return responses;
 	}
 
+	private boolean isVerticalEnabled(String verticalId) {
+		VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+		return config != null && config.isEnabled();
+	}
+
 	/**
 	 * Group mapped hits by vertical identifier.
 	 *
@@ -1554,7 +1559,7 @@ public class SearchService {
 
 		Map<String, List<GlobalSearchHit>> grouped = new LinkedHashMap<>();
 		for (GlobalSearchHit hit : hits) {
-			if (hit == null || !StringUtils.hasText(hit.verticalId())) {
+			if (hit == null || !StringUtils.hasText(hit.verticalId()) || !isVerticalEnabled(hit.verticalId())) {
 				continue;
 			}
 			grouped.computeIfAbsent(hit.verticalId(), key -> new ArrayList<>()).add(hit);

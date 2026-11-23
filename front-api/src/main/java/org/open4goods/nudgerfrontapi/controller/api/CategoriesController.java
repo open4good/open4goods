@@ -102,7 +102,7 @@ public class CategoriesController {
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class)),
                     @Parameter(name = "onlyEnabled", in = ParameterIn.QUERY, required = false,
-                            description = "Deprecated: retained for backward compatibility. All verticals are returned regardless of this flag.",
+                            description = "When true, disabled verticals are excluded.",
                             schema = @Schema(type = "boolean", defaultValue = "false"))
             },
             responses = {
@@ -117,7 +117,7 @@ public class CategoriesController {
     public ResponseEntity<List<VerticalConfigDto>> categories(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "onlyEnabled", defaultValue = "false") boolean onlyEnabled) {
-        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault().stream()
+        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault(onlyEnabled).stream()
                 .map(config -> categoryMappingService.toVerticalConfigDto(config, domainLanguage))
                 .filter(Objects::nonNull)
                 .toList();

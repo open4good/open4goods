@@ -84,7 +84,7 @@ class SearchServiceTest {
         frElements.setVerticalHomeUrl("televiseurs");
         tvConfig.setI18n(Map.of("fr", frElements));
 
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(tvConfig));
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(tvConfig));
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
 
         searchService.initializeSuggestIndex();
@@ -107,12 +107,63 @@ class SearchServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void globalSearch_shouldHideDisabledVertical_inCtaAndGroups() {
+        VerticalConfig enabled = verticalConfig("tv", "Téléviseurs", "televiseurs", true);
+        VerticalConfig disabled = verticalConfig("frz", "Congélateurs", "congelateurs", false);
+        // Same filtering as VerticalsConfigService.getConfigsWithoutDefault(boolean)
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(enabled));
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(enabled);
+        when(verticalsConfigService.getConfigById("frz")).thenReturn(disabled);
+        when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
+        searchService.initializeSuggestIndex();
+
+        long now = System.currentTimeMillis();
+        SearchHits<Product> hits = mock(SearchHits.class);
+        SearchHit<Product> tvHit = freshHit(1L, "tv", now);
+        SearchHit<Product> frzHit = freshHit(2L, "frz", now);
+        when(hits.isEmpty()).thenReturn(false);
+        when(hits.getSearchHits()).thenReturn(List.of(tvHit, frzHit));
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits);
+        when(productMappingService.mapProduct(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(mock(ProductDto.class));
+
+        GlobalSearchResult hidden = searchService.globalSearch("congélateurs", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+        assertThat(hidden.verticalCta()).isNull();
+        assertThat(hidden.verticalGroups()).extracting(g -> g.verticalId()).containsExactly("tv");
+    }
+
+    private static VerticalConfig verticalConfig(String id, String title, String url, boolean enabled) {
+        VerticalConfig config = new VerticalConfig();
+        config.setId(id);
+        config.setEnabled(enabled);
+        ProductI18nElements fr = new ProductI18nElements();
+        fr.setVerticalHomeTitle(title);
+        fr.setVerticalHomeUrl(url);
+        config.setI18n(Map.of("fr", fr));
+        return config;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static SearchHit<Product> freshHit(long id, String vertical, long now) {
+        Product product = new Product(id);
+        product.setVertical(vertical);
+        product.setPrice(new AggregatedPrices());
+        product.getPrice().getOffers().add(OfferFreshnessServiceTest.offer("fnac", 12.0,
+                ProductCondition.NEW, now - Duration.ofHours(1).toMillis()));
+        SearchHit<Product> hit = mock(SearchHit.class);
+        when(hit.getContent()).thenReturn(product);
+        return hit;
+    }
+
+    @Test
     void globalSearch_shouldNotReturnVerticalCta_whenQueryDoesNotMatchStrictly() {
         // GIVEN
         VerticalConfig tvConfig = new VerticalConfig();
         tvConfig.setId("tv");
         tvConfig.setI18n(Map.of("fr", new ProductI18nElements()));
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(tvConfig));
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(tvConfig));
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
 
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
@@ -133,7 +184,7 @@ class SearchServiceTest {
     @Test
     void globalSearch_shouldBuildOnlyLexicalQueries_whenNoVerticalCandidates() {
         // GIVEN initial setup
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
 
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
@@ -532,6 +583,7 @@ class SearchServiceTest {
 
     @Test
     void globalSearch_setsAccessoriesApartFromTheLongTailAndDemotesThemInGroups() throws Exception {
+        lenient().when(verticalsConfigService.getConfigById("coffee-machine")).thenReturn(verticalConfig("coffee-machine", "t", "u", true));
         Product tv = GlobalSearchRelevanceTest.displayable(10, "Machine à café Philips grain", now());
         tv.setVertical("coffee-machine");
         Product machine = GlobalSearchRelevanceTest.displayable(1, "Machine à café Delonghi Magnifica", now());
@@ -556,6 +608,7 @@ class SearchServiceTest {
 
     @Test
     void globalSearch_dropsVerticalProductsWithoutFreshOffer() throws Exception {
+        lenient().when(verticalsConfigService.getConfigById("tv")).thenReturn(verticalConfig("tv", "t", "u", true));
         Product withOffer = GlobalSearchRelevanceTest.displayable(10, "Téléviseur LG OLED", now());
         withOffer.setVertical("tv");
         Product expired = GlobalSearchRelevanceTest.displayable(11, "Téléviseur Samsung HG50BU800EU",
