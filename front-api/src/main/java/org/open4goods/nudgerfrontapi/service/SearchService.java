@@ -1759,7 +1759,9 @@ public class SearchService {
 			return List.of();
 		}
 		List<SearchHit<Product>> sortedHits = sortGlobalHits(hits.getSearchHits(), sort);
+		// GOU-2590: the indexed offersCount keeps expired offers; a product without fresh offer shows no price
 		return sortedHits.stream()
+				.filter(hit -> hit.getContent() != null && offerFreshnessService.offersCount(hit.getContent()) > 0)
 				.map(hit -> mapHit(hit, domainLanguage, hit.getScore()))
 				.filter(Objects::nonNull)
 				.toList();

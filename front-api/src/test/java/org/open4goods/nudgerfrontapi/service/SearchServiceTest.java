@@ -554,6 +554,22 @@ class SearchServiceTest {
     }
 
     @Test
+    void globalSearch_dropsVerticalProductsWithoutFreshOffer() throws Exception {
+        Product withOffer = GlobalSearchRelevanceTest.displayable(10, "Téléviseur LG OLED", now());
+        withOffer.setVertical("tv");
+        Product expired = GlobalSearchRelevanceTest.displayable(11, "Téléviseur Samsung HG50BU800EU",
+                now() - Duration.ofDays(60).toMillis());
+        expired.setVertical("tv");
+        stubGlobalSearch(List.of(expired, withOffer), List.of(), List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("televiseur", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(result.verticalGroups()).hasSize(1);
+        assertThat(gtins(result.verticalGroups().get(0).results())).containsExactly(10L);
+    }
+
+    @Test
     void globalSearch_keepsAccessoriesInPlaceWhenTheQueryNamesOne() throws Exception {
         Product filter = GlobalSearchRelevanceTest.displayable(2, "Filtre à eau pour machine à café", now());
         List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(filter), List.of());
