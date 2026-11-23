@@ -1726,7 +1726,7 @@
             "label": "offers_count"
           },
           "sources": {
-            "description": "Sources that contributed to the product, separated by |.",
+            "description": "Sources that contributed to the product, separated by {'|'}.",
             "label": "sources"
           }
         },
@@ -1834,7 +1834,7 @@
             "label": "offers_count"
           },
           "sources": {
-            "description": "Sources that contributed to the product, separated by |.",
+            "description": "Sources that contributed to the product, separated by {'|'}.",
             "label": "sources"
           },
           "souscategorie": {
