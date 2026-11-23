@@ -604,6 +604,10 @@ export default defineNuxtConfig({
     // Extra user-agent substrings (comma separated, case-insensitive) refused on
     // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
     affiliationBlockedUserAgents: '',
+    // Client IPs refused on /contrib/ (GOU-2577): comma separated exact IPs or CIDR
+    // prefixes, IPv4 and IPv6 (e.g. 2a01:4f8:210:1459::/64). Client IP = CF-Connecting-IP,
+    // else the request IP. Overridden by NUXT_AFFILIATION_BLOCKED_IPS.
+    affiliationBlockedIps: '',
     // /contrib/ only redirects requests carrying the navigation-signal cookie
     // (GOU-1184); a site Referer alone is refused (GOU-1520). Kill switch, no
     // rebuild needed: NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false.
