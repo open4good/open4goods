@@ -15,6 +15,9 @@ const extractBackendErrorDetailsMock = vi.hoisted(() => vi.fn())
 const getRouterParamMock = vi.hoisted(() =>
   vi.fn<(event: unknown, name: string) => string | undefined>()
 )
+const getRequestIPMock = vi.hoisted(() =>
+  vi.fn((event: unknown): string | undefined => (event as { ip?: string }).ip)
+)
 const sendMock = vi.hoisted(() => vi.fn())
 const setResponseHeaderMock = vi.hoisted(() => vi.fn())
 const setResponseStatusMock = vi.hoisted(() => vi.fn())
@@ -45,8 +48,8 @@ const createErrorMock = vi.hoisted(() =>
 vi.mock('h3', () => ({
   defineEventHandler: (fn: ContribRouteHandler) => fn,
   getCookie: getCookieMock,
-  getQuery: (event: { query?: Record<string, unknown> }) =>
-    event.query ?? {},
+  getQuery: (event: { query?: Record<string, unknown> }) => event.query ?? {},
+  getRequestIP: getRequestIPMock,
   getRouterParam: getRouterParamMock,
   createError: createErrorMock,
   send: sendMock,
@@ -75,6 +78,7 @@ const BROWSER_UA =
 
 type ContribRuntimeConfig = {
   affiliationBlockedUserAgents: string
+  affiliationBlockedIps: string
   affiliationRequireNavigationSignal: unknown
 }
 
@@ -117,6 +121,7 @@ describe('resolveAffiliationRedirect', () => {
     // The server util reads the real (auto-imported) Nuxt runtime config.
     runtimeConfig = useRuntimeConfig() as unknown as ContribRuntimeConfig
     runtimeConfig.affiliationBlockedUserAgents = ''
+    runtimeConfig.affiliationBlockedIps = ''
     runtimeConfig.affiliationRequireNavigationSignal = true
     vi.spyOn(console, 'warn').mockImplementation(() => undefined)
 
@@ -126,6 +131,7 @@ describe('resolveAffiliationRedirect', () => {
 
   afterEach(() => {
     runtimeConfig.affiliationBlockedUserAgents = ''
+    runtimeConfig.affiliationBlockedIps = ''
     runtimeConfig.affiliationRequireNavigationSignal = true
     consoleErrorSpy.mockRestore()
     vi.clearAllMocks()
@@ -361,6 +367,82 @@ describe('resolveAffiliationRedirect', () => {
       statusMessage: 'Forbidden',
     })
     expect(resolveRedirectMock).not.toHaveBeenCalled()
+  })
+
+  describe('blocked IPs (GOU-2577)', () => {
+    const ipEvent = (headers: Record<string, string>, ip?: string) =>
+      ({
+        ip,
+        node: {
+          req: {
+            method: 'GET',
+            headers: {
+              host: 'nudger.fr',
+              'user-agent': BROWSER_UA,
+              referer: SITE_REFERER,
+              cookie: NAVIGATION_COOKIE,
+              ...headers,
+            },
+          },
+        },
+        context: { params: { token: 'token-abc-very-long-secret' } },
+      }) as unknown as Parameters<ContribRouteHandler>[0]
+
+    beforeEach(() => {
+      resolveRedirectMock.mockResolvedValue({
+        statusCode: 302,
+        location: 'https://network.example/click',
+      })
+      runtimeConfig.affiliationBlockedIps =
+        ' 203.0.113.7 , 2a01:4f8:210:1459::/64 , 10.0.0.0/8 '
+    })
+
+    it.each([
+      ['exact IPv4', { 'cf-connecting-ip': '203.0.113.7' }, undefined],
+      [
+        'IPv6 inside a /64',
+        { 'cf-connecting-ip': '2a01:4f8:210:1459:aaaa:bbbb:cccc:1' },
+        undefined,
+      ],
+      ['IPv4 inside a CIDR', { 'cf-connecting-ip': '10.9.8.7' }, undefined],
+      ['request IP without header', {}, '203.0.113.7'],
+    ])('refuses %s without calling the service', async (_n, headers, ip) => {
+      await expect(handler(ipEvent(headers, ip))).rejects.toMatchObject({
+        statusCode: 403,
+      })
+      expect(useAffiliationServiceMock).not.toHaveBeenCalled()
+      expect(resolveRedirectMock).not.toHaveBeenCalled()
+    })
+
+    it('lets an IP outside the list through', async () => {
+      const response = await handler(
+        ipEvent({ 'cf-connecting-ip': '198.51.100.9' })
+      )
+      expect(response).toMatchObject({
+        location: 'https://network.example/click',
+      })
+      expect(resolveRedirectMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('prefers CF-Connecting-IP over the request IP', async () => {
+      const response = await handler(
+        ipEvent({ 'cf-connecting-ip': '198.51.100.9' }, '203.0.113.7')
+      )
+      expect(response).toMatchObject({ statusCode: 302 })
+    })
+
+    it('keeps the current behaviour with an empty list', async () => {
+      runtimeConfig.affiliationBlockedIps = ''
+      const response = await handler(
+        ipEvent({ 'cf-connecting-ip': '203.0.113.7' })
+      )
+      expect(response).toMatchObject({ statusCode: 302 })
+    })
+
+    it('does not refuse when no IP is available', async () => {
+      const response = await handler(ipEvent({}))
+      expect(response).toMatchObject({ statusCode: 302 })
+    })
   })
 
   // User agent replayed by the GOU-1168 proxy network (no referer, no cookie).
