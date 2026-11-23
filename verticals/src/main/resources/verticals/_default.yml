@@ -119,9 +119,9 @@ natureMinMarkedCategoryShare: 0.5
 # sparePartCategoryMarkers / accessoryCategoryMarkers marker (natureNeutralCategoryFragments are not
 # removed), for when its category matches the vertical, against when it matches another vertical, and
 # abstains otherwise. A vertical needs strictly more votes for than against; its EPREL group keeps it.
-# Rule and open choices: verticals/README.md. false: historical rule, unchanged. Switched on by its own
-# PR after the before/after measure.
-categoryVoteEnabled: false
+# A tie opposed only by other verticals goes to the historical rule; a tie with a marker or an excluding
+# token against loses (GOU-2317). Rule, choices and measure: verticals/README.md. false: historical rule.
+categoryVoteEnabled: true
 
 # The global scores that are available to build the impact score
 availableImpactScoreCriterias:

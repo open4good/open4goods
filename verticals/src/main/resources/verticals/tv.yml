@@ -34751,6 +34751,19 @@ attributesConfig:
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
   - MEUBLE
+  # PC monitors and signage displays that merchants also list as TVs (Cdiscount "TELEVISEUR LCD",
+  # Rakuten "HIFI | TELEVISION"), measured in GOU-2317. Only the merchant forms that name a monitor:
+  # no bare MONITEUR (alternate "TV & MONITEUR > TV", Inmac "IT | MONITEURS | TV HOTEL"), no bare
+  # ECRAN PC (RueDuCommerce files real TVs there), no Cdiscount "ECRAN ORDINATEUR" (hotel TVs), no
+  # icecat or Rakuten "INFORMATIQUE | ECRAN" form (business TVs, a Silver TV). See verticals/README.md.
+  - MONITEUR SEMI PRO
+  - INFORMATIQUE / ECRAN / ECRAN PC
+  - "ECRAN PC >"
+  - "> ECRAN PC"
+  - "IT | MONITEURS | MONITEUR "
+  - "AFFICHAGE DYNAMIQUE >"
+  - "AFFICHAGE COLLABORATIF >"
+  - MONITORS
 
 matchingCategories:
   all: []

@@ -46,6 +46,9 @@ class PcComponentMarkersTest {
     static void setUp() throws Exception {
         shipped = service();
         before = service();
+        // The comparisons below read the historical rule; the vote is on since GOU-2317
+        shipped.getDefaultConfig().setCategoryVoteEnabled(false);
+        before.getDefaultConfig().setCategoryVoteEnabled(false);
         VerticalConfig defaults = before.getDefaultConfig();
         defaults.getSparePartCategoryMarkers().removeAll(PC_COMPONENT_MARKERS);
         defaults.getAccessoryCategoryMarkers().removeAll(PC_COMPONENT_MARKERS);
@@ -64,7 +67,7 @@ class PcComponentMarkersTest {
         assertThat(defaults.getSparePartCategoryMarkers()).containsAll(PC_COMPONENT_MARKERS);
         assertThat(defaults.getNatureNeutralCategoryFragments()).containsAll(PC_COMPONENT_MARKERS);
         assertThat(defaults.getAccessoryCategoryMarkers()).doesNotContainAnyElementsOf(PC_COMPONENT_MARKERS);
-        assertThat(defaults.isCategoryVoteEnabled()).as("the activation is another PR").isFalse();
+        assertThat(service().isCategoryVoteEnabled()).as("switched on by GOU-2317").isTrue();
 
         for (String marker : PC_COMPONENT_MARKERS) {
             assertThat(shipped.carriesNatureMarker("INFORMATIQUE > " + marker + " > LEAF")).as(marker).isTrue();
@@ -183,7 +186,6 @@ class PcComponentMarkersTest {
      */
     @Test
     void historicalRuleUnchanged() {
-        assertThat(shipped.isCategoryVoteEnabled()).isFalse();
         for (Map.Entry<String, CategoryVoteReplay.ExportedProduct> product : realCategories.entrySet()) {
             Map<String, String> categories = product.getValue().categoriesByDatasources();
             for (String eprelGroup : new String[] { null, product.getValue().eprelGroup() }) {

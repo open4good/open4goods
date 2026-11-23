@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -971,6 +972,20 @@ public class VerticalsConfigService {
 		if (isCategoryVoteEnabled()) {
 			return getVerticalByCategoryVote(productCategoriessByDatasource, eprelProductGroup);
 		}
+		return getVerticalByHistoricalRule(productCategoriessByDatasource, eprelProductGroup);
+	}
+
+	/**
+	 * The historical rule of {@link #getVerticalForCategories(Map, String)},
+	 * whatever the {@code categoryVoteEnabled} flag: the vote falls back on it to
+	 * break a tie (GOU-2317).
+	 *
+	 * @param productCategoriessByDatasource product categories keyed by datasource
+	 * @param eprelProductGroup              EPREL product group of the product, or null
+	 * @return the matching vertical, or null
+	 */
+	private VerticalConfig getVerticalByHistoricalRule(Map<String, String> productCategoriessByDatasource,
+			String eprelProductGroup) {
 
 		VerticalConfig vc = null;
 
@@ -1070,14 +1085,20 @@ public class VerticalsConfigService {
 	 * an EPREL-confirmed current vertical instead of moving the product to the
 	 * vertical of the categories.</li>
 	 * <li>Otherwise V wins when its votes for are strictly more than its votes
-	 * against. On a tie V loses: one row against one row is no evidence either way,
-	 * and the historical rule already drops the vertical in that case when the row
-	 * carries an excluding token.</li>
-	 * </ol>
-	 * At most one vertical can win, so the result does not depend on the order of
-	 * the map: a datasource that votes for W votes against V, hence
+	 * against. At most one vertical can win this way: a datasource that votes for
+	 * W votes against V, hence
 	 * {@code for(V) > against(V) >= for(W) > against(W) >= for(V)} would be needed
-	 * for both to win.
+	 * for both to win.</li>
+	 * <li>When no vertical wins, a tie goes to the historical rule (GOU-2317): V
+	 * wins when its votes for equal its votes against, none of these votes against
+	 * comes from a marker or an excluding token, and the historical rule gives V.
+	 * A tie between two verticals is a conflict of merchant mappings (a Fnac
+	 * "LAVAGE" row mapped to washing machines on a real dishwasher), not evidence
+	 * of an accessory. A tie with a marker against V loses: one marked row is
+	 * enough doubt against one row for V (the Lian-Li cooler filed as a TV).</li>
+	 * </ol>
+	 * Only the tie of the last step depends on the order of the map, through the
+	 * historical rule.
 	 *
 	 * <p>Outside four populations this rule gives the historical result: products
 	 * with a vertical and a category carrying a nature marker that is not an
@@ -1128,30 +1149,53 @@ public class VerticalsConfigService {
 		}
 
 		VerticalConfig winner = null;
+		Set<String> tiedWithoutMarker = new HashSet<>();
 		for (VerticalConfig candidate : candidates.values()) {
 			int votesFor = 0;
 			int votesAgainst = 0;
+			int markedAgainst = 0;
 			for (int i = 0; i < categories.size(); i++) {
 				switch (categoryVote(candidate, categories.get(i), matchedVerticals.get(i))) {
 				case FOR -> votesFor++;
 				case AGAINST -> votesAgainst++;
+				case MARKED_AGAINST -> {
+					votesAgainst++;
+					markedAgainst++;
+				}
 				case ABSTAIN -> {
 					// Says nothing about this vertical
 				}
 				}
 			}
-			logger.debug("Vertical {}: {} votes for, {} against, {} categories", candidate.getId(), votesFor,
-					votesAgainst, categories.size());
+			logger.debug("Vertical {}: {} votes for, {} against ({} marked), {} categories", candidate.getId(),
+					votesFor, votesAgainst, markedAgainst, categories.size());
 			if (votesFor > votesAgainst) {
 				winner = candidate;
+			} else if (votesFor == votesAgainst && markedAgainst == 0) {
+				tiedWithoutMarker.add(candidate.getId());
 			}
 		}
-		return winner;
+		if (winner != null || tiedWithoutMarker.isEmpty()) {
+			return winner;
+		}
+
+		// A tie opposed only by other verticals: the historical rule decides (GOU-2317)
+		VerticalConfig historical = getVerticalByHistoricalRule(categoriesByDatasource, eprelProductGroup);
+		if (historical != null && tiedWithoutMarker.contains(historical.getId())) {
+			logger.debug("Vertical {} kept on a tie by the historical rule", historical.getId());
+			return historical;
+		}
+		return null;
 	}
 
-	/** Vote of one datasource category on a candidate vertical (GOU-2256). */
+	/**
+	 * Vote of one datasource category on a candidate vertical (GOU-2256).
+	 * {@code MARKED_AGAINST} is a vote against carried by a marker or an excluding
+	 * token, {@code AGAINST} one carried by a category of another vertical: only
+	 * the second leaves a tie to the historical rule (GOU-2317).
+	 */
 	private enum CategoryVote {
-		FOR, AGAINST, ABSTAIN
+		FOR, AGAINST, MARKED_AGAINST, ABSTAIN
 	}
 
 	/**
@@ -1164,7 +1208,7 @@ public class VerticalsConfigService {
 	private CategoryVote categoryVote(VerticalConfig candidate, String category, VerticalConfig matched) {
 		if (containsAny(category, candidate.getExcludingTokensFromCategoriesMatching())
 				|| carriesNatureMarker(category)) {
-			return CategoryVote.AGAINST;
+			return CategoryVote.MARKED_AGAINST;
 		}
 		if (matched == null) {
 			return CategoryVote.ABSTAIN;
