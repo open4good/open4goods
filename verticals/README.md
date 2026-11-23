@@ -33,7 +33,7 @@ on every aggregation, then sets the `nature` of a product left without vertical 
 matches a vertical when it is listed in its `matchingCategories`, under its datasource first, then under
 `all`. The flag `categoryVoteEnabled` of `_default.yml` chooses between two rules.
 
-### Historical rule (`categoryVoteEnabled: false`, the default)
+### Historical rule (`categoryVoteEnabled: false`)
 
 1. The first category of the map that matches a vertical gives it.
 2. One category of any datasource containing one of the vertical's `excludingTokensFromCategoriesMatching`
@@ -43,14 +43,14 @@ One misfiled merchant row decides in both directions: a PC case filed as a phone
 smartphone, a real TV with one "PIECES DETACHEES" row loses its vertical. When categories match two
 verticals, the result depends on the iteration order of the map.
 
-### Vote between datasources (`categoryVoteEnabled: true`, GOU-2256)
+### Vote between datasources (`categoryVoteEnabled: true`, the default since GOU-2317)
 
-Merged disabled (GOU-2256). It is switched on by its own PR after the before/after measure
+Merged disabled (GOU-2256), switched on by GOU-2317 after the before/after measure
 ([replay](#beforeafter-replay-gou-2317)). CTO decisions on GOU-2317: one vote per datasource name, another
-vertical votes against, EPREL step 2 kept, a tie loses. The tie rule moves to "tie = historical rule" if the
-measure of population (a) shows more real products lost than false positives removed; population (b) is measured
-before the activation. Each datasource votes once on each candidate vertical V, a vertical matched by at
-least one category of the product:
+vertical votes against, EPREL step 2 kept, a tie loses, moved to "tie = historical rule" if the measure showed
+more real products lost than false positives removed. It did, through ties between verticals (population (c)):
+step 4 below. Each datasource votes once on each candidate vertical V, a vertical matched by at least one
+category of the product:
 
 | Category of the datasource | Vote on V |
 |---|---|
@@ -66,12 +66,15 @@ Decision:
 2. When the EPREL group belongs to a vertical that no category matches, no vertical: the categories
    contradict EPREL, and the aggregation keeps an EPREL-confirmed current vertical instead of moving the
    product to the vertical of the categories.
-3. Otherwise V wins when it has strictly more votes for than against. On a tie V loses.
+3. Otherwise V wins when it has strictly more votes for than against. At most one vertical can win: a
+   datasource voting for W votes against V, so both winning would need
+   `for(V) > against(V) >= for(W) > against(W) >= for(V)`.
+4. When no vertical wins, a tie goes to the historical rule (GOU-2317): V wins when its votes for equal its
+   votes against, none of these votes against comes from a marker or an excluding token, and the historical
+   rule gives V. A tie with one marked vote against V loses.
 
-At most one vertical can win: a datasource voting for W votes against V, so both winning would need
-`for(V) > against(V) >= for(W) > against(W) >= for(V)`. The result therefore does not depend on the order
-of the map. The aggregation keeps its EPREL fallback: a product whose EPREL group confirms its current
-vertical keeps it when the vote gives nothing.
+Only step 4 depends on the order of the map, through the historical rule. The aggregation keeps its EPREL
+fallback: a product whose EPREL group confirms its current vertical keeps it when the vote gives nothing.
 
 The vote reuses the markers of the nature (GOU-2233) without a second list, but not its
 `natureNeutralCategoryFragments`: for the nature, a PC component is not a spare part, whereas for the vote
@@ -84,7 +87,7 @@ compares it with and without them on every real category, every `matchingCategor
 every other marker and fragment). There is no generic `COMPOSANT` token. The historical rule does not read these
 lists.
 
-Choices open at review:
+Choices made at review (GOU-2317):
 
 - **Another vertical votes against.** The card only counts marked categories against V. Counting the votes
   for another vertical makes the winner unique. Alternative: they abstain, and a tie between verticals is
@@ -108,9 +111,15 @@ Choices open at review:
   Unchanged: the air conditioners under `ENTRETIEN DE LA MAISON > ...` (no marker, the row abstains) and the
   EPREL-confirmed fridges under `... > PORTE-SAVON`. The activation PR must rewrite
   `SparePartsCategoriesTest#singularSparePartCategoryKeepsTheVertical`, which asserts the historical result.
-- **A tie loses.** One row against one row is no evidence. The historical rule already drops the vertical
-  when that row carries an excluding token, but kept it when the row only carried a nature marker (see the
-  stricter case above). Alternative: a tie falls back to the historical rule.
+- **A tie with a marker against loses, a tie between verticals follows the historical rule** (GOU-2317). One
+  marked row against one row for V is enough doubt: the historical rule already drops the vertical when that
+  row carries an excluding token, and the false positives of the card (Lian-Li, ASRock) lose theirs this way.
+  A tie between two verticals is a conflict of merchant mappings: Fnac files dishwashers under
+  `PETIT MENAGER & CUISINE - LAVAGE`, a washing machine category, and air conditioners under
+  `PETIT MENAGER & CUISINE - FROID`, a refrigerator one, while the long `Darty FR` categories are only mapped
+  under `darty.com`. With "a tie loses", a real dishwasher with one Darty row and one Fnac row lost its
+  vertical: 26 of 1,412 air conditioners and about 27 of 1,497 dishwashers of the measure. With step 4, 2 real
+  products are lost on 10,412 (two air coolers with a misfiled PC component row, population (a)).
 - **EPREL group of an unmatched vertical.** Step 2 keeps every EPREL-confirmed product in its vertical.
   The historical rule moves such a product to the vertical of its first matching category. Alternative:
   drop step 2 and accept that move.
@@ -193,6 +202,21 @@ mvn --offline -pl verticals -am test -Dtest=CategoryVoteReplayTest -Dsurefire.fa
 
 The report has a table by vertical, a table by change (historical vertical, voted vertical) and the list of the
 differences with their populations, ready for the activation PR.
+
+**Measure of the activation (23/11/2026, `products-moustik`).** Samples sorted on `_doc` (the first indexed
+products, not a random draw): 1,500 products per vertical (all 1,412 air conditioners), and 500 products without
+vertical per vertical with a `datasourceCategories` value of its `matchingCategories` (435 for dishwashers). On
+both: 0 difference outside the populations, 0 EPREL-confirmed product lost.
+
+- With vertical (10,412): 23 differences. 20 are right: 11 dishwashers filed as washing machines move to
+  dishwasher, 1 dishwasher to washing-machine, 1 oven/dishwasher combo to dishwasher (EPREL `dishwashers2019`),
+  1 refrigerator to air-conditioner, 3 PC components, 2 cleaning products and ASRock leave their vertical.
+  2 real air coolers are lost (a misfiled PC component row), 1 dryer moves from refrigerator to washing-machine.
+- Without vertical (3,407), population (b): 130 products gain a vertical. Most are right (about 43 real phones
+  that one `AUTRES ACCESSOIRES SMARTPHONE` row excluded, dishwashers, washing machines, ovens). About 25 are
+  wrong: 17 PC or digital signage monitors gain `tv` (Cdiscount `TELEVISEUR LCD` and Rakuten
+  `HIFI | TELEVISION` against Fnac `ACCESSOIRES POUR TELEVISEURS`), about 8 cases, chargers or cables gain
+  `smartphones`.
 
 ## Contributing new verticals
 

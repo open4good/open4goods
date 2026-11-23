@@ -67,6 +67,7 @@ class CategoryVoteTest {
     static void setUp() throws Exception {
         historical = new VerticalsConfigService(new SerialisationService(), mock(GoogleTaxonomyService.class),
                 new PathMatchingResourcePatternResolver());
+        historical.getDefaultConfig().setCategoryVoteEnabled(false);
         vote = new VerticalsConfigService(new SerialisationService(), mock(GoogleTaxonomyService.class),
                 new PathMatchingResourcePatternResolver());
         vote.getDefaultConfig().setCategoryVoteEnabled(true);
@@ -170,10 +171,6 @@ class CategoryVoteTest {
                 new Case("dishwasher with a singular spare part row", categories(
                         "Cdiscount FR", CDISCOUNT_DISHWASHER,
                         "ManoMano FR", "ELECTROMENAGER > PIECE DETACHEE LAVE-VAISSELLE > PANIER"), "dishwasher", null),
-                // Two verticals, one row each: the historical rule takes the first one in map order
-                new Case("dishwasher and refrigerator, one row each", categories(
-                        "Cdiscount FR", CDISCOUNT_DISHWASHER,
-                        "Darty FR", DARTY_REFRIGERATOR), "dishwasher", null),
                 new Case("two dishwasher rows and one refrigerator row", categories(
                         "Darty FR", DARTY_REFRIGERATOR,
                         "Cdiscount FR", CDISCOUNT_DISHWASHER,
@@ -199,11 +196,14 @@ class CategoryVoteTest {
         return cases;
     }
 
+    /** Switched on after the before/after measure (GOU-2317). */
     @Test
-    void voteShipsDisabled() {
-        assertThat(historical.getDefaultConfig().isCategoryVoteEnabled()).isFalse();
+    void voteShipsEnabled() {
+        VerticalsConfigService shipped = new VerticalsConfigService(new SerialisationService(),
+                mock(GoogleTaxonomyService.class), new PathMatchingResourcePatternResolver());
+        assertThat(shipped.getDefaultConfig().isCategoryVoteEnabled()).isTrue();
+        assertThat(shipped.isCategoryVoteEnabled()).isTrue();
         assertThat(historical.isCategoryVoteEnabled()).isFalse();
-        assertThat(vote.isCategoryVoteEnabled()).isTrue();
     }
 
     @Test
@@ -266,6 +266,50 @@ class CategoryVoteTest {
             Map<String, String> tie = categories("Cdiscount FR", zalman.get("Cdiscount FR"), "grosbill.com", component);
             assertThat(classify(vote, tie, null)).as(component).isNull();
             assertThat(classify(historical, tie, null)).as("historical, %s", component).isEqualTo("refrigerator");
+        }
+    }
+
+    /**
+     * A tie opposed only by another vertical goes to the historical rule (GOU-2317). Fnac files dishwashers under
+     * {@code PETIT MENAGER & CUISINE - LAVAGE}, a washing machine category, and air conditioners under
+     * {@code PETIT MENAGER & CUISINE - FROID}, a refrigerator one; the long {@code Darty FR} categories are only mapped
+     * under {@code darty.com}. With "a tie loses", 26 of 1,412 air conditioners and about 27 of 1,497 dishwashers of
+     * the measure lost their vertical. Real products of {@code products-moustik}, 23/11/2026.
+     */
+    @Test
+    void tieBetweenVerticalsFollowsTheHistoricalRule() {
+        Map<String, String> dishwasher = categories(
+                "darty.com", "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE ENCASTRABLE | GROS ELECTROMENAGER>"
+                        + "LAVE-VAISSELLE>LAVE-VAISSELLE ENCASTRABLE | LAVE-VAISSELLE | LAVE-VAISSELLE ENCASTRABLE",
+                "fnac.com", "PETIT MENAGER & CUISINE - LAVAGE",
+                "Darty FR", "GROS ELECTROMENAGER / LAVE-VAISSELLE / LAVE-VAISSELLE ENCASTRABLE | GROS ELECTROMENAGER>"
+                        + "LAVE-VAISSELLE>LAVE-VAISSELLE ENCASTRABLE | LAVE-VAISSELLE | LAVE-VAISSELLE ENCASTRABLE",
+                "Fnac FR", "PETIT MENAGER & CUISINE - LAVAGE");
+        assertThat(classify(vote, dishwasher, null)).as("dishwasher 3666749654699").isEqualTo("dishwasher");
+
+        Map<String, String> airConditioner = categories(
+                "RueDuCommerce FR", "CLIMATISEUR",
+                "Fnac FR", "PETIT MENAGER & CUISINE - FROID",
+                "Carrefour", "ENTRETIEN DE LA MAISON",
+                "Darty FR", "GROS ELECTROMENAGER / CLIMATISEUR / CLIMATISEUR MOBILE | GROS ELECTROMENAGER>CLIMATISEUR>"
+                        + "CLIMATISEUR MOBILE | CLIMATISEUR | CLIMATISEUR MOBILE");
+        assertThat(classify(vote, airConditioner, null)).as("air conditioner 8436607027089")
+                .isEqualTo("air-conditioner");
+
+        // Two verticals, one row each: only this tie depends on the map order, as the historical rule does
+        assertThat(classify(vote, categories("Cdiscount FR", CDISCOUNT_DISHWASHER, "Darty FR", DARTY_REFRIGERATOR),
+                null)).isEqualTo("dishwasher");
+        assertThat(classify(vote, categories("Darty FR", DARTY_REFRIGERATOR, "Cdiscount FR", CDISCOUNT_DISHWASHER),
+                null)).isEqualTo("refrigerator");
+    }
+
+    /** A tie with a marker or an excluding token against the vertical still loses, whatever the map order. */
+    @Test
+    void tieWithAMarkerAgainstLoses() {
+        Map<String, String> sparePart = categories("Cdiscount FR", CDISCOUNT_DISHWASHER,
+                "ManoMano FR", "ELECTROMENAGER > PIECE DETACHEE LAVE-VAISSELLE > PANIER");
+        for (Map<String, String> order : orders(sparePart)) {
+            assertThat(classify(vote, order, null)).as("order %s", order.keySet()).isNull();
         }
     }
 
