@@ -1540,6 +1540,11 @@ public class SearchService {
 		return responses;
 	}
 
+	private boolean isVerticalEnabled(String verticalId) {
+		VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+		return config != null && config.isEnabled();
+	}
+
 	/**
 	 * Group mapped hits by vertical identifier.
 	 *
@@ -1547,11 +1552,6 @@ public class SearchService {
 	 * @param sort optional sort definition for global search results
 	 * @return grouped vertical results preserving the requested ordering
 	 */
-	private boolean isVerticalEnabled(String verticalId) {
-		VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
-		return config != null && config.isEnabled();
-	}
-
 	private List<GlobalSearchVerticalGroup> groupHitsByVertical(List<GlobalSearchHit> hits, Sort sort) {
 		if (hits == null || hits.isEmpty()) {
 			return List.of();
