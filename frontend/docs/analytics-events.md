@@ -24,8 +24,22 @@ le DNT et le référent local) quand `isLikelyAutomatedBrowser`
    de l'UA. Edge, Opera, Brave, Vivaldi exposent `Chromium` et restent comptés ;
    les marques GREASE sont ignorées.
 
+4. **Langue (GOU-2573)** : Chrome de bureau **Windows ou Linux** (hors Mac,
+   Android, ChromeOS, Edge, Opera et dérivés), `navigator.languages` valant
+   exactement `['en-US', 'en']` ou dont la première valeur commence par `zh-CN`
+   (insensible à la casse), et aucune langue commençant par `fr`. `languages`
+   absent, vide ou non tableau : règle ignorée. Pas de condition de version ni de
+   contexte sécurisé.
+
 Tout le reste (Android/WebView, iOS `CriOS`, Firefox, Safari, contexte non
 sécurisé) est compté : pas d'extension de la règle 3, risque de faux positifs.
+
+Raison de la règle 4 : du 16 au 22/11, une ferme de vrais Chrome (Windows 154 /
+Linux 152, `userAgentData` cohérent, `webdriver` faux, proxys résidentiels,
+≈ 2 250 visiteurs Plausible) passait les règles 1 à 3 ; seule sa langue la
+distingue. Faux positifs acceptés : ≈ 1 visiteur FR par jour en Chrome de bureau
+`en-US` sans langue française (simulation GOU-2573). Pas de condition de fuseau
+horaire (non vérifiable sur la vague).
 
 Raison (GOU-1973) : un robot Tencent (AS132203) et une vague de proxys
 résidentiels exécutent le JS avec un UA " Chrome Windows " ancien sans
