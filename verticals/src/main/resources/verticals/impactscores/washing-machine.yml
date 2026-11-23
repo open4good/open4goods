@@ -8,13 +8,14 @@ criteriasPonderation:
   WEIGHT: 0.03
   REPAIRABILITY_INDEX: 0.12
   CLASSE_ENERGY: 0.18
-# ImpactScore V2 (GOU-1880), inactive while methodologyVersion is 1. Design: docs/impactscore/v2-design.md,
+# ImpactScore V2 (GOU-1880), active since wave 2 (methodologyVersion 2, GOU-1889). Design: docs/impactscore/v2-design.md,
 # sections 1.2 and 2.3. V1 matrix above without DATA_QUALITY (now the confidence indicator), renormalised to
 # 1 pro rata. The stored AI audit (aiResult, yamlPrompt) is the V1 one and was not rerun.
 # GOU-2041: REPAIRABILITY_INDEX is replaced, with its weight, by REPAIRABILITY_OR_DURABILITY_INDEX
 # (DURABILITY_INDEX when filled in, else REPAIRABILITY_INDEX, fixed 0-10 scale).
 # Gate 2 (GOU-1877): POWER_CONSUMPTION_TYPICAL (19 raw values, mixed units) is replaced, with its weight, by
 # ENERGY_CONSUMPTION_100_CYCLES (EPREL kWh per 100 cycles).
+methodologyVersion: 2
 v2:
   criteriasPonderation:
     WATER_CONSUMPTION: 0.2045455
