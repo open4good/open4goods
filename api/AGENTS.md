@@ -336,7 +336,10 @@ GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services
   `open-data-config.publication.enabled` (faux par défaut et en bêta ; vrai en prod, dans `application-prod.yml`).
   N'écris jamais un zip directement sur sa clé publique : clé `.staging/`, relecture et sha256, copie, manifests par jeu,
   `manifest.json` en dernier, suppression des anciens objets ensuite. Le garde-fou `max-bucket-size` (9 Go) reste sous
-  les 10 Go-mois gratuits. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.
+  les 10 Go-mois gratuits : ne le relève pas, réduis les jeux (GOU-2616 : `url` et `categories` retirées,
+  `last_updated` en date, guillemets au besoin, compression maximale). `WARN` et gauge
+  `opendata.publication.bucket.projected.ratio` au-delà de 80 %. Une colonne ajoutée se mesure d'abord en octets
+  compressés ; aucun filtrage de lignes sans décision. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.
 
 Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
 

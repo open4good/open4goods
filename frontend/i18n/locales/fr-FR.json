@@ -1560,10 +1560,6 @@
             "description": "Marque déclarée ou déduite pour le produit.",
             "label": "brand"
           },
-          "categories": {
-            "description": "Catégories du produit.",
-            "label": "categories"
-          },
           "currency": {
             "description": "Devise du prix le plus bas.",
             "label": "currency"
@@ -1581,7 +1577,7 @@
             "label": "gtinType"
           },
           "last_updated": {
-            "description": "Horodatage (EPOCH ms) de la dernière mise à jour de l'article.",
+            "description": "Date UTC (AAAA-MM-JJ) de la dernière mise à jour du produit.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1604,9 +1600,9 @@
             "description": "Nombre d'offres commerciales disponibles pour le produit.",
             "label": "offers_count"
           },
-          "url": {
-            "description": "URL de la fiche produit lorsque des offres sont disponibles.",
-            "label": "url"
+          "sources": {
+            "description": "Sources qui ont contribué au produit, séparées par {'|'}.",
+            "label": "sources"
           }
         },
         "columnsSubtitle": "Chaque ligne correspond à un produit unique, identifié par son code-barre.",
@@ -1693,7 +1689,7 @@
             "label": "isbn"
           },
           "last_updated": {
-            "description": "Horodatage (ms) de la dernière mise à jour.",
+            "description": "Date UTC (AAAA-MM-JJ) de la dernière mise à jour du livre.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1712,6 +1708,10 @@
             "description": "Nombre d'offres commerciales disponibles pour ce livre.",
             "label": "offers_count"
           },
+          "sources": {
+            "description": "Sources qui ont contribué au produit, séparées par {'|'}.",
+            "label": "sources"
+          },
           "souscategorie": {
             "description": "Sous-catégorie principale attribuée au livre.",
             "label": "souscategorie"
@@ -1723,10 +1723,6 @@
           "title": {
             "description": "Titre de l'ouvrage tel que fourni par les sources.",
             "label": "title"
-          },
-          "url": {
-            "description": "URL de la fiche du livre lorsque disponible.",
-            "label": "url"
           }
         },
         "columnsSubtitle": "Chaque ligne correspond à un livre identifié par son ISBN.",

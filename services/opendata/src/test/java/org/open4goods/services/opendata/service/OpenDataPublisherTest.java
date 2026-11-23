@@ -21,7 +21,13 @@ import org.open4goods.services.opendata.model.ObjectHeaders;
 import org.open4goods.services.opendata.model.OpenDataGenerationStatus.State;
 import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.opendata.service.InMemoryOpenDataStorage.Stored;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.unit.DataSize;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
@@ -151,6 +157,47 @@ class OpenDataPublisherTest {
         config.getPublication().setMaxBucketSize(DataSize.ofBytes(10_000));
 
         assertThat(publisher.publish(datasets, globalManifest)).isTrue();
+    }
+
+    @Test
+    void budgetGuardWarnsAbove80PercentAndExposesTheProjectedRatio() {
+        // GOU-2616: about 6,900 bytes after the publication, between 80 % and 100 % of 8,000.
+        config.getPublication().setMaxBucketSize(DataSize.ofBytes(8_000));
+        Logger logger = (Logger) LoggerFactory.getLogger(OpenDataPublisher.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertThat(publisher.publish(datasets, globalManifest)).isTrue();
+        } finally {
+            logger.detachAppender(appender);
+        }
+
+        assertThat(meterRegistry.get("opendata.publication.bucket.projected.ratio").gauge().value())
+                .isGreaterThan(OpenDataPublisher.BUDGET_WARNING_RATIO).isLessThan(1);
+        assertThat(appender.list).anySatisfy(event -> {
+            assertThat(event.getLevel()).isEqualTo(Level.WARN);
+            assertThat(event.getFormattedMessage()).contains("max-bucket-size");
+        });
+    }
+
+    @Test
+    void budgetGuardDoesNotWarnBelow80PercentAndExposesARefusedRatio() {
+        Logger logger = (Logger) LoggerFactory.getLogger(OpenDataPublisher.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertThat(publisher.publish(datasets, globalManifest)).isTrue();
+        } finally {
+            logger.detachAppender(appender);
+        }
+        assertThat(appender.list).noneSatisfy(event -> assertThat(event.getLevel()).isEqualTo(Level.WARN));
+        assertThat(meterRegistry.get("opendata.publication.bucket.projected.ratio").gauge().value()).isLessThan(0.8);
+
+        config.getPublication().setMaxBucketSize(DataSize.ofBytes(1_000));
+        assertThat(publisher.publish(datasets, globalManifest)).isFalse();
+        assertThat(meterRegistry.get("opendata.publication.bucket.projected.ratio").gauge().value()).isGreaterThan(1);
     }
 
     @Test
