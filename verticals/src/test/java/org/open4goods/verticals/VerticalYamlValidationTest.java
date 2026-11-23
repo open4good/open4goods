@@ -249,12 +249,13 @@ class VerticalYamlValidationTest {
     }
 
     @Test
-    void onlyWaveOneVerticalsAreSwitchedToTheV2Methodology() {
-        // GOU-1889 wave 1: refrigerators and dishwashers; the other verticals stay in V1 (waves 2 and 3: GOU-2186)
+    void onlyWaveOneAndTwoVerticalsAreSwitchedToTheV2Methodology() {
+        // GOU-1889 wave 1: refrigerators and dishwashers; wave 2 (GOU-2605): washing machines, ovens, smartphones;
+        // the other verticals stay in V1 (wave 3)
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
-                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher").contains(config.getId()) ? 2
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones").contains(config.getId()) ? 2
                     : ImpactScoreConfig.METHODOLOGY_V1));
     }
 

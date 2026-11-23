@@ -8,9 +8,13 @@ This document details the computation of the **Impact Score** (often referred to
 >
 > **V2 coverage (wave 1, GOU-1889, gate no. 3):** refrigerators and
 > dishwashers use `methodologyVersion: 2` (merge date 2026-11-14; production
-> follows with the next release train). All other verticals stay in V1.
+> follows with the next release train).
+> **Wave 2 (GOU-2605):** washing machines, ovens and smartphones also use
+> `methodologyVersion: 2` (wave date = merge date of the PR, 2026-11-23 if
+> merged today; production with the next release train; EPREL filter kept,
+> `v2.eprelRequired: true`). TVs and air conditioners stay in V1 (wave 3).
 > EPREL filter per vertical: `v2.eprelRequired: false` for refrigerators,
-> `true` for dishwashers (kept; lifting it needs a separate decision).
+> `true` for dishwashers, washing machines, ovens and smartphones (kept; lifting it needs a separate decision).
 > Rollback: set `IMPACTSCORE_METHODOLOGY_OVERRIDES=<vertical>:1`
 > (for example `dishwasher:1`). Re-evaluation happens in the 13:00 batch after
 > the release. Waves 2 and 3: GOU-2186.
