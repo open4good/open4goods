@@ -136,16 +136,14 @@ class OpenDataServiceTest {
 
         List<String> gtinLines = readZipLines(openDataConfig.gtinZipFile(), GTIN_CSV);
         List<String> isbnLines = readZipLines(openDataConfig.isbnZipFile(), ISBN_CSV);
-        // Row conversion: format unchanged in this lot (epoch milliseconds, https://nudger.fr/{gtin}).
+        // Row conversion (GOU-2616): no url nor categories, UTC date, a cell quoted only when it needs to be.
         assertThat(gtinLines).containsExactly(
-                "\"gtin\",\"brand\",\"model\",\"name\",\"last_updated\",\"gs1_country\",\"gtinType\",\"offers_count\","
-                        + "\"min_price\",\"currency\",\"categories\",\"url\",\"sources\"",
-                "\"1234567890123\",\"TestBrand\",\"ModelX\",\"short name\",\"1704067200000\",\"FR\",\"GTIN_13\",\"3\","
-                        + "\"42.42\",\"EUR\",\"" + gtinLines.get(1).split("\",\"")[10] + "\",\"https://nudger.fr/1234567890123\",\"eprel|rakuten.com\"");
-        assertThat(gtinLines.get(1)).contains("electronics").contains("gaming");
-        assertThat(isbnLines).hasSize(2);
-        assertThat(isbnLines.get(1)).isEqualTo("\"9781234567890\",\"short name\",\"1704067200000\",\"3\",\"42.42\",\"EUR\","
-                + "\"https://nudger.fr/9781234567890\",\"Test Editor\",\"Broché\",\"320\",\"SousCat1\",\"SousCat2\",\"eprel|rakuten.com\"");
+                "gtin,brand,model,name,last_updated,gs1_country,gtinType,offers_count,min_price,currency,sources",
+                "1234567890123,TestBrand,ModelX,short name,2024-01-01,FR,GTIN_13,3,42.42,EUR,eprel|rakuten.com");
+        assertThat(isbnLines).containsExactly(
+                "isbn,title,last_updated,offers_count,min_price,currency,editeur,format,nb_page,souscategorie,"
+                        + "souscategorie2,sources",
+                "9781234567890,short name,2024-01-01,3,42.42,EUR,Test Editor,Broché,320,SousCat1,SousCat2,eprel|rakuten.com");
 
         DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
         assertThat(gtin.schemaVersion()).isEqualTo(OpenDataManifest.SCHEMA_VERSION);
@@ -491,6 +489,30 @@ class OpenDataServiceTest {
 
         assertThat(gtinEntry).doesNotContainNull();
         assertThat(isbnEntry).doesNotContainNull();
+        // Absence is not zero: an unknown last change is no 1970-01-01.
+        assertThat(gtinEntry[4]).isEmpty();
+        assertThat(isbnEntry[2]).isEmpty();
+    }
+
+    @Test
+    void cellsShouldBeQuotedOnlyWhenNeededAndReadBackUnchanged() throws Exception {
+        Product product = buildProduct("1234567890123", BarcodeType.GTIN_13);
+        product.setOfferNames(new HashSet<>(Set.of("Lampe, \"LED\" 7W")));
+        exportReturns(buildProduct("9781234567890", BarcodeType.ISBN_13), product);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        List<String> lines = readZipLines(openDataConfig.gtinZipFile(), GTIN_CSV);
+        assertThat(lines.get(1)).startsWith("1234567890123,TestBrand,ModelX,\"Lampe, \"\"LED\"\" 7W\",2024-01-01,");
+        try (com.opencsv.CSVReader reader = new com.opencsv.CSVReader(new java.io.StringReader(lines.get(1)))) {
+            assertThat(reader.readNext()[3]).isEqualTo("Lampe, \"LED\" 7W");
+        }
+    }
+
+    @Test
+    void exportDateShouldBeTheUtcDay() {
+        assertThat(OpenDataService.exportDate(Instant.parse("2026-11-22T23:59:59Z").toEpochMilli())).isEqualTo("2026-11-22");
+        assertThat(OpenDataService.exportDate(0)).isEmpty();
     }
 
     @Test
@@ -511,13 +533,12 @@ class OpenDataServiceTest {
 
         List<String> oven_lines = readZipLines(openDataConfig.impactZipFile("oven"), "impact-oven.csv");
         assertThat(oven_lines).hasSize(3);
-        assertThat(oven_lines.get(0)).isEqualTo("\"gtin\",\"brand\",\"model\",\"name\",\"vertical\",\"nudger_url\","
-                + "\"eprel_registration_number\",\"offers_count\",\"last_updated\",\"classe_energy\",\"classe_energy_source\","
-                + "\"warranty_year\",\"warranty_source\"");
-        assertThat(oven_lines.get(1)).isEqualTo("\"1234567890123\",\"TestBrand\",\"ModelX\",\"short name\",\"oven\","
-                + "\"https://nudger.fr/slug-1234567890123\",\"\",\"3\",\"2024-01-01T00:00:00Z\",\"\",\"\",\"2\",\"eprel\"");
+        assertThat(oven_lines.get(0)).isEqualTo("gtin,brand,model,name,vertical,nudger_url,eprel_registration_number,"
+                + "offers_count,last_updated,classe_energy,classe_energy_source,warranty_year,warranty_source");
+        assertThat(oven_lines.get(1)).isEqualTo("1234567890123,TestBrand,ModelX,short name,oven,"
+                + "https://nudger.fr/slug-1234567890123,,3,2024-01-01T00:00:00Z,,,2,eprel");
         // Absence is not zero: no value, no source, no default.
-        assertThat(oven_lines.get(2)).endsWith(",\"\",\"\",\"\",\"\"");
+        assertThat(oven_lines.get(2)).endsWith(",,,,");
 
         DatasetManifest ovenManifest = manifestStore.readDataset(openDataConfig.impactManifestFile("oven")).orElseThrow();
         assertThat(ovenManifest.id()).isEqualTo("impact-oven");

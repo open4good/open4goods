@@ -85,6 +85,8 @@ jeux : `manifest.json` sur R2 n'annonce jamais un zip que R2 ne sert pas. Sinon 
   - `opendata_publication_failed` (1 si la dernière publication du processus a échoué) ;
   - `opendata_publication_last_success_timestamp_seconds` ;
   - `opendata_publication_bucket_size_bytes` (taille du bucket après la dernière publication réussie) ;
+  - `opendata_publication_bucket_projected_ratio` (taille prévue par le garde-fou budgétaire à la dernière publication,
+    acceptée ou refusée, rapportée à `max-bucket-size` ; log `WARN` au-delà de 0,8, GOU-2616) ;
   - `opendata_publication_enabled`.
   La health `openDataService` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
   `ERROR` `Open data publication on R2 failed`, avec la cause.
@@ -115,6 +117,7 @@ garde le verrou de génération pendant la publication : `POST /opendata/generat
 |---|---|---|
 | Identifiants | `no endpoint and no account id (R2_ACCOUNT_ID)`, `access key id or secret access key missing` | rendre les secrets `R2_*` pour `api`, redémarrer `api` hors fenêtre batch |
 | Budget | `Budget guard: the bucket would hold ... bytes after the publication` | regarder les objets du bucket (tableau de bord Cloudflare) ; ne relever `max-bucket-size` qu'en restant sous 10 Go-mois |
+| Budget à plus de 80 % (`WARN`, publication faite) | `the bucket will hold ... bytes after the publication, ... % of open-data-config.publication.max-bucket-size` | ouvrir une issue de réduction des jeux avant le refus (GOU-2616 : colonnes, compression) ; pas de filtrage de lignes sans décision |
 | Envoi, relecture | `Upload or read back failed, public objects untouched` ou `read back has sha256 ...` | objets publics intacts ; vérifier le réseau et R2, attendre le passage suivant ou relancer la génération |
 | Bascule | `Switch to the new version failed: manifest.json not written` | un zip peut déjà être le nouveau ; relancer la génération dès que possible |
 | Nettoyage | `New version published, but the temporary objects ... were not all deleted` | version publiée ; le passage suivant supprime les objets `.staging/` restants |

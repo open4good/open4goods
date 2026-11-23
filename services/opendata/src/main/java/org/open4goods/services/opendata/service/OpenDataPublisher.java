@@ -74,7 +74,11 @@ public class OpenDataPublisher {
     private final MeterRegistry meterRegistry;
     private final Function<Publication, OpenDataStorage> storageFactory;
 
+    /** Share of {@code max-bucket-size} above which the budget guard warns before refusing (GOU-2616). */
+    static final double BUDGET_WARNING_RATIO = 0.8;
+
     private volatile OpenDataPublicationStatus status = OpenDataPublicationStatus.idle();
+    private volatile double projectedBucketRatio = Double.NaN;
 
     /**
      * A dataset to publish: its manifest (already written locally), its local zip and its local manifest file.
@@ -118,6 +122,10 @@ public class OpenDataPublisher {
                         ? Double.NaN : publisher.status.bucketBytes())
                 .description("Size of the open data bucket after the last successful publication (NaN if none)")
                 .baseUnit("bytes")
+                .register(meterRegistry);
+        Gauge.builder("opendata.publication.bucket.projected.ratio", this, publisher -> publisher.projectedBucketRatio)
+                .description("Size of the open data bucket after the last publication checked by the budget guard, "
+                        + "accepted or refused, divided by max-bucket-size (NaN if none); warning above 0.8")
                 .register(meterRegistry);
     }
 
@@ -316,7 +324,7 @@ public class OpenDataPublisher {
      * Budget guard: size of the bucket once this publication is done, that is the objects kept (neither replaced nor
      * temporary) plus the new zips and manifests. During the upload the temporary copies also count, for a few hours.
      */
-    private static void checkBudget(List<StoredObject> objects, List<Dataset> datasets, List<byte[]> manifests,
+    private void checkBudget(List<StoredObject> objects, List<Dataset> datasets, List<byte[]> manifests,
             List<Dataset> manifestOnly, List<byte[]> carriedManifests, byte[] global, Path globalManifest,
             String stagingPrefix, long maxBytes) throws OpenDataPublicationException {
         Set<String> replaced = new LinkedHashSet<>();
@@ -337,11 +345,17 @@ public class OpenDataPublisher {
                 .mapToLong(StoredObject::bytes)
                 .sum();
         long projected = kept + added;
+        projectedBucketRatio = (double) projected / maxBytes;
         if (projected > maxBytes) {
             throw new OpenDataPublicationException(String.format(Locale.ROOT,
                     "Budget guard: the bucket would hold %d bytes after the publication, above %d "
                             + "(open-data-config.publication.max-bucket-size); %d bytes now, nothing sent",
                     projected, maxBytes, current));
+        }
+        if (projected > BUDGET_WARNING_RATIO * maxBytes) {
+            LOGGER.warn("Open data publication: the bucket will hold {} bytes after the publication, {} % of "
+                    + "open-data-config.publication.max-bucket-size ({} bytes); reduce the datasets before the guard "
+                    + "refuses a publication", projected, Math.round(projectedBucketRatio * 100), maxBytes);
         }
         LOGGER.info("Open data publication: bucket {} bytes now, {} after the publication (maximum {})", current,
                 projected, maxBytes);

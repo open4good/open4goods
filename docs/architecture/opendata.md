@@ -65,7 +65,8 @@ par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
    échec, GOU-2314) ; son manifest est toujours réécrit.
 2. **Garde-fou budgétaire** : la taille du bucket après la publication (objets conservés, hors clés remplacées et
    temporaires, plus les nouveaux zips et manifests) ne doit pas dépasser `max-bucket-size` (9 Go, unités binaires de
-   Spring). Sinon refus, rien n'est envoyé. Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
+   Spring). Sinon refus, rien n'est envoyé. Au-delà de 80 % de ce plafond, la publication se fait mais un log `WARN`
+   l'annonce et la gauge `opendata.publication.bucket.projected.ratio` le montre (GOU-2616). Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
    pendant quelques heures : l'effet sur les Go-mois facturés est négligeable.
 3. **Envoi multipart** de chaque zip vers `staging-prefix` + clé (`.staging/gtin-open-data.zip`), en parts de
    `part-size` (64 Mo), débit limité à `upload-bandwidth` (2 Mo/s). En-têtes : `Content-Type: application/zip`,
@@ -146,8 +147,28 @@ ISO 8601 UTC, à la seconde.
 
 Colonnes et formats inchangés au lot 1, pour les réutilisateurs actuels. Les corrections (`last_updated` en ISO 8601,
 URL canonique, colonne de catégorie Nudger, `souscategorie` vide) forment une version 2 du format, décidée au lot 3.
+GOU-2616 en avance une partie pour tenir le budget R2.
+
+Colonnes publiées (GOU-2616) :
+
+- GTIN : `gtin`, `brand`, `model`, `name`, `last_updated`, `gs1_country`, `gtinType`, `offers_count`, `min_price`,
+  `currency`, `sources` ;
+- ISBN : `isbn`, `title`, `last_updated`, `offers_count`, `min_price`, `currency`, `editeur`, `format`, `nb_page`,
+  `souscategorie`, `souscategorie2`, `sources`.
+
+`last_updated` est une date UTC `AAAA-MM-JJ`, vide si inconnue. `sources` : identifiants des sources séparés par `|`
+(GOU-2301). La fiche produit se déduit du code : `https://nudger.fr/{gtin}`. CSV RFC 4180 en UTF-8, une cellule n'est
+entre guillemets que si elle contient une virgule, un guillemet ou un saut de ligne ; zip en compression Deflate
+maximale.
 
 Journal des modifications du schéma (à compléter par la version 2) :
+
+- **GOU-2616** (budget R2, décision de Goulven du 23/11 sur GOU-2544 : rester sous 10 Go-mois, plafond 9 GiB
+  inchangé) : `gtin.zip` atteignait 9,19 Go et la publication 9,68 Go. Retrait de `url` (GTIN et ISBN, déductible
+  du code) et de `categories` (GTIN : 19 % du zip, catégories brutes des marchands, redondantes entre elles) ;
+  `last_updated` passe d'epoch millisecondes à la date UTC ; guillemets seulement au besoin, y compris dans les
+  jeux impact ; compression maximale. Mesure sur 210 000 lignes contiguës du zip publié : 68 % de la taille
+  actuelle, soit environ 6,3 Go pour GTIN et 6,8 Go publiés au catalogue du 22/11.
 
 - **Lot 1 (GOU-2248)**, par rapport à l'ancien fichier encore diffusé par Kaggle (GTIN : 59,7 M lignes, ISBN :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,

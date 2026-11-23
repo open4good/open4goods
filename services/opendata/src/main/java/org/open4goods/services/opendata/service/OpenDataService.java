@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.io.FileOutputStream;
@@ -100,6 +101,11 @@ public class OpenDataService implements HealthIndicator {
     private static final String ISBN_DATASET_FILENAME = "open4goods-isbn-dataset.csv";
     private static final String GTIN_DATASET_FILENAME = "open4goods-gtin-dataset.csv";
 
+    /**
+     * Columns of the GTIN dataset. Since GOU-2616 the dataset has neither {@code url} (it is
+     * {@code https://nudger.fr/{gtin}}) nor {@code categories} (19 % of the zip), and {@code last_updated} is a UTC date,
+     * so that the whole publication stays under the free 10 GB-month of R2.
+     */
     public static final String[] GTIN_HEADER = {
             "gtin",
             "brand",
@@ -111,8 +117,6 @@ public class OpenDataService implements HealthIndicator {
             "offers_count",
             "min_price",
             "currency",
-            "categories",
-            "url",
             "sources"
     };
 
@@ -123,7 +127,6 @@ public class OpenDataService implements HealthIndicator {
             "offers_count",
             "min_price",
             "currency",
-            "url",
             "editeur",
             "format",
             "nb_page",
@@ -226,7 +229,6 @@ public class OpenDataService implements HealthIndicator {
                 "lastChange",
                 "offersCount",
                 "offerNames",
-                "datasourceCategories",
                 "sources",
                 "gtinInfos.upcType",
                 "gtinInfos.country",
@@ -1004,7 +1006,7 @@ public class OpenDataService implements HealthIndicator {
         line[2] = StringUtils.defaultString(data.model());
         line[3] = exportName(data);
 
-        line[4] = String.valueOf(data.getLastChange());
+        line[4] = exportDate(data.getLastChange());
 
         if (data.getGtinInfos() != null) {
             line[5] = StringUtils.defaultString(data.getGtinInfos().getCountry());
@@ -1026,21 +1028,18 @@ public class OpenDataService implements HealthIndicator {
             }
         }
 
-        Collection<String> categories = data.getDatasourceCategories();
-        if (categories != null && !categories.isEmpty()) {
-            line[10] = StringUtils.join(categories, " ; ");
-        }
-
-        try {
-            // TODO : Point to international website + internationalized URL
-            String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
-            line[11] = url;
-        } catch (Exception e) {
-            LOGGER.error("Error while extracting URL for GTIN {}", data.getId(), e);
-        }
-        line[12] = exportSources(data);
+        line[10] = exportSources(data);
 
         return line;
+    }
+
+    /**
+     * @param lastChange epoch milliseconds, 0 when unknown
+     * @return the UTC date {@code yyyy-MM-dd} (GOU-2616: about 6 % of the GTIN zip saved against epoch milliseconds),
+     *         empty when unknown
+     */
+    static String exportDate(long lastChange) {
+        return lastChange <= 0 ? "" : Instant.ofEpochMilli(lastChange).atZone(ZoneOffset.UTC).toLocalDate().toString();
     }
 
     /** The contributing sources of a product, identifiers separated by {@code |} (GOU-2301). */
@@ -1057,7 +1056,7 @@ public class OpenDataService implements HealthIndicator {
 
         line[0] = StringUtils.defaultString(data.gtin());
         line[1] = exportName(data);
-        line[2] = String.valueOf(data.getLastChange());
+        line[2] = exportDate(data.getLastChange());
         if (data.getOffersCount() != null) {
             line[3] = String.valueOf(data.getOffersCount());
         }
@@ -1071,21 +1070,14 @@ public class OpenDataService implements HealthIndicator {
                 line[5] = bestPrice.getCurrency().toString();
             }
         }
-        try {
-            // TODO : Point to international website + internationalized URL
-            String url = "https://nudger.fr/" + StringUtils.defaultString(data.gtin());
-            line[6] = url;
-        } catch (Exception e) {
-            LOGGER.error("Error while extracting URL for ISBN {}", data.getId(), e);
-        }
 
         Map<String, String> isbnAttributes = extractAttributes(data, ISBN_ATTRIBUTE_KEYS);
-        line[7] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
-        line[8] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
-        line[9] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
-        line[10] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
-        line[11] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
-        line[12] = exportSources(data);
+        line[6] = StringUtils.defaultString(isbnAttributes.get("EDITEUR"));
+        line[7] = StringUtils.defaultString(isbnAttributes.get("FORMAT"));
+        line[8] = StringUtils.defaultString(isbnAttributes.get("NB DE PAGES"));
+        line[9] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE"));
+        line[10] = StringUtils.defaultString(isbnAttributes.get("SOUSCATEGORIE2"));
+        line[11] = exportSources(data);
 
         return line;
     }

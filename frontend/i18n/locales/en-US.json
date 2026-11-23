@@ -1685,10 +1685,6 @@
             "description": "Brand declared or inferred for the product.",
             "label": "brand"
           },
-          "categories": {
-            "description": "Product categories aggregated by Nudger (pipe-separated).",
-            "label": "categories"
-          },
           "currency": {
             "description": "Currency code of the lowest price.",
             "label": "currency"
@@ -1706,7 +1702,7 @@
             "label": "gtinType"
           },
           "last_updated": {
-            "description": "Epoch timestamp (ms) of the latest update for this product.",
+            "description": "UTC date (YYYY-MM-DD) of the latest update of this product.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1729,9 +1725,9 @@
             "description": "Number of commercial offers tracked for the product.",
             "label": "offers_count"
           },
-          "url": {
-            "description": "Product page URL when public offers are available.",
-            "label": "url"
+          "sources": {
+            "description": "Sources that contributed to the product, separated by |.",
+            "label": "sources"
           }
         },
         "columnsSubtitle": "Each row represents a product identifier enriched with metadata gathered by Nudger.",
@@ -1818,7 +1814,7 @@
             "label": "isbn"
           },
           "last_updated": {
-            "description": "Epoch timestamp (ms) of the last update.",
+            "description": "UTC date (YYYY-MM-DD) of the latest update of this book.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1837,6 +1833,10 @@
             "description": "Number of commercial offers tracked for the book.",
             "label": "offers_count"
           },
+          "sources": {
+            "description": "Sources that contributed to the product, separated by |.",
+            "label": "sources"
+          },
           "souscategorie": {
             "description": "Primary subcategory assigned to the book.",
             "label": "souscategorie"
@@ -1848,10 +1848,6 @@
           "title": {
             "description": "Book title as provided by sources.",
             "label": "title"
-          },
-          "url": {
-            "description": "Product page URL when offers are available.",
-            "label": "url"
           }
         },
         "columnsSubtitle": "Each row corresponds to a book identified by its ISBN.",
