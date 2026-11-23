@@ -1513,13 +1513,23 @@ const buildSubsetClauseLabel = (filter: Filter): string => {
 
   if (typeof filter.min === 'number') {
     bounds.push(
-      t('category.fastFilters.operator.greaterThan', { value: filter.min })
+      t(
+        filter.minExclusive
+          ? 'category.fastFilters.operator.strictlyGreaterThan'
+          : 'category.fastFilters.operator.greaterThan',
+        { value: filter.min }
+      )
     )
   }
 
   if (typeof filter.max === 'number') {
     bounds.push(
-      t('category.fastFilters.operator.lowerThan', { value: filter.max })
+      t(
+        filter.maxExclusive
+          ? 'category.fastFilters.operator.strictlyLowerThan'
+          : 'category.fastFilters.operator.lowerThan',
+        { value: filter.max }
+      )
     )
   }
 

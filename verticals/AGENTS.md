@@ -23,6 +23,27 @@ This module is part of the open4goods multi-module Maven project.
 
 The `verticals` module stores YAML configuration describing product verticals.
 
+## Numeric criteria of subsets and sub-categories
+
+`subsets`, `nudgeToolConfig.subsets` and the `activatedFilters` of
+`src/main/resources/categories/{vertical-id}/*.yml` share the same operators, applied as written
+by the listing (frontend `_subset-to-filters.ts`, front-api `SearchService`, GOU-2586):
+
+| Operator | Elasticsearch | Bound |
+|---|---|---|
+| `LOWER_THAN` | `lt` | exclusive |
+| `LOWER_THAN_OR_EQUAL` | `lte` | inclusive |
+| `GREATER_THAN` | `gt` | exclusive |
+| `GREATER_THAN_OR_EQUAL` | `gte` | inclusive |
+
+- Adjacent buckets are half-open: `[a, b)` is `GREATER_THAN_OR_EQUAL a` + `LOWER_THAN b`, and the
+  next bucket starts with `GREATER_THAN_OR_EQUAL b`. `LOWER_THAN b` followed by `GREATER_THAN b`
+  leaves the products at exactly `b` out of both buckets.
+- Reference count for a sub-category (the "Feasibility" comment of its YAML, the "fiche
+  pratique" routine): `products-moustik`, `vertical = {vertical-id}`, `offersCount >= 1`,
+  `excluded = false`, plus the `activatedFilters` with the operators above. Without
+  `excluded = false` the count overstates the page total.
+
 ## Build and test this module only
 
 From this directory:

@@ -282,7 +282,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "500"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -305,21 +305,21 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1100"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 1100 €"
-        fr: "> 1100 €"
+        en: "≥ 1100 €"
+        fr: "≥ 1100 €"
       title:
         en: "Premium"
         fr: "Haut de gamme"
       description:
-        en: "Refrigerators over €1100"
-        fr: "Réfrigérateurs à plus de 1100 €"
+        en: "Refrigerators from €1100"
+        fr: "Réfrigérateurs à partir de 1100 €"
 
     # Volume Subsets
     - id: "volume_small"
@@ -346,7 +346,7 @@ nudgeToolConfig:
       group: "volume"
       criterias:
         - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "260"
         - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
           operator: "LOWER_THAN"
@@ -369,15 +369,15 @@ nudgeToolConfig:
       group: "volume"
       criterias:
         - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "360"
       image: "example-image.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 360 L"
-        fr: "> 360 L"
+        en: "≥ 360 L"
+        fr: "≥ 360 L"
       title:
         en: "Large capacity"
         fr: "Grande capacité"
@@ -478,7 +478,7 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "500"
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
@@ -501,21 +501,21 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "1100"
   image: "example-image.png"
   url:
     en: "premium-price"
     fr: "haut-de-gamme"
   caption:
-    en: "> 1100 €"
-    fr: "> 1100 €"
+    en: "≥ 1100 €"
+    fr: "≥ 1100 €"
   title:
     en: "Premium"
     fr: "Haut de gamme"
   description:
-    en: "Refrigerators over €1100"
-    fr: "Réfrigérateurs à plus de 1100 €"
+    en: "Refrigerators from €1100"
+    fr: "Réfrigérateurs à partir de 1100 €"
 
 # Volume Subsets
 - id: "volume_small"
@@ -542,7 +542,7 @@ subsets:
   group: "volume"
   criterias:
     - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "260"
     - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
       operator: "LOWER_THAN"
@@ -565,15 +565,15 @@ subsets:
   group: "volume"
   criterias:
     - field: "attributes.indexed.TOTAL_VOLUME.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "360"
   image: "example-image.png"
   url:
     en: "large-capacity"
     fr: "grande-capacite"
   caption:
-    en: "> 360 L"
-    fr: "> 360 L"
+    en: "≥ 360 L"
+    fr: "≥ 360 L"
   title:
     en: "Large capacity"
     fr: "Grande capacité"

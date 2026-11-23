@@ -743,7 +743,9 @@
       },
       "operator": {
         "greaterThan": "≥ {value}",
-        "lowerThan": "≤ {value}"
+        "lowerThan": "≤ {value}",
+        "strictlyGreaterThan": "> {value}",
+        "strictlyLowerThan": "< {value}"
       },
       "reset": "Réinitialiser les filtres rapides"
     },

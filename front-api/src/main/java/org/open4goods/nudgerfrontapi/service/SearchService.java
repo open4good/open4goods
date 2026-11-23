@@ -1136,7 +1136,8 @@ public class SearchService {
 			if (filter.operator() == FilterOperator.range && StringUtils.hasText(filter.field())) {
 				String field = filter.field().trim();
 				RangeBounds bounds = rangeByField.computeIfAbsent(field, ignored -> new RangeBounds());
-				bounds.accept(filter.min(), filter.max());
+				bounds.accept(filter.min(), filter.max(), Boolean.TRUE.equals(filter.minExclusive()),
+						Boolean.TRUE.equals(filter.maxExclusive()));
 			} else {
 				merged.add(filter);
 			}
@@ -1151,7 +1152,9 @@ public class SearchService {
 			if (min != null && max != null && min > max) {
 				continue;
 			}
-			merged.add(new Filter(entry.getKey(), FilterOperator.range, null, min, max));
+			merged.add(new Filter(entry.getKey(), FilterOperator.range, null, min, max,
+					min != null && bounds.isMinExclusive() ? Boolean.TRUE : null,
+					max != null && bounds.isMaxExclusive() ? Boolean.TRUE : null));
 		}
 		return merged;
 	}
@@ -1220,7 +1223,8 @@ public class SearchService {
 
 		return switch (operator) {
 		case term -> buildTermQuery(fieldPath, valueType, filter.terms());
-		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max());
+		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max(), Boolean.TRUE.equals(filter.minExclusive()),
+				Boolean.TRUE.equals(filter.maxExclusive()));
 		case rankingPercentile -> buildRankingPercentileQuery(fieldPath, filter.min(), filter.max());
 		case contains -> buildContainsQuery(fieldPath, filter.terms());
 		};
@@ -1276,17 +1280,36 @@ public class SearchService {
 		return values;
 	}
 
-	private Query buildRangeQuery(String fieldPath, Double min, Double max) {
+	/**
+	 * Builds a numeric range query.
+	 *
+	 * @param fieldPath    indexed field
+	 * @param min          lower bound, ignored when {@code null}
+	 * @param max          upper bound, ignored when {@code null}
+	 * @param minExclusive {@code true} to apply {@code gt} instead of {@code gte}
+	 * @param maxExclusive {@code true} to apply {@code lt} instead of {@code lte}
+	 * @return the range query, or {@code null} when no bound is set
+	 */
+	private Query buildRangeQuery(String fieldPath, Double min, Double max, boolean minExclusive,
+			boolean maxExclusive) {
 		if (min == null && max == null) {
 			return null;
 		}
 		return Query.of(q -> q.range(r -> r.number(n -> {
 			n.field(fieldPath);
 			if (min != null) {
-				n.gte(min);
+				if (minExclusive) {
+					n.gt(min);
+				} else {
+					n.gte(min);
+				}
 			}
 			if (max != null) {
-				n.lte(max);
+				if (maxExclusive) {
+					n.lt(max);
+				} else {
+					n.lte(max);
+				}
 			}
 			return n;
 		})));
@@ -1354,22 +1377,46 @@ public class SearchService {
 		return FilterValueType.keyword;
 	}
 
+	/**
+	 * Intersects the range clauses targeting the same field: the highest lower bound and the lowest upper bound win.
+	 * When two clauses share the same bound value, the exclusive one wins since it is the stricter.
+	 */
 	private static final class RangeBounds {
 
 		private Double highestMin;
 		private Double lowestMax;
+		private boolean minExclusive;
+		private boolean maxExclusive;
 		private boolean hasMin;
 		private boolean hasMax;
 
-		void accept(Double min, Double max) {
+		void accept(Double min, Double max, boolean minIsExclusive, boolean maxIsExclusive) {
 			if (min != null) {
 				hasMin = true;
-				highestMin = highestMin == null ? min : Math.max(highestMin, min);
+				if (highestMin == null || min > highestMin) {
+					highestMin = min;
+					minExclusive = minIsExclusive;
+				} else if (min.equals(highestMin)) {
+					minExclusive = minExclusive || minIsExclusive;
+				}
 			}
 			if (max != null) {
 				hasMax = true;
-				lowestMax = lowestMax == null ? max : Math.min(lowestMax, max);
+				if (lowestMax == null || max < lowestMax) {
+					lowestMax = max;
+					maxExclusive = maxIsExclusive;
+				} else if (max.equals(lowestMax)) {
+					maxExclusive = maxExclusive || maxIsExclusive;
+				}
 			}
+		}
+
+		boolean isMinExclusive() {
+			return minExclusive;
+		}
+
+		boolean isMaxExclusive() {
+			return maxExclusive;
 		}
 
 		boolean isEmpty() {

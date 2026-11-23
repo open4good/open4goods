@@ -299,7 +299,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "300"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -322,21 +322,21 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1000"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 1000 €"
-        fr: "> 1000 €"
+        en: "≥ 1000 €"
+        fr: "≥ 1000 €"
       title:
         en: "Premium ovens"
         fr: "Fours haut de gamme"
       description:
-        en: "Ovens priced over €1000."
-        fr: "Les fours dont le prix est supérieur à 1000€."
+        en: "Ovens priced at €1000 or more."
+        fr: "Les fours dont le prix est supérieur ou égal à 1000€."
 
     ################
     # Capacity
@@ -345,7 +345,7 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "60"
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
           operator: "LOWER_THAN"
@@ -368,15 +368,15 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "72"
       image: "example-image.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 72 L"
-        fr: "> 72 L"
+        en: "≥ 72 L"
+        fr: "≥ 72 L"
       title:
         en: "Large capacity"
         fr: "Grande capacité"
@@ -501,7 +501,7 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "300"
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
@@ -524,21 +524,21 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "1000"
   image: "example-image.png"
   url:
     en: "premium-price"
     fr: "haut-de-gamme"
   caption:
-    en: "> 1000 €"
-    fr: "> 1000 €"
+    en: "≥ 1000 €"
+    fr: "≥ 1000 €"
   title:
     en: "Premium ovens"
     fr: "Fours haut de gamme"
   description:
-    en: "Ovens priced over €1000."
-    fr: "Les fours dont le prix est supérieur à 1000€."
+    en: "Ovens priced at €1000 or more."
+    fr: "Les fours dont le prix est supérieur ou égal à 1000€."
 
 ################
 # Capacity
@@ -547,7 +547,7 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "60"
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
       operator: "LOWER_THAN"
@@ -570,15 +570,15 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "72"
   image: "example-image.png"
   url:
     en: "large-capacity"
     fr: "grande-capacite"
   caption:
-    en: "> 72 L"
-    fr: "> 72 L"
+    en: "≥ 72 L"
+    fr: "≥ 72 L"
   title:
     en: "Large capacity"
     fr: "Grande capacité"

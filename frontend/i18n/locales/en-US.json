@@ -865,7 +865,9 @@
       },
       "operator": {
         "greaterThan": "≥ {value}",
-        "lowerThan": "≤ {value}"
+        "lowerThan": "≤ {value}",
+        "strictlyGreaterThan": "> {value}",
+        "strictlyLowerThan": "< {value}"
       },
       "reset": "Clear fast filters"
     },

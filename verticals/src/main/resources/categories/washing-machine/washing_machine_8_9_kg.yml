@@ -9,8 +9,9 @@
 #     shows UFC-Que Choisir: 8 to 9 kg generally enough for 3-4 people, 10 to 12 kg
 #     when laundry is frequent, 12 to 15 kg for bulky textiles.
 # Feasibility:
-#   - Matching products with at least one offer: 816 (Elasticsearch
-#     products-moustik, vertical washing-machine, offersCount >= 1, checked 2026-11-20).
+#   - Matching products: 691 (Elasticsearch products-moustik, vertical washing-machine,
+#     offersCount >= 1 and excluded = false, checked 2026-11-23). The listing applies
+#     excluded = false: a count without it (2026-11-20 draft) overstates the page.
 #   - Filter on attributes.indexed.WASHING_CAPACITY.numericValue (8 kg included, 10 kg excluded);
 #     products without a capacity value (1 180 of 2 834 with offers) are not counted.
 # Rationale:

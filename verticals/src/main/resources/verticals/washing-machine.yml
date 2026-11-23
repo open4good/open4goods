@@ -408,7 +408,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "400"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -431,15 +431,15 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "550"
       image: "example-image.png"
       url:
         en: "premium"
         fr: "premium"
       caption:
-        en: "> 550 €"
-        fr: "> 550 €"
+        en: "≥ 550 €"
+        fr: "≥ 550 €"
       title:
         en: "Premium"
         fr: "Haut de gamme"
@@ -474,7 +474,7 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "8"
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
           operator: "LOWER_THAN"
@@ -497,15 +497,15 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "10"
       image: "large-capacity.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 10 kg"
-        fr: "> 10 kg"
+        en: "≥ 10 kg"
+        fr: "≥ 10 kg"
       title:
         en: "Large Capacity"
         fr: "Grande Capacité"
@@ -607,7 +607,7 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "400"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
@@ -630,15 +630,15 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "550"
     image: "example-image.png"
     url:
       en: "premium"
       fr: "premium"
     caption:
-      en: "> 550 €"
-      fr: "> 550 €"
+      en: "≥ 550 €"
+      fr: "≥ 550 €"
     title:
       en: "Premium"
       fr: "Haut de gamme"
@@ -673,7 +673,7 @@ subsets:
     group: "capacity"
     criterias:
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "8"
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
         operator: "LOWER_THAN"
@@ -696,15 +696,15 @@ subsets:
     group: "capacity"
     criterias:
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "10"
     image: "large-capacity.png"
     url:
       en: "large-capacity"
       fr: "grande-capacite"
     caption:
-      en: "> 10 kg"
-      fr: "> 10 kg"
+      en: "≥ 10 kg"
+      fr: "≥ 10 kg"
     title:
       en: "Large Capacity"
       fr: "Grande Capacité"
