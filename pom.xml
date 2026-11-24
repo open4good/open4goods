@@ -11,15 +11,15 @@
 	<url>https://github.com/open4good/open4goods</url>
         <properties>
                 <github.global.server>github</github.global.server>
-                <springboot.version>4.1.2</springboot.version>
+                <springboot.version>4.2.0</springboot.version>
                 <spring-boot-admin.version>4.1.5</spring-boot-admin.version>
-                <spring-ai.version>2.0.2</spring-ai.version>
+                <spring-ai.version>2.1.0</spring-ai.version>
                 <java.version>21</java.version>
                 <maven.compiler.source>21</maven.compiler.source>
                 <maven.compiler.target>21</maven.compiler.target>
                 <global.version>0.0.1-SNAPSHOT</global.version>
                 <swagger.version>2.9.2</swagger.version>
-                <swagger.core.v3.version>2.2.55</swagger.core.v3.version>
+                <swagger.core.v3.version>2.2.56</swagger.core.v3.version>
                 <jacoco.version>0.8.16</jacoco.version>
                 <barcode4j.version>2.1</barcode4j.version>
                 <sleepycat-je.version>18.3.12</sleepycat-je.version>
@@ -47,7 +47,7 @@
                 <maven-install-plugin.version>3.2.0</maven-install-plugin.version>
                 <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
                 <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-                <versions-maven-plugin.version>2.24.0</versions-maven-plugin.version>
+                <versions-maven-plugin.version>2.25.3</versions-maven-plugin.version>
                 <taglist-maven-plugin.version>3.3.0</taglist-maven-plugin.version>
 
                 <processDependencyManagement>true</processDependencyManagement>
@@ -177,7 +177,7 @@
 				<!-- Google Merchant API, CSS (Comparison Shopping Service) client: CssProductInput (GOU-2080) -->
 				<groupId>com.google.shopping</groupId>
 				<artifactId>google-shopping-css</artifactId>
-				<version>0.70.0</version>
+				<version>0.71.0</version>
 			</dependency>
 			<dependency>
 				<groupId>io.opentelemetry.semconv</groupId>
