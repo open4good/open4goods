@@ -255,7 +255,7 @@ class VerticalYamlValidationTest {
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
-                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones").contains(config.getId()) ? 2
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones", "freezer").contains(config.getId()) ? 2
                     : ImpactScoreConfig.METHODOLOGY_V1));
     }
 
@@ -331,6 +331,7 @@ class VerticalYamlValidationTest {
      */
     private static final Map<String, Object[]> GATE_TWO_FILTER = Map.of(
         "refrigerator", new Object[] { false, 0.50 },
+        "freezer", new Object[] { true, 0.50 },
         "dishwasher", new Object[] { true, 0.60 },
         "smartphones", new Object[] { true, 0.50 },
         "oven", new Object[] { true, 0.50 },

@@ -1,0 +1,33 @@
+# V1 matrix taken from refrigerator (GOU-2631). The CLASSE_ENERGY weight (0.55) is split between the measured annual
+# consumption (0.40) and the class (0.15), as the dishwasher does. No AI audit stored (aiResult, yamlPrompt): the
+# vertical starts directly on the V2 methodology.
+criteriasPonderation:
+  ENERGY_CONSUMPTION_ANNUAL: 0.40
+  CLASSE_ENERGY: 0.15
+  WARRANTY: 0.12
+  NOISE_LEVEL: 0.1
+  DATA_QUALITY: 0.15
+  WEIGHT: 0.08
+# ImpactScore V2: V1 matrix above without DATA_QUALITY, renormalised to 1 pro rata. Thresholds approved by Goulven on
+# 24/11/2026 (approval a4a2ec0a).
+methodologyVersion: 2
+v2:
+  criteriasPonderation:
+    ENERGY_CONSUMPTION_ANNUAL: 0.4705882
+    CLASSE_ENERGY: 0.1764706
+    WARRANTY: 0.1411765
+    NOISE_LEVEL: 0.1176471
+    WEIGHT: 0.0941176
+  minRealWeightCoverage: 0.5
+  eprelRequired: true
+  minRatedForPositionLabel: 100
+  positionLabels:
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.50
+    - level: fair
+      minBetterThan: 0.10
+    - level: poor
+      minBetterThan: 0.0
+  criteriaScoring: {}

@@ -82,3 +82,11 @@ Remplace les bornes provisoires 0,90 / 0,67 / 0,33 : avec 0,67, un produit mieux
 | 6 | Conseil juridique | ~~Consultation d'un conseil externe avant la vague 1 sur les questions 1 ("label de développement durable" ?) et 4 (méthode et hypothèses communes) du § 6 de l'analyse GOU-1886.~~ **Modifiée le 14/11/2026** : Goulven renonce à la consultation et lance la vague 1 sans avis externe (réponse à la demande de GOU-2187 ; brief non transmis, aucune réponse de conseil). Les mesures de l'analyse GOU-1886 restent appliquées : niveaux formulés sur la position, sans pictogramme ; "x critères sur y" et date près de la note ; seuil de couverture ; mention "ni label ni certification" ; page méthode publique par catégorie. |
 
 **Sitemap** : 7 265 fiches sans offre récente sortent du sitemap sur les sept verticales ; elles reviennent dès qu'elles ont une offre (design § 4.2). Suivi Search Console avant chaque vague puis à J+2, J+7 et J+14 ; une baisse nette des clics imputable à la bascule déclenche le retour arrière.
+
+## Congélateurs (`freezer`) : lancement masqué (24/11/2026)
+
+- **Décision** : seuils approuvés par Goulven le 24/11/2026 (approbation board `a4a2ec0a` ; GOU-2628, GOU-2631). Fiche : document `qualification-freezer` de GOU-2628.
+
+| Verticale | `v2.eprelRequired` | `v2.minRealWeightCoverage` | `minRatedForPositionLabel` | Remarque |
+|---|---|---|---|---|
+| `freezer` | `true` (écarte les mini-congélateurs de marketplace sans fiche EPREL, 11 sur 30 dans l'échantillon) | 0,50 | 100 | `enabled: false` ; matrice V1 de `refrigerator`, le poids de `CLASSE_ENERGY` (0,55) réparti entre `ENERGY_CONSUMPTION_ANNUAL` (0,40) et `CLASSE_ENERGY` (0,15) ; seuils de prix et techniques provisoires, recalcul en PR 2 |

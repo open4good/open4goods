@@ -1,0 +1,154 @@
+# Unique identifier for this vertical, equal to the configuration file name.
+id: freezer
+
+# Hidden launch (GOU-2631, PR 1): the vertical is not rendered in the UI, sitemap and search until it is enabled.
+enabled: false
+
+referentials:
+  googleTaxonomy:
+    # Source: Google product taxonomy en-US (front-api/cache/httpswwwgooglecombasepagesproducttypetaxonomywithidsenUStxt, line 3643)
+    - id: 681
+      name: "Home & Garden > Kitchen & Dining > Kitchen Appliances > Freezers"
+  icecat: []
+  eprel:
+    # Source: same EPREL group as refrigerator (qualification-freezer, GOU-2628)
+    - group: "refrigeratingappliances2019"
+
+# Free order (the displayed verticals use 1 to 9).
+order: 10
+# Freezers run continuously; annual energy labels are based on 24h/day operation.
+averageHoursPerDay: 24.0
+
+# Source: Google product taxonomy en-US, id 681 (see referentials).
+googleTaxonomyId: 681
+
+# Unknown
+icecatTaxonomyId: -1
+
+# Source: qualification-freezer (GOU-2628), group already read by refrigerator
+eprelGroupNames:
+  - refrigeratingappliances2019
+
+# The image will come later, it does not block the launch.
+verticalImage: https://nudger.fr/images/verticals/freezer.png
+
+mdiIcon: mdi-fridge-industrial-outline
+
+popularAttributes:
+  - FREEZER_NET_CAPACITY
+  - FREEZER_STARS
+  - CLASSE_ENERGY
+
+commonAttributes:
+  - CLASSE_ENERGY
+  - ENERGY_CONSUMPTION_ANNUAL
+  - FREEZER_NET_CAPACITY
+  - FREEZER_STARS
+  - FAST_FREEZE
+  - CLIMATE_CLASS
+  - NOISE_LEVEL
+  - NOISE_CLASS
+  - INSTALLATION_TYPE
+
+requiredAttributes:
+  - CLASSE_ENERGY
+
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - ENERGY_CONSUMPTION_ANNUAL
+  - DATA_QUALITY
+  - NOISE_LEVEL
+  - WARRANTY
+  - WEIGHT
+
+i18n:
+  fr:
+    url:
+      prefix: "|| congélateur | congelateur ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    designation:
+      - "du congélateur"
+      - "de ce congélateur"
+      - "de cet appareil"
+    productMetaOpenGraphType: "product"
+    verticalHomeUrl: "congelateurs"
+    verticalHomeTitle: "Congélateurs"
+    verticalHomeDescription: "Comparez les congélateurs armoire, coffre et tiroir selon leur impact environnemental, leur capacité, leur classe énergétique et leur prix. Repérez les modèles les moins énergivores (kWh/an) pour conserver vos aliments."
+  en:
+    url:
+      prefix: "|| freezer | freezers ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    designation:
+      - "of the freezer"
+      - "of this freezer"
+      - "of the appliance"
+    productMetaOpenGraphType: "product"
+    verticalHomeUrl: "freezers"
+    verticalHomeTitle: "Freezers"
+    verticalHomeDescription: "Compare upright, chest and drawer freezers by environmental impact, net capacity, energy class and price. Find the models using the least electricity (kWh per year) to keep your food frozen."
+
+aggregationConfiguration:
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "price.minPrice.price":
+    interval: 50
+    buckets: 30
+  "attributes.indexed.FREEZER_NET_CAPACITY":
+    interval: 50
+    buckets: 20
+  "attributes.indexed.ENERGY_CONSUMPTION_ANNUAL":
+    interval: 50
+    buckets: 20
+  "attributes.indexed.NOISE_LEVEL":
+    interval: 1
+    buckets: 15
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "FREEZER_NET_CAPACITY"
+  - "FREEZER_STARS"
+  - "FAST_FREEZE"
+  - "ENERGY_CONSUMPTION_ANNUAL"
+  - "NOISE_LEVEL"
+  - "NOISE_CLASS"
+  - "CLIMATE_CLASS"
+  - "INSTALLATION_TYPE"
+
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "ENERGY_CONSUMPTION_ANNUAL"
+    - key: "FREEZER_NET_CAPACITY"
+    - key: "FREEZER_STARS"
+    - key: "FAST_FREEZE"
+    - key: "CLIMATE_CLASS"
+    - key: "NOISE_LEVEL"
+    - key: "NOISE_CLASS"
+    - key: "INSTALLATION_TYPE"
+    - key: "HEIGHT"
+    - key: "WIDTH"
+    - key: "DEPTH"
+    - key: "WARRANTY"
+    - key: "WEIGHT"
+    - key: "DATA_QUALITY"
+
+# Unclassified categories seen in products-moustik on 23/11/2026 (qualification-freezer). The datasource is not
+# recorded in datasourceCategories: one neutral key. The 219 products already in refrigerator move in PR 2.
+matchingCategories:
+  all-datasources:
+    - "ELECTROMENAGER | ELECTROMENAGER > FROID > CONGELATEUR"
+    - "ELECTROMENAGER > GROS ELECTROMENAGER > CONGELATEUR"
+    - "CONGELATEUR"
+    - "GROS ELECTROMENAGER / CONGELATEUR"
+    - "GROS ELECTROMENAGER > CONGELATEUR"
+    - "ELECTROMENAGER | CONGELATEUR"
+    - "GROS ELECTROMENAGER | CONGELATEUR"
