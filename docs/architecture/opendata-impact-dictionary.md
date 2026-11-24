@@ -88,6 +88,21 @@ Pour chaque critère : une colonne de valeur `{critere}` (suffixée de l'unité 
 | `weight_kg` | kg | Poids | Attribut `WEIGHT` (EPREL, Icecat, marchands) |
 | `weight_source` | - | Origine de la valeur de Poids | Sources de l'attribut `WEIGHT` |
 
+## wine-cooler (`impact-wine-cooler.zip`)
+
+| Colonne | Unité | Définition | Source |
+|---|---|---|---|
+| `classe_energy` | - | Classe énergétique | Attribut `CLASSE_ENERGY` (EPREL, Icecat, marchands) |
+| `classe_energy_source` | - | Origine de la valeur de Classe énergétique | Sources de l'attribut `CLASSE_ENERGY` |
+| `energy_consumption_annual_kwh_year` | kWh/year | Consommation énergétique annuelle | Attribut `ENERGY_CONSUMPTION_ANNUAL` (EPREL, Icecat, marchands) |
+| `energy_consumption_annual_source` | - | Origine de la valeur de Consommation énergétique annuelle | Sources de l'attribut `ENERGY_CONSUMPTION_ANNUAL` |
+| `noise_level_db` | dB | Niveau sonore | Attribut `NOISE_LEVEL` (EPREL, Icecat, marchands) |
+| `noise_level_source` | - | Origine de la valeur de Niveau sonore | Sources de l'attribut `NOISE_LEVEL` |
+| `warranty_year` | Year(s) | Durée de garantie | Attribut `WARRANTY` (EPREL, Icecat, marchands) |
+| `warranty_source` | - | Origine de la valeur de Durée de garantie | Sources de l'attribut `WARRANTY` |
+| `weight_kg` | kg | Poids | Attribut `WEIGHT` (EPREL, Icecat, marchands) |
+| `weight_source` | - | Origine de la valeur de Poids | Sources de l'attribut `WEIGHT` |
+
 ## smartphones (`impact-smartphones.zip`)
 
 | Colonne | Unité | Définition | Source |

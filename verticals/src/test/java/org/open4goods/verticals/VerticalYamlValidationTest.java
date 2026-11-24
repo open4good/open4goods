@@ -251,11 +251,11 @@ class VerticalYamlValidationTest {
     @Test
     void onlyWaveOneAndTwoVerticalsAreSwitchedToTheV2Methodology() {
         // GOU-1889 wave 1: refrigerators and dishwashers; wave 2 (GOU-2605): washing machines, ovens, smartphones;
-        // the other verticals stay in V1 (wave 3)
+        // wine-cooler is V2 from its creation (GOU-2632); the other verticals stay in V1 (wave 3)
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
-                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones").contains(config.getId()) ? 2
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones", "wine-cooler").contains(config.getId()) ? 2
                     : ImpactScoreConfig.METHODOLOGY_V1));
     }
 
@@ -336,7 +336,8 @@ class VerticalYamlValidationTest {
         "oven", new Object[] { true, 0.50 },
         "tv", new Object[] { true, 0.50 },
         "washing-machine", new Object[] { true, 0.40 },
-        "air-conditioner", new Object[] { true, 0.50 });
+        "air-conditioner", new Object[] { true, 0.50 },
+        "wine-cooler", new Object[] { true, 0.50 });
 
     /** Gate 2 fixed bounds, by vertical: criterion to upper bound in W (lower bound 0). */
     private static final Map<String, Map<String, Double>> GATE_TWO_FIXED_BOUNDS = Map.of(
