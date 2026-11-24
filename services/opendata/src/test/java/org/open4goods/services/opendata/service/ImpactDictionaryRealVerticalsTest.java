@@ -75,7 +75,7 @@ class ImpactDictionaryRealVerticalsTest {
     void impactHeadersShouldMatchTheDictionaryForEveryRealVertical() throws IOException {
         List<VerticalConfig> verticals = realVerticals();
         Map<String, Map<String, String>> dictionary = dictionary();
-        assertThat(verticals).hasSize(7);
+        assertThat(verticals).hasSize(8);
         for (VerticalConfig config : verticals) {
             ImpactDataset impact = new ImpactDataset(config, "https://nudger.fr");
             Map<String, String> actual = new LinkedHashMap<>();
