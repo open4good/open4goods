@@ -3,23 +3,20 @@
     <PageLoadingOverlay />
     <The-main-menu-container @toggle-drawer="toggleDrawer" />
 
-    <!-- Mobile menu -->
-    <ClientOnly>
-      <template v-if="isMobileNavigation">
-        <v-navigation-drawer
-          v-model="drawer"
-          location="start"
-          :temporary="isMobileNavigation"
-          :scrim="isMobileNavigation"
-          :width="drawerWidth"
-          floating
-          class="mobile-menu-drawer"
-          :style="drawerInlineStyles"
-        >
-          <the-mobile-menu @close="drawer = false" />
-        </v-navigation-drawer>
-      </template>
-    </ClientOnly>
+    <!-- Mobile menu: rendered in SSR so its links are in the HTML Googlebot mobile indexes -->
+    <v-navigation-drawer
+      v-if="isMobileNavigation"
+      v-model="drawer"
+      location="start"
+      :temporary="isMobileNavigation"
+      :scrim="isMobileNavigation"
+      :width="drawerWidth"
+      floating
+      class="mobile-menu-drawer"
+      :style="drawerInlineStyles"
+    >
+      <the-mobile-menu @close="drawer = false" />
+    </v-navigation-drawer>
 
     <v-main class="app-main-adjust">
       <slot />

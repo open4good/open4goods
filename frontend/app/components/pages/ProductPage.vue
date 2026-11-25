@@ -154,6 +154,16 @@
             />
           </section>
 
+          <section class="product-page__section">
+            <ProductRelatedLinks
+              :products="relatedLinks.products"
+              :sub-category="relatedLinks.subCategory"
+              :vertical-home-url="verticalHomeUrl"
+              :vertical-title="normalizedVerticalTitle"
+              :guides="categoryDetail?.guides ?? []"
+            />
+          </section>
+
           <section
             v-if="showVigilanceSection"
             :id="sectionIds.vigilance"
@@ -251,7 +261,6 @@ import type {
   AggregationResponseDto,
   AttributeConfigDto,
   CommercialEvent,
-  FilterRequestDto,
   ProductIndexedAttributeDto,
   ProductDto,
   ProductReferenceDto,
@@ -282,10 +291,11 @@ import {
 } from '~/composables/useProductSources'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from 'vue-i18n'
-import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
 import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
 import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import ProductRelatedLinks from '~/components/product/ProductRelatedLinks.vue'
+import { useProductRelatedLinks } from '~/composables/product/useProductRelatedLinks'
 import {
   buildImpactAggregateAnchorId,
   buildImpactScoreGroups,
@@ -620,6 +630,9 @@ const { data: aggregationsData } = await useAsyncData<
 
 const aggregations = computed(() => aggregationsData.value ?? {})
 
+// Crawlable internal links (sub-category, sibling products, guides), resolved during SSR.
+const relatedLinks = await useProductRelatedLinks(product, categoryDetail)
+
 const productTitle = computed(() => {
   const rawSlug = product.value?.slug ?? ''
   const normalizedSlug = rawSlug.trim()
@@ -701,30 +714,6 @@ const normalizedVerticalTitle = computed(() => {
 
     return title.toLowerCase()
   }
-})
-
-const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
-
-const normalizedCategoryPath = computed(() => {
-  const raw =
-    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
-    categoryDetail.value?.verticalHomeUrl ??
-    null ??
-    null
-
-  if (!raw) {
-    return null
-  }
-
-  const trimmed = raw.toString().trim()
-  if (!trimmed.length) {
-    return null
-  }
-
-  const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
-  const sanitized = withLeadingSlash.split('?')[0]?.split('#')[0]
-
-  return sanitized?.length ? sanitized : withLeadingSlash
 })
 
 const handleAlternativesUpdated = (payload: {
@@ -872,109 +861,31 @@ const productMetaTitle = computed(() => {
     : productTitle.value
 })
 
-const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
-  const brand = productBrand.value
-  if (!brand.length) {
-    return null
-  }
-
-  const basePath = normalizedCategoryPath.value
-  if (!basePath) {
-    return { title: brand }
-  }
-
-  const filters: FilterRequestDto = {
-    filters: [
-      {
-        field: BRAND_FILTER_FIELD,
-        operator: 'term',
-        terms: [brand],
-      },
-    ],
-  }
-
-  const hash = buildCategoryHash({ filters })
-  const link = `${basePath}${hash}`
-
-  return {
-    title: brand,
-    link,
-  }
-})
-
+// Home → vertical → sub-category (→ product, appended by the hero). The taxonomy
+// `/categories/**` is deliberately left out: those pages are thin and not indexed.
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
-  const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
-  const categoryFullSlug =
-    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
-    null
-
-  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>(
-    (acc, crumb, index, array) => {
-      const rawTitle = crumb?.title ?? crumb?.link ?? ''
-      const title = rawTitle.toString().trim()
-      if (!title.length) {
-        return acc
-      }
-
-      const crumbFullSlug =
-        (crumb as { fullSlug?: string | null }).fullSlug ?? null
-      const rawLink =
-        crumbFullSlug ??
-        (index === array.length - 1
-          ? (categoryFullSlug ?? crumb?.link)
-          : crumb?.link) ??
-        null
-
-      const trimmed = rawLink?.toString().trim() ?? ''
-      const normalized = trimmed
-        ? trimmed.startsWith('http')
-          ? trimmed
-          : trimmed.startsWith('/')
-            ? trimmed
-            : `/${trimmed}`
-        : undefined
-
-      acc.push({
-        title,
-        link: normalized ?? undefined,
-      })
-
-      return acc
-    },
-    []
-  )
-
-  const brandCrumb = brandBreadcrumb.value
-  if (brandCrumb) {
-    const duplicateIndex = resolvedCategories.findIndex(
-      entry =>
-        entry.title.trim().toLowerCase() ===
-        brandCrumb.title.trim().toLowerCase()
-    )
-
-    if (duplicateIndex >= 0) {
-      resolvedCategories.splice(duplicateIndex, 1, brandCrumb)
-    } else {
-      resolvedCategories.push(brandCrumb)
-    }
+  if (!categoryDetail.value) {
+    return []
   }
 
-  // Fallback: If no category breadcrumbs (uncategorized), ensure we have Home
-  if (
-    resolvedCategories.length &&
-    (!resolvedCategories[0].link || resolvedCategories[0].link !== '/')
-  ) {
-    // Check if the first item effectively is Home (e.g. title is Home but link is something else? Unlikely)
-    // Simply check if we started with category crumbs. If categoryDetail is null, resolvedCategories came from empty array.
-    if (!categoryDetail.value) {
-      resolvedCategories.unshift({
-        title: t('navigation.home'), // Ensure key exists or use fallback
-        link: '/',
-      })
-    }
+  const crumbs: ProductHeroBreadcrumb[] = [
+    { title: t('navigation.home'), link: '/' },
+  ]
+
+  const homeUrl = verticalHomeUrl.value
+  if (homeUrl) {
+    crumbs.push({
+      title: verticalTitle.value || homeUrl,
+      link: homeUrl.startsWith('/') ? homeUrl : `/${homeUrl}`,
+    })
   }
 
-  return resolvedCategories
+  const subCategory = relatedLinks.value.subCategory
+  if (subCategory) {
+    crumbs.push({ title: subCategory.title, link: subCategory.href })
+  }
+
+  return crumbs
 })
 
 const productMetaDescription = computed(() => {
