@@ -251,11 +251,11 @@ class VerticalYamlValidationTest {
     @Test
     void onlyWaveOneAndTwoVerticalsAreSwitchedToTheV2Methodology() {
         // GOU-1889 wave 1: refrigerators and dishwashers; wave 2 (GOU-2605): washing machines, ovens, smartphones;
-        // wine-cooler is V2 from its creation (GOU-2632); the other verticals stay in V1 (wave 3)
+        // wine-cooler (GOU-2632) and freezer (GOU-2631) are V2 from their creation; the other verticals stay in V1 (wave 3)
         assertThat(verticalsConfigService.getConfigsWithoutDefault())
             .allSatisfy(config -> assertThat(config.getImpactScoreConfig().effectiveMethodologyVersion())
                 .as("methodology version of %s", config.getId())
-                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones", "wine-cooler").contains(config.getId()) ? 2
+                .isEqualTo(java.util.Set.of("refrigerator", "dishwasher", "washing-machine", "oven", "smartphones", "wine-cooler", "freezer").contains(config.getId()) ? 2
                     : ImpactScoreConfig.METHODOLOGY_V1));
     }
 
@@ -331,6 +331,7 @@ class VerticalYamlValidationTest {
      */
     private static final Map<String, Object[]> GATE_TWO_FILTER = Map.of(
         "refrigerator", new Object[] { false, 0.50 },
+        "freezer", new Object[] { true, 0.50 },
         "dishwasher", new Object[] { true, 0.60 },
         "smartphones", new Object[] { true, 0.50 },
         "oven", new Object[] { true, 0.50 },
@@ -601,6 +602,14 @@ class VerticalYamlValidationTest {
 
         config.setMethodologyVersionOverride(2);
         assertThat(ImpactScoreMethodology.blockingErrors(config, tv)).isNotEmpty();
+    }
+
+    @Test
+    void freezerCategoriesMatchForAnyDatasource() {
+        // GOU-2631: the categories are declared under `all`, the only key the lookup reads for any datasource
+        assertThat(verticalsConfigService.getVerticalForCategories(Map.of("any-merchant", "GROS ELECTROMENAGER | CONGELATEUR")))
+            .extracting(VerticalConfig::getId)
+            .isEqualTo("freezer");
     }
 
     private static void assertV2Refused(Consumer<ImpactScoreV2Config> breaker, String expectedError) {
