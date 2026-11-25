@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, ref } from 'vue'
+import { buildGuideArticleJsonLd } from '~/utils/seo/guide-jsonld'
 import GuideStickySidebar from '~/components/category/guides/GuideStickySidebar.vue'
 import BuyingGuideRenderer from '~/components/docs/BuyingGuideRenderer.vue'
 import { useCategories } from '~/composables/categories/useCategories'
@@ -341,6 +342,21 @@ const markdownCanonicalUrl = computed(() => {
   return new URL(markdownCanonicalPath.value, requestURL.origin).toString()
 })
 
+// og:image: the guide's own image, else the category image.
+const guideImageUrl = computed(() => {
+  const candidate = markdownGuide?.ogImage?.trim() || categoryImage.value
+
+  if (!candidate) {
+    return undefined
+  }
+
+  try {
+    return new URL(candidate, requestURL.origin).toString()
+  } catch {
+    return undefined
+  }
+})
+
 if (markdownGuide) {
   useSeoMeta({
     title: () => markdownGuide.title ?? resolvedGuideTitle.value,
@@ -348,11 +364,34 @@ if (markdownGuide) {
     ogTitle: () => markdownGuide.title ?? resolvedGuideTitle.value,
     ogDescription: () => markdownGuide.description ?? '',
     ogUrl: () => markdownCanonicalUrl.value,
+    ogImage: () => guideImageUrl.value,
+    ogType: 'article',
   })
 
   useHead(() => ({
     link: markdownCanonicalUrl.value
       ? [{ rel: 'canonical', href: markdownCanonicalUrl.value }]
+      : [],
+    script: markdownCanonicalUrl.value
+      ? [
+          {
+            key: 'guide-article-jsonld',
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(
+              buildGuideArticleJsonLd({
+                url: markdownCanonicalUrl.value,
+                headline: markdownGuide.title ?? resolvedGuideTitle.value,
+                description: markdownGuide.description,
+                image: guideImageUrl.value,
+                datePublished:
+                  markdownGuide.publishedAt ?? markdownGuide.updatedAt,
+                dateModified: markdownGuide.updatedAt,
+                inLanguage: 'fr',
+                origin: requestURL.origin,
+              })
+            ),
+          },
+        ]
       : [],
   }))
 }

@@ -196,6 +196,9 @@ useSeoMeta({
 })
 
 useHead(() => ({
+  link: canonicalUrl.value
+    ? [{ rel: 'canonical', href: canonicalUrl.value }]
+    : [],
   script: [
     {
       key: 'impact-score-jsonld',

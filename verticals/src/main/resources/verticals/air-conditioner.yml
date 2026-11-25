@@ -101,6 +101,8 @@ i18n:
       - "de la climatisation"
     verticalHomeUrl: "climatiseurs"
     verticalHomeTitle: "Climatiseurs"
+    verticalMetaTitle: "Comparatif climatiseurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les climatiseurs par prix, puissance, efficacité énergétique et Impact Score noté sur 20 pour rafraîchir en consommant moins."
     verticalHomeDescription: "Comparez les climatiseurs selon leur consommation électrique, leur efficacité et leur impact environnemental. Nudger vous aide à choisir un modèle adapté à votre logement sans négliger le coût d’usage ni la consommation (kWh/an, étiquette énergie)."
     productMetaOpenGraphType: "product"
 
@@ -118,6 +120,8 @@ i18n:
       - "of the AC unit"
     verticalHomeUrl: "air-conditioners"
     verticalHomeTitle: "Air conditioners"
+    verticalMetaTitle: "Air conditioners comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare air conditioners by price, power, energy efficiency and Impact Score out of 20 to cool your home while using less energy."
     verticalHomeDescription: "Compare air conditioners by electricity use, efficiency, and environmental impact. Nudger helps you choose a model that fits your room while keeping running costs and energy use (kWh/year, energy label) in view."
     productMetaOpenGraphType: "product"
 

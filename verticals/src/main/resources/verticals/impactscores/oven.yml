@@ -360,32 +360,32 @@ aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" :
   type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EU) No 66/2014 of 14 January 2014 implementing Directive\
   \ 2009/125/EC with regard to ecodesign requirements for domestic ovens, hobs and range hoods\",\n    \"authors_or_org\"\
   \ : \"European Commission\",\n    \"year\" : 2014,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\"\
-  ,\n    \"url\" : \"[https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF](https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF)\"\
+  ,\n    \"url\" : \"https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"energy materiality\", \"guardrails for energy dominance\", \"positioning (within-category relevance)\" ],\n    \"notes\"\
   \ : \"Le règlement indique que la consommation d'énergie en phase d'utilisation est l'aspect environnemental le plus significatif\
   \ pour les produits couverts.\"\n  }, {\n    \"id\" : \"S2\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission\
   \ Delegated Regulation (EU) No 65/2014 of 1 October 2013 supplementing Directive 2010/30/EU with regard to the energy labelling\
   \ of domestic ovens and range hoods (consolidated version)\",\n    \"authors_or_org\" : \"European Commission\",\n    \"\
-  year\" : 2014,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"[https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng)\"\
+  year\" : 2014,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"energy class definition and consumer comparability\", \"anti-double-counting notes between class and consumption\" ],\n\
   \    \"notes\" : \"Cadre UE harmonisé d'étiquetage énergie, support de comparabilité grand public (classe énergétique).\"\
   \n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Product lifespans - monitoring trends\
   \ in Europe\",\n    \"authors_or_org\" : \"European Environment Agency (EEA)\",\n    \"year\" : 2024,\n    \"publisher\"\
-  \ : \"EEA\",\n    \"url\" : \"[https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends](https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends)\"\
+  \ : \"EEA\",\n    \"url\" : \"https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"lifetime reference proxy (large household appliances)\", \"durability/repair vs replacement context\" ],\n    \"notes\"\
   \ : \"Fournit des tendances de durées de vie moyennes par grandes catégories d'appareils ménagers et des motifs de remplacement.\"\
   \n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Environmental Footprint (PEF/OEF) overview\"\
   ,\n    \"authors_or_org\" : \"European Commission Joint Research Centre (JRC) - European Platform on Life Cycle Assessment\"\
-  ,\n    \"year\" : 2021,\n    \"publisher\" : \"European Commission (JRC)\",\n    \"url\" : \"[https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html](https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html)\"\
+  ,\n    \"year\" : 2021,\n    \"publisher\" : \"European Commission (JRC)\",\n    \"url\" : \"https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"LCA-inspired framing (life-cycle scope)\", \"gap analysis context (what full EF/PEF would require)\" ],\n    \"notes\"\
   \ : \"Page institutionnelle décrivant PEF/OEF comme méthodes ACV recommandées par l'UE et leur portée cycle de vie.\"\n\
   \  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Guide for EF compliant data sets (Version\
   \ 2.0)\",\n    \"authors_or_org\" : \"Fazio S., Zampori L., De Schryver A., Kusche O., Thellier L., Diaconu E. (JRC)\",\n\
-  \    \"year\" : 2020,\n    \"publisher\" : \"Publications Office of the European Union\",\n    \"url\" : \"[https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf](https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf)\"\
+  \    \"year\" : 2020,\n    \"publisher\" : \"Publications Office of the European Union\",\n    \"url\" : \"https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"DATA_QUALITY rationale (DQR concept and criteria)\", \"missing data / documentation incentives\" ],\n    \"notes\" :\
   \ \"Documente le Data Quality Rating (DQR) et ses critères (représentativité techno/géo/temps, précision) dans le cadre\
@@ -623,7 +623,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2014
     publisher: Official Journal of the European Union (EUR-Lex)
-    url: '[https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF](https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF)'
+    url: 'https://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=OJ%3AL%3A2014%3A029%3A0033%3A0047%3Aen%3APDF'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -640,7 +640,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2014
     publisher: Official Journal of the European Union (EUR-Lex)
-    url: '[https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng)'
+    url: 'https://eur-lex.europa.eu/eli/reg_del/2014/65/oj/eng'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -654,7 +654,7 @@ aiResult:
     authors_or_org: European Environment Agency (EEA)
     year: 2024
     publisher: EEA
-    url: '[https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends](https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends)'
+    url: 'https://www.eea.europa.eu/en/analysis/publications/product-lifespans-monitoring-trends'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -668,7 +668,7 @@ aiResult:
     authors_or_org: European Commission Joint Research Centre (JRC) - European Platform on Life Cycle Assessment
     year: 2021
     publisher: European Commission (JRC)
-    url: '[https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html](https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html)'
+    url: 'https://eplca.jrc.ec.europa.eu/EnvironmentalFootprint.html'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -682,7 +682,7 @@ aiResult:
     authors_or_org: Fazio S., Zampori L., De Schryver A., Kusche O., Thellier L., Diaconu E. (JRC)
     year: 2020
     publisher: Publications Office of the European Union
-    url: '[https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf](https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf)'
+    url: 'https://eplca.jrc.ec.europa.eu/permalink/Guide_EF_DATA.pdf'
     accessed_date: '2026-03-01'
     reliability: high
     used: true

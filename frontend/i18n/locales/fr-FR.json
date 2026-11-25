@@ -658,8 +658,8 @@
         "USE": "Usage du produit"
       },
       "seo": {
-        "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
-        "title": "{category} - Impact Score détaillé"
+        "description": "Comment Nudger note les {category} sur 20 : critères, pondérations et sources de l'Impact Score. Méthode publiée et versionnée.",
+        "title": "Impact Score {category} : critères, pondérations et méthode"
       },
       "title": "{category} - {label}",
       "method": {

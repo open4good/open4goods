@@ -118,4 +118,12 @@ describe('CategoryEcoscoreCard', () => {
       false
     )
   })
+
+  it('builds the link from the site root for a relative vertical URL', () => {
+    const wrapper = mountCard('fours')
+
+    expect(
+      wrapper.get('[data-test="category-ecoscore-card"]').attributes('href')
+    ).toBe('/fours/ecoscore')
+  })
 })

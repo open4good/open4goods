@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { resolveCategorySeoMeta } from './category-meta'
+import {
+  clampMetaDescription,
+  resolveCategoryEcoscoreSeoMeta,
+  resolveCategorySeoMeta,
+} from './category-meta'
 
 describe('resolveCategorySeoMeta', () => {
   it('prioritises sub-category backend SEO and Open Graph fields', () => {
@@ -44,5 +48,42 @@ describe('resolveCategorySeoMeta', () => {
       ogTitle: 'Category home title',
       ogDescription: 'Category home description',
     })
+  })
+})
+
+describe('meta description length', () => {
+  it('clamps long category descriptions to 155 characters', () => {
+    const meta = resolveCategorySeoMeta({
+      siteName: 'Nudger',
+      category: { verticalHomeDescription: 'mot '.repeat(90) },
+    })
+
+    expect(meta.description.length).toBeLessThanOrEqual(155)
+    expect(meta.description.endsWith('…')).toBe(true)
+  })
+
+  it('keeps short descriptions untouched', () => {
+    expect(clampMetaDescription('Courte description.')).toBe(
+      'Courte description.'
+    )
+  })
+
+  it('gives the ecoscore page its own title and clamped description', () => {
+    const category = resolveCategorySeoMeta({
+      siteName: 'Nudger',
+      category: {
+        verticalMetaTitle: 'Comparatif téléviseurs 2026 | Nudger',
+        verticalMetaDescription: 'Description de la catégorie.',
+      },
+    })
+    const ecoscore = resolveCategoryEcoscoreSeoMeta({
+      title: 'Impact Score Téléviseurs : critères et méthode',
+      description: 'x '.repeat(200),
+    })
+
+    expect(ecoscore.title).not.toBe(category.title)
+    expect(ecoscore.description).not.toBe(category.description)
+    expect(ecoscore.description.length).toBeLessThanOrEqual(155)
+    expect(ecoscore.ogTitle).toBe(ecoscore.title)
   })
 })
