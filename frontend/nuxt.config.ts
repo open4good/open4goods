@@ -459,12 +459,6 @@ export default defineNuxtConfig({
         file: 'fr-FR.ts',
         ...(localeDomains['fr-FR'] ?? {}),
       },
-      {
-        code: 'en-US',
-        name: 'English',
-        file: 'en-US.ts',
-        ...(localeDomains['en-US'] ?? {}),
-      },
     ],
     strategy: 'no_prefix',
     detectBrowserLanguage: false,
@@ -625,10 +619,6 @@ export default defineNuxtConfig({
         // public /sitemap/fr/guides.xml answered 404. Add it back with the first guide.
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/category-pages.xml`,
         `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/fr/product-pages.xml`,
-      ],
-      en: [
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/category-pages.xml`,
-        `${process.env.SITEMAP_BASE_PATH || '/opt/open4goods/sitemap'}/default/product-pages.xml`,
       ],
     },
 

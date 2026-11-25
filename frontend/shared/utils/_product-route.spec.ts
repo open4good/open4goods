@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   isBackendNotFoundError,
+  isValidGtin,
   matchProductRouteFromSegments,
 } from './_product-route'
 
@@ -142,5 +143,16 @@ describe('_product-route', () => {
       expect(isBackendNotFoundError({ statusCode: 500 })).toBe(false)
       expect(isBackendNotFoundError({ response: { status: 200 } })).toBe(false)
     })
+  })
+})
+
+describe('isValidGtin', () => {
+  it('accepts a GTIN with a correct check digit', () => {
+    expect(isValidGtin('4006381333931')).toBe(true)
+  })
+
+  it('rejects placeholder and mistyped GTINs', () => {
+    expect(isValidGtin('0000000000000')).toBe(false)
+    expect(isValidGtin('4006381333932')).toBe(false)
   })
 })

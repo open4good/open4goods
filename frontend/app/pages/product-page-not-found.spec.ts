@@ -24,9 +24,9 @@ const translate = (key: string) => {
 
 const routeMock = {
   params: {
-    slug: ['9999999999999-inexistant'],
+    slug: ['4006381333931-inexistant'],
   },
-  path: '/9999999999999-inexistant',
+  path: '/4006381333931-inexistant',
 }
 
 const useAsyncDataMock = vi.hoisted(() => vi.fn())
@@ -45,6 +45,16 @@ mockNuxtImport('useSeoMeta', () => vi.fn())
 mockNuxtImport('useHead', () => vi.fn())
 mockNuxtImport('navigateTo', () => vi.fn())
 mockNuxtImport('useAsyncData', () => useAsyncDataMock)
+
+const requestEventMock = vi.hoisted(() => ({ value: undefined as unknown }))
+mockNuxtImport('useRequestEvent', () => () => requestEventMock.value)
+vi.mock('~/utils/ssr-backend-error', () => ({
+  createBackendUnavailableError: (cause: unknown) =>
+    Object.assign(new Error('Service Unavailable'), {
+      statusCode: 503,
+      cause,
+    }),
+}))
 
 const selectCategoryBySlugMock = vi.hoisted(() => vi.fn())
 vi.mock('~/composables/categories/useCategories', () => ({
@@ -106,8 +116,9 @@ describe('ProductPage SSR 404 (GOU-472)', () => {
     selectCategoryBySlugMock.mockReset()
     selectCategoryBySlugMock.mockRejectedValue(new Error('Category not found'))
     useAsyncDataMock.mockReset()
-    routeMock.params.slug = ['9999999999999-inexistant']
-    routeMock.path = '/9999999999999-inexistant'
+    requestEventMock.value = {}
+    routeMock.params.slug = ['4006381333931-inexistant']
+    routeMock.path = '/4006381333931-inexistant'
   })
 
   it('rethrows a fatal 404 when the backend reports an unknown GTIN', async () => {
@@ -125,7 +136,7 @@ describe('ProductPage SSR 404 (GOU-472)', () => {
     })
   })
 
-  it('does not throw a 404 when the backend fails with a 5xx error', async () => {
+  it('answers a 503, not a 200 banner, when the backend fails with a 5xx during SSR', async () => {
     useAsyncDataMock.mockResolvedValue({
       data: ref(null),
       pending: ref(false),
@@ -134,6 +145,18 @@ describe('ProductPage SSR 404 (GOU-472)', () => {
       ),
     })
 
-    await expect(mountProductPage()).resolves.toBeDefined()
+    await expect(mountProductPage()).rejects.toMatchObject({
+      statusCode: 503,
+    })
+  })
+
+  it('answers a real 404 for a placeholder GTIN without calling the backend', async () => {
+    routeMock.params.slug = ['0000000000000-fiche-factice']
+    routeMock.path = '/0000000000000-fiche-factice'
+
+    await expect(mountProductPage()).rejects.toMatchObject({
+      statusCode: 404,
+    })
+    expect(useAsyncDataMock).not.toHaveBeenCalled()
   })
 })

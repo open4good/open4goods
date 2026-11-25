@@ -200,7 +200,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale, availableLocales } = useI18n()
+const { t, locale } = useI18n()
 const requestURL = useRequestURL()
 const runtimeConfig = useRuntimeConfig()
 const localePath = useLocalePath()
@@ -655,16 +655,6 @@ const ogImageUrl = computed(() =>
 )
 const ogImageAlt = computed(() => String(t('feedback.seo.imageAlt')))
 
-const alternateLinks = computed(() =>
-  availableLocales.map(availableLocale => ({
-    rel: 'alternate' as const,
-    hreflang: availableLocale,
-    href: new URL(
-      resolveLocalizedRoutePath('feedback', availableLocale),
-      requestURL.origin
-    ).toString(),
-  }))
-)
 
 useSeoMeta({
   title: () => String(t('feedback.seo.title')),
@@ -682,7 +672,6 @@ useSeoMeta({
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateLinks.value,
   ],
 }))
 

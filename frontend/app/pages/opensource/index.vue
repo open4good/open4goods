@@ -152,7 +152,6 @@ import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpensourcePillarsSection from '~/components/domains/opensource/OpensourcePillarsSection.vue'
 import OpensourceContributionSection from '~/components/domains/opensource/OpensourceContributionSection.vue'
 import OpensourceResourcesSection from '~/components/domains/opensource/OpensourceResourcesSection.vue'
-import { resolveLocalizedRoutePath } from '~~/shared/utils/localized-routes'
 
 interface PillarCardDisplay {
   icon: string
@@ -219,7 +218,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, availableLocales } = useI18n()
+const { t } = useI18n()
 const requestURL = useRequestURL()
 const localePath = useLocalePath()
 const currentVersion = 'v0.9.8'
@@ -396,24 +395,10 @@ const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-const alternateLinks = computed(() =>
-  availableLocales.map(availableLocale => ({
-    rel: 'alternate' as const,
-    hreflang: availableLocale,
-    href: new URL(
-      resolveLocalizedRoutePath('opensource', availableLocale),
-      requestURL.origin
-    ).toString(),
-  }))
-)
 
 // Note: SEO metadata (title, description, OG tags, canonical, JSON-LD)
 // is now handled automatically by PageHeader component via useHeaderSeo composable
 
-// Keep alternate links in head (not handled by PageHeader)
-useHead(() => ({
-  link: [...alternateLinks.value],
-}))
 </script>
 
 <style scoped lang="sass">

@@ -265,8 +265,11 @@ import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 import { resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
 import type { ScoreView } from '~/components/product/impact/impact-types'
 import type { ProductRouteMatch } from '~~/shared/utils/_product-route'
-import { isBackendNotFoundError } from '~~/shared/utils/_product-route'
-import { buildProductHreflangLinks } from '~~/shared/utils/domain-language'
+import {
+  isBackendNotFoundError,
+  isValidGtin,
+} from '~~/shared/utils/_product-route'
+import { createBackendUnavailableError } from '~/utils/ssr-backend-error'
 import { buildProductJsonLdGraph } from '~/utils/product-jsonld'
 import { buildProductMeta } from '~/utils/seo/product-meta'
 
@@ -387,6 +390,16 @@ if (!productRoute) {
 
 const { categorySlug, gtin } = productRoute
 
+// Placeholder or mistyped GTINs (all zeros, wrong check digit) are not products:
+// answer a real 404 without asking the backend.
+if (!isValidGtin(gtin)) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Product not found',
+    fatal: true,
+  })
+}
+
 const productLoadError = ref<Error | null>(null)
 
 const {
@@ -440,6 +453,17 @@ if (error.value?.statusCode === 404) {
     statusMessage: 'Product not found',
     fatal: true,
   })
+}
+
+// A backend failure (5xx, timeout) during SSR answers 503 + Retry-After instead of
+// a 200 page with an error banner, which crawlers index as a soft 404. On the
+// client the banner stays: a successful SSR page is never replaced by error.vue.
+const ssrRequestEvent = useRequestEvent()
+if (ssrRequestEvent && (productLoadError.value || error.value)) {
+  throw createBackendUnavailableError(
+    productLoadError.value ?? error.value,
+    ssrRequestEvent
+  )
 }
 
 const product = computed(() => productData.value)
@@ -568,6 +592,13 @@ if (categorySlug) {
         'Failed to resolve category detail for product page.',
         categoryError
       )
+
+      // Without the vertical detail the page would be rendered (and indexed) as an
+      // uncategorized product: fail the SSR instead.
+      const categoryRequestEvent = useRequestEvent()
+      if (categoryRequestEvent) {
+        throw createBackendUnavailableError(categoryError, categoryRequestEvent)
+      }
     }
   }
 }
@@ -1004,12 +1035,15 @@ const canonicalPath = computed(() => {
 const canonicalUrl = computed(() =>
   new URL(canonicalPath.value, requestURL.origin).toString()
 )
-const alternateProductLinks = computed(() =>
-  buildProductHreflangLinks(canonicalPath.value, requestURL.protocol)
-)
-const productRobotsContent = computed(() =>
-  categoryDetail.value?.enabled === false ? 'noindex, nofollow' : undefined
-)
+// Products without a vertical (catalogue leftovers) stay out of the index but
+// their links are followed; hidden verticals stay fully out.
+const productRobotsContent = computed(() => {
+  if (categoryDetail.value?.enabled === false) {
+    return 'noindex, nofollow'
+  }
+
+  return categoryDetail.value ? undefined : 'noindex, follow'
+})
 
 const resolvedProductImageSource = computed(() => {
   const galleryImages = product.value?.resources?.images ?? []
@@ -2539,7 +2573,6 @@ useHead(() => ({
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateProductLinks.value,
   ],
 }))
 

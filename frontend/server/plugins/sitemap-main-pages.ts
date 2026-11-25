@@ -1,4 +1,7 @@
-import { APP_ROUTES_SITEMAP_KEY } from '~~/shared/utils/sitemap-config'
+import {
+  APP_ROUTES_SITEMAP_KEY,
+  isNoindexPath,
+} from '~~/shared/utils/sitemap-config'
 import { getDomainLanguageFromHostname } from '~~/shared/utils/domain-language'
 import { getMainPagePathsForDomainLanguage } from '~~/shared/utils/sitemap-main-pages'
 
@@ -54,7 +57,11 @@ export default defineNitroPlugin(nitroApp => {
     )
 
     const staticPaths = Array.from(
-      new Set(getMainPagePathsForDomainLanguage(domainLanguage))
+      new Set(
+        getMainPagePathsForDomainLanguage(domainLanguage).filter(
+          path => !isNoindexPath(path)
+        )
+      )
     )
 
     if (!staticPaths.length) {

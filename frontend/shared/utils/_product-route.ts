@@ -122,3 +122,26 @@ export const isBackendNotFoundError = (error: unknown): boolean => {
 
   return status === 404
 }
+
+/**
+ * True when the digits form a plausible GTIN: not all zeros and, for the
+ * GTIN-8/12/13/14 lengths, a valid GS1 check digit. Other lengths are not
+ * checkable and are left to the backend.
+ */
+export const isValidGtin = (gtin: string): boolean => {
+  if (!/^\d+$/.test(gtin) || /^0+$/.test(gtin)) {
+    return false
+  }
+
+  if (![8, 12, 13, 14].includes(gtin.length)) {
+    return true
+  }
+
+  const digits = gtin.split('').map(Number)
+  const checkDigit = digits.pop() as number
+  const sum = digits
+    .reverse()
+    .reduce((acc, digit, index) => acc + digit * (index % 2 === 0 ? 3 : 1), 0)
+
+  return (10 - (sum % 10)) % 10 === checkDigit
+}

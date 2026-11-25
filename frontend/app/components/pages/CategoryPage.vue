@@ -494,6 +494,7 @@
 </template>
 
 <script setup lang="ts">
+import { createBackendUnavailableError } from '~/utils/ssr-backend-error'
 import {
   computed,
   onBeforeUnmount,
@@ -693,11 +694,10 @@ const { data: categoryData, error: categoryError } = await useAsyncData(
     try {
       return await selectCategoryBySlug(slug)
     } catch (err) {
-      if (
-        err instanceof Error &&
-        (err.name === 'CategoryNotFoundError' ||
-          err.name === 'CategoryResolutionError')
-      ) {
+      // CategoryResolutionError means the category list itself could not be
+      // fetched (backend failure): that is not a missing page, it falls through
+      // to the 503 below.
+      if (err instanceof Error && err.name === 'CategoryNotFoundError') {
         throw createError({
           statusCode: 404,
           message: err.message,
@@ -719,11 +719,20 @@ if (categoryError.value && import.meta.server) {
     statusMessage?: string
   }
 
+  if (resolvedError.statusCode !== 404) {
+    // Backend failure while rendering: 503 + Retry-After, never a 200 page
+    // (nor a noindex) built from a missing category detail.
+    throw createBackendUnavailableError(
+      categoryError.value,
+      useRequestEvent()
+    )
+  }
+
   throw createError({
-    statusCode: resolvedError.statusCode ?? 500,
+    statusCode: 404,
     message: resolvedError.statusMessage ?? 'Failed to load category',
     cause: categoryError.value,
-    fatal: resolvedError.statusCode !== 404,
+    fatal: false,
   })
 }
 

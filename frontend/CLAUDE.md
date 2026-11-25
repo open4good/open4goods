@@ -85,8 +85,9 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 
 #### Internationalization
 
-- French (fr-FR) and English (en-US) support
-- `prefix_except_default` strategy (English is default, French has `/fr-FR` prefix)
+- French only (fr-FR): the English locale was retired (GOU-2696, D4). `no_prefix` strategy, no
+  hreflang. `i18n/locales/en-US.*` files remain only as test fixtures.
+- See [docs/internationalisation.md](docs/internationalisation.md)
 
 ### Environment Variables
 

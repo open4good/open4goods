@@ -167,6 +167,7 @@ const paddedStatusCode = computed(() =>
   String(statusCode.value).padStart(3, '0')
 )
 const is404 = computed(() => statusCode.value === 404)
+const is503 = computed(() => statusCode.value === 503)
 
 const pageStrings = computed<ErrorPageStrings>(() => {
   const fallbackStatusMessage = props.error?.statusMessage
@@ -268,7 +269,13 @@ useSeoMeta({
   ogTitle: () => pageStrings.value.title,
   description: () => pageStrings.value.description,
   ogDescription: () => pageStrings.value.description,
-  robots: () => (is404.value ? 'noindex, follow' : 'noindex, nofollow'),
+  // A 503 (backend unavailable) must stay indexable so crawlers retry the URL.
+  robots: () =>
+    is503.value
+      ? undefined
+      : is404.value
+        ? 'noindex, follow'
+        : 'noindex, nofollow',
 })
 
 const toggleDrawer = () => {

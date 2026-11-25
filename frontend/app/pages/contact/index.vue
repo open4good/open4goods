@@ -137,7 +137,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, te, locale, availableLocales } = useI18n()
+const { t, te, locale } = useI18n()
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const requestURL = useRequestURL()
@@ -254,16 +254,6 @@ const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 const ogImageAlt = computed(() => String(t('contact.seo.imageAlt')))
-const alternateLinks = computed(() =>
-  availableLocales.map(availableLocale => ({
-    rel: 'alternate' as const,
-    hreflang: availableLocale,
-    href: new URL(
-      resolveLocalizedRoutePath('contact', availableLocale),
-      requestURL.origin
-    ).toString(),
-  }))
-)
 
 const fallbackErrorMessage = computed(() =>
   String(t('contact.form.feedback.genericError'))
@@ -366,7 +356,6 @@ useSeoMeta({
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateLinks.value,
   ],
   script: [
     {

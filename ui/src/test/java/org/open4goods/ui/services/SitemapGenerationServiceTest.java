@@ -90,6 +90,8 @@ class SitemapGenerationServiceTest {
 				"https://nudger.fr/televiseurs/1-smart-tv-qe32ls03cbu-32-pouces",
 				"https://nudger.fr/televiseurs/2-oled-55");
 		assertThat(texts(xml, "lastmod")).hasSize(2).allMatch(value -> value.startsWith("2026-10-2"));
+		assertThat(texts(xml, "changefreq")).isEmpty();
+		assertThat(texts(xml, "priority")).isEmpty();
 
 		assertThat(meterRegistry.get("sitemap.generation").tag("result", "success").counter().count()).isEqualTo(1);
 		assertThat(meterRegistry.get("sitemap.generation.last.success").gauge().value()).isPositive();
@@ -97,6 +99,10 @@ class SitemapGenerationServiceTest {
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/category-pages.xml"))).isTrue();
 		assertThat(texts(parse(rootFolder.resolve("sitemap/fr/category-pages.xml")), "loc"))
 				.contains("https://nudger.fr/televiseurs/ecoscore");
+		// Category pages carry the latest product change of their vertical as lastmod.
+		Document categoryXml = parse(rootFolder.resolve("sitemap/fr/category-pages.xml"));
+		assertThat(texts(categoryXml, "lastmod")).isNotEmpty().allMatch(value -> value.startsWith("2026-10-2"));
+		assertThat(texts(categoryXml, "changefreq")).isEmpty();
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/sitemap.xml"))).isTrue();
 		assertThat(Files.exists(rootFolder.resolve("sitemap/fr/guides.xml"))).isFalse();
 		assertThat(leftoverTemporaryFiles()).isEmpty();

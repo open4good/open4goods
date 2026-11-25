@@ -53,7 +53,7 @@ definePageMeta({
   ssr: true,
 })
 
-const { t, locale, availableLocales } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
@@ -424,30 +424,13 @@ const canonicalUrl = computed(() =>
   ).toString()
 )
 
-const alternateLinks = computed(() =>
-  availableLocales.map(availableLocale => ({
-    rel: 'alternate' as const,
-    hreflang: availableLocale,
-    href: new URL(
-      resolveLocalizedRoutePath('index', availableLocale),
-      requestURL.origin
-    ).toString(),
-  }))
-)
 
 const siteName = computed(() => String(t('siteIdentity.siteName')))
 const logoUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-const localizedHomeUrls = computed(() =>
-  Array.from(
-    new Set([
-      canonicalUrl.value,
-      ...alternateLinks.value.map(link => link.href),
-    ])
-  )
-)
+const localizedHomeUrls = computed(() => [canonicalUrl.value])
 
 const linkedinUrl = computed(() =>
   toTrimmedString(t('siteIdentity.links.linkedin'))
@@ -735,7 +718,6 @@ useSeoMeta({
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateLinks.value,
   ],
   script: [
     {
