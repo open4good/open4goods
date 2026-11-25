@@ -142,7 +142,6 @@ before anything is written.
 | `API_EFFILIATION_API_KEY`         | api: `AFFILIATIONCONFIG_EFFILIATIONAPIKEY`                                                                                                                                    | Effiliation product feeds (GOU-1014)                           |
 | `API_VERTEX_API_JSON`             | api: tree `gen-ai-config.google-api-json` (service account JSON)                                                                                                              | Vertex Gemini (`vertexnudgerclient`), `AiProvidersConfiguration` |
 | `API_VERTEX_BATCH_JSON`           | api: tree `vertex.batch.credentials-json` (service account JSON)                                                                                                              | Vertex batch (`VertexBatchConfig`)                             |
-| `API_GOOGLE_SEARCH_API_KEY`       | api: tree `googlesearch.api-key`                                                                                                                                              | Custom Search (`GoogleSearchConfig`)                           |
 | `API_OPENAI_API_KEY`              | api: tree `spring.ai.openai.api-key`                                                                                                                                          | Spring AI OpenAI                                               |
 | `API_AWIN_ACCESS_TOKEN`           | api: tree `affiliation-config.awin-access-token`                                                                                                                              | Awin feeds                                                     |
 | `API_AWIN_DATAFEED_KEY`           | api: tree `affiliation-config.awin-datafeed-key` (key of the catalog URL `feed.providers.awin.catalog-url`)                                                                   | Awin catalog (`${affiliation-config.awin-datafeed-key:}`)       |
@@ -155,7 +154,7 @@ before anything is written.
 | `O4G_SBA_PASSWORD`                | api, ui, front-api: tree `spring.boot.admin.client.password`; api, ui, front-api: tree `o4g.actuator.monitor.password`; admin: tree `spring.boot.admin.instance-auth.default-password`, `o4g.sba.registration.password` | Spring Boot Admin registration and actuator access |
 | `O4G_INTERNAL_API_KEY`            | api: tree `admin-key`; front-api: tree `front.affiliation-partners.api-key`                                                                                                   | front-api -> api calls (affiliation partners)                  |
 | `API_METRIKS_KEY`                 | api: tree `metriks-key` (opens `/api/metriks/**` only, `ROLE_METRIKS`, GOU-1412)                                                                                              | Metriks workflow of open4goods-config, which sends it from its `prod/PROD_API_TOKEN` environment secret |
-| `O4G_CAPTCHA_SECRET`              | ui: tree `captcha-secret`; front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
+| `O4G_CAPTCHA_SECRET`              | front-api: tree `captcha.secret-key`                                                                                                               | hCaptcha                                                       |
 | `O4G_MAIL_PASSWORD`               | front-api, admin: tree `spring.mail.password`                                                                                                                                 | Gmail application password                                     |
 | `FRONT_API_JWT_SECRET`            | front-api: tree `front.security.jwt-secret`; frontend: `FRONT_SECURITY_JWT_SECRET`                                                                                            | JWT signature (front-api signs, frontend verifies admin tokens) |
 | `O4G_MACHINE_TOKEN`               | front-api: tree `front.security.shared-token`; frontend: `NUXT_MACHINE_TOKEN`, `MACHINE_TOKEN`                                                                                | `X-Shared-Token` machine calls                                 |
@@ -177,13 +176,9 @@ Not rendered, on purpose:
   key, `API_METRIKS_KEY` (`metriks-key`), which opens `/api/metriks/**` only
   and nothing else (GOU-1412). While `API_METRIKS_KEY` is not set, api accepts
   no Metriks key and the admin key keeps opening `/api/metriks/**`.
-- `API_URLFETCHER_PROXY_PASSWORD`: no deployed service depends on the
-  `urlfetching` module that reads `urlfetcher.proxy.*`.
-- `feed.api-key` (api) and `front.review-generation.api-key` (front-api): no
-  class reads them.
-- ui: `icecat-feature-config.password`, `feedback.github.access-token` and
-  `spring.mail.password` are present in its beta configuration, but ui ships
-  neither the Icecat, feedback nor mail module.
+- `API_URLFETCHER_PROXY_PASSWORD`: the `urlfetching` module that read
+  `urlfetcher.proxy.*` was deleted; the GitHub secret can go.
+- `feed.api-key` (api): no class reads it.
 - Infrastructure secrets: see
   [Infrastructure secrets](infra-secrets-rotation.md) (GOU-1092). Redis
   (`spring.data.redis.password`) and XWiki (`xwiki.password`) are not

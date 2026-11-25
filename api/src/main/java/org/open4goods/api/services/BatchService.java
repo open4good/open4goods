@@ -1098,16 +1098,6 @@ public class BatchService {
 
 
 
-    /**
-     * Filters and returns datasource properties that match the provided feed key.
-     *
-     * @param feedKey the feed key to match
-     * @return a set of matching datasource properties
-     */
-    private Set<DataSourceProperties> matchingKey(String feedKey) {
-        return matchingKey(feedKey, null);
-    }
-
     private Set<DataSourceProperties> matchingKey(String feedKey, String providerName) {
         String cleanedKey = IdHelper.azCharAndDigits(feedKey).toLowerCase();
         Set<DataSourceProperties> result = new HashSet<>();

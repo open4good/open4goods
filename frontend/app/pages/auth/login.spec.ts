@@ -23,13 +23,6 @@ vi.mock('#app/nuxt', async importOriginal => ({
   useRuntimeConfig: () => runtimeConfigMock,
 }))
 
-vi.mock('~~/shared/api-client/services/auth.services', () => ({
-  authService: { login: vi.fn(), logout: vi.fn() },
-}))
-
-vi.mock('~/stores/useAuthStore', () => ({
-  useAuthStore: () => ({ $patch: vi.fn() }),
-}))
 
 describe('auth/login page', () => {
   it('hides the Google sign-in button when the flag is disabled', async () => {

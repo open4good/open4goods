@@ -86,8 +86,6 @@
         <module>api</module>
         <module>ui</module>
         <module>front-api</module>
-        <module>services/urlfetching</module>
-        <module>services/googlesearch</module>
         <module>services/google-indexation</module>
         <module>services/evaluation</module>
         <module>services/serialisation</module>
@@ -106,8 +104,6 @@
         <module>services/feedservice</module>
         <module>services/contribution</module>
         <module>services/eprel-service</module>
-        <module>services/exposed-docs</module>
-        <module>services/geocode</module>
         <module>services/wikidata-service</module>
 
 

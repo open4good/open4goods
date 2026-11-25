@@ -223,11 +223,6 @@ front:
       #   role-allowlist:
       #     "[john.doe@example.com]": [ROLE_SITEEDITOR]
       role-allowlist: {}
-  exposed-docs:
-    base-url: ${FRONT_EXPOSED_DOCS_BASE_URL:http://localhost:8086}
-    public-access: ${FRONT_EXPOSED_DOCS_PUBLIC_ACCESS:true}
-  geocode:
-    base-url: ${FRONT_GEOCODE_BASE_URL:http://localhost:8089}
 
   affiliation-partners:
     api-base-url: ${FRONT_AFFILIATION_PARTNERS_API_BASE_URL:http://localhost:8080}
@@ -252,10 +247,6 @@ front:
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
     english-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.en-US.txt"
-
-  rate-limit:
-    anonymous: 100
-    authenticated: 1000
 
   # Distinct merchant domains with an active offer (GOU-2037), computed hourly from the api
   # GET /merchants/offer-activity (same base URL and key as affiliation-partners). Affiliation

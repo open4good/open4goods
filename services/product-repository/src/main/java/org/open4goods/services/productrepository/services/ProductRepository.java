@@ -67,7 +67,6 @@ import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
 import co.elastic.clients.elasticsearch._types.mapping.FieldType;
 import co.elastic.clients.elasticsearch._types.ScriptSortType;
-import co.elastic.clients.json.JsonData;
 
 
 /**
@@ -361,35 +360,6 @@ public class ProductRepository {
 		}
     }
 
-	/**
-	 * Retrieves only the mappedCategories for items having the minimal attributes set
-	 * @return
-	 */
-	public Stream<Product> exportForCategoriesMapping(Set<String> mustExistsfields, Integer maxResults) {
-	    Criteria c = new Criteria("datasourceCategories").exists();
-	    c = c.and(getRecentPriceQuery());
-
-	    for (String f : mustExistsfields) {
-	    	c = c.and(new Criteria(f).exists());
-	    }
-
-	    NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder()
-	            .withQuery(new CriteriaQuery(c))
-	            .withSourceFilter(new FetchSourceFilter(true,new String[]{"categoriesByDatasources"}, null));
-
-	    if (null != maxResults) {
-            initialQueryBuilder = initialQueryBuilder.withMaxResults(maxResults);
-	    }
-
-	    NativeQuery initialQuery = initialQueryBuilder.build();
-
-	    initialQuery.setPageable(PageRequest.of(0, 1000));
-
-	    var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
-	    return iterator.stream().onClose(iterator::close)
-	            .map(SearchHit::getContent);
-	}
-
 
 
 	public Stream<Product> exportAll(String vertical) {
@@ -577,32 +547,6 @@ public class ProductRepository {
 
 
 
-
-	/**
-	 * Export all aggregateddatas for a vertical, ordered by ecoscore descending
-	 *
-	 * @param vertical
-	 * @param max
-	 * @param max
-	 * @param withExcluded
-	 * @param indexName
-	 * @return
-	 */
-	public Stream<Product> exportAllVerticalizedProductsWithGenAiSinceEpoch(Long epoch) {
-
-		Criteria c = new Criteria("vertical").exists()
-				.and(getSinceDateQuery(epoch))
-				.and(new Criteria("aiDescriptions").exists())
-				;
-		NativeQueryBuilder initialQueryBuilder = new NativeQueryBuilder().withQuery(new CriteriaQuery(c));
-
-                initialQueryBuilder =  initialQueryBuilder.withSort(Sort.by(org.springframework.data.domain.Sort.Order.desc("scores.ECOSCORE.relativ.value")));
-
-		NativeQuery initialQuery = initialQueryBuilder.build();
-
-		var iterator = elasticsearchOperations.searchForStream(initialQuery, Product.class, CURRENT_INDEX);
-		return iterator.stream().onClose(iterator::close).map(SearchHit::getContent);
-	}
 
 
 
@@ -995,56 +939,6 @@ public class ProductRepository {
                 .stream()
                 .map(SearchHit::getContent)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Get random products globally with minimum offers count and optional vertical filter
-     * @param limit max number of products
-     * @param minOffersCount minimum number of offers
-     * @param verticalId optional vertical filter
-     * @return list of random products
-     */
-    public List<Product> getRandomProducts(int limit, int minOffersCount, String verticalId) {
-        Criteria c = new Criteria("offersCount").greaterThanEqual(minOffersCount)
-                .and(new Criteria("excluded").is(false))
-                .and(getRecentPriceQuery());
-
-        if (verticalId != null && !verticalId.isBlank()) {
-            c = c.and(new Criteria("vertical").is(verticalId));
-        }
-
-        // Script sort for random
-        SortOptions sortOptions = new SortOptions.Builder()
-                .script(s -> s
-                        .script(sc -> sc
-                                .source(src -> src.scriptString("Math.random()"))
-                        )
-                        .type(ScriptSortType.Number)
-                        .order(SortOrder.Asc)
-                )
-                .build();
-
-        NativeQuery query = new NativeQueryBuilder()
-                .withQuery(new CriteriaQuery(c))
-                .withSort(sortOptions)
-                .withMaxResults(limit)
-                .withSourceFilter(productFieldsWithoutEmbeddingSourceFilter())
-                .build();
-
-        return elasticsearchOperations.search(query, Product.class, CURRENT_INDEX)
-                .stream()
-                .map(SearchHit::getContent)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Get random products globally with minimum offers count
-     * @param limit max number of products
-     * @param minOffersCount minimum number of offers
-     * @return list of random products
-     */
-    public List<Product> getRandomProducts(int limit, int minOffersCount) {
-        return getRandomProducts(limit, minOffersCount, null);
     }
 
 
@@ -1448,7 +1342,7 @@ public class ProductRepository {
 	/**
 	 * Reads the products targeted by a realtime aggregation batch.
 	 *
-	 * <p>Unlike {@link #multiGetById(Collection)}, results are keyed by the
+	 * <p>Results are keyed by the
 	 * Elasticsearch document id ({@link Product#getId()}), not by
 	 * {@link Product#gtin()}: the referential GTIN string can differ from the id
 	 * (leading zeros of a GTIN-14 or of a padded UPC-12), and a key mismatch made
@@ -1483,63 +1377,6 @@ public class ProductRepository {
 			}
 		}
 		return new AggregationLookup(found, failedIds);
-	}
-
-	/**
-	 * Get multiple data from ids
-	 * @param ids
-	 * @return
-	 * @throws ResourceNotFoundException
-	 */
-	//TODO(P1,perf) : Heavy cache
-	public Map<String, Product> multiGetById( final Collection<Long> ids)
-			throws ResourceNotFoundException {
-
-		logger.info("Getting {} products from default index",ids.size());
-		Map<String, Product> ret = new HashMap<String, Product>();
-
-
-		// Getting from redis
-//		Iterable<Product> redisResults = redisRepository.findAllById(ids);
-//		redisResults.forEach(e -> {
-//			if (null != e) {
-//				ret.put(e.gtin(), e);
-//			}
-//		});
-//
-		// Getting the one we don't have in redis from elastic
-                Set<String> missingIds = computeMissingIds(ids, ret);
-		logger.info("returned hits : {}, missing : {}",ret.size(), missingIds.size());
-
-
-                if (missingIds.size() != 0) {
-
-
-			NativeQuery query = new NativeQueryBuilder().withIds(missingIds).build();
-
-			elasticsearchOperations.multiGet(query, Product.class,CURRENT_INDEX )
-			.stream().map(MultiGetItem::getItem)
-			.filter(Objects::nonNull)
-			.forEach(e -> ret.put(e.gtin(), e));
-
-
-			// Filtrer et collecter les produits à partir d'une liste en utilisant leur GTIN comme clé dans une map
-			Set<Product> redisItems = ret.values().stream()
-			    // Filtrer les éléments non nuls
-			    .filter(Objects::nonNull)
-			    // Filtrer les éléments dont le GTIN est présent dans la liste des IDs manquants
-			    .filter(e -> missingIds.contains(e.gtin()))
-			    // Collecter les produits dans une map avec le GTIN comme clé
-			    .collect(Collectors.toSet());
-
-			logger.info("Saving {} products in redis",redisItems.size());
-//			executor.submit(() -> {
-
-//			redisRepository.saveAll(redisItems);
-//			});
-		}
-
-		return ret;
 	}
 
 	/**

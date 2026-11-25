@@ -15,8 +15,6 @@ import org.open4goods.icecat.repository.IcecatFeatureGroupRepository;
 import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.feedback.service.GitHubIssueService;
-import org.open4goods.services.geocode.service.GeoNamesIndexService;
-import org.open4goods.services.geocode.service.IpGeolocationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,19 +40,17 @@ import org.hamcrest.Matchers;
  * with the {@code Test} suffix is what actually makes it an enforced regression guard.
  *
  * <p>No {@code @MockitoBean} is used: every bean below is the real one the "local" profile
- * wires. The GeoNames/MaxMind dataset URLs are pointed at the IPv4 "TEST-NET-3" documentation
+ * wires. The Google taxonomy URLs are pointed at the IPv4 "TEST-NET-3" documentation
  * range (RFC 5737, 203.0.113.0/24): those addresses are reserved and never routed, so the
  * download deterministically fails without depending on the test host's actual network
  * reachability or DNS resolution - exercising the exact fail-soft path
- * {@link GeoNamesIndexService#initialize()} must take instead of failing startup. This is the
+ * the remote-file loaders must take instead of failing startup. This is the
  * documented fallback for the plan's preferred mechanism (a loopback-only
  * {@code InetAddressResolverProvider}): that SPI is a JVM-wide resolver, and this module's
  * Surefire configuration reuses one forked JVM for all ~115 other tests (no per-class fork), so
  * installing it here would silently change DNS behaviour for every other test in the module.
  */
 @SpringBootTest(properties = {
-        "geocode.geonames.url=http://203.0.113.1:9/cities5000.zip",
-        "geocode.maxmind.url=http://203.0.113.1:9/maxmind.tar.gz",
         "front.google-taxonomy.french-taxonomy-url=http://203.0.113.1:9/taxonomy-fr.txt",
         "front.google-taxonomy.english-taxonomy-url=http://203.0.113.1:9/taxonomy-en.txt",
         "remote-file-caching.connection-timeout=1000",
@@ -71,12 +67,6 @@ class LocalProfileOfflineStartupTest
 
     @Autowired
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private GeoNamesIndexService geoNamesIndexService;
-
-    @Autowired
-    private IpGeolocationService ipGeolocationService;
 
     @Autowired
     private IcecatCategoryRepository icecatCategoryRepository;
@@ -100,7 +90,6 @@ class LocalProfileOfflineStartupTest
     static void offlineCachePaths(DynamicPropertyRegistry registry)
     {
         registry.add("front.cache.path", () -> new File(tempDir, "front-cache").getAbsolutePath());
-        registry.add("geocode.cache.path", () -> new File(tempDir, "geocode-cache").getAbsolutePath());
     }
 
     /**
@@ -131,26 +120,6 @@ class LocalProfileOfflineStartupTest
     }
 
     /**
-     * B2: a dataset download that cannot reach the network must leave the GeoNames index
-     * unloaded (fail-soft) rather than aborting startup.
-     */
-    @Test
-    void geoNamesIndexFailsSoftWithoutNetwork()
-    {
-        assertThat(geoNamesIndexService.isLoaded()).isFalse();
-    }
-
-    /**
-     * B2's MaxMind twin, already fail-soft before this issue: kept here as a regression guard
-     * for the pair.
-     */
-    @Test
-    void maxMindGeolocationFailsSoftWithoutNetwork()
-    {
-        assertThat(ipGeolocationService.isLoaded()).isFalse();
-    }
-
-    /**
      * B5: the Google taxonomy dataset is also unreachable here. The context must still start,
      * with the taxonomy/vertical wiring {@link GoogleTaxonomyService#updateCategoryWithVertical}
      * skipped rather than throwing, and {@code verticalsConfigService} must be a real bean.
@@ -164,10 +133,10 @@ class LocalProfileOfflineStartupTest
     }
 
     /**
-     * {@code /actuator/health} must respond even though GeoNames/MaxMind are degraded.
+     * {@code /actuator/health} must respond even though remote datasets are unreachable.
      * Spring Boot reports a {@code 503} (not {@code 200}) once any indicator is {@code DOWN};
-     * that is expected local-profile behaviour here (not just for geoNames/maxMind, but also
-     * for indicators this profile does not attempt to simulate, like outbound mail or a real
+     * that is expected local-profile behaviour here (for instance
+     * indicators this profile does not attempt to simulate, like outbound mail or a real
      * Elasticsearch cluster) and must not be mistaken for the endpoint failing to respond.
      */
     @Test
@@ -175,7 +144,7 @@ class LocalProfileOfflineStartupTest
     {
         mockMvc.perform(get("/actuator/health").with(httpBasic("monitor", "monitor-secret")))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isIn(200, 503))
-                .andExpect(content().string(Matchers.containsString("\"geoNames\"")))
-                .andExpect(content().string(Matchers.containsString("\"maxMind\"")));
+                .andExpect(content().string(Matchers.containsString("\"components\"")))
+                .andExpect(content().string(Matchers.containsString("\"diskSpace\"")));
     }
 }

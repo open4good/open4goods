@@ -3,7 +3,6 @@ package org.open4goods.nudgerfrontapi.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import java.time.Instant;
 import java.util.List;
@@ -37,7 +36,6 @@ class StatsServiceTest {
         AffiliationPartnerService partnerService = mock(AffiliationPartnerService.class);
         OpenDataService openDataService = mock(OpenDataService.class);
         ProductRepository productRepository = mock(ProductRepository.class);
-        ProductMappingService productMappingService = mock(ProductMappingService.class);
 
         Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
         Resource enabledResource = resource("enabled.yml", ENABLED_YAML);
@@ -61,7 +59,7 @@ class StatsServiceTest {
         given(merchantDomainsService.current()).willReturn(new ActiveMerchantDomains(domains, computedAt, false,
                 computedAt.minusSeconds(864_000), List.of(), Map.of()));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService, merchantDomainsService);
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, merchantDomainsService);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
@@ -84,14 +82,5 @@ class StatsServiceTest {
                 return filename;
             }
         };
-    }
-    @Test
-    void randomPassesVerticalId() {
-        ProductRepository productRepository = mock(ProductRepository.class);
-        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class), mock(MerchantDomainsService.class));
-        
-        service.random(5, 2, "my-vertical", DomainLanguage.fr);
-        
-        verify(productRepository).getRandomProducts(5, 2, "my-vertical");
     }
 }

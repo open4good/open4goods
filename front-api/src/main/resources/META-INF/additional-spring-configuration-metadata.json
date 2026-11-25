@@ -288,28 +288,10 @@
       "description": "Recipient email address for contact form submissions."
     },
     {
-      "name": "front.exposed-docs.base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the exposed docs microservice.",
-      "defaultValue": "http://localhost:8086"
-    },
-    {
-      "name": "front.exposed-docs.public-access",
-      "type": "java.lang.Boolean",
-      "description": "Allow anonymous access to exposed docs endpoints when security is enabled.",
-      "defaultValue": true
-    },
-    {
       "name": "front.contribution-votes-purge.enabled",
       "type": "java.lang.Boolean",
       "description": "Run once, asynchronously after startup, the idempotent purge of the historical ip and ua fields of the contribution-votes index.",
       "defaultValue": true
-    },
-    {
-      "name": "front.geocode.base-url",
-      "type": "java.lang.String",
-      "description": "Base URL of the geocode microservice.",
-      "defaultValue": "http://localhost:8089"
     },
     {
       "name": "front.google-indexation.batch-enabled",
@@ -469,24 +451,6 @@
       "description": "Public website URL of a mentor partner."
     },
     {
-      "name": "front.rate-limit.anonymous",
-      "type": "java.lang.Integer",
-      "description": "Maximum requests per minute for anonymous users.",
-      "defaultValue": 100
-    },
-    {
-      "name": "front.rate-limit.authenticated",
-      "type": "java.lang.Integer",
-      "description": "Maximum requests per minute for authenticated users.",
-      "defaultValue": 1000
-    },
-    {
-      "name": "front.rate-limit.counter-ttl",
-      "type": "java.time.Duration",
-      "description": "Duration after which idle rate-limit counters are purged.",
-      "defaultValue": "75s"
-    },
-    {
       "name": "front.resource-root-path",
       "type": "java.lang.String",
       "description": "Absolute root URL used to expose downloadable static resources."
@@ -565,47 +529,6 @@
       "type": "java.time.Duration",
       "description": "Time to keep share resolution entries in the in-memory store.",
       "defaultValue": "20m"
-    },
-    {
-      "name": "geocode.cache.path",
-      "type": "java.lang.String",
-      "description": "Filesystem path used for cached geocode datasets.",
-      "defaultValue": "target/geocode-cache"
-    },
-    {
-      "name": "geocode.geonames.extracted-file-name",
-      "type": "java.lang.String",
-      "description": "Expected GeoNames data file name inside the downloaded archive.",
-      "defaultValue": "cities5000.txt"
-    },
-    {
-      "name": "geocode.geonames.refresh-in-days",
-      "type": "java.lang.Integer",
-      "description": "Number of days before refreshing the cached GeoNames dataset.",
-      "defaultValue": 7
-    },
-    {
-      "name": "geocode.geonames.url",
-      "type": "java.lang.String",
-      "description": "Remote GeoNames dataset archive URL.",
-      "defaultValue": "https://download.geonames.org/export/dump/cities5000.zip"
-    },
-    {
-      "name": "geocode.maxmind.database-file-name",
-      "type": "java.lang.String",
-      "description": "Expected MaxMind database file name inside the downloaded archive.",
-      "defaultValue": "GeoLite2-City.mmdb"
-    },
-    {
-      "name": "geocode.maxmind.refresh-in-days",
-      "type": "java.lang.Integer",
-      "description": "Number of days before refreshing the cached MaxMind dataset.",
-      "defaultValue": 7
-    },
-    {
-      "name": "geocode.maxmind.url",
-      "type": "java.lang.String",
-      "description": "Remote MaxMind GeoIP dataset archive URL."
     },
     {
       "name": "google-indexation.api-url",

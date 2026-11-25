@@ -224,14 +224,6 @@ public class BrandService {
                 .toList();
     }
 
-    public Optional<Brand> findCanonical(String brandName) {
-        Brand brand = resolve(brandName);
-        if (StringUtils.isBlank(brand.getCompanyName())) {
-            return Optional.empty();
-        }
-        return Optional.of(brand);
-    }
-
     public boolean hasLogo(String upperCase) {
         return false;
     }

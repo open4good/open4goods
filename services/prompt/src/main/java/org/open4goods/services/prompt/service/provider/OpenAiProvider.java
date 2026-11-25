@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptOptions;
@@ -29,7 +28,6 @@ import org.springframework.util.StringUtils;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import reactor.core.publisher.Flux;
 
 /**
  * OpenAI provider implementation.
@@ -68,15 +66,6 @@ public class OpenAiProvider implements GenAiProvider {
             return generateWithWebSearch(request);
         }
         return generateWithChatModel(request);
-    }
-
-    @Override
-    public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
-        String model = resolveModel(request.getOptions());
-        if (request.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH && request.isAllowWebSearch()) {
-            return streamFromWebSearch(request, model);
-        }
-        return streamFromChatModel(request);
     }
 
     private ProviderResult generateWithChatModel(ProviderRequest request) {
@@ -236,57 +225,6 @@ public class OpenAiProvider implements GenAiProvider {
         }
         messages.add(new UserMessage(request.getUserPrompt()));
         return new Prompt(messages, options);
-    }
-
-    private Flux<ProviderEvent> streamFromChatModel(ProviderRequest request) {
-        OpenAiChatOptions options = buildOptions(request.getOptions());
-        if (StringUtils.hasText(request.getJsonSchema())) {
-            options = withJsonSchema(options, request.getJsonSchema());
-        }
-        final OpenAiChatOptions streamOptions = options;
-        Prompt prompt = buildPrompt(request, streamOptions);
-        return Flux.defer(() -> {
-            StringBuilder content = new StringBuilder();
-            Map<String, Object> metadata = new LinkedHashMap<>();
-            return Flux.concat(
-                    Flux.just(ProviderEvent.started(service(), streamOptions.getModel())),
-                    chatModel.stream(prompt)
-                            .map(response -> {
-                                String delta = response.getResult().getOutput().getText();
-                                if (StringUtils.hasText(delta)) {
-                                    content.append(delta);
-                                }
-                                Map<String, Object> responseMetadata = extractAnnotationsFromResponse(response);
-                                if (!responseMetadata.isEmpty()) {
-                                    metadata.putAll(responseMetadata);
-                                }
-                                if (StringUtils.hasText(delta)) {
-                                    return ProviderEvent.streamChunk(service(), streamOptions.getModel(), delta);
-                                }
-                                return null;
-                            })
-                            .filter(Objects::nonNull),
-                    Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), streamOptions.getModel(), metadata))),
-                    Flux.defer(() -> Flux.just(ProviderEvent.completed(service(), streamOptions.getModel(),
-                            content.toString(), metadata)))
-            );
-        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), streamOptions.getModel(), ex.getMessage())));
-    }
-
-    private Flux<ProviderEvent> streamFromWebSearch(ProviderRequest request, String model) {
-        return Flux.defer(() -> {
-            logger.info("Starting streaming web search for model: {}", model);
-            ProviderEvent start = ProviderEvent.started(service(), model);
-            ProviderEvent toolStart = ProviderEvent.toolStatus(service(), model, "web_search", "started", Map.of());
-            ProviderResult result = generateWithWebSearch(request);
-            ProviderEvent toolComplete = ProviderEvent.toolStatus(service(), model, "web_search", "completed", Map.of());
-            return Flux.concat(
-                    Flux.just(start, toolStart, toolComplete),
-                    Flux.just(ProviderEvent.streamChunk(service(), model, result.getContent())),
-                    Flux.just(ProviderEvent.metadata(service(), model, result.getMetadata())),
-                    Flux.just(ProviderEvent.completed(service(), model, result.getContent(), result.getMetadata()))
-            );
-        }).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), model, ex.getMessage())));
     }
 
     private Map<String, Object> extractAnnotationsFromResponse(ChatResponse response) {

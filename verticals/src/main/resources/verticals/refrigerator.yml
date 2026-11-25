@@ -638,27 +638,6 @@ technicalFilters:
   - "AMBIENT_TEMPERATURE_MIN"
   - "AMBIENT_TEMPERATURE_MAX"
 
-dataviz:
-  chartOverrides:
-    total-volume-distribution:
-      title: "Répartition des volumes utiles"
-      description: "Comparez les capacités les plus courantes"
-    energy-class-distribution:
-      title: "Répartition des classes énergétiques"
-      description: "Visualisez la performance énergétique du marché"
-  heroKpis:
-    - field: "attributes.indexed.TOTAL_VOLUME"
-      label: "Volume moyen"
-      unit: "L"
-      aggregation: "avg"
-    - field: "scores.ECOSCORE.value"
-      label: "Impact Score moyen"
-      aggregation: "avg"
-    - field: "price.minPrice.price"
-      label: "Prix moyen"
-      unit: "€"
-      aggregation: "avg"
-
 ####################################################################################
 # ATTRIBUTES CONFIGURATION
 ####################################################################################

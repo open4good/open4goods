@@ -8,17 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.open4goods.model.rating.Cardinality;
 import org.open4goods.model.affiliation.AffiliationPartner;
 import org.open4goods.model.constants.CacheConstants;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.stats.ActiveMerchantDomainsDto;
-import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoreStatsDto;
 import org.open4goods.nudgerfrontapi.dto.stats.CategoriesStatsDto;
-import org.open4goods.nudgerfrontapi.dto.stats.CategoriesScoresStatsDto;
-import org.open4goods.nudgerfrontapi.dto.stats.CategoryScoreCardinalitiesDto;
-import org.open4goods.nudgerfrontapi.dto.stats.ScoreCardinalityDto;
 import org.open4goods.nudgerfrontapi.dto.stats.VerticalStatsDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.ActiveMerchantDomains;
@@ -53,7 +47,6 @@ public class StatsService {
     private final AffiliationPartnerService affiliationPartnerService;
     private final OpenDataService openDataService;
     private final ProductRepository productRepository;
-    private final ProductMappingService productMappingService;
     private final MerchantDomainsService merchantDomainsService;
 
     public StatsService(SerialisationService serialisationService,
@@ -61,14 +54,12 @@ public class StatsService {
                         AffiliationPartnerService affiliationPartnerService,
                         OpenDataService openDataService,
                         ProductRepository productRepository,
-                        ProductMappingService productMappingService,
                         MerchantDomainsService merchantDomainsService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
         this.openDataService = openDataService;
         this.productRepository = productRepository;
-        this.productMappingService = productMappingService;
         this.merchantDomainsService = merchantDomainsService;
     }
 
@@ -127,81 +118,6 @@ public class StatsService {
                 ratedProductsCount,
                 detailedStats
         );
-    }
-
-    /**
-     * Compute per-category score cardinalities for all available impact score criteria.
-     *
-     * @param domainLanguage currently unused but retained for future localisation of statistics labels
-     * @return DTO containing per-category and per-score cardinalities for absolute and relative scores
-     */
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
-    public CategoriesScoresStatsDto categoryScores(DomainLanguage domainLanguage) {
-        List<VerticalConfig> enabledVerticals = loadEnabledVerticals();
-        Map<String, Map<String, CategoryScoreCardinalitiesDto>> scoresByCategory = new LinkedHashMap<>();
-
-        for (VerticalConfig vertical : enabledVerticals) {
-            String verticalId = vertical.getId();
-            if (verticalId == null || verticalId.isBlank()) {
-                continue;
-            }
-
-            Map<String, CategoryScoreCardinalitiesDto> scores = new LinkedHashMap<>();
-            if (vertical.getAvailableImpactScoreCriterias() != null) {
-                for (String scoreName : vertical.getAvailableImpactScoreCriterias()) {
-                    if (scoreName == null || scoreName.isBlank()) {
-                        continue;
-                    }
-                    Cardinality absolute = productRepository.scoreAbsoluteCardinality(scoreName, verticalId);
-                    Cardinality relativ = productRepository.scoreRelativCardinality(scoreName, verticalId);
-                    scores.put(scoreName, new CategoryScoreCardinalitiesDto(
-                            mapScoreCardinality(absolute),
-                            mapScoreCardinality(relativ)
-                    ));
-                }
-            }
-            scoresByCategory.put(verticalId, scores);
-        }
-
-        return new CategoriesScoresStatsDto(scoresByCategory);
-    }
-
-    /**
-     * Compute per-category score cardinalities for a single impact score criterion.
-     *
-     * @param domainLanguage currently unused but retained for future localisation of statistics labels
-     * @param scoreName      score key to compute for each category
-     * @return DTO containing per-category cardinalities for absolute and relative scores
-     */
-    @Cacheable(cacheNames = CacheConstants.ONE_HOUR_LOCAL_CACHE_NAME, keyGenerator = CacheConstants.KEY_GENERATOR)
-    public CategoriesScoreStatsDto categoryScore(DomainLanguage domainLanguage, String scoreName) {
-        List<VerticalConfig> enabledVerticals = loadEnabledVerticals();
-        Map<String, CategoryScoreCardinalitiesDto> scoresByCategory = new LinkedHashMap<>();
-
-        if (scoreName == null || scoreName.isBlank()) {
-            return new CategoriesScoreStatsDto(scoreName, scoresByCategory);
-        }
-
-        for (VerticalConfig vertical : enabledVerticals) {
-            String verticalId = vertical.getId();
-            if (verticalId == null || verticalId.isBlank()) {
-                continue;
-            }
-
-            if (vertical.getAvailableImpactScoreCriterias() == null
-                    || !vertical.getAvailableImpactScoreCriterias().contains(scoreName)) {
-                continue;
-            }
-
-            Cardinality absolute = productRepository.scoreAbsoluteCardinality(scoreName, verticalId);
-            Cardinality relativ = productRepository.scoreRelativCardinality(scoreName, verticalId);
-            scoresByCategory.put(verticalId, new CategoryScoreCardinalitiesDto(
-                    mapScoreCardinality(absolute),
-                    mapScoreCardinality(relativ)
-            ));
-        }
-
-        return new CategoriesScoreStatsDto(scoreName, scoresByCategory);
     }
 
     /**
@@ -291,26 +207,6 @@ public class StatsService {
     }
 
     /**
-     * Map a {@link Cardinality} domain object to the frontend DTO.
-     *
-     * @param cardinality cardinality statistics to map
-     * @return DTO with standard deviation computed as σ
-     */
-    private ScoreCardinalityDto mapScoreCardinality(Cardinality cardinality) {
-        if (cardinality == null) {
-            return null;
-        }
-        return new ScoreCardinalityDto(
-                cardinality.getMin(),
-                cardinality.getMax(),
-                cardinality.getAvg(),
-                cardinality.getCount(),
-                cardinality.getSum(),
-                cardinality.getStdDev()
-        );
-    }
-
-    /**
      * Protect against null counts returned by the repository.
      *
      * @param count repository count result
@@ -332,18 +228,4 @@ public class StatsService {
         return serialisationService.fromYaml(yaml, VerticalConfig.class);
     }
 
-    /**
-     * Get a list of random products.
-     *
-     * @param num            number of products to return
-     * @param minOffersCount minimum number of offers
-     * @param verticalId     optional vertical filter
-     * @param domainLanguage language for localization
-     * @return list of random products
-     */
-    public List<ProductDto> random(int num, int minOffersCount, String verticalId, DomainLanguage domainLanguage) {
-        return productRepository.getRandomProducts(num, minOffersCount, verticalId).stream()
-                .map(product -> productMappingService.mapProduct(product, null, null, domainLanguage, false))
-                .toList();
-    }
 }

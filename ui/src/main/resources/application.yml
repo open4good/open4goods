@@ -49,40 +49,15 @@ spring:
     virtual:
       enabled: true
 
-  # Spring Mail defaults — host/credentials are set per environment.
-  mail:
-    port: 587
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-
-  # i18n message bundles.
-  messages:
-    basename: i18n/messages
-
   # Application name (shown in Spring Boot Admin).
   application:
     name: open4goods-ui
-
-  # Thymeleaf — caching is disabled by default (dev); enabled in prod.
-  thymeleaf:
-    cache: true
 
   # Enable Spring Data Elasticsearch repositories.
   data:
     elasticsearch:
       repositories:
         enabled: true
-
-###############################################
-# Amazon affiliate links
-# Bound to: UiConfig.amazonConfig (AmazonConfig)
-###############################################
-amazon-config:
-  # Affiliate tag appended to every Amazon URL.
-  affiliate-tag: nudger-21
-  # Template for Amazon product search URLs ({search_terms} and {affiliate_tag} are replaced).
-  amazon-search-link: "https://www.amazon.fr/s?k={search_terms}&tag={affiliate_tag}"
 
 ###############################################
 # Image resizing (ImageResizeInterceptor)
@@ -130,19 +105,6 @@ open-data-config:
   generation-enabled: false
   # When set, GET/HEAD on /opendata/{gtin,isbn}-open-data.zip answer 301 to {redirect-base-url}/{name}.
   redirect-base-url: ${OPEN_DATA_REDIRECT_BASE_URL:}
-
-###############################################
-# TODO scanner (reads taglist.xml from Maven site)
-# Bound to: UiConfig.tagListUrl (key "tag-list-url")
-###############################################
-tag-list-url: https://open4good.github.io/open4goods/maven/taglist/taglist.xml
-
-###############################################
-# Custom URL pages mapping (page name -> template file)
-# Bound to: UiConfig.pages (Map<String, String>)
-###############################################
-pages:
-  "comparateur-prix": "pages/comparateur-prix.html"
 
 ---
 # "default" profile: disable Spring Boot Admin client registration.

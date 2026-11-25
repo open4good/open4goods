@@ -1,18 +1,6 @@
 {
   "groups": [
     {
-      "name": "amazon-config",
-      "type": "org.open4goods.ui.config.yml.AmazonConfig",
-      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
-      "description": "Amazon affiliate link configuration."
-    },
-    {
-      "name": "banchecker-config",
-      "type": "org.open4goods.commons.config.yml.BanCheckerConfig",
-      "sourceType": "org.open4goods.ui.config.yml.UiConfig",
-      "description": "IP ban checker configuration."
-    },
-    {
       "name": "namings",
       "type": "org.open4goods.model.vertical.SiteNaming",
       "sourceType": "org.open4goods.ui.config.yml.UiConfig",
@@ -32,24 +20,6 @@
     }
   ],
   "properties": [
-    {
-      "name": "amazon-config.affiliate-tag",
-      "type": "java.lang.String",
-      "description": "Affiliate tag appended to generated Amazon links.",
-      "sourceType": "org.open4goods.ui.config.yml.AmazonConfig"
-    },
-    {
-      "name": "amazon-config.amazon-search-link",
-      "type": "java.lang.String",
-      "description": "Amazon search URL template. Supports {search_terms} and {affiliate_tag} placeholders.",
-      "sourceType": "org.open4goods.ui.config.yml.AmazonConfig"
-    },
-    {
-      "name": "banchecker-config.ips",
-      "type": "java.util.Set<java.lang.String>",
-      "description": "IP addresses rejected with HTTP 403.",
-      "sourceType": "org.open4goods.commons.config.yml.BanCheckerConfig"
-    },
     {
       "name": "namings.base-urls",
       "type": "org.open4goods.model.Localisable<java.lang.String,java.lang.String>",

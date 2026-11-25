@@ -18,7 +18,7 @@ Technical metrics and maven site is deployed on Github Pages:
 
 - [https://open4good.github.io/open4goods/](https://open4good.github.io/open4goods/)
 
-Open4goods (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it is a stack aiming at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, Redis, and some other cool libraries. It is mainly designed to :
+Open4goods (o4g) is an open-source and open-data product aggregator, search engine and comparator. More over, it is a stack aiming at handling large product datasets identified by GTIN's. It is build upon Maven, Java, SpringBoot, Elasticsearch, and some other cool libraries. It is mainly designed to :
 
 - **ingest product based data** from merchant CSV feeds and URL-oriented review/enrichment sources.
 
@@ -110,11 +110,11 @@ You will need :
 
 - [Java 21+](https://adoptopenjdk.net/)
 - [Maven](http://maven.apache.org/install.html)
-- [Elasticsearch](https://github.com/elastic/elasticsearch) and [Redis](https://redis.io/), that can be transparently provided through [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- [Elasticsearch](https://github.com/elastic/elasticsearch), that can be transparently provided through [Docker](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### running through docker-compose
 
-Elasticsearch and Redis are used by the open4goods project. A [Kibana instance](https://www.elastic.co/fr/kibana) is commented in the docker-compose.yml file, if you want to browse data's by yourself. Go to the project root, then start the compose file
+Elasticsearch is used by the open4goods project. A [Kibana instance](https://www.elastic.co/fr/kibana) is commented in the docker-compose.yml file, if you want to browse data's by yourself. Go to the project root, then start the compose file
 
 ```
 docker compose up
@@ -122,11 +122,10 @@ docker compose up
 
 > Docker compose is managed by spring-boot-docker-compose. That means that the manual launching of docker-compose is not mandatory, containers will be started by the application if not present.
 
-Elastic, kibana and Redis should be available on :
+Elastic and Kibana should be available on :
 
 - Elastic Search : [http://localhost:9200](http://localhost:9200)
 - Kibana : [http://localhost:5601](http://localhost:5601)
-- Redis : [http://localhost:6379](http://localhost:6379)
 
 The compose file also defines a `frontend-ssr` service. During the CI/CD
 deployment, the Nuxt build directory (`.output`) is copied to
@@ -146,16 +145,13 @@ access, no token and no pre-existing cache file**:
 - **Disabled**: the GitHub-backed feedback integration (`feedback.github.enabled: false`);
   creating/listing feedback issues and votes falls back to an in-memory no-op instead of
   calling the GitHub API.
-- **Degraded, not blocking**: the GeoNames (city lookup) and MaxMind (IP geolocation) datasets,
-  and the Google product taxonomy, still try to download on startup, but a failed download (no
-  network) leaves them unloaded instead of failing startup - `/actuator/health` then reports
-  `DOWN` for `geoNames`/`maxMind`, and verticals simply have no Google taxonomy id attached,
-  which is expected offline, not an error.
+- **Degraded, not blocking**: the Google product taxonomy still tries to download on startup,
+  but a failed download (no network) leaves it unloaded instead of failing startup - verticals
+  simply have no Google taxonomy id attached, which is expected offline, not an error.
 - **Still live and reaching the real internet** (not disabled by this profile): the Icecat
   product/category/feature Elasticsearch repositories use a stub converter just to let their
   proxies be created without a server; any actual query against them still needs a reachable
-  Elasticsearch, as does the affiliation-partners refresh job and the geocode microservice
-  proxied by the frontend's generated client.
+  Elasticsearch, as does the affiliation-partners refresh job.
 
 **1. Start the Backend (Front-API)**
 
@@ -265,10 +261,6 @@ For now, you have an up and running open4good platform. You will like to play wi
 A [special service](https://github.com/open4good/open4goods/blob/main/commons/src/main/java/org/open4goods/helper/DevModeService.java) will automaticaly load sample datas on applications startup, allowing you to easily play with the project.
 
 ## A note on the work directory
-
-> TODO : Document
-
-## A note on Xwiki
 
 > TODO : Document
 

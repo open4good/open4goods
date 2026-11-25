@@ -21,7 +21,6 @@ import org.open4goods.icecat.repository.IcecatFeatureRepository;
 import org.open4goods.icecat.repository.IcecatSupplierRepository;
 import org.open4goods.services.contribution.repository.AffiliationClickRepository;
 import org.open4goods.services.contribution.repository.ContributionVoteRepository;
-import org.open4goods.services.geocode.service.IpGeolocationService;
 
 @SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
         "front.security.enabled=true",
@@ -42,8 +41,6 @@ class OpenApiDocsIT {
     @MockitoBean
     private BrandService brandService;
 
-    @MockitoBean
-    private IpGeolocationService ipGeolocationService;
 
     @MockitoBean
     private IcecatFeatureRepository icecatFeatureRepository;

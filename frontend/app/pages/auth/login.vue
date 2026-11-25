@@ -1,32 +1,6 @@
 <template>
   <v-container style="max-width: 400px">
-    <v-form v-model="valid" @submit.prevent="onSubmit">
-      <v-text-field
-        v-model="username"
-        label="Username"
-        required
-        prepend-inner-icon="mdi-account"
-      />
-      <v-text-field
-        v-model="password"
-        label="Password"
-        type="password"
-        required
-        prepend-inner-icon="mdi-lock"
-      />
-      <v-btn
-        type="submit"
-        color="primary"
-        class="mt-4"
-        :loading="loading"
-        :disabled="!valid"
-      >
-        Login
-      </v-btn>
-    </v-form>
-    <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
     <template v-if="isGoogleSsoEnabled">
-      <v-divider class="my-4" />
       <v-btn
         variant="outlined"
         block
@@ -41,18 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import { authService } from '~~/shared/api-client/services/auth.services'
 import { isSafeRedirectTarget } from '~~/shared/utils/_safe-redirect'
-import { useAuthStore } from '~/stores/useAuthStore'
 
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
-const valid = ref(true)
-const router = useRouter()
 const route = useRoute()
-const authStore = useAuthStore()
 const config = useRuntimeConfig()
 
 const canonicalUrl = useCanonicalUrl()
@@ -102,20 +67,4 @@ const resolveRedirectTarget = () => {
   return '/'
 }
 
-const onSubmit = async () => {
-  loading.value = true
-  error.value = ''
-  try {
-    const { authState } = await authService.login(
-      username.value,
-      password.value
-    )
-    authStore.$patch(authState)
-    await router.replace(resolveRedirectTarget())
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Login failed'
-  } finally {
-    loading.value = false
-  }
-}
 </script>

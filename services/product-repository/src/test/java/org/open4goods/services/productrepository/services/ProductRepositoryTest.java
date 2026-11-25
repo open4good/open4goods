@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,32 +114,6 @@ class ProductRepositoryTest
         assertThatThrownBy(() -> repository.knnSearchByEmbedding(new float[0], new Criteria("vertical"), 2))
                         .isInstanceOf(IllegalArgumentException.class)
                         .hasMessageContaining("Embedding vector must not be empty");
-    }
-
-    @Test
-    void getRandomProductsWithVerticalIdAddsCriteria()
-    {
-        when(elasticsearchOperations.search(any(org.springframework.data.elasticsearch.core.query.Query.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX))).thenReturn(searchHits);
-
-        repository.getRandomProducts(10, 3, "test-vertical");
-
-        ArgumentCaptor<NativeQuery> queryCaptor = ArgumentCaptor.forClass(NativeQuery.class);
-        verify(elasticsearchOperations).search(queryCaptor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
-
-        NativeQuery submittedQuery = queryCaptor.getValue();
-        // Since the structure of the criteria query is complex, we can at least toString it and check for the vertical criteria
-        // Or inspect the Query object if possible, but CriteriaQuery structure inspection can be verbose.
-        // A simpler check is to ensure the query string representation contains the vertical ID.
-        // However, NativeQuery might not easily expose the criteria string in toString().
-        // Let's rely on basic non-exception execution and coverage or debug if needed.
-        // Since verifying the exact structure of NativeQuery wrapping a CriteriaQuery is complex and API dependent
-        // We will verify that the query is not null and rely on the fact that if the code constructs it, it should be correct.
-        // We can also check if valid.
-        assertThat(submittedQuery).isNotNull();
-        assertProductProjection(submittedQuery.getSourceFilter());
-        // If possible we could check if the verticalId is in the toString of the criteria if exposed
-        // But for now, ensuring the method was called and query object formed is enough for this unit level verification
-        // given the internal implementation is straightforward.
     }
 
     @Test

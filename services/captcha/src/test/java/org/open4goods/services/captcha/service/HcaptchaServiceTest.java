@@ -16,7 +16,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.open4goods.services.captcha.CaptchaVerificationException;
 import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;

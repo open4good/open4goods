@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
 import org.open4goods.model.ai.AiFieldScanner;
@@ -22,8 +21,6 @@ import org.open4goods.services.prompt.dto.PromptResponse;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.services.prompt.service.provider.GenAiProvider;
-import org.open4goods.services.prompt.service.provider.ProviderEvent;
-import org.open4goods.services.prompt.service.provider.ProviderEventAccumulator;
 import org.open4goods.services.prompt.service.provider.ProviderRegistry;
 import org.open4goods.services.prompt.service.provider.ProviderRequest;
 import org.open4goods.services.prompt.service.provider.ProviderResult;
@@ -38,7 +35,6 @@ import org.springframework.util.StringUtils;
 import tools.jackson.core.type.TypeReference;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import reactor.core.publisher.Flux;
 
 /**
  * Service handling interactions with generative AI services.
@@ -429,143 +425,6 @@ public class PromptService implements HealthIndicator {
         ret.setPrompt(nativ.getPrompt());
         ret.setStart(nativ.getStart());
 
-        return ret;
-    }
-
-    /**
-     * Executes a prompt with streaming callbacks while still producing a typed response.
-     *
-     * @param promptKey      The key identifying the prompt configuration.
-     * @param variables      The variables to resolve within the prompt templates.
-     * @param type           The response type to convert to.
-     * @param eventConsumer  A consumer receiving streaming provider events.
-     * @return A {@link PromptResponse} with the final parsed body and metadata.
-     */
-    public <T> PromptResponse<T> objectPromptStream(String promptKey, Map<String, Object> variables, Class<T> type,
-                                                    Consumer<ProviderEvent> eventConsumer)
-            throws ResourceNotFoundException, SerialisationException {
-
-        PromptConfig pConf = getPromptConfig(promptKey);
-        if (pConf == null) {
-            logger.error("PromptConfig {} does not exist", promptKey);
-            throw new ResourceNotFoundException("Prompt not found");
-        }
-
-        meterRegistry.counter("prompt.requests",
-                "prompt", promptKey,
-                "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
-                "retrievalMode", pConf.getRetrievalMode().name()).increment();
-
-        PromptResponse<T> ret = new PromptResponse<>();
-        ret.setStart(System.currentTimeMillis());
-
-        var outputConverter = new BeanOutputConverter<>(type);
-        var jsonSchema = outputConverter.getJsonSchema();
-        Map<String, String> instructions = AiFieldScanner.getGenAiInstruction(type);
-
-        String systemPromptEvaluated = "";
-        if (pConf.getSystemPrompt() != null) {
-            try {
-                systemPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getSystemPrompt());
-            } catch (TemplateEvaluationException e) {
-                meterRegistry.counter("prompt.errors",
-                        "prompt", promptKey,
-                        "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
-                        "retrievalMode", pConf.getRetrievalMode().name()).increment();
-                logger.error("Template evaluation error for system prompt in {}: {}", promptKey, e.getMessage());
-                throw e;
-            }
-        }
-        String userPromptEvaluated;
-        try {
-            userPromptEvaluated = evaluationService.thymeleafEval(variables, pConf.getUserPrompt());
-        } catch (TemplateEvaluationException e) {
-            meterRegistry.counter("prompt.errors",
-                    "prompt", promptKey,
-                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
-                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
-            logger.error("Template evaluation error for user prompt in {}: {}", promptKey, e.getMessage());
-            throw e;
-        }
-
-        if (null != instructions && !instructions.isEmpty()) {
-            systemPromptEvaluated += INSTRUCTION_HEADER_FR;
-            for (Entry<String, String> entry : instructions.entrySet()) {
-                systemPromptEvaluated += entry.getKey() + " : " + entry.getValue() + "\n";
-            }
-        }
-
-        String yamlPromptConfig = serialisationService.toYamLiteral(pConf);
-        PromptConfig updatedConfig = serialisationService.fromYaml(yamlPromptConfig, PromptConfig.class);
-        updatedConfig.setSystemPrompt(systemPromptEvaluated);
-        updatedConfig.setUserPrompt(userPromptEvaluated);
-        ret.setPrompt(updatedConfig);
-
-        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null) {
-            recordPromptRequest(promptKey, updatedConfig, systemPromptEvaluated, userPromptEvaluated);
-        }
-
-        GenAiProvider provider = providerRegistry.getProvider(pConf.getAiService());
-        ProviderRequest providerRequest = new ProviderRequest(
-                promptKey,
-                systemPromptEvaluated,
-                userPromptEvaluated,
-                pConf.getOptions(),
-                pConf.getRetrievalMode(),
-                jsonSchema,
-                pConf.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH,
-                pConf.getProviderOptions()
-        );
-
-        ProviderEventAccumulator accumulator = new ProviderEventAccumulator();
-        try {
-            Flux<ProviderEvent> stream = provider.generateTextStream(providerRequest)
-                    .doOnNext(event -> {
-                        accumulator.accept(event);
-                        if (eventConsumer != null) {
-                            eventConsumer.accept(event);
-                        }
-                    });
-            stream.blockLast();
-            externalApiHealthy = true;
-        } catch (Exception e) {
-            externalApiHealthy = false;
-            meterRegistry.counter("prompt.errors",
-                    "prompt", promptKey,
-                    "provider", pConf.getAiService() != null ? pConf.getAiService().name() : "UNKNOWN",
-                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
-            logger.error("Error during streaming API call for promptKey {}: {}", promptKey, e.getMessage(), e);
-            throw e;
-        }
-
-        String raw = cleanJsonMarkdown(accumulator.getContent());
-        try {
-            ret.setBody(outputConverter.convert(raw));
-            logger.info("Raw LLM output : \n {}",raw);
-            ret.setRaw(raw);
-        } catch (Exception e) {
-            meterRegistry.counter("prompt.json.repair",
-                    "prompt", promptKey,
-                    "provider", pConf.getAiService() != null
-                            ? pConf.getAiService().name()
-                            : "UNKNOWN",
-                    "retrievalMode", pConf.getRetrievalMode().name()).increment();
-
-            if (!genAiConfig.isRepairEnabled()) {
-                logger.error("JSON parsing failed for prompt {} and repair is disabled.", promptKey, e);
-                throw new RuntimeException("JSON parsing failed for prompt " + promptKey + ": " + e.getMessage(), e);
-            }
-
-            logger.warn("JSON parsing failed for prompt {}. Attempting repair.", promptKey, e);
-            String repaired = repairJson(promptKey, raw, jsonSchema, updatedConfig);
-            ret.setBody(outputConverter.convert(repaired));
-            ret.setRaw(repaired);
-        }
-        ret.setMetadata(accumulator.getMetadata());
-        ret.setDuration(System.currentTimeMillis() - ret.getStart());
-        if (genAiConfig.isRecordEnabled() && genAiConfig.getRecordFolder() != null && ret.getRaw() != null) {
-            recordPromptResponse(promptKey, ret.getRaw());
-        }
         return ret;
     }
 
