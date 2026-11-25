@@ -2666,6 +2666,7 @@
         "technical": "Technically"
       },
       "bestPriceTitle": "Best price",
+      "outOfStockPriceTitle": "Out-of-stock offer",
       "breadcrumbAriaLabel": "Product breadcrumb",
       "compare": {
         "add": "Add to compare",

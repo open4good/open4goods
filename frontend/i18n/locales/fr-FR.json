@@ -2560,6 +2560,7 @@
         "technical": "Techniquement"
       },
       "bestPriceTitle": "Meilleur prix",
+      "outOfStockPriceTitle": "Offre en rupture de stock",
       "breadcrumbAriaLabel": "Fil d'Ariane du produit",
       "compare": {
         "add": "Comparaison",

@@ -59,10 +59,13 @@ const toAbsoluteUrl = (origin: string, value: string): string | undefined => {
   }
 }
 
+// Stable entity ids: https://nudger.fr/#organization (trailing slash kept).
+const siteBase = (origin: string) => `${origin.replace(/\/+$/, '')}/`
+
 const buildOrganizationEntry = (site: BlogJsonLdSiteInfo) =>
   compactJsonLd({
     '@type': 'Organization',
-    '@id': `${site.origin}#organization`,
+    '@id': `${siteBase(site.origin)}#organization`,
     name: normalizeString(site.name),
     url: site.origin,
     logo: normalizeString(site.logoUrl),
@@ -97,29 +100,23 @@ const buildBlogPostingEntry = (siteOrigin: string, post: BlogJsonLdPosting) => {
     headline: normalizeString(post.headline),
     description: normalizeString(post.description),
     url: absoluteUrl,
-    image: Array.isArray(post.image)
-      ? post.image
-          .map(value => normalizeString(value))
-          .filter((value): value is string => Boolean(value))
-      : normalizeString(post.image),
+    image: (Array.isArray(post.image) ? post.image : [post.image])
+      .map(value => normalizeString(value))
+      .map(value => (value ? toAbsoluteUrl(siteOrigin, value) : undefined))
+      .filter((value): value is string => Boolean(value)),
     datePublished: normalizeString(post.datePublished),
     dateModified: normalizeString(post.dateModified),
-    author: normalizeString(post.author)
-      ? {
-          '@type': 'Person',
-          name: normalizeString(post.author),
-        }
-      : undefined,
+    author: { '@id': `${siteBase(siteOrigin)}#organization` },
   })
 }
 
 const buildWebsiteEntry = (site: BlogJsonLdSiteInfo) =>
   compactJsonLd({
     '@type': 'WebSite',
-    '@id': `${site.origin}#website`,
+    '@id': `${siteBase(site.origin)}#website`,
     url: site.origin,
     name: normalizeString(site.name),
-    publisher: { '@id': `${site.origin}#organization` },
+    publisher: { '@id': `${siteBase(site.origin)}#organization` },
   })
 
 export const buildBlogCollectionJsonLd = (
@@ -140,7 +137,7 @@ export const buildBlogCollectionJsonLd = (
     name: normalizeString(input.pageTitle),
     description: normalizeString(input.description),
     inLanguage: normalizeString(input.locale),
-    isPartOf: { '@id': `${input.site.origin}#website` },
+    isPartOf: { '@id': `${siteBase(input.site.origin)}#website` },
     about: normalizeString(input.about),
   })
 
@@ -148,7 +145,7 @@ export const buildBlogCollectionJsonLd = (
     '@type': 'Blog',
     '@id': `${input.canonicalUrl}#blog`,
     name: normalizeString(input.pageTitle),
-    publisher: { '@id': `${input.site.origin}#organization` },
+    publisher: { '@id': `${siteBase(input.site.origin)}#organization` },
   })
 
   const blogPosts = input.posts
@@ -166,7 +163,11 @@ export const buildBlogCollectionJsonLd = (
           mainEntity: blogEntry
             ? { '@id': `${input.canonicalUrl}#blog` }
             : undefined,
-          hasPart: blogPosts.length ? blogPosts : undefined,
+          hasPart: blogPosts.length
+            ? blogPosts.map(post => ({
+                '@id': (post as Record<string, JsonLdValue>)['@id'],
+              }))
+            : undefined,
         }
       : undefined,
     ...blogPosts,
@@ -198,7 +199,7 @@ export const buildBlogArticleJsonLd = (
     name: normalizeString(input.pageTitle),
     description: normalizeString(input.description),
     inLanguage: normalizeString(input.locale),
-    isPartOf: { '@id': `${input.site.origin}#website` },
+    isPartOf: { '@id': `${siteBase(input.site.origin)}#website` },
   })
 
   const blogPostingEntry = buildBlogPostingEntry(input.site.origin, {
@@ -214,7 +215,7 @@ export const buildBlogArticleJsonLd = (
       ? {
           ...blogPostingEntry,
           mainEntityOfPage: { '@id': `${input.canonicalUrl}#webpage` },
-          publisher: { '@id': `${input.site.origin}#organization` },
+          publisher: { '@id': `${siteBase(input.site.origin)}#organization` },
         }
       : undefined,
     webPageEntry

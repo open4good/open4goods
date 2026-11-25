@@ -644,6 +644,23 @@ const productTitle = computed(() => {
   return resolvedTitle || slugFallback || gtinFallback
 })
 
+// Structured-data name: the brand casing is kept as in the data (no forced
+// capitals), unlike the display title.
+const productJsonLdName = computed(() => {
+  if (!product.value) {
+    return productTitle.value
+  }
+
+  return (
+    resolveProductTitle(product.value, locale.value, {
+      preferH1Title: true,
+      gtinFallback: product.value.gtin
+        ? t('product.meta.gtinFallback', { gtin: product.value.gtin })
+        : '',
+    }) || productTitle.value
+  )
+})
+
 const heroPopularAttributes = computed(
   () => categoryDetail.value?.popularAttributes ?? []
 )
@@ -2251,7 +2268,7 @@ const productJsonLdGraph = computed(() => {
 
   return buildProductJsonLdGraph({
     product: product.value,
-    productTitle: productTitle.value,
+    productTitle: productJsonLdName.value,
     canonicalUrl: canonicalUrl.value,
     locale: locale.value,
     breadcrumbs: jsonLdBreadcrumbs.value,

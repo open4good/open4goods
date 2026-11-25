@@ -400,23 +400,6 @@ const faqPanels = computed(() =>
   }))
 )
 
-const faqJsonLd = computed(() => {
-  const validItems = faqItems.value.filter(item => item.answer?.trim())
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: validItems.map(item => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  }
-})
-
 const canonicalUrl = computed(() =>
   new URL(
     resolveLocalizedRoutePath('index', locale.value),
@@ -440,49 +423,34 @@ const logoUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-const localizedHomeUrls = computed(() =>
-  Array.from(
-    new Set([
-      canonicalUrl.value,
-      ...alternateLinks.value.map(link => link.href),
-    ])
-  )
-)
+const GITHUB_URL = 'https://github.com/open4good'
 
 const linkedinUrl = computed(() =>
   toTrimmedString(t('siteIdentity.links.linkedin'))
 )
 
+const siteOrigin = computed(() => requestURL.origin)
+const organizationId = computed(() => `${siteOrigin.value}/#organization`)
+const websiteId = computed(() => `${siteOrigin.value}/#website`)
+
 const organizationJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': organizationId.value,
   name: siteName.value,
-  url: canonicalUrl.value,
+  url: `${siteOrigin.value}/`,
   logo: logoUrl.value,
-  sameAs: Array.from(
-    new Set([linkedinUrl.value, ...localizedHomeUrls.value].filter(Boolean))
-  ),
+  sameAs: [linkedinUrl.value, GITHUB_URL].filter(Boolean),
 }))
-
-const searchPageUrl = computed(() =>
-  new URL(
-    resolveLocalizedRoutePath('search', locale.value),
-    requestURL.origin
-  ).toString()
-)
 
 const websiteJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': websiteId.value,
   name: siteName.value,
-  url: canonicalUrl.value,
+  url: `${siteOrigin.value}/`,
   inLanguage: locale.value,
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: `${searchPageUrl.value}?q={search_term_string}`,
-    'query-input': 'required name=q',
-  },
-  sameAs: localizedHomeUrls.value,
+  publisher: { '@id': organizationId.value },
 }))
 
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
@@ -695,28 +663,11 @@ const webPageJsonLd = computed(() => ({
   description: seoDescription.value,
   url: canonicalUrl.value,
   inLanguage: locale.value,
-  isPartOf: {
-    '@type': 'WebSite',
-    name: siteName.value,
-    url: canonicalUrl.value,
-  },
+  isPartOf: { '@id': websiteId.value },
   primaryImageOfPage: {
     '@type': 'ImageObject',
     url: ogImageUrl.value,
   },
-}))
-
-const breadcrumbJsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: String(t('navigation.home')),
-      item: canonicalUrl.value,
-    },
-  ],
 }))
 
 useSeoMeta({
@@ -739,11 +690,6 @@ useHead(() => ({
   ],
   script: [
     {
-      key: 'home-faq-jsonld',
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(faqJsonLd.value),
-    },
-    {
       key: 'home-organization-jsonld',
       type: 'application/ld+json',
       innerHTML: JSON.stringify(organizationJsonLd.value),
@@ -757,11 +703,6 @@ useHead(() => ({
       key: 'home-webpage-jsonld',
       type: 'application/ld+json',
       innerHTML: JSON.stringify(webPageJsonLd.value),
-    },
-    {
-      key: 'home-breadcrumb-jsonld',
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
     },
   ],
 }))
