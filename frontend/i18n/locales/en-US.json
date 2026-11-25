@@ -1458,7 +1458,7 @@
     "intro": "The Impact Score evolves. Each method version is dated; a score is only compared with scores of the same version.",
     "backLink": "← The Impact Score",
     "noDate": "Since the beginning",
-    "planned": "Announced, not yet in force",
+    "partial": "In force by category; version 1 remains in force for the others",
     "scopeLabel": "Categories concerned:",
     "changeLabel": "Change:",
     "reasonLabel": "Reason:",
@@ -1469,7 +1469,7 @@
     "entries": {
       "v2": {
         "title": "Version 2",
-        "scope": "Categories switch one by one; none is concerned until version 2 is announced as in force.",
+        "scope": "Refrigerators and dishwashers (since 16 November 2026), washing machines, ovens and smartphones (since 25 November 2026). Other categories remain on version 1; both versions coexist, category by category.",
         "changes": [
           {
             "change": "A score is computed only from criteria that are actually provided; the weight of missing criteria is spread over the provided criteria.",
@@ -1509,7 +1509,7 @@
       },
       "v1": {
         "title": "Version 1",
-        "scope": "All rated categories.",
+        "scope": "All categories rated at the start. It remains in force for categories not yet moved to version 2.",
         "changes": [
           {
             "change": "First method: score out of 20, weighted average of criteria per category, normalised against the category's products; an average value is assigned to missing criteria.",

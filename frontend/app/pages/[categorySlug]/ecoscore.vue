@@ -641,7 +641,6 @@ import {
   useSeoMeta,
 } from '#imports'
 import {
-  IMPACT_SCORE_CURRENT_METHOD_VERSION,
   IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
 } from '~~/shared/utils/impact-score-versions'
 import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
@@ -1289,7 +1288,6 @@ useHead(() => ({
           description: seoDescription.value,
           url: canonicalUrl.value,
           dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
           inLanguage: locale.value,
           aboutName: categoryLabel.value,
         })
