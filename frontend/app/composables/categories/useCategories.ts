@@ -3,35 +3,38 @@ import type {
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
 
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000
+
+type CacheEntry<T> = {
+  data: T
+  timestamp: number
+}
+
+/**
+ * Module-level caches, kept out of `useState` on purpose: `useState` content is
+ * serialized in `__NUXT_DATA__` of every page, and the full vertical configs
+ * weigh hundreds of kilobytes. On the server they are shared by the requests of
+ * the process (public data), keyed by host since the language follows the host.
+ */
+const categoriesListCache = new Map<string, CacheEntry<VerticalConfigDto[]>>()
+const categoryDetailCache = new Map<string, CacheEntry<VerticalConfigFullDto>>()
+
+const readCache = <T>(
+  cache: Map<string, CacheEntry<T>>,
+  key: string
+): T | undefined => {
+  const entry = cache.get(key)
+  return entry && Date.now() - entry.timestamp < TWO_HOURS_MS
+    ? entry.data
+    : undefined
+}
+
 /**
  * Composable for categories-related functionality
  */
 export const useCategories = () => {
-  const TWO_HOURS_MS = 2 * 60 * 60 * 1000
-
-  type CacheEntry<T> = {
-    data: T
-    timestamp: number
-  }
-
-  const getGlobalCacheStore = <T>(key: string) => {
-    const globalObject = globalThis as unknown as Record<string, T>
-
-    if (!globalObject[key]) {
-      globalObject[key] = {} as T
-    }
-
-    return globalObject[key]
-  }
-
   // Reactive state
   const categories = useState<VerticalConfigDto[]>('categories-list', () => [])
-  const categoriesListCache = useState<
-    Record<string, CacheEntry<VerticalConfigDto[]>>
-  >('categories-list-cache', () => getGlobalCacheStore('categories-list-cache'))
-  const categoryDetailCache = useState<
-    Record<string, CacheEntry<VerticalConfigFullDto>>
-  >('category-detail-cache', () => getGlobalCacheStore('category-detail-cache'))
   const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
   const buildRequestHeaders = () => {
@@ -57,6 +60,8 @@ export const useCategories = () => {
 
     return Object.keys(normalizedEntries).length ? normalizedEntries : undefined
   }
+  const cacheScope = () =>
+    requestHeaders?.['x-forwarded-host'] ?? requestHeaders?.host ?? 'client'
   const loading = useState('categories-loading', () => false)
   const error = useState<string | null>('categories-error', () => null)
   const activeCategoryId = useState<string | null>(
@@ -75,15 +80,13 @@ export const useCategories = () => {
     forceRefresh?: boolean
   }): Promise<VerticalConfigDto[]> => {
     const forceRefresh = options?.forceRefresh ?? false
-    const cacheKey = 'list-all'
-    const cachedCategories = categoriesListCache.value[cacheKey]
+    const cacheKey = `${cacheScope()}:list-all`
+    const cachedCategories = forceRefresh
+      ? undefined
+      : readCache(categoriesListCache, cacheKey)
 
-    if (
-      !forceRefresh &&
-      cachedCategories &&
-      Date.now() - cachedCategories.timestamp < TWO_HOURS_MS
-    ) {
-      categories.value = cachedCategories.data
+    if (cachedCategories) {
+      categories.value = cachedCategories
       return categories.value
     }
 
@@ -97,10 +100,10 @@ export const useCategories = () => {
       })
 
       categories.value = response ?? []
-      categoriesListCache.value[cacheKey] = {
+      categoriesListCache.set(cacheKey, {
         data: categories.value,
         timestamp: Date.now(),
-      }
+      })
     } catch (err) {
       error.value =
         err instanceof Error ? err.message : 'Failed to fetch categories'
@@ -124,14 +127,13 @@ export const useCategories = () => {
     options?: { forceRefresh?: boolean }
   ): Promise<VerticalConfigFullDto> => {
     const forceRefresh = options?.forceRefresh ?? false
-    const cachedDetail = categoryDetailCache.value[id]
+    const detailKey = `${cacheScope()}:${id}`
+    const cachedDetail = forceRefresh
+      ? undefined
+      : readCache(categoryDetailCache, detailKey)
 
-    if (
-      !forceRefresh &&
-      cachedDetail &&
-      Date.now() - cachedDetail.timestamp < TWO_HOURS_MS
-    ) {
-      return cachedDetail.data
+    if (cachedDetail) {
+      return cachedDetail
     }
 
     loading.value = true
@@ -143,10 +145,10 @@ export const useCategories = () => {
         detailHeaders ? { headers: detailHeaders } : undefined
       )
 
-      categoryDetailCache.value[id] = {
+      categoryDetailCache.set(detailKey, {
         data: detail,
         timestamp: Date.now(),
-      }
+      })
       return detail
     } catch (err) {
       error.value =
@@ -195,8 +197,6 @@ export const useCategories = () => {
     const detail = await fetchCategoryById(matchingCategory.id)
     activeCategoryId.value = matchingCategory.id
     currentCategory.value = detail
-    categoryDetailCache.value[slug] =
-      categoryDetailCache.value[matchingCategory.id]
     return detail
   }
 

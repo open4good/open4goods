@@ -32,9 +32,6 @@ describe('useCategories composable', () => {
     vi.resetModules()
     fetchMock.mockReset()
     stateStore = new Map()
-    const globalObject = globalThis as Record<string, unknown>
-    globalObject['categories-list-cache'] = {}
-    globalObject['category-detail-cache'] = {}
     vi.stubGlobal('$fetch', fetchMock)
   })
 
@@ -163,5 +160,29 @@ describe('useCategories composable', () => {
     expect(error.value).toBe('Category not found')
     expect(currentCategory.value).toBeNull()
     expect(activeCategoryId.value).toBeNull()
+  })
+
+  it('keeps the caches out of the serialized state (GOU-2698)', async () => {
+    fetchMock.mockImplementation((request: string) =>
+      Promise.resolve(
+        request === '/api/categories'
+          ? [{ id: 'category-1', verticalHomeUrl: '/dish-washers' }]
+          : { id: 'category-1', impactScoreConfig: { audit: {} } }
+      )
+    )
+
+    const { useCategories } = await import('./useCategories')
+    await useCategories().selectCategoryBySlug('dish-washers')
+
+    expect([...stateStore.keys()]).not.toContain('category-detail-cache')
+    expect([...stateStore.keys()]).not.toContain('categories-list-cache')
+    expect(
+      (globalThis as Record<string, unknown>)['category-detail-cache']
+    ).toBe(undefined)
+
+    // A second composable instance is served by the module cache.
+    fetchMock.mockClear()
+    await useCategories().fetchCategoryById('category-1')
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

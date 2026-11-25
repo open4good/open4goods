@@ -284,15 +284,6 @@ useHead(() => ({
           },
         ]
       : []),
-    ...(article.value.image
-      ? [
-          {
-            rel: 'preload',
-            as: 'image',
-            href: article.value.image,
-          },
-        ]
-      : []),
   ],
   script: structuredData.value
     ? [
@@ -427,6 +418,10 @@ useHead(() => ({
         width="100%"
         height="100%"
         class="article-hero__image"
+        priority
+        format="webp"
+        :quality="80"
+        sizes="sm:100vw md:100vw lg:900px"
       />
       <figcaption class="d-sr-only">
         {{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}
