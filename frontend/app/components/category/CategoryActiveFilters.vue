@@ -104,6 +104,17 @@ const formatChipBoundary = (
   return formatNumericRangeValue(value, n, { isPrice })
 }
 
+const CONDITION_LABEL_KEYS: Record<string, string> = {
+  NEW: 'category.filters.condition.new',
+  OCCASION: 'category.filters.condition.used',
+  USED: 'category.filters.condition.used',
+}
+
+const formatTermLabel = (mapping: string, term: string) =>
+  mapping === 'price.conditions' && CONDITION_LABEL_KEYS[term]
+    ? t(CONDITION_LABEL_KEYS[term])
+    : term
+
 const createManualLabel = (filter: Filter) => {
   const mapping = filter.field ?? ''
   const fieldLabel = resolveFilterFieldTitle(
@@ -114,7 +125,9 @@ const createManualLabel = (filter: Filter) => {
 
   if (filter.operator === 'term') {
     const term = filter.terms?.[0] ?? ''
-    return term ? `${fieldLabel}: ${term}` : fieldLabel
+    return term
+      ? `${fieldLabel}: ${formatTermLabel(mapping, term)}`
+      : fieldLabel
   }
 
   const priceField = isPriceField(mapping)
