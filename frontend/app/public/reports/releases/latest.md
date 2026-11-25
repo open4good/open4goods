@@ -1,34 +1,30 @@
-## 🥳 Welcome to **v1.0.88**
+## 🥳 Welcome to **v1.0.89**
 
-This release covers **3 day(s)** of work, from **2026-11-19T19:50:14.000Z** to **2026-11-23T07:54:16.000Z**.
+This release covers **0 day(s)** of work, from **2026-11-23T07:54:16.000Z** to **2026-11-24T07:33:25.000Z**.
 
 ### 📦 Stats
-- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.87...v1.0.88)
-- Changed files: **61**
-- Commits: **13**
-- Additions: **3137** / Deletions: **235**
+- Diff: [compare](https://github.com/open4good/open4goods/compare/v1.0.88...v1.0.89)
+- Changed files: **53**
+- Commits: **9**
+- Additions: **1359** / Deletions: **338**
 
 ---
 
 
 
 <details>
-<summary>🙈 Other changes (12)</summary>
+<summary>🙈 Other changes (8)</summary>
 
 | PR | Title | Author |
 |---:|---|---|
-| [PR 3723](https://github.com/open4good/open4goods/pull/3723) | feat(blog): brouillon article classe énergétique A à G (GOU-2479) | @GoulvenF |
-| [PR 3724](https://github.com/open4good/open4goods/pull/3724) | feat(blog): publier l'article classe énergétique A à G (GOU-2492) | @GoulvenF |
-| [PR 3725](https://github.com/open4good/open4goods/pull/3725) | feat(front-api): règle « tête étrangère » étendue aux produits catégorisés de la longue traîne (GOU-2497) | @GoulvenF |
-| [PR 3726](https://github.com/open4good/open4goods/pull/3726) | feat(blog): refonte « capacité de machine à laver » et 3 sous-catégories (GOU-2499) | @GoulvenF |
-| [PR 3727](https://github.com/open4good/open4goods/pull/3727) | feat(api): Metriks, ventes et commissions par marchand (GOU-2521) | @GoulvenF |
-| [PR 3728](https://github.com/open4good/open4goods/pull/3728) | fix(front): ?from= sur les liens /contrib/ servis via offer.url (GOU-2524) | @GoulvenF |
-| [PR 3729](https://github.com/open4good/open4goods/pull/3729) | feat(front-api): id du clic dans le paramètre de référence du réseau, éteint par défaut (GOU-2522) | @GoulvenF |
-| [PR 3730](https://github.com/open4good/open4goods/pull/3730) | feat(api): Metriks, ventes rattachées à leur clic par page d'origine via le clickref (GOU-2523) | @GoulvenF |
-| [PR 3731](https://github.com/open4good/open4goods/pull/3731) | feat(front-api): clickref Awin activé par défaut (GOU-2526) | @GoulvenF |
-| [PR 3732](https://github.com/open4good/open4goods/pull/3732) | perf(opendata): passe GTIN/ISBN sans champs impact, passe impact filtrée par verticale, progression visible (GOU-2556) | @GoulvenF |
-| [PR 3736](https://github.com/open4good/open4goods/pull/3736) | feat(front): /contrib/ refuse les IP listées en configuration (GOU-2577) | @GoulvenF |
-| [PR 3735](https://github.com/open4good/open4goods/pull/3735) | fix(front): plausible-guard ignore la ferme de Chrome de bureau en-US / zh-CN (GOU-2576) | @GoulvenF |
+| [PR 3737](https://github.com/open4good/open4goods/pull/3737) | fix(front,front-api): bornes strictes LOWER_THAN / GREATER_THAN portées jusqu'à Elasticsearch (GOU-2586) | @GoulvenF |
+| [PR 3738](https://github.com/open4good/open4goods/pull/3738) | fix(front-api): recherche globale, pas de produit sans offre fraîche dans les groupes de verticale (GOU-2590) | @GoulvenF |
+| [PR 3739](https://github.com/open4good/open4goods/pull/3739) | feat(verticals): ImpactScore V2 vague 2, lave-linge, fours, smartphones (GOU-2605) | @GoulvenF |
+| [PR 3740](https://github.com/open4good/open4goods/pull/3740) | feat(opendata): réduire gtin.zip sous le budget R2 gratuit (GOU-2616) | @GoulvenF |
+| [PR 3741](https://github.com/open4good/open4goods/pull/3741) | feat(verticals): activer le vote entre sources, égalité entre verticales par la règle historique (GOU-2317) | @GoulvenF |
+| [PR 3742](https://github.com/open4good/open4goods/pull/3742) | fix(front-api): recherche, suggestions et /categories écartent les verticales désactivées (GOU-2621) | @GoulvenF |
+| [PR 3733](https://github.com/open4good/open4goods/pull/3733) | chore(deps): update gradle to v9.9.2 | @renovate[bot] |
+| [PR 3734](https://github.com/open4good/open4goods/pull/3734) | fix(deps): update dependency com.android.tools.build:gradle to v9.5.2 | @renovate[bot] |
 
 
 </details>
