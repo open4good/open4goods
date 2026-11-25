@@ -61,12 +61,6 @@ The module exposes configurable security settings via
 - `front.security.enabled` - toggle Spring Security.
 - `front.security.cors-allowed-hosts` - list of allowed CORS origins.
 
-Rate limiting is configured via `front.rate-limit.*` mapped by
-`RateLimitProperties`:
-
-- `front.rate-limit.anonymous` - requests per minute for unauthenticated users.
-- `front.rate-limit.authenticated` - requests per minute for authenticated users.
-
 Offer freshness is configured via `front.offers.max-age` mapped by
 `OfferFreshnessProperties` (default: the api rule `ProductRepository.VALID_UNTIL_DURATION`).
 Any code exposing offers, prices or `/contrib/` links must read them through
@@ -91,7 +85,7 @@ default profile, see root `README.md`, "Running Locally (Offline Mode)"). It mus
 network, no token and no pre-existing cache file; `LocalProfileOfflineStartupTest` enforces
 this. When adding an integration with an external system, give it a `*.enabled` flag defaulting
 to `true` (so `default`/`devsec` are unaffected) and set it to `false` here, or make its startup
-fail-soft (log + degraded health, see `GeoNamesIndexService`/`MaxMindIpGeolocationService`) -
+fail-soft (log + degraded health) -
 never require a network call or a token to reach `Started NudgerFrontApiApplication`.
 
 ---
@@ -189,7 +183,7 @@ public record OfferDto(
 
 ## 7. Validation checklist
 1. `mvn spring-boot:run`
-2. Open `/swagger-ui.html` (requires XWiki credentials via Basic auth)
+2. Open `/swagger-ui.html` (authenticated; `/v3/api-docs/front` is public)
 3. Verify:  
    - all endpoints are listed  
    - each DTO field has description & example  

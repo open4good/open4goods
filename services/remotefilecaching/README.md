@@ -43,7 +43,7 @@ subfolders. Count them without printing their names, which contain the keys,
 then delete them:
 
 ```bash
-# Cache folders: /opt/open4goods/.cached and the geocode cache path
+# Cache folder: /opt/open4goods/.cached
 find /opt/open4goods/.cached -maxdepth 1 -type f \( -name 'http*' -o -name 'tmp-http*' \) | wc -l
 find /opt/open4goods/.cached -maxdepth 1 -type f \( -name 'http*' -o -name 'tmp-http*' \) -delete
 ```

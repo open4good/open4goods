@@ -35,16 +35,13 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount, shallowRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type {
-  DatavizChartPresetDto,
-  DatavizChartQueryResponseDto,
-} from '~~/shared/api-client'
+import type { DatavizChartPreset, DatavizChartData } from '~/types/dataviz-chart'
 import type { EChartsType } from 'echarts/core'
 import { ensureECharts } from '~/utils/echarts-loader'
 
 const props = defineProps<{
-  preset: DatavizChartPresetDto
-  chartData: DatavizChartQueryResponseDto | null
+  preset: DatavizChartPreset
+  chartData: DatavizChartData | null
   loading: boolean
 }>()
 
@@ -52,7 +49,7 @@ const { t } = useI18n()
 const chartContainer = ref<HTMLElement | null>(null)
 const chartInstance = shallowRef<EChartsType | null>(null)
 
-const buildChartOption = (data: DatavizChartQueryResponseDto) => {
+const buildChartOption = (data: DatavizChartData) => {
   const labels = data.labels ?? []
   const values = data.values ?? []
   const chartType = data.chartType ?? props.preset.chartType ?? 'bar'

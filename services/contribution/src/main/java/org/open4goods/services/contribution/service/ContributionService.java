@@ -1,6 +1,5 @@
 package org.open4goods.services.contribution.service;
 
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -18,7 +17,6 @@ import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.Health.Builder;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cache.Cache;
-import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
@@ -77,48 +75,6 @@ public class ContributionService implements HealthIndicator {
 			return url;
 		}
 	}
-
-    /**
-     * Store the user contribution vote,
-     *
-     * @param ip
-     * @param token
-     * @param vote
-     * @return
-     */
-    public String processContributionVote(String ip, String ua, String token, String vote) {
-
-        // Deserialize the token
-        try {
-            // Unencoding the token
-            String str = SerialisationService.uncompressString(URLDecoder.decode(token, Charset.defaultCharset()));
-
-            // Deserialisation
-            ContributionVote aff = serialisationService.fromJson(str, ContributionVote.class);
-
-            aff.setIp(ip);
-            aff.setUa(ua);
-            ValueWrapper existantVote = cache.get(ip);
-
-            if (null == existantVote) {
-                aff.setVote(vote);
-                cache.put(ip, vote);
-            } else {
-                aff.setVote(ALREADY_VOTED_CONST);
-            }
-
-            // TODO(P2,perf) : async index
-            repository.save(aff);
-
-            // Return the decoded affiliationtoken
-            return aff.getUrl();
-
-        } catch (final Exception e) {
-            criticalExceptionscounter.incrementAndGet();
-            logger.warn("Error handling contribution vote {}", token, e);
-            return null;
-        }
-    }
 
     /**
      * Return the total number of nudges since a given date

@@ -342,14 +342,6 @@ public class DataSourceProperties {
 	public String getName() {
 		return name;
 	}
-	//
-	//	public ProviderType getType() {
-	//		return type;
-	//	}
-	//
-	//	public void setType(final ProviderType type) {
-	//		this.type = type;
-	//	}
 
 	public String getFavico() {
 		return favico;

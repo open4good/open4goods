@@ -68,7 +68,6 @@
 # | api       | API_EFFILIATION_API_KEY         | env     | AFFILIATIONCONFIG_EFFILIATIONAPIKEY (affiliation-config.effiliation-api-key)   | optional |
 # | api       | API_VERTEX_API_JSON             | tree-sa | gen-ai-config.google-api-json                                                  | optional |
 # | api       | API_VERTEX_BATCH_JSON           | tree-sa | vertex.batch.credentials-json                                                  | optional |
-# | api       | API_GOOGLE_SEARCH_API_KEY       | tree    | googlesearch.api-key                                                           | optional |
 # | api       | API_OPENAI_API_KEY              | tree    | spring.ai.openai.api-key                                                       | optional |
 # | api       | API_AWIN_ACCESS_TOKEN           | tree    | affiliation-config.awin-access-token                                           | optional |
 # | api       | API_AWIN_DATAFEED_KEY           | tree    | affiliation-config.awin-datafeed-key                                           | optional |
@@ -89,7 +88,6 @@
 # | api       | R2_SECRET_ACCESS_KEY            | tree    | open-data-config.publication.secret-access-key                                 | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | ui        | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
-# | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
 # | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | ui        | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
 # | ui        | OPEN_DATA_REDIRECT_BASE_URL     | tree    | open-data-config.redirect-base-url (GitHub variable, not a secret)             | optional |
@@ -171,7 +169,6 @@ api API_METRIKS_EFFILIATION_API_KEY env METRIKS_AFFILIATION_EFFILIATION_API_KEY 
 api API_EFFILIATION_API_KEY env AFFILIATIONCONFIG_EFFILIATIONAPIKEY optional
 api API_VERTEX_API_JSON tree-sa gen-ai-config.google-api-json optional
 api API_VERTEX_BATCH_JSON tree-sa vertex.batch.credentials-json optional
-api API_GOOGLE_SEARCH_API_KEY tree googlesearch.api-key optional
 api API_OPENAI_API_KEY tree spring.ai.openai.api-key optional
 api API_AWIN_ACCESS_TOKEN tree affiliation-config.awin-access-token optional
 api API_AWIN_DATAFEED_KEY tree affiliation-config.awin-datafeed-key optional
@@ -192,7 +189,6 @@ api R2_ACCESS_KEY_ID tree open-data-config.publication.access-key-id optional
 api R2_SECRET_ACCESS_KEY tree open-data-config.publication.secret-access-key optional
 ui O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
-ui O4G_CAPTCHA_SECRET tree captcha-secret optional
 ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 ui IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
 ui OPEN_DATA_REDIRECT_BASE_URL tree open-data-config.redirect-base-url optional

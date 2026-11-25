@@ -7,10 +7,8 @@ import org.open4goods.model.RolesConstants;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackErrorResponseDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueType;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackRemainingVotesDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionRequestDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionResponseDto;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteEligibilityDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteResponseDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.service.FeedbackService;
@@ -160,58 +158,6 @@ public class FeedbackController {
                     .header("X-Locale", domainLanguage.languageTag())
                     .body(body);
         }
-    }
-
-    @GetMapping("/votes/remaining")
-    @Operation(
-            summary = "Get remaining votes",
-            description = "Return the number of votes still available for the caller today.",
-            parameters = {
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Remaining votes",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = FeedbackRemainingVotesDto.class)))
-            }
-    )
-    public ResponseEntity<FeedbackRemainingVotesDto> remainingVotes(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                                                   HttpServletRequest httpRequest) {
-        FeedbackRemainingVotesDto body = feedbackService.remainingVotes(IpUtils.getIp(httpRequest));
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache())
-                .header("X-Locale", domainLanguage.languageTag())
-                .body(body);
-    }
-
-    @GetMapping("/votes/can")
-    @Operation(
-            summary = "Check voting eligibility",
-            description = "Indicate whether the caller may still vote today.",
-            parameters = {
-                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
-                            description = "Language driving localisation of textual fields (future use).",
-                            schema = @Schema(implementation = DomainLanguage.class))
-            },
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Eligibility returned",
-                            headers = @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
-                                    schema = @Schema(type = "string", example = "fr-FR")),
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = FeedbackVoteEligibilityDto.class)))
-            }
-    )
-    public ResponseEntity<FeedbackVoteEligibilityDto> canVote(@RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
-                                                              HttpServletRequest httpRequest) {
-        FeedbackVoteEligibilityDto body = feedbackService.canVote(IpUtils.getIp(httpRequest));
-        return ResponseEntity.ok()
-                .cacheControl(CacheControl.noCache())
-                .header("X-Locale", domainLanguage.languageTag())
-                .body(body);
     }
 
     @PostMapping("/vote")

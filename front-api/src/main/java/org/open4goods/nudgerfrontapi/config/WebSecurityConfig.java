@@ -6,7 +6,6 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.open4goods.nudgerfrontapi.config.properties.ExposedDocsProperties;
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.open4goods.model.RolesConstants;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -47,14 +46,11 @@ import io.jsonwebtoken.security.Keys;
 public class WebSecurityConfig {
 
     private final SecurityProperties securityProperties;
-    private final ExposedDocsProperties exposedDocsProperties;
     private final ActuatorMonitorCredentials actuatorMonitorCredentials;
 
     public WebSecurityConfig(SecurityProperties securityProperties,
-                             ExposedDocsProperties exposedDocsProperties,
                              ActuatorMonitorCredentials actuatorMonitorCredentials) {
         this.securityProperties = securityProperties;
-        this.exposedDocsProperties = exposedDocsProperties;
         this.actuatorMonitorCredentials = actuatorMonitorCredentials;
     }
 
@@ -87,9 +83,6 @@ public class WebSecurityConfig {
         if (securityProperties.isEnabled()) {
             http.authenticationProvider(new ActuatorMonitorAuthenticationProvider(actuatorMonitorCredentials));
             http.authorizeHttpRequests(auth -> {
-                    if (exposedDocsProperties.isPublicAccess()) {
-                        auth.requestMatchers("/exposed/**").permitAll();
-                    }
                     auth.requestMatchers("/", "/v3/api-docs/front",  "/auth/**").permitAll()
                             .requestMatchers("/actuator", "/actuator/**")
                             .hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)

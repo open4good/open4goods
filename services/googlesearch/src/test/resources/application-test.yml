@@ -1,4 +1,0 @@
-googlesearch:
-  apiKey: "API-KEY"
-  cx: "API-CX"
-  searchUrl: "https://www.googleapis.com/customsearch/v1"

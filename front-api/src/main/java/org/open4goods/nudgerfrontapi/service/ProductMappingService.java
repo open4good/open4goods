@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.open4goods.commons.services.textgen.BlaBlaSecGenerator;
 import org.open4goods.icecat.model.AttributesFeatureGroups;
 import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.Localisable;
@@ -52,7 +51,6 @@ import org.open4goods.model.resource.PdfInfo;
 import org.open4goods.model.resource.Resource;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
-import org.open4goods.model.vertical.ProductI18nElements;
 import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.PageDto;
@@ -660,45 +658,6 @@ public class ProductMappingService {
             return candidate;
         }
         return ProductNameResolver.resolve(product, null);
-    }
-
-    /**
-     * Resolve designation variants for the product using the vertical configuration.
-     * The order is deterministically shuffled based on the product GTIN to ensure
-     * stable variants for the same product and different orderings across products.
-     *
-     * @param product product to resolve
-     * @param vConfig vertical configuration containing designation variants
-     * @param domainLanguage requested domain language
-     * @return ordered list of designation variants
-     */
-    private List<String> resolveDesignationVariants(Product product, VerticalConfig vConfig,
-            DomainLanguage domainLanguage) {
-        if (product == null || vConfig == null) {
-            return Collections.emptyList();
-        }
-        String lang = domainLanguage != null ? domainLanguage.languageTag() : "default";
-        ProductI18nElements i18n = vConfig.i18n(lang);
-        if (i18n == null || i18n.getDesignation() == null) {
-            return Collections.emptyList();
-        }
-        List<String> rawDesignations = i18n.getDesignation().stream()
-                .filter(StringUtils::hasText)
-                .map(StringUtils::trimWhitespace)
-                .collect(Collectors.toCollection(ArrayList::new));
-        if (rawDesignations.isEmpty()) {
-            return Collections.emptyList();
-        }
-        String gtin = product.gtin();
-        if (!StringUtils.hasText(gtin)) {
-            gtin = String.valueOf(product.getId());
-        }
-        BlaBlaSecGenerator generator = new BlaBlaSecGenerator(gtin.hashCode());
-        for (int index = rawDesignations.size() - 1; index > 0; index--) {
-            int swapIndex = generator.getNextAlea(index + 1);
-            Collections.swap(rawDesignations, index, swapIndex);
-        }
-        return rawDesignations;
     }
 
     /**

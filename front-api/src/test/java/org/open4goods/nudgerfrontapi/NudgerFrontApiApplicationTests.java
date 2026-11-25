@@ -3,7 +3,6 @@ package org.open4goods.nudgerfrontapi;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHRepository;
 import org.open4goods.brand.service.BrandService;
-import org.open4goods.services.geocode.service.IpGeolocationService;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,8 +17,6 @@ class NudgerFrontApiApplicationTests
     @MockitoBean
     private GHRepository ghRepository;
 
-    @MockitoBean
-    private IpGeolocationService ipGeolocationService;
 
     // Icecat*Repository proxies no longer need a stand-in here: LocalDevConfig's
     // elasticsearchOperations() stub now answers getElasticsearchConverter().getMappingContext()

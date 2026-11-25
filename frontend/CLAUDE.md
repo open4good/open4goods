@@ -47,7 +47,7 @@ This is a **Nuxt 3** frontend application built with **Vue 3** and **TypeScript*
 │   ├── components/     # Reusable UI components (auto-imported)
 │   ├── pages/          # File-based routing
 │   ├── layouts/        # Page layout wrappers
-│   ├── stores/         # Pinia stores (useAuthStore, useAppStore)
+│   ├── stores/         # Pinia stores (useAuthStore, ...)
 │   ├── composables/    # Composition API hooks
 │   ├── assets/         # Static assets, SASS files
 │   ├── plugins/        # Nuxt plugins

@@ -19,7 +19,6 @@ import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.api.config.yml.ActuatorMonitorCredentials;
 import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.services.eprelservice.config.EprelServiceProperties;
-import org.open4goods.services.googlesearch.config.GoogleSearchConfig;
 import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.services.prompt.config.PromptServiceConfig;
 import org.open4goods.services.prompt.config.VertexBatchConfig;
@@ -68,8 +67,6 @@ class RenderedSecretsConfigTreeTest {
                     binder -> bind(binder, "gen-ai-config", PromptServiceConfig.class).getGoogleApiJson()),
             entry("vertex.batch.credentials-json",
                     binder -> bind(binder, "vertex.batch", VertexBatchConfig.class).getCredentialsJson()),
-            entry("googlesearch.api-key",
-                    binder -> bind(binder, "googlesearch", GoogleSearchConfig.class).getApiKey()),
             entry("spring.ai.openai.api-key",
                     binder -> bind(binder, "spring.ai.openai", OpenAiCommonProperties.class).getApiKey()),
             entry("affiliation-config.awin-access-token",

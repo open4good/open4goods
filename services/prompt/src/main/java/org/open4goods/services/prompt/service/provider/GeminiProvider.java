@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.open4goods.services.prompt.config.GenAiServiceType;
 import org.open4goods.services.prompt.config.PromptOptions;
@@ -21,7 +20,6 @@ import org.springframework.ai.google.genai.schema.JsonSchemaConverter;
 import org.springframework.ai.util.json.schema.JsonSchemaGenerator;
 import org.springframework.util.StringUtils;
 
-import reactor.core.publisher.Flux;
 import tools.jackson.databind.node.ObjectNode;
 
 /**
@@ -60,49 +58,6 @@ public class GeminiProvider implements GenAiProvider {
 		String content = response.getResult().getOutput().getText();
 		Map<String, Object> metadata = extractGroundingMetadata(response);
 		return new ProviderResult(service(), options.getModel(), content, content, metadata);
-	}
-
-	@Override
-	public Flux<ProviderEvent> generateTextStream(ProviderRequest request) {
-		GoogleGenAiChatOptions options = buildOptions(request.getOptions(), request.getRetrievalMode(),
-				request.isAllowWebSearch(), request.getJsonSchema());
-
-		Prompt prompt = buildPrompt(request, options);
-		return Flux.defer(() -> {
-			StringBuilder content = new StringBuilder();
-			Map<String, Object> metadata = new LinkedHashMap<>();
-			List<ProviderEvent> startEvents = new ArrayList<>();
-			startEvents.add(ProviderEvent.started(service(), options.getModel()));
-			if (request.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH && request.isAllowWebSearch()) {
-				startEvents.add(ProviderEvent.toolStatus(service(), options.getModel(), "google_search_retrieval", "started",
-						Map.of()));
-			}
-			return Flux.concat(Flux.fromIterable(startEvents),
-					chatModel.stream(prompt).map(response -> {
-						String delta = response.getResult().getOutput().getText();
-						if (StringUtils.hasText(delta)) {
-							content.append(delta);
-						}
-						Map<String, Object> responseMetadata = extractGroundingMetadata(response);
-						if (!responseMetadata.isEmpty()) {
-							metadata.putAll(responseMetadata);
-						}
-						if (StringUtils.hasText(delta)) {
-							return ProviderEvent.streamChunk(service(), options.getModel(), delta);
-						}
-						return null;
-					}).filter(Objects::nonNull),
-					Flux.defer(() -> Flux.just(ProviderEvent.metadata(service(), options.getModel(), metadata))),
-					Flux.defer(() -> {
-						if (request.getRetrievalMode() == RetrievalMode.MODEL_WEB_SEARCH && request.isAllowWebSearch()) {
-							return Flux.just(ProviderEvent.toolStatus(service(), options.getModel(), "google_search_retrieval", "completed",
-									Map.of()));
-						}
-						return Flux.empty();
-					}),
-					Flux.defer(() -> Flux.just(
-							ProviderEvent.completed(service(), options.getModel(), content.toString(), metadata))));
-		}).onErrorResume(ex -> Flux.just(ProviderEvent.error(service(), options.getModel(), ex.getMessage())));
 	}
 
 	private GoogleGenAiChatOptions buildOptions(PromptOptions options, RetrievalMode retrievalMode,

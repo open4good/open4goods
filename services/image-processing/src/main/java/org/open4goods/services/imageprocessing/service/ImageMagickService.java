@@ -30,37 +30,6 @@ public class ImageMagickService {
 	// *
 	// */
 
-	public void convertToPng(final File source, final File target) {
-
-		try {
-			final ProcessBuilder pb = new ProcessBuilder("convert",
-					source.getAbsolutePath(), target.getAbsolutePath());
-
-			final Process p = pb.start();
-			p.waitFor();
-
-			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
-
-			IOUtils.closeQuietly(p.getErrorStream());
-			IOUtils.closeQuietly(p.getInputStream());
-
-
-			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
-				log.info("Image magick output : {}", err);
-			}
-
-			if (!StringUtils.isEmpty(err)) {
-				log.error("Error with image magick command : {}", err);
-			}
-
-		} catch (final Exception e) {
-			log.error("Error while generating default translated image for favico {} : {}", source, e.getMessage());
-
-
-		}
-	}
-
 	/**
 	 * Converts an image to a temporary PNG that Java image libraries can decode.
 	 *
@@ -96,80 +65,6 @@ public class ImageMagickService {
 			Files.deleteIfExists(target.toPath());
 			throw exception;
 		}
-	}
-
-	/**
-	 * Generate a thumbnail from the originaly translated (png) image
-	 *
-	 *
-	 *
-	 * @param height
-	 */
-	public void generateThumbnail(final File src, final File target, final Integer height) {
-
-		try {
-
-			final ProcessBuilder pb = new ProcessBuilder("convert", "-geometry", "x" + height, src.getAbsolutePath(),
-					target.getAbsolutePath());
-
-			final Process p = pb.start();
-			p.waitFor();
-
-			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
-
-			IOUtils.closeQuietly(p.getErrorStream());
-			IOUtils.closeQuietly(p.getInputStream());
-
-			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
-				log.info("Image magick output : {}", err);
-			}
-
-			if (!StringUtils.isEmpty(err)) {
-				log.error("Error with image magick command : {}", err);
-			}
-
-		} catch (final Exception e) {
-			log.error("Error while generating default translated image for {} : {}", src.getAbsolutePath(),
-					e.getMessage());
-		}
-
-	}
-
-	/**
-	 * Use image magick to transform to png with no metadata
-	 *
-	 *
-	 *
-	 */
-	public void normalizeImage(final File source, final File target) {
-
-		try {
-			final ProcessBuilder pb = new ProcessBuilder("convert", "-strip", source.getAbsolutePath(),
-					target.getAbsolutePath());
-
-			final Process p = pb.start();
-			p.waitFor();
-
-			final String err = IOUtils.toString(p.getErrorStream(), StandardCharsets.UTF_8);
-			final String std = IOUtils.toString(p.getInputStream(), StandardCharsets.UTF_8);
-
-			IOUtils.closeQuietly(p.getErrorStream());
-			IOUtils.closeQuietly(p.getInputStream());
-
-			if (log.isInfoEnabled() && !StringUtils.isEmpty(std)) {
-				log.info("Image magick output : {}", err);
-			}
-
-			if (!StringUtils.isEmpty(err)) {
-				log.error("Error with image magick command : {}", err);
-			}
-
-		} catch (final Exception e) {
-			log.error("Error while generating default translated image for {} : {}", source.getAbsolutePath(),
-					e.getMessage());
-		}
-
 	}
 
 	/**

@@ -572,31 +572,6 @@ subsets:
       en: "Air conditioners with a declared noise level of 64 dB or more."
       fr: "Climatiseurs dont le niveau sonore déclaré atteint ou dépasse 64 dB."
 
-dataviz:
-  chartOverrides:
-    noise-level-distribution:
-      title: "Repartition des niveaux sonores"
-      description: "Comparez le bruit declare des climatiseurs"
-    energy-class-distribution:
-      title: "Repartition des classes energetiques"
-      description: "Visualisez l'efficacite energetique du marche"
-  heroKpis:
-    - field: "attributes.indexed.NOISE_LEVEL"
-      label: "Bruit moyen"
-      unit: "dB"
-      aggregation: "avg"
-    - field: "attributes.indexed.COOLING_CAPACITY"
-      label: "Puissance frigorifique moyenne"
-      unit: "kW"
-      aggregation: "avg"
-    - field: "scores.ECOSCORE.value"
-      label: "Impact Score moyen"
-      aggregation: "avg"
-    - field: "price.minPrice.price"
-      label: "Prix moyen"
-      unit: "EUR"
-      aggregation: "avg"
-
 attributesConfig:
   configs:
     # Air conditioners keep the A+++ to D scale of Delegated Regulation (EU) 626/2011 (no A to G rescaling yet):

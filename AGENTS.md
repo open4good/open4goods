@@ -160,7 +160,7 @@ A predictable, enforced structure lowers cognitive load for humans and gives lar
 
 ## 9  Automated dependency updates
 
-Dependencies for Maven modules, Node projects (`frontend` and `ui`), and GitHub
+Dependencies for Maven modules, the Node project (`frontend`), and GitHub
 Actions workflows are maintained by Renovate. Updates run nightly (after 10pm
 and before 5am) with major Maven upgrades disabled.
 
@@ -170,9 +170,9 @@ For detailed module-specific conventions, see:
 
 - **Frontend**: [frontend/AGENTS.md](frontend/AGENTS.md) - Nuxt 4 / Vue 3 / Vuetify
 - **Front API**: [front-api/AGENTS.md](front-api/AGENTS.md) - SpringDoc / OpenAPI
-- **Services**: [services/AGENTS.md](services/AGENTS.md) - Microservices (19 services)
+- **Services**: [services/AGENTS.md](services/AGENTS.md) - Service modules (19)
 - **Core Modules**: [admin](admin/AGENTS.md), [api](api/AGENTS.md), [commons](commons/AGENTS.md), [model](model/AGENTS.md), [verticals](verticals/AGENTS.md)
-- **UI (deprecated)**: [ui/AGENTS.md](ui/AGENTS.md) - Being replaced by frontend
+- **UI (legacy)**: [ui/AGENTS.md](ui/AGENTS.md) - static.nudger.fr resources, sitemaps and open data redirect only
 
 ---
 

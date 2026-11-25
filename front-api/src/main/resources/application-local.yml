@@ -8,11 +8,6 @@
 # Elasticsearch-backed repositories (product search, Icecat reference data) and the
 # contribution vote repository are already stubbed in LocalDevConfig /
 # ContributionRepositoryConfig for this profile; they need no flag here.
-#
-# The geocode datasets (GeoNames cities, MaxMind GeoIP) are not disabled by a flag: both
-# GeoNamesIndexService and MaxMindIpGeolocationService fail soft on startup (WARN log,
-# health indicator reporting DOWN) when the dataset cannot be downloaded, so they do not
-# block startup offline.
 feedback:
   github:
     # Disables the GHRepository bean (GitHubClientConfig), which otherwise calls the GitHub

@@ -179,27 +179,6 @@ public class BatchPromptService implements HealthIndicator {
         return jobId;
     }
 
-    /**
-     * Processes and returns the batch prompt response.
-     * <p>
-     * This method checks the external batch job status.
-     * If the job is completed, it downloads the output file and parses the batch outputs.
-     * </p>
-     *
-     * @param jobId the job ID to process.
-     * @return a PromptResponse containing the list of BatchOutput objects.
-     */
-    public PromptResponse<List<BatchResultItem>> batchPromptResponse(String jobId) {
-        BatchJob job = loadJob(jobId);
-        if (job.getProvider() == GenAiServiceType.OPEN_AI) {
-            return openAiBatchPromptResponse(job);
-        }
-        if (job.getProvider() == GenAiServiceType.GEMINI) {
-            return geminiBatchPromptResponse(job);
-        }
-        throw new IllegalStateException("Batch not supported for " + job.getProvider());
-    }
-
 
     /**
      * Checks the status of a batch job.

@@ -1,17 +1,14 @@
 package org.open4goods.ui.controllers.ui;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.Optional;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.open4goods.brand.service.BrandService;
 import org.open4goods.commons.services.DataSourceConfigService;
@@ -54,7 +51,6 @@ public class ResourceController {
 	private static final String CONTENT_TYPE_IMAGE_PNG = "image/png";
 	private static final String CONTENT_TYPE_IMAGE_JPEG = "image/jpeg";
 
-	private static final String CONTENT_TYPE_JAVA_ARCHIVE = "application/java-archive";
 	private static final String HEADER_CONTENT_TYPE = "Content-type";
 	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
@@ -202,25 +198,6 @@ public class ResourceController {
 	}
 
 
-
-	/**
-	 * Serves the latest UI jar file.
-	 *
-	 * @param response the HttpServletResponse to write the jar file to.
-	 * @throws IOException               if an I/O error occurs.
-	 * @throws InvalidParameterException if an invalid parameter is provided.
-	 * @throws URISyntaxException        if the URI syntax is incorrect.
-	 */
-	@GetMapping("/ui-latest.jar")
-	public void uiJarFile(final HttpServletResponse response) throws IOException, InvalidParameterException, URISyntaxException {
-
-		response.addHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_JAVA_ARCHIVE);
-		response.addHeader(HEADER_CACHE_CONTROL, "public, max-age=" + AppConfig.CACHE_PERIOD_SECONDS);
-
-		try (InputStream stream = new BufferedInputStream(FileUtils.openInputStream(config.uiJarFile()))) {
-			IOUtils.copy(stream, response.getOutputStream());
-		}
-	}
 
 
 	//////////////////////////

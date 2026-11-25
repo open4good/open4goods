@@ -162,23 +162,6 @@ or a provider/feed name; see the
 
 ---
 
-### googlesearch
-
-**Purpose**: Integrates with Google Custom Search API.
-
-**Key Responsibilities**:
-- Execute Google Custom Search queries
-- Parse and normalize search results
-- Handle API quotas and rate limiting
-- Cache search results
-
-**Configuration**:
-- Requires Google Custom Search API key
-- Configure search engine ID
-- Monitor API usage and quotas
-
----
-
 ### google-indexation
 
 **Purpose**: Publishes product URLs to the Google Indexing API after AI review generation.
@@ -302,21 +285,6 @@ See [docs/architecture/opendata.md](../docs/architecture/opendata.md).
 
 ---
 
-### exposed-docs
-
-**Purpose**: Exposes embedded documentation and prompt resources for browsing.
-
-**Key Responsibilities**:
-- Index embedded `.md`, `.prompt`, and documentation assets from the classpath
-- Provide navigation trees, content retrieval, and search endpoints
-- Support configurable categories and optional authentication
-
-**Configuration**:
-- Configure resource categories and extensions via `exposed-docs.*`
-- Toggle public access and security with `exposed-docs.security.enabled`
-
----
-
 ### remotefilecaching
 
 **Purpose**: Remote file fetching and caching service.
@@ -360,41 +328,6 @@ name a cache file, or log a URL, from the URL itself; see the
 - Provide reusable auto-configuration for text embeddings.
 - Centralise DJL model loading and health checks for downstream services.
 - Expose configuration properties for local vs remote models so applications fail fast when assets are missing.
-
----
-
-### urlfetching
-
-**Purpose**: URL fetching with retry logic and error handling.
-
-**Key Responsibilities**:
-- Fetch content from URLs with robust error handling
-- Implement exponential backoff retry logic
-- Handle redirects and authentication
-- Respect robots.txt and rate limits
-- Provide user-agent configuration
-
-**Best Practices**:
-- Use connection pooling
-- Implement circuit breakers
-- Log failed requests for debugging
-- Monitor response times and error rates
-
----
-
-### geocode
-
-**Purpose**: Offline city geocoding and distance lookup service backed by GeoNames cities5000.txt.
-
-**Key Responsibilities**:
-- Download and cache GeoNames cities5000.zip via `RemoteFileCachingService`
-- Parse and index cities into in-memory lookup maps for fast geocoding
-- Expose REST APIs to resolve city + country and compute distances
-- Provide health status based on successful dataset load
-
-**Configuration**:
-- Requires cache directory for `RemoteFileCachingService`
-- Uses GeoNames download URL `https://download.geonames.org/export/dump/cities5000.zip`
 
 ---
 

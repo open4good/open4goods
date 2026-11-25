@@ -6,11 +6,9 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.open4goods.brand.service.BrandService;
-import org.open4goods.commons.services.BarcodeValidationService;
 import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.ResourceService;
 import org.open4goods.model.constants.CacheConstants;
-import org.open4goods.services.imageprocessing.service.ImageMagickService;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.remotefilecaching.config.RemoteFileCachingProperties;
 import org.open4goods.services.remotefilecaching.service.RemoteFileCachingService;
@@ -18,7 +16,6 @@ import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
 import org.open4goods.ui.services.SitemapGenerationService;
-import org.open4goods.ui.services.todo.TodoService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,72 +56,11 @@ public class AppConfig {
 		this.config = config;
 	}
 
-
-
-
-
-	@Bean
-	TodoService todoService() {
-		return new TodoService(config.getTagListUrl());
-	}
-
 	@Bean
 	SitemapGenerationService sitemapGenerationService(ProductRepository repository,
 			VerticalsConfigService verticalConfigService, MeterRegistry meterRegistry) {
 		return new SitemapGenerationService(repository, config, verticalConfigService, meterRegistry);
 	}
-
-	@Bean
-	BarcodeValidationService barcodeValidationService () {
-		return new BarcodeValidationService();
-	}
-
-
-
-
-//    @Bean
-//    RedisTemplate<String, Product> redisTemplate(RedisConnectionFactory connectionFactory) {
-//		  RedisTemplate<String, Product> template = new RedisTemplate<>();
-//		    template.setConnectionFactory(connectionFactory);
-//
-//		    // Configure serialization
-//		    template.setKeySerializer(new StringRedisSerializer());
-//		    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-//
-//
-//		    // Add some specific configuration here. Key serializers, etc.
-//		    return template;
-//	  }
-
-
-
-
-//    @Bean
-//    public ResourceBundle messageSource() {
-//        ResourceBundle messageSource = new ResourceBundle();
-//
-//        // Set multiple base names for properties files
-//        messageSource.setBasenames(
-//            "classpath:i18n/messages",  // default.properties
-//            "classpath:i18n/metas",      // metas.properties
-//            "classpath:i18n/product"      // metas.properties
-//        );
-//
-//        messageSource.setDefaultEncoding("UTF-8");
-//        messageSource.setCacheSeconds(3600);  // Refresh every hour
-//        return messageSource;
-//    }
-
-
-
-//    /** Override the default RestTemplate with a custom one that has a longer timeout (For ImageGenerationService) **/
-//    @Bean
-//    RestClientCustomizer restClientCustomizer() {
-//		return restClientBuilder -> restClientBuilder
-//				.requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
-//						.withConnectTimeout(Duration.ofSeconds(60))
-//						.withReadTimeout(Duration.ofSeconds(60))));
-//	}
 
 	@Bean
         BrandService brandService(@Autowired RemoteFileCachingService rfc, SerialisationService serialisationService) throws Exception {
@@ -137,13 +73,6 @@ public class AppConfig {
 	/** The bean providing datasource configurations **/
 	@Bean DataSourceConfigService datasourceConfigService(@Autowired final UiConfig config) {
 		return new DataSourceConfigService(config.getDatasourcesfolder());
-	}
-
-
-
-	@Bean
-	ImageMagickService imageMagickService() {
-		return new ImageMagickService();
 	}
 
 	@Bean
@@ -163,28 +92,6 @@ public class AppConfig {
 	ProductRepository aggregatedDataRepo(ElasticsearchOperations elasticsearchOperations) {
 		return new ProductRepository(elasticsearchOperations);
 	}
-
-
-//	@Bean
-//	StandardiserService standardiserService() {
-//		return new StandardiserService() {
-//			@Override
-//			public void standarise(final Price price, final Currency currency) {
-//			}
-//		};
-//	}
-
-	/**
-	 * The service that hot evaluates thymeleaf / spel expressions
-	 *
-	 * @return
-	 */
-//	@Bean
-//	EvaluationService evaluationService(@Autowired EvaluationConfig evalConfig) {
-//		return new EvaluationService(evalConfig);
-//	}
-
-
 
 	// TODO : should not be required at ui side
         @Bean RemoteFileCachingService remoteFileCachingService(RemoteFileCachingProperties remoteFileCachingProperties) {
@@ -275,8 +182,6 @@ public class AppConfig {
 
 			@Override
 			public void addInterceptors(final InterceptorRegistry registry) {
-//				registry.addInterceptor(new BanCheckerInterceptor(config.getBancheckerConfig()));
-//				registry.addInterceptor(AppConfig.localeChangeInterceptor());
                 registry.addInterceptor(new ImageResizeInterceptor(resourceService(), config.getAllowedImagesSizeSuffixes(), config.getImageBaseUrl()));
 
 			}

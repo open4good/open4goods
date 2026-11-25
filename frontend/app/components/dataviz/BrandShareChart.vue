@@ -9,10 +9,9 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
   AggregationResponseDto,
-  DatavizChartPresetDto,
-  DatavizChartQueryResponseDto,
   ProductSearchResponseDto,
 } from '~~/shared/api-client'
+import type { DatavizChartPreset, DatavizChartData } from '~/types/dataviz-chart'
 import DatavizChart from '~/components/dataviz/DatavizChart.vue'
 import { useGuideContext } from '~/composables/useGuideContext'
 
@@ -114,7 +113,7 @@ const buckets = computed(() => {
     .slice(0, topCount.value)
 })
 
-const chartData = computed<DatavizChartQueryResponseDto | null>(() => {
+const chartData = computed<DatavizChartData | null>(() => {
   if (!buckets.value.length) {
     return null
   }
@@ -127,7 +126,7 @@ const chartData = computed<DatavizChartQueryResponseDto | null>(() => {
   }
 })
 
-const preset = computed<DatavizChartPresetDto>(() => ({
+const preset = computed<DatavizChartPreset>(() => ({
   id: `brand-share-${normalizedVertical.value}`,
   chartType: chartType.value,
   title: resolvedTitle.value,

@@ -448,54 +448,6 @@ public final class ProductModelCandidateHelper {
     }
 
     /**
-     * Checks whether a candidate appears as a whole model phrase or strong model
-     * token in normalized text.
-     *
-     * @param model raw model
-     * @param text raw or normalized text
-     * @return true when the text contains model evidence
-     */
-    public static boolean modelMatchesTextZone(String model, String text) {
-        if (model == null || model.isBlank() || text == null || text.isBlank()) {
-            return false;
-        }
-        String normalizedZone = normalizePhrase(text);
-        String normalizedModel = normalizePhrase(model);
-        if (normalizedZone == null || normalizedModel == null) {
-            return false;
-        }
-        if (normalizedModel.length() >= 4 && containsWholePhrase(normalizedZone, normalizedModel)) {
-            return true;
-        }
-        for (String token : model.split("[\\s_\\-\\./\\\\]+")) {
-            if (isStrongModelToken(token) && containsWholePhrase(normalizedZone, normalizePhrase(token))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Extracts code-like candidates from URL, title, or free text.
-     *
-     * @param value raw value
-     * @return extracted model-code candidates
-     */
-    public static List<String> extractModelCodeCandidates(String value) {
-        if (value == null || value.isBlank()) {
-            return List.of();
-        }
-        List<String> candidates = URL_MODEL_TOKEN_PATTERN.matcher(value).results()
-                .map(match -> match.group())
-                .filter(candidate -> candidate != null && !candidate.isBlank())
-                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-        Pattern.compile("(?i)\\b[A-Z]{2,8}\\s+\\d{3,5}\\b").matcher(value).results()
-                .map(match -> match.group().trim())
-                .forEach(candidates::add);
-        return candidates;
-    }
-
-    /**
      * Frequency-aware result of title-based model extraction.
      *
      * @param best   highest-confidence candidate, or {@code null} when none qualify

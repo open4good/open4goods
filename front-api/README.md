@@ -5,11 +5,6 @@ The former `/api/v1/search` endpoint was removed from this module.
 The main REST endpoints are provided by the `ProductController` class.
 Use the main `api` service for search operations.
 
-### Content endpoints
-
-- `GET /blocs/{blocId}` - return a small HTML bloc from XWiki.
-- `GET /pages/{xwikiPageId}` - return a rendered XWiki page with metadata.
-
 ## Default Port
 
 The application runs on **port 8082** by default (`server.port` in `application.yml`). This keeps it separate from the main API on port 8081.
@@ -31,16 +26,6 @@ Additional properties configure token generation:
 
 With this configuration all calls stay on the same origin and the built-in CORS
 rules apply correctly.
-
-## Rate limiting
-
-Requests are limited using an in-memory token bucket. Defaults can be changed in
-`application.yml`:
-
-- `front.rate-limit.anonymous` - requests per minute allowed for unauthenticated users.
-- `front.rate-limit.authenticated` - requests per minute allowed for authenticated users.
-
-When limits are exceeded the API responds with HTTP `429 Too Many Requests`.
 
 ## Search sort tie-break
 
@@ -362,26 +347,11 @@ export GOOGLE_INDEXATION_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
 
 ## API documentation
 
-Access to the Swagger UI (`/swagger-ui.html`) and the raw OpenAPI specification
-(`/v3/api-docs`) requires valid XWiki credentials. Use HTTP Basic
-authentication when requesting these endpoints. Example commands:
-
-```bash
-curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/swagger-ui.html
-curl -u XWIKI_USER:XWIKI_PASS http://localhost:8082/v3/api-docs
-```
-
-To call secured REST endpoints you must obtain a JWT by authenticating with the
-same credentials:
-
-```bash
-curl -X POST http://localhost:8082/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"XWIKI_USER","password":"XWIKI_PASS"}'
-```
-
-The response returns `accessToken` and `refreshToken`; include the access token
-in subsequent requests using the `Authorization: Bearer <token>` header.
+The frontend OpenAPI specification (`/v3/api-docs/front`) is public. Every
+other endpoint, the Swagger UI (`/swagger-ui.html`) included, requires
+authentication: the Nuxt server sends the shared `X-Shared-Token`, and users
+get a JWT through Google sign-in (`POST /auth/google`). Include the access
+token with the `Authorization: Bearer <token>` header.
 
 ## Domain localisation contract
 
@@ -424,7 +394,3 @@ DTO classes such as `ProductDto` are now implemented using Java records. This
 means all fields are immutable and accessed via record accessors
 (e.g. `dto.base()`). Ensure any custom code or tests no longer rely on
 setters.
-
-## Blog service loading
-
-Blog posts are fetched from XWiki by the `BlogService`. Posts are now loaded asynchronously when the application starts, so the API becomes available immediately. See [../docs/blog_service_async_loading_plan.md](../docs/blog_service_async_loading_plan.md) for details.

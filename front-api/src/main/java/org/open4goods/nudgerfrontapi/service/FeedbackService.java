@@ -11,9 +11,7 @@ import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueType;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionRequestDto;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteEligibilityDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteResponseDto;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackRemainingVotesDto;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.feedback.service.IssueService;
 import org.open4goods.services.feedback.service.VoteResponse;
@@ -100,8 +98,6 @@ public class FeedbackService {
                 .toList();
     }
 
-    // ... (vote, remainingVotes, canVote methods unchanged) ...
-
     /**
      * Cast a vote on the requested GitHub issue and expose the new totals.
      *
@@ -112,26 +108,6 @@ public class FeedbackService {
     public FeedbackVoteResponseDto vote(String issueId, String clientIp) {
         VoteResponse response = voteService.vote(issueId, clientIp);
         return new FeedbackVoteResponseDto(response.remainingVotes(), response.totalVotes());
-    }
-
-    /**
-     * Retrieve how many votes remain for the current IP address.
-     *
-     * @param clientIp originating IP address
-     * @return remaining votes for the day
-     */
-    public FeedbackRemainingVotesDto remainingVotes(String clientIp) {
-        return new FeedbackRemainingVotesDto(voteService.getRemainingVotes(clientIp));
-    }
-
-    /**
-     * Determine if the current IP address can still cast votes today.
-     *
-     * @param clientIp originating IP address
-     * @return whether the user can still vote today
-     */
-    public FeedbackVoteEligibilityDto canVote(String clientIp) {
-        return new FeedbackVoteEligibilityDto(voteService.userCanVote(clientIp));
     }
 
     /**

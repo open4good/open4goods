@@ -55,7 +55,6 @@ When touching caching rules adjust the `runtimeCaching` array near the top of `n
 ### Notifications readiness
 
 - `app/plugins/pwa-capabilities.client.ts` captures whether the browser supports the Notifications + Service Worker combo and stores the registration once it is ready.
-- `app/composables/pwa/usePwaCapabilities.ts` exposes `supportsNotifications`, the cached permission and a `requestNotificationPermission()` helper so future UI can prompt users consistently.
 - The state is SSR-safe and remains accessible from any component or store without leaking browser globals.
 
 ### Runtime caching reference

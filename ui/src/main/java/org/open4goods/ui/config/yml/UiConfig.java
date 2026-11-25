@@ -3,218 +3,72 @@ package org.open4goods.ui.config.yml;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.open4goods.commons.config.yml.BanCheckerConfig;
-import org.open4goods.commons.config.yml.DevModeConfiguration;
-import org.open4goods.commons.config.yml.ui.OpenSearchConfig;
 import org.open4goods.commons.config.yml.ui.WebConfig;
-import org.open4goods.model.Localisable;
-import org.open4goods.model.priceevents.PriceRestitutionConfig;
 import org.open4goods.model.vertical.SiteNaming;
 import org.open4goods.ui.interceptors.ImageResizeInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
-import com.fasterxml.jackson.annotation.JsonMerge;
-
+/**
+ * Root YAML configuration of the ui service.
+ *
+ * <p>ui only serves the static resources of static.nudger.fr (cached files and resized images), redirects the open
+ * data downloads and writes the sitemaps read by the Nuxt frontend; this class only holds the properties those jobs
+ * read.
+ */
 @Configuration
 @ConfigurationProperties
-/**
- * Le parametrage Yaml de la capsule. Celui ci dispose soit de propriétés de
- * premier niveau, soit de sous-objets de configuration.
- *
- * @author goulven
- *
- */
-
 @Validated
 public class UiConfig {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(UiConfig.class);
+	/**
+	 * The local folder where ui data is stored.
+	 */
+	private String rootFolder = File.separator + "opt" + File.separator + "open4goods" + File.separator;
 
 	/**
-	 * The local folder where capsule data will be stored.
+	 * Folder where datasources definitions are stored.
 	 */
-	private String rootFolder = File.separator+"opt"+File.separator+"open4goods"+File.separator;
-
+	private String datasourcesfolder = rootFolder + File.separator + "config" + File.separator + "datasources"
+			+ File.separator;
 
 	/**
-	 * if defined, use to templatize from a local folder
+	 * The list of authorized dynamic image resizing suffixes.
 	 */
-	private String resourceTemplateFolder;
-
-
-
-	/** A localised list of fun facts **/
-	private Localisable<String,FunFactsConfig> funFacts = new Localisable<>();
+	private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
 
 	/**
-	 * Folder where datasources definitions are stored
+	 * Base URL used by the {@link ImageResizeInterceptor} to fetch source images.
 	 */
-	private String datasourcesfolder=rootFolder+ File.separator+ "config"+File.separator+"datasources"+File.separator;
+	private String imageBaseUrl = "https://static.nudger.fr";
 
+	/** Map of language code to Google taxonomy URL. */
+	private Map<String, String> googleTaxonomy = new HashMap<>();
 
 	/**
-	 * Folder where AI generated images are stored
+	 * The URL namings, used to build the sitemaps.
 	 */
-	private String generatedImagesFolder = rootFolder + "generated-images" + File.separator;
-
-	/**
-	 * The list of authorized dynamic image resizing suffixes
-	 */
-        private Set<String> allowedImagesSizeSuffixes = new HashSet<>();
-
-        /**
-         * Base URL used by the {@link ImageResizeInterceptor} to fetch source images.
-         */
-        private String imageBaseUrl = "https://static.nudger.fr";
-
-        /** Map of language code to Google taxonomy URL */
-        private Map<String, String> googleTaxonomy = new HashMap<>();
-
-	/**
-	 * The mapped wiki pages
-	 */
-	@JsonMerge
-	private Map<String,String> pages = new HashMap<>();
-
-
-	/**
-	 * The URL namings
-	 */
-
 	private SiteNaming namings;
 
-	private OpenSearchConfig openSearchConfig = new OpenSearchConfig();
-
-
 	/**
-	 * Elastic search host
+	 * Web settings (authentication toggle, CORS hosts).
 	 */
-	private String elasticSearchHost = "localhost";
-
-	/**
-	 * Elastic search port
-	 */
-	private Integer elasticSearchPort = 9200;
-
-	/**
-	 * The email where pageSize send emails
-	 */
-	private String email;
-
-	/**
-	 * For the T O D O service, the taglist.xml url to be scanned
-	 */
-	private String tagListUrl = "";
-    /**
-     * Secret and key  for captcha system
-     */
-	private String captchaKey;
-	private String captchaSecret;
-
-	/**
-	 * The google API, for indexing services
-	 */
-	private String googleApiJson;
-
-	//	/**
-	//	 * Relativ pageSize the web ( trackings id, ....)
-	//	 */
-	//
 	private WebConfig webConfig = new WebConfig();
 
-
-	private PriceRestitutionConfig priceConfig = new PriceRestitutionConfig();
-
-	/**
-	 * Config for url checking
-	 */
-	private UrlCheckConfig urlcheck;
-
-
-	/***
-	 * Config for IP and UA banChecking
-	 */
-	private BanCheckerConfig bancheckerConfig = new BanCheckerConfig();
-
-	/**
-	 * Containing the project members, for restitution in /team
-	 */
-	private TeamConfig teamConfig = new TeamConfig();
-
-
-	/**
-	 * The configuration for developpement mode services
-	 */
-	private DevModeConfiguration devModeConfig = new DevModeConfiguration();
-
-	public String getThymeLeafTemplateFolder() {
-		return resourceTemplateFolder + "templates"+File.separator;
-	}
-
-
-	/**
-	 *
-	 * @return a File pointing to the ui Jar File
-	 */
-	public File uiJarFile() {
-
-		return new File(rootFolder+ File.separator+"bin"+File.separator+"latest"+File.separator+"ui-latest.jar");
-	}
-
-
-	public String resourceBundleFolder() {
-
-		return resourceTemplateFolder+"i18n"+File.separator+"messages";
-	}
-
-	/**
-	 * Configuration for the brand service
-	 */
-
-
-	/**
-	 * Configuration for Amazon Links & Tags
-	 */
-	private AmazonConfig amazonConfig = new AmazonConfig();
-
-	/**
-	 * Return the root url for a given sitelocale, with the "default" behavior
-	 *
-	 * @param siteLocale
-	 * @return
-	 */
-	public String getBaseUrl(final Locale siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale.getLanguage(), namings.getBaseUrls().get("default"));
-	}
-
-	public String getBaseUrl(final String siteLocale) {
-		return namings.getBaseUrls().getOrDefault(siteLocale, namings.getBaseUrls().get("default"));
-	}
-
 	public String getRemoteCachingFolder() {
-		return rootFolder + File.separator+".cached"+ File.separator;
+		return rootFolder + File.separator + ".cached" + File.separator;
 	}
-
-	public String getGoogleIndexationMarkerFile() {
-		return getRemoteCachingFolder() + "google-indexation-timestamp";
-	}
-
 
 	public String logsFolder() {
-		return rootFolder + File.separator+ "logs" + File.separator;
+		return rootFolder + File.separator + "logs" + File.separator;
 	}
 
-
 	public File siteMapFolder() {
-		return new File(rootFolder + File.separator + "sitemap"+ File.separator);
+		return new File(rootFolder + File.separator + "sitemap" + File.separator);
 	}
 
 	public String getRootFolder() {
@@ -225,37 +79,36 @@ public class UiConfig {
 		this.rootFolder = rootFolder;
 	}
 
-	public OpenSearchConfig getOpenSearchConfig() {
-		return openSearchConfig;
+	public String getDatasourcesfolder() {
+		return datasourcesfolder;
 	}
 
-	public void setOpenSearchConfig(OpenSearchConfig openSearchConfig) {
-		this.openSearchConfig = openSearchConfig;
+	public void setDatasourcesfolder(String datasourcesfolder) {
+		this.datasourcesfolder = datasourcesfolder;
 	}
 
-
-	public WebConfig getWebConfig() {
-		return webConfig;
+	public Set<String> getAllowedImagesSizeSuffixes() {
+		return allowedImagesSizeSuffixes;
 	}
 
-	public void setWebConfig(WebConfig webConfig) {
-		this.webConfig = webConfig;
+	public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
+		this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
 	}
 
-	public String getElasticSearchHost() {
-		return elasticSearchHost;
+	public String getImageBaseUrl() {
+		return imageBaseUrl;
 	}
 
-	public void setElasticSearchHost(String elasticSearchHost) {
-		this.elasticSearchHost = elasticSearchHost;
+	public void setImageBaseUrl(String imageBaseUrl) {
+		this.imageBaseUrl = imageBaseUrl;
 	}
 
-	public Integer getElasticSearchPort() {
-		return elasticSearchPort;
+	public Map<String, String> getGoogleTaxonomy() {
+		return googleTaxonomy;
 	}
 
-	public void setElasticSearchPort(Integer elasticSearchPort) {
-		this.elasticSearchPort = elasticSearchPort;
+	public void setGoogleTaxonomy(Map<String, String> googleTaxonomy) {
+		this.googleTaxonomy = googleTaxonomy;
 	}
 
 	public SiteNaming getNamings() {
@@ -266,188 +119,11 @@ public class UiConfig {
 		this.namings = namings;
 	}
 
-	public String getGeneratedImagesFolder() {
-		return generatedImagesFolder;
+	public WebConfig getWebConfig() {
+		return webConfig;
 	}
 
-	public void setGeneratedImagesFolder(String generatedImagesFolder) {
-		this.generatedImagesFolder = generatedImagesFolder;
+	public void setWebConfig(WebConfig webConfig) {
+		this.webConfig = webConfig;
 	}
-
-
-	public String getDatasourcesfolder() {
-		return datasourcesfolder;
-	}
-
-	public void setDatasourcesfolder(String datasourcesfolder) {
-		this.datasourcesfolder = datasourcesfolder;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-
-
-	public String getResourceTemplateFolder() {
-		return resourceTemplateFolder;
-	}
-
-	public void setResourceTemplateFolder(String resourceTemplateFolder) {
-		this.resourceTemplateFolder = resourceTemplateFolder;
-	}
-
-
-	public Map<String, String> getPages() {
-		return pages;
-	}
-
-
-	public void setPages(Map<String, String> pages) {
-		this.pages = pages;
-	}
-
-
-
-
-
-	public DevModeConfiguration getDevModeConfig() {
-		return devModeConfig;
-	}
-
-
-	public void setDevModeConfig(DevModeConfiguration devModeConfig) {
-		this.devModeConfig = devModeConfig;
-	}
-
-
-
-	public String getCaptchaSecret() {
-		return captchaSecret;
-	}
-
-
-	public void setCaptchaSecret(String captchaSecret) {
-		this.captchaSecret = captchaSecret;
-	}
-
-
-	public String getCaptchaKey() {
-		return captchaKey;
-	}
-
-
-	public void setCaptchaKey(String captchaKey) {
-		this.captchaKey = captchaKey;
-	}
-
-
-
-
-
-
-
-	public String getTagListUrl() {
-		return tagListUrl;
-	}
-
-
-	public void setTagListUrl(String tagListUrl) {
-		this.tagListUrl = tagListUrl;
-	}
-
-
-
-	public String getGoogleApiJson() {
-		return googleApiJson;
-	}
-
-
-	public void setGoogleApiJson(String googleApiJson) {
-		this.googleApiJson = googleApiJson;
-	}
-
-
-	public BanCheckerConfig getBancheckerConfig() {
-		return bancheckerConfig;
-	}
-
-
-	public void setBancheckerConfig(BanCheckerConfig bancheckerConfig) {
-		this.bancheckerConfig = bancheckerConfig;
-	}
-
-
-	public TeamConfig getTeamConfig() {
-		return teamConfig;
-	}
-
-
-	public void setTeamConfig(TeamConfig teamConfig) {
-		this.teamConfig = teamConfig;
-	}
-
-	public Set<String> getAllowedImagesSizeSuffixes() {
-		return allowedImagesSizeSuffixes;
-	}
-
-
-        public void setAllowedImagesSizeSuffixes(Set<String> allowedImagesSizeSuffixes) {
-                this.allowedImagesSizeSuffixes = allowedImagesSizeSuffixes;
-        }
-
-        public String getImageBaseUrl() {
-                return imageBaseUrl;
-        }
-
-        public void setImageBaseUrl(String imageBaseUrl) {
-                this.imageBaseUrl = imageBaseUrl;
-        }
-
-        public Map<String, String> getGoogleTaxonomy() {
-                return googleTaxonomy;
-        }
-
-        public void setGoogleTaxonomy(Map<String, String> googleTaxonomy) {
-                this.googleTaxonomy = googleTaxonomy;
-        }
-
-
-	public UrlCheckConfig getUrlcheck() {
-		return urlcheck;
-	}
-
-
-	public void setUrlcheck(UrlCheckConfig urlcheck) {
-		this.urlcheck = urlcheck;
-	}
-
-
-	public PriceRestitutionConfig getPriceConfig() {
-		return priceConfig;
-	}
-
-
-	public void setPriceConfig(PriceRestitutionConfig priceConfig) {
-		this.priceConfig = priceConfig;
-	}
-
-
-	public Localisable<String, FunFactsConfig> getFunFacts() {
-		return funFacts;
-	}
-
-
-	public void setFunFacts(Localisable<String, FunFactsConfig> funFacts) {
-		this.funFacts = funFacts;
-	}
-
-
-	public AmazonConfig getAmazonConfig() { return amazonConfig; }
-
-	public void setAmazonConfig(AmazonConfig amazon) { this.amazonConfig = amazon; }
 }

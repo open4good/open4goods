@@ -18,9 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackIssueType;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackSubmissionRequestDto;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteEligibilityDto;
 import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackVoteResponseDto;
-import org.open4goods.nudgerfrontapi.dto.feedback.FeedbackRemainingVotesDto;
 import org.open4goods.services.captcha.service.HcaptchaService;
 import org.open4goods.services.feedback.dto.IssueDto;
 import org.open4goods.services.feedback.service.IssueService;
@@ -117,23 +115,5 @@ class FeedbackServiceTest {
 
         assertThat(response.remainingVotes()).isEqualTo(4);
         assertThat(response.totalVotes()).isEqualTo(10);
-    }
-
-    @Test
-    void shouldReturnRemainingVotes() {
-        when(voteService.getRemainingVotes("ip")).thenReturn(2);
-
-        FeedbackRemainingVotesDto dto = feedbackService.remainingVotes("ip");
-
-        assertThat(dto.remainingVotes()).isEqualTo(2);
-    }
-
-    @Test
-    void shouldReturnEligibility() {
-        when(voteService.userCanVote("ip")).thenReturn(true);
-
-        FeedbackVoteEligibilityDto dto = feedbackService.canVote("ip");
-
-        assertThat(dto.canVote()).isTrue();
     }
 }

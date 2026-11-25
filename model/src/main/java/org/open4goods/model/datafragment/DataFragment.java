@@ -1177,14 +1177,6 @@ public class DataFragment implements Standardisable, Validable {
 		this.inStock = inStock;
 	}
 
-	//	public ProviderType getProviderType() {
-	//		return providerType;
-	//	}
-	//
-	//	public void setProviderType(final ProviderType providerType) {
-	//		this.providerType = providerType;
-	//	}
-
 
 	public String getAffiliatedUrl() {
 		return affiliatedUrl;

@@ -198,16 +198,8 @@ const VENDOR_CHUNK_MATCHERS = [
   },
   { pattern: /[\\/]node_modules[\\/]@vueuse[\\/]/, chunkName: 'vendor-vueuse' },
   {
-    pattern: /[\\/]node_modules[\\/]@vue-pdf-viewer[\\/]/,
-    chunkName: 'vendor-pdf-viewer',
-  },
-  {
     pattern: /[\\/]node_modules[\\/]vue-pdf-embed[\\/]/,
     chunkName: 'vendor-pdf-viewer',
-  },
-  {
-    pattern: /[\\/]node_modules[\\/]vue3-picture-swipe[\\/]/,
-    chunkName: 'vendor-gallery',
   },
 ]
 
@@ -284,9 +276,6 @@ export default defineNuxtConfig({
       compilerOptions: {
         esModuleInterop: true,
         typeRoots: ['types', '../types', './node_modules/@types'],
-        paths: {
-          'vue3-picture-swipe': ['../types/vue3-picture-swipe'],
-        },
       },
     },
   },
@@ -634,7 +623,6 @@ export default defineNuxtConfig({
 
     // Public keys (exposed to the client side)
     public: {
-      apiBase: process.env.PUBLIC_API_URL || 'http://localhost:8082',
       // Name of the cookie storing the JWT
       tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
       // Name of the cookie storing the refresh token
@@ -670,14 +658,6 @@ export default defineNuxtConfig({
   hooks: {
     'pages:extend'(pages) {
       const normalizePath = (file?: string) => file?.split('\\').join('/')
-
-      const gtinRedirectPage = pages.find(page =>
-        normalizePath(page.file)?.endsWith('/app/pages/[gtin].vue')
-      )
-
-      if (gtinRedirectPage) {
-        gtinRedirectPage.path = '/:gtin(\\d{6,})'
-      }
 
       const wikiSourcePage = pages.find(page =>
         normalizePath(page.file)?.includes('/app/pages/cms-fullpage.vue')

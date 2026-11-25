@@ -646,44 +646,6 @@ public class VerticalsGenerationService {
     // Attribute mapping (used by /{vertical}/attributes/ endpoint)
     // -----------------------------------------------------------------------
 
-    /**
-     * Generates a commented YAML attribute config fragment for the given vertical.
-     */
-    public String generateAttributesMapping(VerticalConfig verticalConfig, int minCoverage, String containing) {
-        LOGGER.info("Generating attributes mapping for {}", verticalConfig);
-        VerticalAttributesStats stats = attributesStats(verticalConfig.getId());
-
-        Set<String> exclusions = new HashSet<>();
-        if (verticalConfig.getGenerationExcludedFromAttributesMatching() != null) {
-            exclusions.addAll(verticalConfig.getGenerationExcludedFromAttributesMatching());
-        }
-        verticalConfig.getAttributesConfig().getConfigs().stream()
-                .map(e -> e.getSynonyms().values())
-                .forEach(e -> e.forEach(exclusions::addAll));
-
-        Set<String> knownAttributes = getKnownAttributesFromOtherVerticals(verticalConfig.getId());
-        int totalItems = stats.getTotalItems();
-
-        StringBuilder ret = new StringBuilder();
-        for (Entry<String, AttributesStats> cat : stats.getStats().entrySet()) {
-            if (!exclusions.contains(cat.getKey())) {
-                boolean isKnown = knownAttributes.contains(cat.getKey());
-                int coveragePercent = (int) (cat.getValue().getHits() / (double) totalItems * 100.0);
-                if (isKnown || coveragePercent > minCoverage) {
-                    LOGGER.info("Generating template for attribute: {} (Known: {}, Coverage: {}%)",
-                            cat.getKey(), isKnown, coveragePercent);
-                    if (StringUtils.isEmpty(containing)
-                            || cat.getKey().toLowerCase().contains(containing.toLowerCase())) {
-                        ret.append(attributeConfigTemplate(cat, totalItems, 10));
-                    }
-                } else {
-                    LOGGER.info("Skipping {}, not enough coverage", cat.getKey());
-                }
-            }
-        }
-        return ret.toString();
-    }
-
     // -----------------------------------------------------------------------
     // Impact score criteria fragment
     // -----------------------------------------------------------------------

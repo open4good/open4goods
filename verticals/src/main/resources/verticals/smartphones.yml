@@ -560,27 +560,6 @@ technicalFilters:
   - MOBILE_NETWORK_GENERATION
   - DIAGONALE_POUCES
 
-dataviz:
-  chartOverrides:
-    storage-capacity-distribution:
-      title: "Répartition des capacités de stockage"
-      description: "Comparez les capacités internes les plus courantes"
-    repairability-distribution:
-      title: "Répartition des indices de réparabilité"
-      description: "Visualisez les niveaux de réparabilité disponibles"
-  heroKpis:
-    - field: "attributes.indexed.STORAGE_CAPACITY"
-      label: "Stockage moyen"
-      unit: "Go"
-      aggregation: "avg"
-    - field: "scores.ECOSCORE.value"
-      label: "Impact Score moyen"
-      aggregation: "avg"
-    - field: "price.minPrice.price"
-      label: "Prix moyen"
-      unit: "EUR"
-      aggregation: "avg"
-
 popularAttributes:
   - STORAGE_CAPACITY
   - RAM_CAPACITY

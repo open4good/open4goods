@@ -22,27 +22,10 @@ spring:
     compose:
       enabled: true
       file: ../docker-compose.yml
-      
-  thymeleaf:
-      cache: false
 
-  mail:
-    host: 
-    port: 587
-    username: 
-    password: 
-    properties:
-        mail.smtp.auth: true
-        mail.smtp.starttls.enable: true
-        mail.smtp.ssl.trust: smtp.gmail.com
-        
-email: your@email.com
-
-google.recaptcha.secret: "[RECAPTCHA_SECRET]"
 
 webConfig:
   webAuthentication: false
-  templates-caching: false    
 ###############################################################
 # URL's 
 ###############################################################
