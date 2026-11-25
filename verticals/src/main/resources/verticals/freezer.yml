@@ -19,8 +19,20 @@ order: 10
 # Freezers run continuously; annual energy labels are based on 24h/day operation.
 averageHoursPerDay: 24.0
 
+# Source: refrigerator.yml and wine-cooler.yml bounds (max 250 kg, warranty 10 years); min 5 kg as wine-cooler,
+# for table-top mini freezers. Provisoire, recalcul en PR 2.
+parsers:
+  weight:
+    minKg: 5.0
+    maxKg: 250.0
+  warranty:
+    minYears: 0.0
+    maxYears: 10.0
+
 # Source: Google product taxonomy en-US, id 681 (see referentials).
-googleTaxonomyId: 681
+# Kept commented while enabled: false. GoogleTaxonomyService.updateCategoryWithVertical marks the taxonomy node for
+# every vertical, disabled ones included, so /categories would list a hidden vertical. Uncomment at activation.
+# googleTaxonomyId: 681
 
 # Unknown
 icecatTaxonomyId: -1
@@ -91,8 +103,9 @@ i18n:
     productMetaOpenGraphType: "product"
     verticalHomeUrl: "freezers"
     verticalHomeTitle: "Freezers"
-    verticalHomeDescription: "Compare upright, chest and drawer freezers by environmental impact, net capacity, energy class and price. Find the models using the least electricity (kWh per year) to keep your food frozen."
+    verticalHomeDescription: "Compare upright, chest and drawer freezers by environmental impact, net capacity, energy class, noise and price. Find the models using the least electricity (kWh per year) to keep your food frozen for years."
 
+# Provisoire, recalcul en PR 2 (buckets and filters, after the first batch measurement).
 aggregationConfiguration:
   "scores.CLASSE_ENERGY.value":
     interval: 1
@@ -142,9 +155,10 @@ attributesConfig:
     - key: "DATA_QUALITY"
 
 # Unclassified categories seen in products-moustik on 23/11/2026 (qualification-freezer). The datasource is not
-# recorded in datasourceCategories: one neutral key. The 219 products already in refrigerator move in PR 2.
+# recorded, so they go under `all`, the only datasource-independent key that VerticalsConfigService reads.
+# The 219 products already in refrigerator move in PR 2.
 matchingCategories:
-  all-datasources:
+  all:
     - "ELECTROMENAGER | ELECTROMENAGER > FROID > CONGELATEUR"
     - "ELECTROMENAGER > GROS ELECTROMENAGER > CONGELATEUR"
     - "CONGELATEUR"

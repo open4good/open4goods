@@ -98,4 +98,4 @@ créée avec `enabled: false` ; ces seuils s'appliquent dès le premier batch.
 
 | Verticale | `v2.eprelRequired` | `v2.minRealWeightCoverage` | `minRatedForPositionLabel` | Remarque |
 |---|---|---|---|---|
-| `freezer` | `true` (écarte les mini-congélateurs de marketplace sans fiche EPREL, 11 sur 30 dans l'échantillon) | 0,50 | 100 | `enabled: false` ; matrice V1 de `refrigerator`, le poids de `CLASSE_ENERGY` (0,55) réparti entre `ENERGY_CONSUMPTION_ANNUAL` (0,40) et `CLASSE_ENERGY` (0,15) ; seuils de prix et techniques provisoires, recalcul en PR 2 |
+| `freezer` | `true` (écarte les mini-congélateurs de marketplace sans fiche EPREL, 11 sur 30 dans l'échantillon) | 0,50 | 100 | `enabled: false` ; seuils approuvés, mais la répartition des poids est proposée en PR 1 et reste à confirmer par le CTO : matrice V1 de `refrigerator`, le poids de `CLASSE_ENERGY` (0,55) réparti entre `ENERGY_CONSUMPTION_ANNUAL` (0,40) et `CLASSE_ENERGY` (0,15) ; seuils de prix et techniques provisoires, recalcul en PR 2 |
