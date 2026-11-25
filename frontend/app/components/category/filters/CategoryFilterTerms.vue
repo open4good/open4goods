@@ -73,6 +73,12 @@ import {
 } from '~~/shared/utils/facet-normalization'
 
 const COUNTRY_MAPPING = 'gtinInfos.country'
+const CONDITION_MAPPING = 'price.conditions'
+const CONDITION_LABEL_KEYS: Record<string, string> = {
+  NEW: 'category.filters.condition.new',
+  OCCASION: 'category.filters.condition.used',
+  USED: 'category.filters.condition.used',
+}
 
 const props = defineProps<{
   field: FieldMetadataDto
@@ -290,6 +296,11 @@ const formatOptionLabel = (key?: string) => {
   // Country codes (ISO alpha-2) are rendered as "🇫🇷 France" using built-in Intl APIs.
   if (mapping === COUNTRY_MAPPING) {
     return formatCountryLabel(key, locale.value)
+  }
+
+  // The mapping contains a dot, so a flat i18n key cannot be resolved: reuse the toggle labels.
+  if (mapping === CONDITION_MAPPING && CONDITION_LABEL_KEYS[key]) {
+    return t(CONDITION_LABEL_KEYS[key])
   }
 
   if (mapping) {
