@@ -83,6 +83,15 @@ Remplace les bornes provisoires 0,90 / 0,67 / 0,33 : avec 0,67, un produit mieux
 
 **Sitemap** : 7 265 fiches sans offre récente sortent du sitemap sur les sept verticales ; elles reviennent dès qu'elles ont une offre (design § 4.2). Suivi Search Console avant chaque vague puis à J+2, J+7 et J+14 ; une baisse nette des clics imputable à la bascule déclenche le retour arrière.
 
+## Caves à vin, lancement masqué (24/11/2026)
+
+Approbation board `bd50d2b9-b5e3-4fd8-a16b-51dd75b69808` (GOU-2629), mise en œuvre GOU-2632. La verticale `wine-cooler` est
+créée avec `enabled: false` ; ces seuils s'appliquent dès le premier batch.
+
+| Verticale | `v2.eprelRequired` | `v2.minRealWeightCoverage` | `minRatedForPositionLabel` |
+|---|---|---|---|
+| `wine-cooler` | `true` | 0,50 | 100 |
+
 ## Congélateurs (`freezer`) : lancement masqué (24/11/2026)
 
 - **Décision** : seuils approuvés par Goulven le 24/11/2026 (approbation board `a4a2ec0a` ; GOU-2628, GOU-2631). Fiche : document `qualification-freezer` de GOU-2628.

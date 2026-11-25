@@ -1,0 +1,85 @@
+# Search-intent subcategory for the smartphones vertical.
+# Maintained: 2026-11-25 by Growth (GOU-2666).
+# Intent: choosing a smartphone by internal storage (512 GB).
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 28 days to 2026-11-24, FRA): no impression on the
+#     question "128 ou 256 Go" nor on any query containing "stockage" (new
+#     query, non mesuré).
+#   - Google Autocomplete: non mesuré (no direct access); web search (2026-11-25)
+#     shows the question answered by Actunumerique, ComparatifMobile, Combak,
+#     Samsung and others.
+# Feasibility:
+#   - Matching products with at least one offer: 508 (Elasticsearch products-moustik,
+#     vertical smartphones, offersCount >= 1, STORAGE_CAPACITY.numericValue from 512 to under 1024,
+#     checked 2026-11-25).
+#   - Overlaps the generic subsets storage_basic / storage_large / storage_xl of
+#     verticals/smartphones.yml (<=128, 129-256, >256 GB): different pages and slugs.
+# Rationale:
+#   - Answers the storage question with a deterministic numeric filter, so the
+#     practical sheet can link each answer to a matching listing.
+id: "smartphones_512gb"
+slug:
+  en: "512gb-smartphone"
+  fr: "smartphone-512-go"
+h1Title:
+  en: "512 GB smartphones"
+  fr: "Smartphones 512 Go"
+description:
+  en: |-
+    Compare **smartphones with 512 GB of storage**, with warranty, repairability and Impact Score data to compare models.
+  fr: |-
+    Comparez les **smartphones de 512 Go de stockage**, avec la garantie, la réparabilité et l'Impact Score pour comparer les modèles.
+metaTitle:
+  en: "512 GB smartphones: compare models | Nudger"
+  fr: "Smartphones 512 Go : comparer | Nudger"
+metaDescription:
+  en: "Compare smartphones with 512 GB of storage by warranty, repairability and Impact Score before choosing the right capacity."
+  fr: "Comparez les smartphones de 512 Go selon la garantie, la réparabilité et l'Impact Score avant de choisir la bonne capacité."
+metaOpenGraphTitle:
+  en: "Compare 512 GB smartphones"
+  fr: "Comparer les smartphones 512 Go"
+metaOpenGraphDescription:
+  en: "A focused selection of 512 GB smartphones with practical comparison data."
+  fr: "Une sélection ciblée de smartphones 512 Go avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-cellphone"
+  title:
+    en: "For heavy creative use"
+    fr: "Pour les usages créatifs"
+  body:
+    en: |-
+      This page lists smartphones with 512 GB of internal storage.
+    fr: |-
+      Cette page ne liste que des smartphones de 512 Go de stockage interne.
+readMore:
+  title:
+    en: "Is 512 GB the right storage for a smartphone?"
+    fr: "512 Go, est-ce la bonne capacité pour un smartphone ?"
+  shortText:
+    en: |-
+      512 GB suits video editing and large local libraries. This page lists only 512 GB models so you compare like for like.
+    fr: |-
+      512 Go conviennent au montage vidéo et aux grandes bibliothèques locales. Cette page ne liste que des modèles de 512 Go, pour comparer à capacité égale.
+  longText:
+    en: |-
+      Storage is rarely expandable, so choose the capacity at purchase. Then compare
+      warranty, repairability and Impact Score: they matter more for the lifespan
+      of the phone than the storage itself.
+
+      Nudger keeps this page on a bounded storage range. Each product stays
+      comparable on Impact Score, offers and technical attributes.
+    fr: |-
+      Le stockage est rarement extensible : choisissez la capacité à l'achat.
+      Comparez ensuite la garantie, la réparabilité et l'Impact Score, qui pèsent
+      davantage que la capacité sur la durée de vie du téléphone.
+
+      Nudger garde cette page sur une plage de stockage bornée. Chaque produit
+      reste comparable sur l'Impact Score, les offres et les caractéristiques
+      techniques.
+activatedFilters:
+  - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "512"
+  - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+    operator: "LOWER_THAN"
+    value: "1024"

@@ -26,8 +26,8 @@
               {{ formatDate(entry.date) }}
             </time>
             <span v-else>{{ t('impactScoreVersionsPage.noDate') }}</span>
-            <span v-if="entry.status === 'planned'">
-              · {{ t('impactScoreVersionsPage.planned') }}
+            <span v-if="entry.status === 'partial'">
+              · {{ t('impactScoreVersionsPage.partial') }}
             </span>
           </p>
           <p class="text-body-2 mb-3">
@@ -71,7 +71,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import {
-  IMPACT_SCORE_CURRENT_METHOD_VERSION,
   IMPACT_SCORE_VERSIONS,
   IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
 } from '~~/shared/utils/impact-score-versions'
@@ -108,7 +107,6 @@ useHead(() => ({
           description: String(t('impactScoreVersionsPage.seo.description')),
           url: canonicalUrl.value,
           dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
           inLanguage: locale.value,
         })
       ),

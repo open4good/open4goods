@@ -1333,7 +1333,7 @@
     "intro": "L'Impact Score évolue. Chaque version de la méthode est datée ; une note n'est comparée qu'à des notes de la même version.",
     "backLink": "← L'Impact Score",
     "noDate": "Depuis l'origine",
-    "planned": "Annoncée, pas encore en vigueur",
+    "partial": "En vigueur par catégorie ; la version 1 reste en vigueur pour les autres",
     "scopeLabel": "Catégories concernées :",
     "changeLabel": "Changement :",
     "reasonLabel": "Raison :",
@@ -1344,7 +1344,7 @@
     "entries": {
       "v2": {
         "title": "Version 2",
-        "scope": "Catégories basculées une à une ; aucune n'est concernée tant que la version 2 n'est pas annoncée comme en vigueur.",
+        "scope": "Réfrigérateurs et lave-vaisselle (depuis le 16 novembre 2026), lave-linge, fours et smartphones (depuis le 25 novembre 2026). Les autres catégories restent en version 1 ; les deux versions coexistent, catégorie par catégorie.",
         "changes": [
           {
             "change": "Une note n'est calculée qu'à partir des critères réellement renseignés ; le poids des critères absents est réparti sur les critères renseignés.",
@@ -1384,7 +1384,7 @@
       },
       "v1": {
         "title": "Version 1",
-        "scope": "Toutes les catégories notées.",
+        "scope": "Toutes les catégories notées à l'origine. Elle reste en vigueur pour les catégories pas encore passées en version 2.",
         "changes": [
           {
             "change": "Première méthode : note sur 20, moyenne pondérée de critères par catégorie, normalisés par rapport aux produits de la catégorie ; une valeur moyenne est attribuée aux critères absents.",
