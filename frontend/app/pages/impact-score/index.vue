@@ -125,7 +125,6 @@
       </section>
 
       <ImpactScoreDocsPanel class="impact-score-page__section" />
-
     </v-container>
   </div>
 </template>
@@ -141,10 +140,7 @@ import ImpactScoreHero from '~/components/impact-score/ImpactScoreHero.vue'
 import ImpactScoreMethodology from '~/components/impact-score/ImpactScoreMethodology.vue'
 import ImpactScoreDocsPanel from '~/components/impact-score/ImpactScoreDocsPanel.vue'
 
-import {
-  IMPACT_SCORE_CURRENT_METHOD_VERSION,
-  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-} from '~~/shared/utils/impact-score-versions'
+import { IMPACT_SCORE_VERSIONS_LAST_MODIFIED } from '~~/shared/utils/impact-score-versions'
 import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
 
 const NOT_ITEM_KEYS = ['lca', 'footprint', 'label', 'perfect', 'advice']
@@ -211,7 +207,6 @@ useHead(() => ({
           description: String(t('impactScorePage.seo.description')),
           url: canonicalUrl.value,
           dateModified: IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-          version: IMPACT_SCORE_CURRENT_METHOD_VERSION,
           inLanguage: locale.value,
           aboutName: 'Impact Score',
         })
