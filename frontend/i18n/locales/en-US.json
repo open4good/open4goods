@@ -1091,6 +1091,9 @@
     "boolean": {
       "false": "No",
       "true": "Yes"
+    },
+    "errors": {
+      "clientToast": "Something went wrong. Please try again or reload the page."
     }
   },
   "components": {

@@ -185,7 +185,7 @@ describe('CategoryImpactMethod', () => {
     const hrefs = mountMethod(stats)
       .findAll('a')
       .map(a => a.attributes('href'))
-    expect(hrefs).toContain('/partners')
+    expect(hrefs).toContain('/partenaires')
     expect(hrefs).toContain('/contact')
   })
 

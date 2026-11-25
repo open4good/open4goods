@@ -1,5 +1,6 @@
 export type DomainLanguage = 'en' | 'fr'
-export type NuxtLocale = 'en-US' | 'fr-FR'
+// The English locale was retired (GOU-2696, D4): nudger.fr is the only site.
+export type NuxtLocale = 'fr-FR'
 
 export const DEFAULT_DOMAIN_LANGUAGE: DomainLanguage = 'fr'
 export const DEFAULT_NUXT_LOCALE: NuxtLocale = 'fr-FR'
@@ -8,14 +9,15 @@ export const HOST_DOMAIN_LANGUAGE_MAP: Record<string, DomainLanguage> = {
   'nudger.fr': 'fr',
   localhost: 'fr',
   'beta.nudger.fr': 'fr',
-  'nudger.com': 'en',
-  'www.nudger.com': 'en',
-  '127.0.0.1': 'en',
+  // nudger.com only serves a static page / redirects to nudger.fr (Ops, lot H);
+  // should it reach the app, it is served in French.
+  'nudger.com': 'fr',
+  'www.nudger.com': 'fr',
+  '127.0.0.1': 'fr',
 }
 
 export const PRIMARY_LOCALE_HOSTS: Record<NuxtLocale, string> = {
   'fr-FR': 'nudger.fr',
-  'en-US': 'nudger.com',
 }
 
 export interface NuxtI18nLocaleDomains {
@@ -24,7 +26,7 @@ export interface NuxtI18nLocaleDomains {
 }
 
 const DOMAIN_LANGUAGE_TO_LOCALE_MAP: Record<DomainLanguage, NuxtLocale> = {
-  en: 'en-US',
+  en: 'fr-FR',
   fr: 'fr-FR',
 }
 
@@ -155,32 +157,6 @@ export const getDomainLanguageFromHostname = (
   hostname: string | null
 ): DomainLanguageResolution =>
   resolveDomainLanguage(hostname, { logUnknownHost: false })
-
-export interface ProductHreflangLink {
-  rel: 'alternate'
-  hreflang: NuxtLocale | 'x-default'
-  href: string
-}
-
-/**
- * Product pages have no per-locale slug — there is no English content to
- * alternate to on nudger.com. Only emit fr-FR + x-default, both pointing at
- * the canonical nudger.fr path, so hreflang never advertises a 404.
- */
-export const buildProductHreflangLinks = (
-  canonicalPath: string,
-  protocol: string = 'https:'
-): ProductHreflangLink[] => {
-  const frenchHref = new URL(
-    canonicalPath,
-    `${protocol}//${PRIMARY_LOCALE_HOSTS['fr-FR']}`
-  ).toString()
-
-  return [
-    { rel: 'alternate', hreflang: 'fr-FR', href: frenchHref },
-    { rel: 'alternate', hreflang: 'x-default', href: frenchHref },
-  ]
-}
 
 export const DEFAULT_DOMAIN_LANGUAGE_RESOLUTION: DomainLanguageResolution = {
   domainLanguage: DEFAULT_DOMAIN_LANGUAGE,

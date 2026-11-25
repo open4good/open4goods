@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. This logic is centralised in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) so that both client and server share the same mapping between hostnames, domain language codes (`'en' | 'fr'`), and Nuxt locales (`'en-US' | 'fr-FR'`). The helper now also exposes `buildI18nLocaleDomains()`, allowing [`nuxt.config.ts`](../nuxt.config.ts) to hydrate each locale definition with its canonical domain plus any alternates (e.g. `localhost`) without duplicating configuration. With `differentDomains: true` enabled, the i18n module can reuse the same mapping for host-based locale detection while our plugin keeps SSR and CSR aligned. The default locale is French (`DEFAULT_DOMAIN_LANGUAGE = 'fr'` / `DEFAULT_NUXT_LOCALE = 'fr-FR'`) to match the live site at `nudger.fr`.
+The Nuxt 3 frontend determines the active language on every request by inspecting the incoming hostname. This logic is centralised in [`shared/utils/domain-language.ts`](../shared/utils/domain-language.ts) so that both client and server share the same mapping between hostnames, domain language codes (`'en' | 'fr'`), and Nuxt locales (`'fr-FR'` only). The helper now also exposes `buildI18nLocaleDomains()`, allowing [`nuxt.config.ts`](../nuxt.config.ts) to hydrate each locale definition with its canonical domain plus any alternates (e.g. `localhost`) without duplicating configuration. With `differentDomains: true` enabled, the i18n module can reuse the same mapping for host-based locale detection while our plugin keeps SSR and CSR aligned. The default locale is French (`DEFAULT_DOMAIN_LANGUAGE = 'fr'` / `DEFAULT_NUXT_LOCALE = 'fr-FR'`) to match the live site at `nudger.fr`.
 
 The helper is consumed by:
 
@@ -28,16 +28,28 @@ Top-level routes now expose translated slugs per locale through [`shared/utils/l
 
 ### Sharing the configuration with Nuxt i18n
 
-`buildI18nPagesConfig()` exports the same mapping as a structure that Nuxt i18n understands. `nuxt.config.ts` feeds this output to the `pages` option, ensuring the module registers translated aliases and generates `<link rel="alternate">` tags for SEO. Keeping the data in one place guarantees SSR, CSR, and server routes all agree on which slug belongs to which locale.
+`buildI18nPagesConfig()` exports the same mapping as a structure that Nuxt i18n understands. `nuxt.config.ts` feeds this output to the `pages` option, ensuring the module registers translated route aliases. Keeping the data in one place guarantees SSR, CSR, and server routes all agree on which slug belongs to which locale.
+
+## English locale retired (GOU-2696, decision D4)
+
+The `en-US` locale, the English domains in `site.config.ts`, the `default/*.xml` local sitemaps and every `hreflang` alternate were removed: nudger.com is only a static page, so alternates pointed at French pages or 404s. Pages emit no `hreflang`; do not reintroduce one without a real translated site. `i18n/locales/en-US.*` remain only because specs import them.
+
+## Indexing rules (GOU-2696)
+
+- Internal tools and developer docs (`NOINDEX_PATH_PREFIXES` in `shared/utils/sitemap-config.ts`) and `/rechercher` with any query carry `noindex, follow` (plugin `app/plugins/noindex-routes.ts`) and are filtered out of `main-pages.xml`.
+- Product pages: invalid GTIN (all zeros, wrong check digit) answers 404; no vertical means `noindex, follow`.
+- A backend failure during SSR (product, category, vertical detail) answers 503 with `Retry-After`, never a 200 banner nor a noindex.
+- A client-side failure never replaces a server-rendered page by `error.vue`: a toast is shown (`app/plugins/client-error-toast.client.ts`).
+- `/api/*` answers `X-Robots-Tag: noindex`.
 
 ## Current hostname mapping
 
-| Hostname     | Domain language | Nuxt locale | Notes                                         |
-| ------------ | --------------- | ----------- | --------------------------------------------- |
-| `nudger.fr`  | `fr`            | `fr-FR`     | Default production site and canonical locale. |
-| `nudger.com` | `en`            | `en-US`     | English production domain.                    |
-| `localhost`  | `fr`            | `fr-FR`     | Development override for local browsers.      |
-| `127.0.0.1`  | `en`            | `en-US`     | Development override for English testing.     |
+| Hostname     | Domain language | Nuxt locale | Notes                                                     |
+| ------------ | --------------- | ----------- | --------------------------------------------------------- |
+| `nudger.fr`  | `fr`            | `fr-FR`     | Default production site and canonical locale.             |
+| `nudger.com` | `fr`            | `fr-FR`     | Static Apache page; redirect to nudger.fr handled by Ops. |
+| `localhost`  | `fr`            | `fr-FR`     | Development override for local browsers.                  |
+| `127.0.0.1`  | `fr`            | `fr-FR`     | Development override.                                     |
 
 _IPv6 loopback (`::1`) is intentionally ignored so that dual-stack machines fall back to the default French locale._
 

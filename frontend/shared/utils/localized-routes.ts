@@ -1,7 +1,7 @@
 import type { NuxtLocale } from './domain-language'
 import { DEFAULT_NUXT_LOCALE } from './domain-language'
 
-const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['en-US', 'fr-FR'] as const
+const SUPPORTED_LOCALES: readonly NuxtLocale[] = ['fr-FR'] as const
 
 export type LocalizedRouteName =
   | 'compare'
@@ -34,18 +34,10 @@ export const LOCALIZED_WIKI_PATHS = {
       path: '/mentions-legales',
       pageId: 'webpages:default:legal-notice:WebHome',
     },
-    'en-US': {
-      path: '/legal-notice',
-      pageId: 'webpages:default:legal-notice:WebHome',
-    },
   },
   'data-privacy': {
     'fr-FR': {
       path: '/politique-confidentialite',
-      pageId: 'webpages:default:data-privacy:WebHome',
-    },
-    'en-US': {
-      path: '/data-privacy',
       pageId: 'webpages:default:data-privacy:WebHome',
     },
   },
@@ -73,27 +65,21 @@ const LOCALIZED_WIKI_ROUTE_PATHS =
 export const LOCALIZED_ROUTE_PATHS: LocalizedRoutePaths = {
   search: {
     'fr-FR': '/rechercher',
-    'en-US': '/search',
   },
   compare: {
     'fr-FR': '/comparer',
-    'en-US': '/compare',
   },
   partners: {
     'fr-FR': '/partenaires',
-    'en-US': '/partners',
   },
   team: {
     'fr-FR': '/equipe',
-    'en-US': '/team',
   },
   'ranking-and-listing': {
     'fr-FR': '/classement-et-referencement',
-    'en-US': '/ranking-and-listing',
   },
   releases: {
     'fr-FR': '/versions',
-    'en-US': '/releases',
   },
   ...LOCALIZED_WIKI_ROUTE_PATHS,
 } satisfies LocalizedRoutePaths

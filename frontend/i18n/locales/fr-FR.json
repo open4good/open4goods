@@ -969,6 +969,9 @@
     "boolean": {
       "false": "Non",
       "true": "Oui"
+    },
+    "errors": {
+      "clientToast": "Une erreur est survenue. Merci de réessayer ou de recharger la page."
     }
   },
   "components": {

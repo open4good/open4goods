@@ -8,26 +8,6 @@ const loadModule = async () => {
 }
 
 describe('getMainPagePathsForDomainLanguage', () => {
-  it('returns unique english paths', async () => {
-    const { getMainPagePathsForDomainLanguage } = await loadModule()
-    const paths = getMainPagePathsForDomainLanguage('en')
-    const unique = new Set(paths)
-
-    expect(paths.length).toBe(unique.size)
-    expect(paths).toContain('/')
-    expect(paths).toContain('/team')
-    expect(paths).toContain('/partners')
-    expect(paths).toContain('/legal-notice')
-    expect(paths).toContain('/data-privacy')
-    expect(paths).toContain('/ranking-and-listing')
-    expect(paths).toContain('/impact-score')
-    expect(paths).toContain('/impact-score/versions')
-    expect(paths).toContain('/opendata/gtin')
-    expect(paths).toContain('/opendata/isbn')
-    expect(paths).toContain('/opensource')
-    expect(paths).not.toContain('/offline')
-  })
-
   it('returns localized french paths', async () => {
     const { getMainPagePathsForDomainLanguage } = await loadModule()
     const paths = getMainPagePathsForDomainLanguage('fr')
@@ -55,9 +35,9 @@ describe('getMainPagePathsForDomainLanguage', () => {
     ])
 
     const { getMainPagePathsForDomainLanguage } = await loadModule()
-    const paths = getMainPagePathsForDomainLanguage('en')
+    const paths = getMainPagePathsForDomainLanguage('fr')
 
-    expect(paths).toContain('/team')
+    expect(paths).toContain('/equipe')
     expect(paths).not.toContain('/offline')
     expect(paths).not.toContain('/offline/')
 

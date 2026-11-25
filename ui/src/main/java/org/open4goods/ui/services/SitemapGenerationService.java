@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import ch.qos.logback.classic.Level;
 import cz.jiripinkas.jsitemapgenerator.AbstractGenerator;
-import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
 import cz.jiripinkas.jsitemapgenerator.WebPage;
 import cz.jiripinkas.jsitemapgenerator.generator.SitemapGenerator;
 import cz.jiripinkas.jsitemapgenerator.generator.SitemapIndexGenerator;
@@ -172,16 +172,19 @@ public class SitemapGenerationService {
 	 */
 	private boolean generateLanguage(String lang, String baseUrl) {
 		boolean success = true;
+		// Latest product change per vertical id, filled by the product pass and used as the
+		// category pages' lastmod.
+		Map<String, Date> verticalLastMods = new HashMap<>();
 
 		try {
-			success &= writeProductPages(baseUrl, lang);
+			success &= writeProductPages(baseUrl, lang, verticalLastMods);
 		} catch (IOException | RuntimeException e) {
 			LOGGER.error("Error while generating product sitemap for language {}", lang, e);
 			success = false;
 		}
 
 		try {
-			writeSitemap(addVerticalPages(baseUrl, lang), SITEMAP_NAME_VERTICAL_PAGES, lang);
+			writeSitemap(addVerticalPages(baseUrl, lang, verticalLastMods), SITEMAP_NAME_VERTICAL_PAGES, lang);
 		} catch (IOException | RuntimeException e) {
 			LOGGER.error("Error while generating category sitemap for language {}", lang, e);
 			success = false;
@@ -222,11 +225,12 @@ public class SitemapGenerationService {
 	 *
 	 * @param baseUrl  site base URL for the target language
 	 * @param language language key of {@code namings.baseUrls}
+	 * @param verticalLastMods receives, per vertical id, the latest product {@code lastChange}
 	 * @return {@code true} when the file was written, {@code false} when the
 	 *         language has no domain language
 	 * @throws IOException when the file cannot be written
 	 */
-	private boolean writeProductPages(String baseUrl, String language) throws IOException {
+	private boolean writeProductPages(String baseUrl, String language, Map<String, Date> verticalLastMods) throws IOException {
 		DomainLanguage domainLanguage = toDomainLanguage(language);
 		if (domainLanguage == null) {
 			LOGGER.error("No domain language for sitemap language '{}', product sitemap not generated", language);
@@ -248,7 +252,10 @@ public class SitemapGenerationService {
 					Date lastMod = product.getLastChange() > 0
 							? Date.from(Instant.ofEpochMilli(product.getLastChange()))
 							: null;
-					sitemap = sitemap.addPage(getWebPage(path.substring(1), ChangeFreq.DAILY, 1.0, lastMod));
+					if (lastMod != null) {
+						verticalLastMods.merge(vertical.getId(), lastMod, (a, b) -> a.after(b) ? a : b);
+					}
+					sitemap = sitemap.addPage(getWebPage(path.substring(1), lastMod));
 				}
 			}
 		}
@@ -331,18 +338,20 @@ public class SitemapGenerationService {
 	 *
 	 * @param baseUrl  site base URL for the target language
 	 * @param language BCP-47 language tag
+	 * @param verticalLastMods latest product change per vertical id, {@code lastmod} of its pages
 	 * @return the category sitemap
 	 */
-	private SitemapGenerator addVerticalPages(String baseUrl, String language) {
+	private SitemapGenerator addVerticalPages(String baseUrl, String language, Map<String, Date> verticalLastMods) {
 		SitemapGenerator sitemap = SitemapGenerator.of(baseUrl);
 		for (VerticalConfig v : verticalsConfigService.getConfigsWithoutDefault(true)) {
 			ProductI18nElements i18n = v.i18n(language);
+			Date lastMod = verticalLastMods.get(v.getId());
 
 			// Vertical home page
-			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl(), ChangeFreq.WEEKLY, 1.0));
+			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl(), lastMod));
 
 			// Impact Score method page of the vertical (rendered by app/pages/[categorySlug]/ecoscore.vue)
-			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl() + "/ecoscore", ChangeFreq.MONTHLY, 0.7));
+			sitemap = sitemap.addPage(getWebPage(baseUrl + i18n.getVerticalHomeUrl() + "/ecoscore", lastMod));
 
 			// Sub-category pages (inline + auto-generated from categories/*.yml)
 			for (VerticalSubCategory subCategory : v.getSubCategories()) {
@@ -352,14 +361,14 @@ public class SitemapGenerationService {
 				}
 				String url = baseUrl + i18n.getVerticalHomeUrl() + "/" + subCategorySlug;
 				LOGGER.debug("Adding sub-category page to sitemap : {}", url);
-				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.WEEKLY, 0.9));
+				sitemap = sitemap.addPage(getWebPage(url, lastMod));
 			}
 
 			// Buying guide pages discovered from guides/{vertical-id}/*.md
 			for (String guideSlug : v.getGuides()) {
 				String url = baseUrl + i18n.getVerticalHomeUrl() + "/" + guideSlug;
 				LOGGER.debug("Adding guide page to sitemap : {}", url);
-				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
+				sitemap = sitemap.addPage(getWebPage(url, lastMod));
 			}
 
 			// Vertical-specific editorial pages (rendered by CategoryPage.vue /
@@ -367,7 +376,7 @@ public class SitemapGenerationService {
 			for (WikiPageConfig wikiPage : i18n.getWikiPages()) {
 				String url = baseUrl + i18n.getVerticalHomeUrl() + "/" + wikiPage.getVerticalUrl();
 				LOGGER.debug("Adding to sitemap : {}", url);
-				sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.9));
+				sitemap = sitemap.addPage(getWebPage(url, lastMod));
 			}
 		}
 		return sitemap;
@@ -395,7 +404,7 @@ public class SitemapGenerationService {
 		for (String guideSlug : guides) {
 			String url = baseUrl + "guides/" + guideSlug;
 			LOGGER.debug("Adding default guide page to sitemap : {}", url);
-			sitemap = sitemap.addPage(getWebPage(url, ChangeFreq.MONTHLY, 0.8));
+			sitemap = sitemap.addPage(getWebPage(url, null));
 		}
 
 		writeSitemap(sitemap, SITEMAP_NAME_DEFAULT_GUIDES, language);
@@ -447,30 +456,15 @@ public class SitemapGenerationService {
 	}
 
 	/**
-	 * Builds a {@link WebPage} with no last-modification date.
+	 * Builds a {@link WebPage} with an optional last-modification date. No
+	 * {@code changefreq} nor {@code priority}: they were uniform and search engines ignore them.
 	 *
-	 * @param path       page path relative to the base URL
-	 * @param changeFreq expected change frequency
-	 * @param priority   sitemap priority (0.0-1.0)
+	 * @param path    page path relative to the base URL
+	 * @param lastMod last modification date, or {@code null} to omit the field
 	 * @return configured {@link WebPage}
 	 */
-	private WebPage getWebPage(String path, ChangeFreq changeFreq, double priority) {
-		return getWebPage(path, changeFreq, priority, null);
-	}
-
-	/**
-	 * Builds a {@link WebPage} with an optional last-modification date.
-	 *
-	 * @param path       page path relative to the base URL
-	 * @param changeFreq expected change frequency
-	 * @param priority   sitemap priority (0.0-1.0)
-	 * @param lastMod    last modification date, or {@code null} to omit the field
-	 * @return configured {@link WebPage}
-	 */
-	private WebPage getWebPage(String path, ChangeFreq changeFreq, double priority, Date lastMod) {
+	private WebPage getWebPage(String path, Date lastMod) {
 		WebPage w = WebPage.of(path);
-		w.setChangeFreq(changeFreq);
-		w.setPriority(priority);
 		if (lastMod != null) {
 			w.setLastMod(lastMod);
 		}

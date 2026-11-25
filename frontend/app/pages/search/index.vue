@@ -465,7 +465,7 @@ const VERTICAL_RESULTS_LIMIT = 4
 const SINGLE_VERTICAL_RESULTS_LIMIT = 8
 const isDev = process.env.NODE_ENV === 'development'
 
-const { t, locale, availableLocales } = useI18n()
+const { t, locale } = useI18n()
 const { mdAndUp } = useDisplay()
 const { translatePlural } = usePluralizedTranslation()
 const { trackSearch } = useAnalytics()
@@ -1345,16 +1345,6 @@ const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 const ogImageAlt = computed(() => String(t('search.seo.imageAlt')))
-const alternateLinks = computed(() =>
-  availableLocales.map(availableLocale => ({
-    rel: 'alternate' as const,
-    hreflang: availableLocale,
-    href: new URL(
-      localePath({ name: 'search' }, availableLocale),
-      requestURL.origin
-    ).toString(),
-  }))
-)
 
 useSeoMeta({
   title: () => String(t('search.seo.title')),
@@ -1372,7 +1362,6 @@ useSeoMeta({
 useHead(() => ({
   link: [
     { rel: 'canonical', href: canonicalUrl.value },
-    ...alternateLinks.value,
   ],
 }))
 

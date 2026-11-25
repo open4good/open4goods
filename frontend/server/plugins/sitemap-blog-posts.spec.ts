@@ -80,14 +80,4 @@ describe('sitemap-blog-posts plugin', () => {
       { loc: '/blog/second-post', lastmod: '2026-01-01T00:00:00Z' },
     ])
   })
-
-  it('skips the english domain, which has no blog content yet', async () => {
-    const callback = runPlugin()
-    setRequestHost('nudger.com')
-
-    await callback(mockCtx)
-
-    expect(listBlogDocs).not.toHaveBeenCalled()
-    expect(mockCtx.sources).toHaveLength(0)
-  })
 })
