@@ -105,6 +105,8 @@ const MAX_SLA_SECONDS = 4
 definePageMeta({
   layout: 'default',
   ssr: true,
+  // Per-visitor page: kept out of shared caches (GOU-2700).
+  htmlCache: false,
 })
 
 const { t } = useI18n()

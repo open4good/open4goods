@@ -25,6 +25,7 @@ owned, and linked from this index when they become durable project knowledge.
 - [Service secrets, beta and prod (render + restart)](operations/prod-service-secrets.md)
 - [Infrastructure secrets, beta and prod (wave 3 runbook)](operations/infra-secrets-rotation.md)
 - [Frontend asset hardening](operations/frontend-asset-hardening.md)
+- [HTML edge cache (Cloudflare)](operations/html-edge-cache.md)
 - [Production log triage](operations/production-log-triage.md)
 - [Products index mapping at startup, api only (GOU-1835)](operations/product-index-mapping.md)
 - [Recreated products and lost verticals, count and repair (GOU-1700)](operations/product-recreation-recovery.md)

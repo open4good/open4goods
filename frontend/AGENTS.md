@@ -43,7 +43,7 @@
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
 - Format dates rendered during SSR with an explicit `timeZone` (`Intl.DateTimeFormat`, `getUTC*`): the server runs in UTC and the browser in the user's zone, so an implicit zone causes hydration mismatches.
-- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226).
+- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226). The server never sets the `csrf_token` cookie: SSR calls use a per-render token kept in `event.context`, and the browser client creates the cookie right before its first unsafe call (GOU-2700). Never set a cookie on a page response.
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
 - All static texts must be internationalised
 - Also write or update tests (component-level tests) if pertinent
@@ -121,6 +121,12 @@ Every code that is produced MUST me validated using :
 ## SEO metadata policy
 
 - Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources. Twitter-specific tags are not allowed.
+
+## Server-rendered HTML caching
+
+- `server/plugins/html-cache-control.ts` sets `Cache-Control` on every rendered page: public (`s-maxage`) for anonymous visitors, `private, no-store` with an auth cookie, a dark theme cookie, a `Set-Cookie` or a page opt-out, `no-store` for errors and renders where an internal call failed (GOU-2700). See `docs/operations/html-edge-cache.md`.
+- Anything that varies per visitor in the SSR of a public page must render client-side (`onMounted`, `<ClientOnly>`), or be covered by that policy and the Cloudflare rule. A page whose whole HTML is per visitor declares `definePageMeta({ htmlCache: false })`.
+- Server-side device detection reads `CF-Device-Type` first (`shared/utils/ssr-device.ts`), the device class of the edge cache key.
 
 ## Backend API authentication and caching guidelines
 
