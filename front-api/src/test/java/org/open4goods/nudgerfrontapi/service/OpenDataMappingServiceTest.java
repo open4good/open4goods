@@ -150,6 +150,6 @@ class OpenDataMappingServiceTest {
 
     private static DatasetManifest dataset(String id, long rows, long bytes, String sha256, String generatedAt) {
         return new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, id + "-open-data.zip", null,
-                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, bytes, sha256, rows, rows, generatedAt, List.of());
+                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, bytes, sha256, rows, rows, generatedAt, List.of(), 1);
     }
 }
