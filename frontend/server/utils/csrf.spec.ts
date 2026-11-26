@@ -1,7 +1,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
-import { assertCsrfToken, assertSameOrigin, ensureCsrfCookie } from './csrf'
-import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from '~~/shared/utils/csrf'
+import {
+  assertCsrfToken,
+  assertSameOrigin,
+  ensureCsrfContextToken,
+} from './csrf'
+import { CSRF_HEADER_NAME } from '~~/shared/utils/csrf'
 
 const getCookieMock = vi.hoisted(() => vi.fn())
 const setCookieMock = vi.hoisted(() => vi.fn())
@@ -25,7 +29,7 @@ vi.mock('h3', async importOriginal => ({
 
 describe('csrf utilities', () => {
   const event = { context: {} } as unknown as Parameters<
-    typeof ensureCsrfCookie
+    typeof ensureCsrfContextToken
   >[0]
   const originalEnv = process.env.NODE_ENV
 
@@ -41,10 +45,10 @@ describe('csrf utilities', () => {
     process.env.NODE_ENV = originalEnv
   })
 
-  it('reuses an existing CSRF cookie', () => {
+  it('reuses an existing CSRF cookie without setting one', () => {
     getCookieMock.mockReturnValue('existing-token')
 
-    const token = ensureCsrfCookie(event)
+    const token = ensureCsrfContextToken(event)
 
     expect(token).toBe('existing-token')
     expect(setCookieMock).not.toHaveBeenCalled()
@@ -55,20 +59,15 @@ describe('csrf utilities', () => {
     ).toBe('existing-token')
   })
 
-  it('sets a CSRF cookie when missing', () => {
+  it('never sets a CSRF cookie when missing, so anonymous HTML stays cacheable', () => {
     getCookieMock.mockReturnValue(undefined)
 
-    const token = ensureCsrfCookie(event)
+    const token = ensureCsrfContextToken(event)
 
     expect(token).toBe('csrf-token-123')
-    expect(setCookieMock).toHaveBeenCalledWith(event, CSRF_COOKIE_NAME, token, {
-      httpOnly: false,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-      maxAge: 60 * 60 * 24,
-    })
-    // Token should be stored in event context so SSR plugin can read it on first visit
+    // GOU-2700: a Set-Cookie on an anonymous page keeps the CDN from caching it.
+    expect(setCookieMock).not.toHaveBeenCalled()
+    // The per-render token lives only in the server context for internal SSR calls
     expect(
       (event as unknown as { context: Record<string, unknown> }).context
         .csrfToken

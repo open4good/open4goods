@@ -1,17 +1,13 @@
 import { randomUUID } from 'node:crypto'
 
 import type { H3Event } from 'h3'
-import { createError, getCookie, getRequestHeader, setCookie } from 'h3'
+import { createError, getCookie, getRequestHeader } from 'h3'
 
 import {
   CSRF_COOKIE_NAME,
   CSRF_HEADER_NAME,
   isSafeMethod,
 } from '~~/shared/utils/csrf'
-
-const CSRF_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24
-
-const isProduction = () => process.env.NODE_ENV === 'production'
 
 const getRequestHost = (event: H3Event) =>
   getRequestHeader(event, 'x-forwarded-host') || getRequestHeader(event, 'host')
@@ -46,30 +42,17 @@ const resolveRefererHost = (referer?: string | null) => {
   }
 }
 
-export const ensureCsrfCookie = (event: H3Event) => {
-  const existingToken = getCookie(event, CSRF_COOKIE_NAME)
-
-  if (existingToken) {
-    // Expose the token in the event context so the Nuxt plugin can read it during SSR
-    // even on the first request when useCookie only sees incoming (request) cookies.
-    event.context.csrfToken = existingToken
-    return existingToken
-  }
-
-  const token = randomUUID()
-  setCookie(event, CSRF_COOKIE_NAME, token, {
-    httpOnly: false,
-    sameSite: 'lax',
-    secure: isProduction(),
-    path: '/',
-    maxAge: CSRF_COOKIE_MAX_AGE_SECONDS,
-  })
-
-  // Expose the freshly-generated token in the event context so the Nuxt plugin
-  // can attach it to internal SSR $fetch calls (the response cookie is not yet
-  // readable through useCookie at render time).
+/**
+ * Exposes the request's CSRF token to the internal SSR `$fetch` calls through
+ * `event.context.csrfToken`, without ever issuing a cookie: a `Set-Cookie` on an
+ * anonymous page response would keep the CDN from caching its HTML (GOU-2700).
+ * When the browser has no token yet, a per-render token is generated; it only
+ * lives in this server-side context. The browser creates its own token before
+ * its first unsafe call (`app/utils/_csrf-fetch.ts`).
+ */
+export const ensureCsrfContextToken = (event: H3Event) => {
+  const token = getCookie(event, CSRF_COOKIE_NAME) || randomUUID()
   event.context.csrfToken = token
-
   return token
 }
 

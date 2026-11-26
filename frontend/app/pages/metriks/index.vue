@@ -14,6 +14,11 @@ import { useAuth } from '~/composables/useAuth'
 import { isTopRowsMetrik } from '~/composables/useMetriks'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
 
+definePageMeta({
+  // Per-visitor page: kept out of shared caches (GOU-2700).
+  htmlCache: false,
+})
+
 const { t } = useI18n()
 const route = useRoute()
 const { isLoggedIn, roles } = useAuth()

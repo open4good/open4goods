@@ -6,8 +6,40 @@ import {
   CSRF_HEADER_NAME,
   isSafeMethod,
 } from '~~/shared/utils/csrf'
+import { HTML_CACHE_DEGRADED_CONTEXT_KEY } from '~~/shared/utils/html-cache'
 
 const API_PREFIX = '/api'
+const CSRF_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24
+
+/** Reads one cookie from a `document.cookie` string. */
+export const readCookieValue = (cookies: string, name: string) => {
+  for (const part of cookies.split(';')) {
+    const separator = part.indexOf('=')
+    if (separator === -1 || part.slice(0, separator).trim() !== name) {
+      continue
+    }
+    try {
+      return decodeURIComponent(part.slice(separator + 1).trim()) || undefined
+    } catch {
+      return undefined
+    }
+  }
+  return undefined
+}
+
+/**
+ * `document.cookie` assignment for a browser-created CSRF token. Written
+ * synchronously, so the unsafe request that needed it already carries it: the
+ * server no longer sets this cookie on page responses (GOU-2700).
+ */
+export const buildCsrfCookie = (token: string, secure: boolean) =>
+  [
+    `${CSRF_COOKIE_NAME}=${encodeURIComponent(token)}`,
+    'Path=/',
+    `Max-Age=${CSRF_COOKIE_MAX_AGE_SECONDS}`,
+    'SameSite=Lax',
+    ...(secure ? ['Secure'] : []),
+  ].join('; ')
 
 export interface CsrfFetchDependencies {
   isServer: boolean
@@ -54,8 +86,15 @@ export const createCsrfFetch = ({
   readCookie,
   writeCookie,
   getServerContext,
-}: CsrfFetchDependencies): $Fetch =>
-  $fetch.create({
+}: CsrfFetchDependencies): $Fetch => {
+  const markRenderDegraded = () => {
+    const context = isServer ? getServerContext() : undefined
+    if (context) {
+      context[HTML_CACHE_DEGRADED_CONTEXT_KEY] = true
+    }
+  }
+
+  return $fetch.create({
     onRequest({ request, options }) {
       const method = (options.method ?? 'GET').toString().toUpperCase()
 
@@ -63,11 +102,11 @@ export const createCsrfFetch = ({
         return
       }
 
-      // On the very first SSR request, the CSRF cookie hasn't been sent back to
-      // the browser yet (it lives only in the Set-Cookie response header).
-      // useCookie() reads the *incoming* request cookie, so it returns undefined.
-      // We therefore fall back to event.context.csrfToken which the server
-      // middleware sets immediately after generating (or reading) the token.
+      // During SSR, a visitor without a CSRF cookie has no token to read: the
+      // server never issues the cookie on page responses, so that anonymous HTML
+      // stays cacheable (GOU-2700). We therefore fall back to
+      // event.context.csrfToken, which the server middleware fills with the
+      // incoming cookie or a per-render token that never leaves the server.
       let token = readCookie() ?? null
       if (isServer && !token) {
         const contextToken = getServerContext()?.csrfToken
@@ -80,6 +119,7 @@ export const createCsrfFetch = ({
         if (isServer) {
           return
         }
+        // First unsafe call of this browser: the token is created on demand.
         token = createClientCsrfToken()
         writeCookie(token)
       }
@@ -99,4 +139,13 @@ export const createCsrfFetch = ({
       // Convert back to a plain object to ensure ofetch compatibility
       options.headers = Object.fromEntries(headers.entries())
     },
+    onRequestError() {
+      markRenderDegraded()
+    },
+    onResponseError({ response }) {
+      if (response.status >= 500) {
+        markRenderDegraded()
+      }
+    },
   })
+}

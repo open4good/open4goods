@@ -579,6 +579,7 @@ import {
   matchesCategoryInitialSort,
 } from '~/utils/_category-initial-sort'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
+import { isDesktopRequest } from '~~/shared/utils/ssr-device'
 import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
 const route = useRoute()
@@ -621,37 +622,18 @@ const adminFilterFields = computed<FieldMetadataDto[]>(() => {
 
 const showAdminFilters = computed(() => adminFilterFields.value.length > 0)
 
-const MOBILE_USER_AGENT_PATTERN =
-  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
-
-const resolveUserAgentFromHeader = (
-  headerValue: string | string[] | undefined
-): string | null => {
-  if (!headerValue) {
-    return null
-  }
-
-  if (Array.isArray(headerValue)) {
-    return headerValue[0] ?? null
-  }
-
-  return headerValue
-}
-
 const display = useDisplay()
 
 const initialIsDesktop = useState<boolean>(
   'category-page-initial-is-desktop',
   () => {
     if (import.meta.server) {
-      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
-      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
+      const headers = useRequestHeaders(['user-agent', 'cf-device-type'])
 
-      if (!userAgent) {
-        return true
-      }
-
-      return !MOBILE_USER_AGENT_PATTERN.test(userAgent)
+      return isDesktopRequest({
+        cfDeviceType: headers['cf-device-type'],
+        userAgent: headers['user-agent'],
+      })
     }
 
     return display.lgAndUp.value

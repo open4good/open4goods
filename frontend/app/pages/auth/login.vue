@@ -45,6 +45,11 @@ import { authService } from '~~/shared/api-client/services/auth.services'
 import { isSafeRedirectTarget } from '~~/shared/utils/_safe-redirect'
 import { useAuthStore } from '~/stores/useAuthStore'
 
+definePageMeta({
+  // Per-visitor page: kept out of shared caches (GOU-2700).
+  htmlCache: false,
+})
+
 const username = ref('')
 const password = ref('')
 const loading = ref(false)

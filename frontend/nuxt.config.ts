@@ -578,6 +578,12 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    // Edge cache of anonymous HTML pages (GOU-2700), in seconds. Overridable at
+    // runtime with NUXT_HTML_CACHE_S_MAXAGE / NUXT_HTML_CACHE_STALE_WHILE_REVALIDATE.
+    htmlCache: {
+      sMaxAge: 600,
+      staleWhileRevalidate: 3600,
+    },
     // Google OAuth client id for the confidential "Web" client (GOU-317): the code
     // exchange happens server-side with client_secret, PKCE is kept as defense in
     // depth. The client id itself is not a secret, but must match front-api's
