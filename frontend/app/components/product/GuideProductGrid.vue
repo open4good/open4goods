@@ -43,7 +43,7 @@ import { useI18n } from 'vue-i18n'
 import type {
   Filter,
   ProductDto,
-  ProductSearchResponseDto,
+  ProductCardSearchResponseDto,
   SortRequestDto,
 } from '~~/shared/api-client'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
@@ -52,8 +52,6 @@ import { useAnalytics } from '~/composables/useAnalytics'
 import { useCategories } from '~/composables/categories/useCategories'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
 import { buildFilterRequestFromCriteria } from '~/utils/_subset-to-filters'
-
-const LISTING_INCLUDE = 'base,identity,names,attributes,resources,scores,offers'
 
 const props = withDefaults(
   defineProps<{
@@ -211,11 +209,10 @@ const { data, pending } = await useAsyncData<GridData>(
     const searchFilters = [...subFilters, ...requestFilters.value]
 
     try {
-      const response = await csrfFetch<ProductSearchResponseDto>(
-        '/api/products/search',
+      const response = await csrfFetch<ProductCardSearchResponseDto>(
+        '/api/products/cards',
         {
           method: 'POST',
-          query: { include: LISTING_INCLUDE },
           body: {
             verticalId: normalizedVertical.value,
             pageNumber: 0,

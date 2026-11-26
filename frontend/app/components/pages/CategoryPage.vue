@@ -525,8 +525,8 @@ import type {
   FieldMetadataDto,
   Filter,
   FilterRequestDto,
+  ProductCardSearchResponseDto,
   ProductFieldOptionsResponse,
-  ProductSearchResponseDto,
   SortRequestDto,
   VerticalConfigFullDto,
   VerticalSubsetDto,
@@ -595,16 +595,6 @@ const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
 const { trackFilterChange, trackSortUsage } = useAnalytics()
-const listComponents = [
-  'base',
-  'identity',
-  'names',
-  'attributes',
-  'resources',
-  'scores',
-  'offers',
-]
-const LISTING_COMPONENTS = listComponents.join(',')
 
 type FilterChangeOverrides = Partial<Parameters<typeof trackFilterChange>[0]>
 
@@ -992,17 +982,21 @@ const { data: initialProductsData, error: initialProductsError } =
         return null
       }
 
-      return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
-        method: 'POST',
-        query: { include: LISTING_COMPONENTS },
-        body: {
-          verticalId: verticalId.value,
-          pageNumber: initialPageNumber,
-          pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
-          sort: CATEGORY_INITIAL_SORT,
-          filters: subCategoryBaseFilters.value,
-        },
-      })
+      // Listing cards (GOU-2710): about 4 KB per product instead of the
+      // ~50 KB full DTO, which weighed most of the page payload.
+      return await csrfFetch<ProductCardSearchResponseDto>(
+        '/api/products/cards',
+        {
+          method: 'POST',
+          body: {
+            verticalId: verticalId.value,
+            pageNumber: initialPageNumber,
+            pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+            sort: CATEGORY_INITIAL_SORT,
+            filters: subCategoryBaseFilters.value,
+          },
+        }
+      )
     },
     { server: true, immediate: true }
   )
@@ -1020,7 +1014,7 @@ if (initialProductsError.value) {
   productError.value = t('category.products.fetchError')
 }
 
-const productsData = ref<ProductSearchResponseDto | null>(
+const productsData = ref<ProductCardSearchResponseDto | null>(
   initialProductsData.value ?? null
 )
 watch(initialProductsData, value => {
@@ -2232,11 +2226,10 @@ const fetchProducts = async ({ silent = false }: { silent?: boolean } = {}) => {
   }
 
   try {
-    const response = await csrfFetch<ProductSearchResponseDto>(
-      '/api/products/search',
+    const response = await csrfFetch<ProductCardSearchResponseDto>(
+      '/api/products/cards',
       {
         method: 'POST',
-        query: { include: LISTING_COMPONENTS },
         body: {
           verticalId: verticalId.value,
           pageNumber: pageNumber.value,

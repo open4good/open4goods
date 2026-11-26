@@ -5,6 +5,7 @@ import type {
   FilterRequestDto,
   GlobalSearchRequestDto,
   GlobalSearchResponseDto,
+  ProductCardSearchResponseDto,
   ProductDto,
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
@@ -14,6 +15,7 @@ import type {
 } from '..'
 import type {
   FilterableFieldsForVerticalRequest,
+  ProductCardsRequest,
   ProductsRequest,
   SortableFieldsForVerticalRequest,
 } from '../apis/ProductApi'
@@ -153,6 +155,48 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     }
   }
 
+  /**
+   * Search listing cards (`POST /products/cards`): same contract as
+   * `searchProducts`, but each product is a lightweight `ProductCardDto`
+   * (no attribute sourcing, price history, other scores, videos or PDFs).
+   */
+  const searchProductCards = async (
+    parameters: Omit<ProductCardsRequest, 'domainLanguage'> & {
+      aggs?: AggregationRequestDto
+      sort?: SortRequestDto
+      filters?: FilterRequestDto
+    }
+  ): Promise<ProductCardSearchResponseDto> => {
+    const { aggs, sort, filters, productSearchRequestDto, ...rest } = parameters
+
+    const body: ProductSearchRequestDto | undefined =
+      productSearchRequestDto ??
+      (sort || aggs || filters
+        ? {
+            ...(sort ? { sort } : {}),
+            ...(aggs ? { aggs } : {}),
+            ...(filters ? { filters } : {}),
+          }
+        : undefined)
+
+    const request: ProductCardsRequest = {
+      domainLanguage,
+      ...rest,
+      ...(body ? { productSearchRequestDto: body } : {}),
+    }
+
+    try {
+      return await resolveApi().productCards(request)
+    } catch (error) {
+      console.error(
+        'Error searching product cards with parameters:',
+        request,
+        error
+      )
+      throw error
+    }
+  }
+
   const searchGlobalProducts = async (
     payload: GlobalSearchRequestDto
   ): Promise<GlobalSearchResponseDto> => {
@@ -229,6 +273,7 @@ export const useProductService = (domainLanguage: DomainLanguage) => {
     getFilterableFieldsForVertical,
     getSortableFieldsForVertical,
     searchProducts,
+    searchProductCards,
     searchGlobalProducts,
     fetchSearchSuggestions,
   }

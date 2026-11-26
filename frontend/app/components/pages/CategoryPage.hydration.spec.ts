@@ -37,7 +37,7 @@ mockNuxtImport('useLazyAsyncData', () => (key: string) => ({
 }))
 
 const searchCalls = () =>
-  csrfFetchMock.mock.calls.filter(([url]) => url === '/api/products/search')
+  csrfFetchMock.mock.calls.filter(([url]) => url === '/api/products/cards')
 
 describe('CategoryPage hydration (GOU-2269)', () => {
   beforeEach(() => {

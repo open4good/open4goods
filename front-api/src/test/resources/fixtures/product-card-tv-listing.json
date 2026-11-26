@@ -1,0 +1,124 @@
+{
+  "gtin" : 8718863041000,
+  "slug" : "8718863041000-television-philips-40pfs600912-2024",
+  "fullSlug" : "/televiseurs/8718863041000-television-philips-40pfs600912-2024",
+  "base" : {
+    "gtin" : 8718863041000,
+    "vertical" : "tv",
+    "bestName" : "PHILIPS 40PFS6009/12",
+    "coverImagePath" : "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp"
+  },
+  "identity" : {
+    "brand" : "PHILIPS",
+    "model" : "40PFS6009/12",
+    "bestName" : "PHILIPS 40PFS6009/12"
+  },
+  "names" : {
+    "displayName" : "PHILIPS 40PFS6009/12",
+    "cardName" : "PHILIPS 40PFS6009/12"
+  },
+  "attributes" : {
+    "referentialAttributes" : {
+      "GTIN" : "8718863041000",
+      "MODEL" : "40PFS6009/12",
+      "BRAND" : "PHILIPS"
+    },
+    "indexedAttributes" : {
+      "DIAGONALE_POUCES" : {
+        "name" : "Diagonale (en pouces)",
+        "value" : "40",
+        "numericValue" : 40.0
+      },
+      "DISPLAY_TECHNOLOGY" : {
+        "name" : "Technologie d'affichage",
+        "value" : "LED"
+      },
+      "HDMI_PORTS_QUANTITY" : {
+        "name" : "Quantité de ports HDMI",
+        "value" : "3",
+        "numericValue" : 3.0
+      },
+      "REPAIRABILITY_INDEX" : {
+        "name" : "Indice de réparabilité",
+        "value" : "8.6",
+        "numericValue" : 8.6
+      },
+      "CLASSE_ENERGY" : {
+        "name" : "Classe énergétique",
+        "value" : "D"
+      }
+    }
+  },
+  "resources" : {
+    "coverImagePath" : "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp",
+    "externalCover" : "https://images.icecat.biz/img/feature_logo/980-6359.png",
+    "images" : [ {
+      "url" : "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp",
+      "originalUrl" : "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.jpg"
+    } ]
+  },
+  "scores" : {
+    "scores" : {
+      "ECOSCORE" : {
+        "id" : "ECOSCORE",
+        "value" : 15.500981605278572
+      }
+    },
+    "impactScore" : {
+      "status" : "RATED",
+      "notRatedReason" : null,
+      "methodologyVersion" : 1,
+      "methodologyRevision" : "0038e8fd",
+      "scoredAt" : 1795608402207,
+      "currentMethodologyVersion" : 1,
+      "realWeightCoverage" : 1.0,
+      "realCriteriaCount" : 13,
+      "totalCriteriaCount" : 13,
+      "position" : 1,
+      "ratedCount" : 2124,
+      "betterThanPercent" : 100,
+      "level" : null
+    }
+  },
+  "offers" : {
+    "offersCount" : 1,
+    "bestPrice" : {
+      "datasourceName" : "rueducommerce.fr",
+      "favicon" : "/api/favicon?url=https://rueducommerce.fr",
+      "url" : "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiMWRhZmY4MjctZmUyNC00MTc0LTg5ZDItMjNkZTZjYjgyNmUxIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+      "condition" : "NEW",
+      "price" : 329.98,
+      "currency" : "EUR",
+      "shortPrice" : "330"
+    },
+    "bestNewOffer" : {
+      "datasourceName" : "rueducommerce.fr",
+      "favicon" : "/api/favicon?url=https://rueducommerce.fr",
+      "url" : "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiOGE0YzYxNGEtOTE1Ni00ZDRjLWFmMzYtYjZiNDFlZmM0YTQwIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+      "condition" : "NEW",
+      "price" : 329.98,
+      "currency" : "EUR",
+      "shortPrice" : "330"
+    },
+    "offersByCondition" : {
+      "NEW" : [ {
+        "datasourceName" : "rueducommerce.fr",
+        "favicon" : "/api/favicon?url=https://rueducommerce.fr",
+        "url" : "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiODgxNGY2MjUtOWEwMS00MjljLWE4YWQtMjNkMzhmZGE2ZGEyIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+        "condition" : "NEW",
+        "price" : 329.98,
+        "currency" : "EUR",
+        "shortPrice" : "330"
+      } ]
+    },
+    "newTrend" : {
+      "trend" : "PRICE_STABLE",
+      "period" : 2847299123,
+      "actualPrice" : 329.98,
+      "lastPrice" : 329.98,
+      "variation" : 0.0,
+      "historicalLowestPrice" : 232.85,
+      "historicalVariation" : 97.13000000000002
+    }
+  }
+}

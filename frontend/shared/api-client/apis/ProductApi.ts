@@ -17,6 +17,7 @@ import type {
   GlobalSearchRequestDto,
   GlobalSearchResponseDto,
   ProblemDetail,
+  ProductCardSearchResponseDto,
   ProductDto,
   ProductFieldOptionsResponse,
   ProductSearchRequestDto,
@@ -30,6 +31,8 @@ import {
   GlobalSearchResponseDtoToJSON,
   ProblemDetailFromJSON,
   ProblemDetailToJSON,
+  ProductCardSearchResponseDtoFromJSON,
+  ProductCardSearchResponseDtoToJSON,
   ProductDtoFromJSON,
   ProductDtoToJSON,
   ProductFieldOptionsResponseFromJSON,
@@ -64,6 +67,15 @@ export interface ProductRequest {
   gtin: number
   domainLanguage: ProductDomainLanguageEnum
   include?: Array<ProductIncludeEnum>
+}
+
+export interface ProductCardsRequest {
+  domainLanguage: ProductCardsDomainLanguageEnum
+  pageNumber?: number
+  pageSize?: number
+  verticalId?: string
+  query?: string
+  productSearchRequestDto?: ProductSearchRequestDto
 }
 
 export interface ProductsRequest {
@@ -488,6 +500,100 @@ export class ProductApi extends runtime.BaseAPI {
   }
 
   /**
+   * Return paginated lightweight product cards for listings (category grids, guides, alternatives). Same search contract as POST /products, without the include parameter: a card carries identity, card and display names, the indexed attributes of the vertical popular attributes, technical and eco filters and active sort, the cover image, the ECOSCORE value and ImpactScore status, best offers, offers per condition and price trends. Absent values are omitted.
+   * List product cards
+   */
+  async productCardsRaw(
+    requestParameters: ProductCardsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<runtime.ApiResponse<ProductCardSearchResponseDto>> {
+    if (requestParameters['domainLanguage'] == null) {
+      throw new runtime.RequiredError(
+        'domainLanguage',
+        'Required parameter "domainLanguage" was null or undefined when calling productCards().'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (requestParameters['pageNumber'] != null) {
+      queryParameters['pageNumber'] = requestParameters['pageNumber']
+    }
+
+    if (requestParameters['pageSize'] != null) {
+      queryParameters['pageSize'] = requestParameters['pageSize']
+    }
+
+    if (requestParameters['verticalId'] != null) {
+      queryParameters['verticalId'] = requestParameters['verticalId']
+    }
+
+    if (requestParameters['query'] != null) {
+      queryParameters['query'] = requestParameters['query']
+    }
+
+    if (requestParameters['domainLanguage'] != null) {
+      queryParameters['domainLanguage'] = requestParameters['domainLanguage']
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    headerParameters['Content-Type'] = 'application/json'
+
+    if (
+      this.configuration &&
+      (this.configuration.username !== undefined ||
+        this.configuration.password !== undefined)
+    ) {
+      headerParameters['Authorization'] =
+        'Basic ' +
+        btoa(this.configuration.username + ':' + this.configuration.password)
+    }
+    if (this.configuration && this.configuration.accessToken) {
+      const token = this.configuration.accessToken
+      const tokenString = await token('bearerAuth', [])
+
+      if (tokenString) {
+        headerParameters['Authorization'] = `Bearer ${tokenString}`
+      }
+    }
+
+    let urlPath = `/products/cards`
+
+    const response = await this.request(
+      {
+        path: urlPath,
+        method: 'POST',
+        headers: headerParameters,
+        query: queryParameters,
+        body: ProductSearchRequestDtoToJSON(
+          requestParameters['productSearchRequestDto']
+        ),
+      },
+      initOverrides
+    )
+
+    return new runtime.JSONApiResponse(response, jsonValue =>
+      ProductCardSearchResponseDtoFromJSON(jsonValue)
+    )
+  }
+
+  /**
+   * Return paginated lightweight product cards for listings (category grids, guides, alternatives). Same search contract as POST /products, without the include parameter: a card carries identity, card and display names, the indexed attributes of the vertical popular attributes, technical and eco filters and active sort, the cover image, the ECOSCORE value and ImpactScore status, best offers, offers per condition and price trends. Absent values are omitted.
+   * List product cards
+   */
+  async productCards(
+    requestParameters: ProductCardsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<ProductCardSearchResponseDto> {
+    const response = await this.productCardsRaw(
+      requestParameters,
+      initOverrides
+    )
+    return await response.value()
+  }
+
+  /**
    * Return paginated products.
    * List products
    */
@@ -881,6 +987,15 @@ export const ProductIncludeEnum = {
 } as const
 export type ProductIncludeEnum =
   (typeof ProductIncludeEnum)[keyof typeof ProductIncludeEnum]
+/**
+ * @export
+ */
+export const ProductCardsDomainLanguageEnum = {
+  Fr: 'fr',
+  En: 'en',
+} as const
+export type ProductCardsDomainLanguageEnum =
+  (typeof ProductCardsDomainLanguageEnum)[keyof typeof ProductCardsDomainLanguageEnum]
 /**
  * @export
  */

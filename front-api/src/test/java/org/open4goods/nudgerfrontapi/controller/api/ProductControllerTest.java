@@ -57,7 +57,8 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         controller = new ProductController(productMappingService, verticalsConfigService, searchService,
-                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties());
+                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties(),
+                new org.open4goods.nudgerfrontapi.service.ProductCardMappingService(verticalsConfigService));
         // Default lenient mock for vertical existence check
         org.mockito.Mockito.lenient().when(verticalsConfigService.getConfigById(any())).thenReturn(new VerticalConfig());
     }

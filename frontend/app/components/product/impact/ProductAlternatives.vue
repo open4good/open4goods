@@ -91,9 +91,8 @@ import type {
   AttributeConfigDto,
   Filter,
   ProductDto,
-  ProductSearchResponseDto,
+  ProductCardSearchResponseDto,
 } from '~~/shared/api-client'
-import { ProductsIncludeEnum } from '~~/shared/api-client'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
 import { resolveAttributeRawValueByKey } from '~/utils/_product-attributes'
 import { ECOSCORE_RELATIVE_FIELD } from '~/constants/scores'
@@ -637,24 +636,15 @@ const searchAlternatives = async (
   signal?: AbortSignal
 ): Promise<ProductDto[]> => {
   const clauses = resolveClausesFor(keys)
-  const response = await csrfFetch<ProductSearchResponseDto>(
-    '/api/products/search',
+  const response = await csrfFetch<ProductCardSearchResponseDto>(
+    '/api/products/cards',
     {
       method: 'POST',
       signal,
-      query: {
+      body: {
         verticalId: props.verticalId,
         pageSize: props.maxResults,
         pageNumber: 0,
-        include: [
-          ProductsIncludeEnum.Base,
-          ProductsIncludeEnum.Identity,
-          ProductsIncludeEnum.Offers,
-          ProductsIncludeEnum.Scores,
-          ProductsIncludeEnum.Resources,
-        ],
-      },
-      body: {
         sort: {
           field: ECOSCORE_RELATIVE_FIELD,
           order: 'DESC',

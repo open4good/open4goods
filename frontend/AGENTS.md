@@ -128,6 +128,19 @@ Every code that is produced MUST me validated using :
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication. On beta and prod both come from the `O4G_MACHINE_TOKEN` GitHub Environment secret once it is set (`NUXT_MACHINE_TOKEN` and `MACHINE_TOKEN` lines of `/etc/open4goods/frontend.env`, rendered by `scripts/deploy/render-service-secrets.sh`, GOU-1041, GOU-1694); see `docs/operations/prod-service-secrets.md`.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
 
+## Listing cards
+
+- Product listings (category grids, list and table views, guides, nudge tool,
+  product alternatives) fetch `POST /api/products/cards`, which returns
+  `ProductCardDto` items (about 4 KB each) instead of the full `ProductDto`
+  (about 50 KB) of `/api/products/search` (GOU-2710).
+- `ProductCardDto` keeps the field names of `ProductDto`, so listing
+  components keep their `ProductDto` props. A listing component must only read
+  the fields listed in front-api `README.md` ("Listing cards"); a new need adds
+  the field to the front-api card DTO.
+- `ListingCardPayload.spec.ts` renders the card, list and table views from the
+  front-api fixtures (full DTO and its card) and requires identical HTML.
+
 ## DomainLanguage injection
 
 Every downstream call should be wrapped in a thin service that:
