@@ -76,7 +76,7 @@ describe('ProductImpactWhyThisScore', () => {
     }).text()
     expect(text).toContain('Why this score?')
     expect(text).toContain('14.2/20')
-    expect(text).toContain('above 97% of the 412 televisions')
+    expect(text).toContain('above 97% of the products rated by Nudger in the televisions category')
     expect(text).toContain('Power use (41 W, versus 78 W on average')
     expect(text).toContain('Spare parts')
     expect(text).toContain('Repairability')

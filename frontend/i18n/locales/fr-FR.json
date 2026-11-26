@@ -714,7 +714,7 @@
           "title": "Produits comparés",
           "scope": "Sont comparés les produits de la catégorie {category} présents dans le catalogue Nudger avec au moins une offre.",
           "rated": "{count} produits notés.",
-          "ratedCompared": "{count} {items} noté et comparé. | {count} {items} notés et comparés.",
+          "ratedCompared": "{count} produit noté et comparé dans la catégorie {items}. | {count} produits notés et comparés dans la catégorie {items}.",
           "notRated": "{count} produits non notés (données insuffisantes : {lowCoverage} ; aucun critère renseigné : {noCriteria}).",
           "outdated": "{count} produits en attente de recalcul avec la méthode actuelle.",
           "excluded": "{count} produits exclus de la comparaison. Sont exclus les produits sans marque, sans modèle, sans fiche EPREL associée (selon la catégorie) ou auxquels il manque un attribut requis par la catégorie.",
@@ -1019,7 +1019,7 @@
           "fair": "En dessous de la médiane",
           "poor": "Parmi les moins bien classés"
         },
-        "betterThan": "Mieux classé que {percent} % des {count} {items} notés par Nudger",
+        "betterThan": "Mieux classé que {percent} % des produits notés par Nudger dans la catégorie {items}",
         "productsFallback": "produits",
         "onlyRated": "Seul produit noté de sa catégorie",
         "criteria": "{count} critère sur {total} renseigné | {count} critères sur {total} renseignés",
@@ -1036,8 +1036,8 @@
       },
       "why": {
         "title": "Pourquoi cette note ?",
-        "headline": "{score}/20 : ce produit est mieux classé que {percent} % des {count} {items} notés par Nudger.",
-        "headlineBottom": "{score}/20 : ce produit est classé devant {percent} % des {count} {items} notés par Nudger.",
+        "headline": "{score}/20 : ce produit est mieux classé que {percent} % des produits notés par Nudger dans la catégorie {items}.",
+        "headlineBottom": "{score}/20 : ce produit est classé devant {percent} % des produits notés par Nudger dans la catégorie {items}.",
         "onlyRated": "{score}/20 : seul produit noté de sa catégorie, aucune comparaison de position n'est possible.",
         "criterion": "{label} ({value})",
         "criterionVsAverage": "{label} ({value}, contre {average} en moyenne dans la catégorie)",
@@ -3017,13 +3017,13 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis {'|'} ImpactScore {score}/20",
+            "full": "{productName} : meilleur prix et caractéristiques {'|'} ImpactScore {score}/20",
             "fullVertical": "{verticalTitle} {productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "compact": "{productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "minimal": "{productName} : ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis",
+            "full": "{productName} : meilleur prix et caractéristiques",
             "fullVertical": "{verticalTitle} {productName} : meilleur prix",
             "compact": "{productName} : meilleur prix",
             "minimal": "{productName}"

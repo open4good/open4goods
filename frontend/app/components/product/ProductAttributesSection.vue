@@ -1244,6 +1244,23 @@ const getImplementationAims = (
   return aims
 }
 
+// Raw feed description columns ("Product short description"): free text in the
+// merchant's language, never a labelled attribute. The description is shown by
+// the product text blocks, so these keys are not listed as attributes.
+const RAW_DESCRIPTION_KEYS = new Set([
+  'DESCRIPTION',
+  'SHORT_DESCRIPTION',
+  'LONG_DESCRIPTION',
+  'PRODUCT_DESCRIPTION',
+  'PRODUCT_SHORT_DESCRIPTION',
+  'DESCRIPTIF',
+])
+
+const isRawDescriptionKey = (value: unknown): boolean => {
+  const key = normalizeAttributeKey(value)
+  return key ? RAW_DESCRIPTION_KEYS.has(key.replace(/[\s-]+/g, '_')) : false
+}
+
 const auditRows = computed<AuditAttributeRow[]>(() => {
   const configs = props.attributeConfigs ?? []
   const indexedAttributes =
@@ -1333,6 +1350,8 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
   const allRawAttributes = Array.from(rawAttributesMap.values())
 
   allRawAttributes.forEach((attr, index) => {
+    if (isRawDescriptionKey(attr.name)) return
+
     // Find matching config
     const matchedConfig = configs.filter(config =>
       checkAttributeMatchesConfig(attr, config)
