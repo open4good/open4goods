@@ -1,0 +1,4480 @@
+{
+  "gtin": 8718863041000,
+  "slug": "8718863041000-television-philips-40pfs600912-2024",
+  "fullSlug": "/televiseurs/8718863041000-television-philips-40pfs600912-2024",
+  "base": {
+    "gtin": 8718863041000,
+    "creationDate": 1715659651933,
+    "lastChange": 1795656713332,
+    "vertical": "tv",
+    "externalIds": {
+      "icecat": "120315188",
+      "mpn": [],
+      "sku": []
+    },
+    "googleTaxonomyId": 404,
+    "excluded": false,
+    "excludedCauses": [],
+    "gtinInfo": {
+      "upcType": "GTIN_13",
+      "countryCode": "NL",
+      "countryName": "Pays-Bas",
+      "countryFlagUrl": "/images/flags/nl.webp"
+    },
+    "coverImagePath": "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp",
+    "bestName": "PHILIPS 40PFS6009/12",
+    "ecoscoreValue": 15.500981605278572
+  },
+  "identity": {
+    "brand": "PHILIPS",
+    "model": "40PFS6009/12",
+    "bestName": "PHILIPS 40PFS6009/12",
+    "randomModel": "40PFS6009/12",
+    "shortestModel": "40PFH6009/12",
+    "akaModels": [],
+    "akaBrandsByDatasource": {
+      "cdiscount.com": "PHILIPS",
+      "JoomFR": "PANGEADISCOUN"
+    },
+    "akaBrands": []
+  },
+  "names": {
+    "displayName": "PHILIPS 40PFS6009/12",
+    "cardName": "PHILIPS 40PFS6009/12",
+    "pageTitle": "PHILIPS 40PFS6009/12",
+    "seoName": "PHILIPS 40PFS6009/12",
+    "metaTitle": "Philips 40PFS6009/12 : TV 40\" - avis, prix et impact",
+    "metaDescription": "Philips 40PFS6009/12, TV : score impact 15.5/20, 40\", LED, prix : 329,98 €. Comparez les offres sur Nudger.",
+    "ogTitle": "PHILIPS - 40PFS6009 : Ecoscore de ECOSCORE:2.0078387557102997--> rel:(0.0 > 2.458492021410769 < 5.0 (2466 elements))2.0078387557102997--> abs:(0.9960011843078364 > 2.7283335977571426 < 4.519161720039885 (1739 elements)). Venez nudger ce téléviseur au meilleur prix, et reversez gratuitement 0.93",
+    "ogDescription": "productMetaOpenGraphDescription"
+  },
+  "attributes": {
+    "referentialAttributes": {
+      "GTIN": "8718863041000",
+      "MODEL": "40PFS6009/12",
+      "BRAND": "PHILIPS"
+    },
+    "indexedAttributes": {
+      "MINAVAILABILITYSPAREPARTSYEARS": {
+        "name": "Disponibilité des pièces détachées",
+        "value": "7",
+        "numericValue": 7,
+        "sourcing": {
+          "bestValue": "7",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "7",
+              "name": "MINAVAILABILITYSPAREPARTSYEARS"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "7",
+              "language": "und",
+              "name": "MINAVAILABILITYSPAREPARTSYEARS"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "HDMI_PORTS_QUANTITY": {
+        "name": "Quantité de ports HDMI",
+        "value": "3",
+        "numericValue": 3,
+        "sourcing": {
+          "bestValue": "3",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "3",
+              "language": "FR",
+              "icecatTaxonomyId": 3566,
+              "name": "QUANTITE DE PORTS HDMI"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "3",
+              "name": "HDMI_PORTS_QUANTITY"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_HDR": {
+        "name": "Consommation électrique (haute définition)",
+        "value": "42",
+        "numericValue": 42,
+        "sourcing": {
+          "bestValue": "42",
+          "sources": [
+            {
+              "datasourceName": "eprel",
+              "value": "42",
+              "language": "und",
+              "name": "POWERONMODEHDR"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "USAGE_COST_YEAR": {
+        "name": "Coût d'usage annuel",
+        "value": "6.84",
+        "numericValue": 6.84,
+        "sourcing": {
+          "bestValue": "6.84",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_TYPICAL": {
+        "name": "Consommation électrique (typique/max)",
+        "value": "27",
+        "numericValue": 27,
+        "sourcing": {
+          "bestValue": "27",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "27 W",
+              "name": "POWER_CONSUMPTION_TYPICAL"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "MINAVAILABILITYSOFTWAREUPDATESYEARS": {
+        "name": "Disponibilité des mises à jour logicielles",
+        "value": "8",
+        "numericValue": 8,
+        "sourcing": {
+          "bestValue": "8",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "8",
+              "name": "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "8",
+              "language": "und",
+              "name": "MINAVAILABILITYSOFTWAREUPDATESYEARS"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_OFF": {
+        "name": "Consommation électrique (arrêt/veille)",
+        "value": "0.5",
+        "numericValue": 0.5,
+        "sourcing": {
+          "bestValue": "0.5",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "0.5",
+              "language": "FR",
+              "icecatTaxonomyId": 2036,
+              "name": "CONSOMMATION D'ENERGIE (MODE VEILLE)"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "0.3 W",
+              "name": "POWER_CONSUMPTION_OFF"
+            }
+          ],
+          "conflicts": true
+        }
+      },
+      "MINGUARANTEEDSUPPORTYEARS": {
+        "name": "Durée garantie du support",
+        "value": "7",
+        "numericValue": 7,
+        "sourcing": {
+          "bestValue": "7",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "7",
+              "name": "MINGUARANTEEDSUPPORTYEARS"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "7",
+              "language": "und",
+              "name": "MINGUARANTEEDSUPPORTYEARS"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "DURABILITY_INDEX": {
+        "name": "Indice de durabilité",
+        "value": "5.2",
+        "numericValue": 5.2,
+        "sourcing": {
+          "bestValue": "5.2",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "5.2",
+              "language": "FR",
+              "icecatTaxonomyId": 48523,
+              "name": "INDICE DE DURABILITE"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "FREQUENCY_RATE": {
+        "name": "Taux de rafraîchissement",
+        "value": "60",
+        "numericValue": 60,
+        "sourcing": {
+          "bestValue": "60",
+          "sources": [
+            {
+              "datasourceName": "rakuten.com",
+              "value": "60 Hz",
+              "name": "FREQUENCE"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "60",
+              "language": "und",
+              "name": "FREQUENCYRATE"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY_SDR": {
+        "name": "Classe énergétique (SDR)",
+        "value": "D",
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "D",
+              "language": "FR",
+              "icecatTaxonomyId": 42856,
+              "name": "CLASSE D'EFFICACITE ENERGETIQUE (SDR)"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "D",
+              "language": "und",
+              "name": "ENERGYCLASSSDR"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "DISPLAY_TECHNOLOGY": {
+        "name": "Technologie d'affichage",
+        "value": "LED",
+        "sourcing": {
+          "bestValue": "LED",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "LED",
+              "language": "FR",
+              "icecatTaxonomyId": 9713,
+              "name": "TECHNOLOGIE D'AFFICHAGE"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "LED",
+              "name": "DISPLAY_TECHNOLOGY"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "LED_LCD",
+              "language": "und",
+              "name": "PANELTECHNOLOGY"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "YEAR": {
+        "name": "Année de mise en service",
+        "value": "2024",
+        "numericValue": 2024,
+        "sourcing": {
+          "bestValue": "2024",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "2024",
+              "name": "YEAR"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_STANDBY": {
+        "name": "Consommation en veille",
+        "value": "0.5",
+        "numericValue": 0.5,
+        "sourcing": {
+          "bestValue": "0.5",
+          "sources": [
+            {
+              "datasourceName": "eprel",
+              "value": "0.5",
+              "language": "und",
+              "name": "POWERSTANDBY"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "COLOR": {
+        "name": "Couleur",
+        "value": "NOIR",
+        "sourcing": {
+          "bestValue": "NOIR",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "Black",
+              "language": "FR",
+              "icecatTaxonomyId": 1766,
+              "name": "COULEUR DU PRODUIT"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "Noir",
+              "name": "COLOR"
+            },
+            {
+              "datasourceName": "fnac.com",
+              "value": "Noir mat",
+              "name": "COLOUR"
+            },
+            {
+              "datasourceName": "manomano.fr",
+              "value": "Noir",
+              "name": "COLOUR"
+            },
+            {
+              "datasourceName": "cdiscount.com",
+              "value": "Noir",
+              "name": "COLOUR"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "WARRANTY": {
+        "name": "Durée de garantie",
+        "value": "2",
+        "numericValue": 2,
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [
+            {
+              "datasourceName": "AI",
+              "value": "2",
+              "name": "WARRANTY"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "2",
+              "language": "und",
+              "name": "MINGUARANTEEDGUARANTEE"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_STANDBY_NETWORKD": {
+        "name": "Consommation électrique (arrêt/veille/réseau)",
+        "value": "2",
+        "numericValue": 2,
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [
+            {
+              "datasourceName": "eprel",
+              "value": "2",
+              "language": "und",
+              "name": "POWERSTANDBYNETWORKED"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "WEIGHT": {
+        "name": "Poids",
+        "value": "5.4",
+        "numericValue": 5.4,
+        "sourcing": {
+          "bestValue": "5.4",
+          "sources": [
+            {
+              "datasourceName": "rakuten.com",
+              "value": "15 à 30 kg",
+              "name": "TRANCHE DE POIDS"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "5.4 kg",
+              "name": "WEIGHT"
+            }
+          ],
+          "conflicts": true
+        }
+      },
+      "REPAIRABILITY_INDEX": {
+        "name": "Indice de réparabilité",
+        "value": "8.6",
+        "numericValue": 8.6,
+        "sourcing": {
+          "bestValue": "8.6",
+          "sources": [
+            {
+              "datasourceName": "rakuten.com",
+              "value": "8.6",
+              "name": "REPAIRABILITY INDEX"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "8.6",
+              "name": "REPAIRABILITY_INDEX"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY_HDR": {
+        "name": "Classe énergétique (HDR)",
+        "value": "F",
+        "sourcing": {
+          "bestValue": "F",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "F",
+              "language": "FR",
+              "icecatTaxonomyId": 42857,
+              "name": "CLASSE D'EFFICACITE ENERGETIQUE (HDR)"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "F",
+              "language": "und",
+              "name": "ENERGYCLASSHDR"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "DIAGONALE_POUCES": {
+        "name": "Diagonale (en pouces)",
+        "value": "40",
+        "numericValue": 40,
+        "sourcing": {
+          "bestValue": "40",
+          "sources": [
+            {
+              "datasourceName": "icecat.biz",
+              "value": "40",
+              "language": "FR",
+              "icecatTaxonomyId": 944,
+              "name": "TAILLE DE L'ECRAN"
+            },
+            {
+              "datasourceName": "rakuten.com",
+              "value": "40",
+              "name": "DIAGONALE"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "40",
+              "name": "DIAGONALE_POUCES"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "40",
+              "language": "und",
+              "name": "DIAGONALINCH"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY": {
+        "name": "Classe énergétique",
+        "value": "D",
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [
+            {
+              "datasourceName": "rakuten.com",
+              "value": "Classe D",
+              "name": "CLASSE D'EFFICACITE ENERGETIQUE"
+            },
+            {
+              "datasourceName": "AI",
+              "value": "D",
+              "name": "CLASSE_ENERGY"
+            },
+            {
+              "datasourceName": "eprel",
+              "value": "D",
+              "language": "und",
+              "name": "ENERGYCLASS"
+            }
+          ],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_SDR": {
+        "name": "Consommation électrique (basse définition)",
+        "value": "27",
+        "numericValue": 27,
+        "sourcing": {
+          "bestValue": "27",
+          "sources": [
+            {
+              "datasourceName": "eprel",
+              "value": "27",
+              "language": "und",
+              "name": "POWERONMODESDR"
+            }
+          ],
+          "conflicts": false
+        }
+      }
+    },
+    "classifiedAttributes": [],
+    "allAttributes": {
+      "COLOUR": {
+        "name": "COLOUR",
+        "value": "NOIR",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "NOIR",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TITRE": {
+        "name": "TITRE",
+        "value": "TV LED 40\" Philips 40PFS6009 Full HD",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "TV LED 40\" Philips 40PFS6009 Full HD",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TRANCHE DE POIDS": {
+        "name": "TRANCHE DE POIDS",
+        "value": "30",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "30",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "SMART TV": {
+        "name": "SMART TV",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": true
+        }
+      },
+      "DIAGONALE": {
+        "name": "DIAGONALE",
+        "value": "40",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "40",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FREQUENCE": {
+        "name": "FREQUENCE",
+        "value": "60",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "60",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "REPAIRABILITY INDEX": {
+        "name": "REPAIRABILITY INDEX",
+        "value": "8.6",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "8.6",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TYPE DE PRODUIT": {
+        "name": "TYPE DE PRODUIT",
+        "value": "LED",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "LED",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE D'EFFICACITE ENERGETIQUE": {
+        "name": "CLASSE D'EFFICACITE ENERGETIQUE",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "RAPPORT D'IMAGE": {
+        "name": "RAPPORT D'IMAGE",
+        "value": "16:9",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "16:9",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "EPREL CATEGORY": {
+        "name": "EPREL CATEGORY",
+        "value": "electronicdisplays",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "electronicdisplays",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "THEME": {
+        "name": "THEME",
+        "value": "TV LED Philips 40 pouces",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "TV LED Philips 40 pouces",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "RESOLUTION": {
+        "name": "RESOLUTION",
+        "value": "1920 x 1080",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1920 x 1080",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FABRICANT": {
+        "name": "FABRICANT",
+        "value": "Philips",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Philips",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DESCRIPTIF": {
+        "name": "DESCRIPTIF",
+        "value": "Si vous êtes passionné d'<b>informatique et d'électronique</b>, si vous êtes à la pointe de la technologie et qu'aucun détail ne vous échappe, achetez <b>TV intelligente Philips 40PFS6009 Full HD 40\" LED</b> au meilleur prix.<br /><br /><ul><li>Produit à brancher: Oui</li><li>Type de prise: Prise EU</li><li>Diagonale de l'écran (cm): 101,6 cm</li><li>Ecran: 40\"</li><li>Couleur: Noir</li><li>TV intelligente: Oui</li><li>Technologie: <ul><li>LED</li><li>HDR</li></ul></li><li>Récepteur: <ul><li>Analogique et numérique</li><li>DVB-C,DVB-S,DVB-S2,DVB-T,DVB-T2,DVB-T2 HD</li></ul></li><li>Résolution: Full HD</li><li>Connectivité: <ul><li>Wi-Fi</li><li>Interface commune</li><li>Wi-Fi 4 (802.11n)</li></ul></li><li>Connexions: <ul><li>HDMI</li><li>USB 2.0</li><li>RJ45</li><li>Ethernet LAN</li><li>HDCP</li><li>CI+</li><li>HDMI 1.4</li></ul></li><li>Caractéristiques: <ul><li>2 Haut-parleurs</li><li>ECO</li><li>TV intelligente</li><li>Télétexte</li><li>Guide électronique des programmes (EPG)</li><li>Minuterie d'arrêt</li><li>Canal de retour audio (ARC)</li><li>Écran plat</li></ul></li><li>Résolution (px): 1920 x 1080 px</li><li>Classification énergétique: D</li><li>Tension: <ul><li>240 V</li><li>220-240 V</li></ul></li><li>Compatible: Amazon Alexa</li><li>Inclut: Télécommande</li><li>VESA: 20 x 20 cm</li><li>Formats: Dolby Audio</li><li>Fréquence: 60 Hz</li><li>Montage: VESA</li><li>puissance: 10 W</li></ul>",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Si vous êtes passionné d'<b>informatique et d'électronique</b>, si vous êtes à la pointe de la technologie et qu'aucun détail ne vous échappe, achetez <b>TV intelligente Philips 40PFS6009 Full HD 40\" LED</b> au meilleur prix.<br /><br /><ul><li>Produit à brancher: Oui</li><li>Type de prise: Prise EU</li><li>Diagonale de l'écran (cm): 101,6 cm</li><li>Ecran: 40\"</li><li>Couleur: Noir</li><li>TV intelligente: Oui</li><li>Technologie: <ul><li>LED</li><li>HDR</li></ul></li><li>Récepteur: <ul><li>Analogique et numérique</li><li>DVB-C,DVB-S,DVB-S2,DVB-T,DVB-T2,DVB-T2 HD</li></ul></li><li>Résolution: Full HD</li><li>Connectivité: <ul><li>Wi-Fi</li><li>Interface commune</li><li>Wi-Fi 4 (802.11n)</li></ul></li><li>Connexions: <ul><li>HDMI</li><li>USB 2.0</li><li>RJ45</li><li>Ethernet LAN</li><li>HDCP</li><li>CI+</li><li>HDMI 1.4</li></ul></li><li>Caractéristiques: <ul><li>2 Haut-parleurs</li><li>ECO</li><li>TV intelligente</li><li>Télétexte</li><li>Guide électronique des programmes (EPG)</li><li>Minuterie d'arrêt</li><li>Canal de retour audio (ARC)</li><li>Écran plat</li></ul></li><li>Résolution (px): 1920 x 1080 px</li><li>Classification énergétique: D</li><li>Tension: <ul><li>240 V</li><li>220-240 V</li></ul></li><li>Compatible: Amazon Alexa</li><li>Inclut: Télécommande</li><li>VESA: 20 x 20 cm</li><li>Formats: Dolby Audio</li><li>Fréquence: 60 Hz</li><li>Montage: VESA</li><li>puissance: 10 W</li></ul>",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMAT D'AFFICHAGE": {
+        "name": "FORMAT D'AFFICHAGE",
+        "value": "1080p (Full HD)",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1080p (Full HD)",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "EPREL CERTIFICATION CODE": {
+        "name": "EPREL CERTIFICATION CODE",
+        "value": "1892040",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1892040",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "RESOLUTION DE L'ECRAN": {
+        "name": "RESOLUTION DE L'ECRAN",
+        "value": "1920 x 1080",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1920 x 1080",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MINUTERIE MARCHE/ARRET": {
+        "name": "MINUTERIE MARCHE/ARRET",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TYPE HD": {
+        "name": "TYPE HD",
+        "value": "Full HD",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Full HD",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMAT SOUS-TITRES SUPPORTE": {
+        "name": "FORMAT SOUS-TITRES SUPPORTE",
+        "value": "SRT,ASS,SSA,SUB,SMI,TXT",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "SRT,ASS,SSA,SUB,SMI,TXT",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PROFONDEUR (SUPPORT INCLUS)": {
+        "name": "PROFONDEUR (SUPPORT INCLUS)",
+        "value": "226",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "226",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TELECOMMANDE FOURNIE": {
+        "name": "TELECOMMANDE FOURNIE",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PUISSANCE EVALUEE DE RMS": {
+        "name": "PUISSANCE EVALUEE DE RMS",
+        "value": "10",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "10",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PRISE EN CHARGE HDR": {
+        "name": "PRISE EN CHARGE HDR",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FREQUENCE D'ENTREE AC": {
+        "name": "FREQUENCE D'ENTREE AC",
+        "value": "50/60",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "50/60",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "INTERNET TV": {
+        "name": "INTERNET TV",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "APPS VIDEOS": {
+        "name": "APPS VIDEOS",
+        "value": "Amazon Prime Video,HBO,Netflix,YouTube",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Amazon Prime Video,HBO,Netflix,YouTube",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PROFONDEUR (SANS SUPPORT)": {
+        "name": "PROFONDEUR (SANS SUPPORT)",
+        "value": "87",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "87",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HDCP": {
+        "name": "HDCP",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "QUANTITE DE PORTS USB 2.0": {
+        "name": "QUANTITE DE PORTS USB 2.0",
+        "value": "1",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TECHNOLOGIE HDR (PLAGE DYNAMIQUE ELEVEE)": {
+        "name": "TECHNOLOGIE HDR (PLAGE DYNAMIQUE ELEVEE)",
+        "value": "High Dynamic Range 10 (HDR10),Hybrid Log-Gamma (HLG)",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "High Dynamic Range 10 (HDR10),Hybrid Log-Gamma (HLG)",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "VERSION HDCP": {
+        "name": "VERSION HDCP",
+        "value": "2.3",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2.3",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "INTERFACE COMMUNE (IC)": {
+        "name": "INTERFACE COMMUNE (IC)",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMAT DU SYSTEME DE SIGNAL NUMERIQUE": {
+        "name": "FORMAT DU SYSTEME DE SIGNAL NUMERIQUE",
+        "value": "DVB-C,DVB-S,DVB-S2,DVB-T,DVB-T2,DVB-T2 HD",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "DVB-C,DVB-S,DVB-S2,DVB-T,DVB-T2,DVB-T2 HD",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "NORME VESA": {
+        "name": "NORME VESA",
+        "value": "200 x 200",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "200 x 200",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FONCTION TELETEXTE": {
+        "name": "FONCTION TELETEXTE",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "INTERFACE COMMUNE PLUS (CL+)": {
+        "name": "INTERFACE COMMUNE PLUS (CL+)",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PLAGE D'EFFICACITE ENERGETIQUE": {
+        "name": "PLAGE D'EFFICACITE ENERGETIQUE",
+        "value": "A to G",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "A to G",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TENSION D'ENTREE AC": {
+        "name": "TENSION D'ENTREE AC",
+        "value": "220 - 240",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "220 - 240",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMATS AUDIO PRIS EN CHARGE": {
+        "name": "FORMATS AUDIO PRIS EN CHARGE",
+        "value": "AAC,MP3,WAV,FLAC",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "AAC,MP3,WAV,FLAC",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "QUANTITE DE PORTS HDMI": {
+        "name": "QUANTITE DE PORTS HDMI",
+        "value": "3",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "3",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "NOMBRE DE PORT ETHERNET LAN (RJ-45)": {
+        "name": "NOMBRE DE PORT ETHERNET LAN (RJ-45)",
+        "value": "1",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DIAGONALE D'ECRAN (CM)": {
+        "name": "DIAGONALE D'ECRAN (CM)",
+        "value": "99",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "99",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MODE ECONOMIE D'ENERGIE": {
+        "name": "MODE ECONOMIE D'ENERGIE",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMAT VIDEO PRIS EN CHARGE": {
+        "name": "FORMAT VIDEO PRIS EN CHARGE",
+        "value": "H.264,MPEG2,H.265,MPEG4,AVC,HEVC,AVI,VP9,MPEG1",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "H.264,MPEG2,H.265,MPEG4,AVC,HEVC,AVI,VP9,MPEG1",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "REFLET D'ECRAN": {
+        "name": "REFLET D'ECRAN",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "NOMBRE DE HAUT-PARLEURS": {
+        "name": "NOMBRE DE HAUT-PARLEURS",
+        "value": "2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ETHERNET/LAN": {
+        "name": "ETHERNET/LAN",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE D'EFFICACITE ENERGETIQUE (HDR)": {
+        "name": "CLASSE D'EFFICACITE ENERGETIQUE (HDR)",
+        "value": "F",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "F",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TECHNOLOGIE D'AFFICHAGE": {
+        "name": "TECHNOLOGIE D'AFFICHAGE",
+        "value": "LED",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "LED",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "STANDARDS WIFI": {
+        "name": "STANDARDS WIFI",
+        "value": "Wi-Fi 4 (802.11n)",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Wi-Fi 4 (802.11n)",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HAUTEUR (SANS SUPPORT)": {
+        "name": "HAUTEUR (SANS SUPPORT)",
+        "value": "518",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "518",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "GUIDE DE PROGRAMME ELECTRONIQUE": {
+        "name": "GUIDE DE PROGRAMME ELECTRONIQUE",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "SUPPORT DE BUREAU": {
+        "name": "SUPPORT DE BUREAU",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CONSOMMATION D'ENERGIE (SDR) POUR 1000 HEURES": {
+        "name": "CONSOMMATION D'ENERGIE (SDR) POUR 1000 HEURES",
+        "value": "27",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "27",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE D'EFFICACITE ENERGETIQUE (SDR)": {
+        "name": "CLASSE D'EFFICACITE ENERGETIQUE (SDR)",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "COMPATIBLE AVEC AMAZON ALEXA": {
+        "name": "COMPATIBLE AVEC AMAZON ALEXA",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMATS D'IMAGE SUPPORTES": {
+        "name": "FORMATS D'IMAGE SUPPORTES",
+        "value": "PNG,BMP,GIF,HEIF,JPEG",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "PNG,BMP,GIF,HEIF,JPEG",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORME D'ECRAN": {
+        "name": "FORME D'ECRAN",
+        "value": "Flat screen",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Flat screen",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CONSOMMATION D'ENERGIE (HDR) POUR 1000 HEURES": {
+        "name": "CONSOMMATION D'ENERGIE (HDR) POUR 1000 HEURES",
+        "value": "42",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "42",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PERIODE DE PROGRAMMATION": {
+        "name": "PERIODE DE PROGRAMMATION",
+        "value": "8",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "8",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HBBTV (HYBRID BROADCAST BROADBAND TV)": {
+        "name": "HBBTV (HYBRID BROADCAST BROADBAND TV)",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TYPE DE TUNER": {
+        "name": "TYPE DE TUNER",
+        "value": "Analog & Digital",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Analog & Digital",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CONTROLE D'ELECTRONIQUE GRAND PUBLIQUE (CEC)": {
+        "name": "CONTROLE D'ELECTRONIQUE GRAND PUBLIQUE (CEC)",
+        "value": "EasyLink",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "EasyLink",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "WIFI": {
+        "name": "WIFI",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "SYSTEME D'EXPLOITATION INSTALLE": {
+        "name": "SYSTEME D'EXPLOITATION INSTALLE",
+        "value": "Titan OS",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Titan OS",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DECODEURS AUDIO INTEGRES": {
+        "name": "DECODEURS AUDIO INTEGRES",
+        "value": "Dolby Digital",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Dolby Digital",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "COULEUR DU PRODUIT": {
+        "name": "COULEUR DU PRODUIT",
+        "value": "NOIR",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "NOIR",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "LARGEUR APPAREIL (SUPPORT INCLUS)": {
+        "name": "LARGEUR APPAREIL (SUPPORT INCLUS)",
+        "value": "892",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "892",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HAUTEUR (SUPPORT INCLUS)": {
+        "name": "HAUTEUR (SUPPORT INCLUS)",
+        "value": "564",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "564",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CONSOMMATION D'ENERGIE (MODE VEILLE)": {
+        "name": "CONSOMMATION D'ENERGIE (MODE VEILLE)",
+        "value": "0.5",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "0.5",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "LARGEUR (SANS SUPPORT)": {
+        "name": "LARGEUR (SANS SUPPORT)",
+        "value": "892",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "892",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CAPTEUR DE LUMIERE AMBIANTE": {
+        "name": "CAPTEUR DE LUMIERE AMBIANTE",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MONTAGE VESA": {
+        "name": "MONTAGE VESA",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TAILLE DE L'ECRAN": {
+        "name": "TAILLE DE L'ECRAN",
+        "value": "40",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "40",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TAUX DE RAFRAICHISSEMENT NATIF": {
+        "name": "TAUX DE RAFRAICHISSEMENT NATIF",
+        "value": "60",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "60",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CANAL DE RETOUR AUDIO (ARC, AUDIO RETURN CHANNEL)": {
+        "name": "CANAL DE RETOUR AUDIO (ARC, AUDIO RETURN CHANNEL)",
+        "value": "Y",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Y",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "GTIN": {
+        "name": "GTIN",
+        "value": "8718863041000",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "8718863041000",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "BRAND": {
+        "name": "BRAND",
+        "value": "PHILIPS",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "PHILIPS",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PRODUCT_SHORT_DESCRIPTION": {
+        "name": "PRODUCT_SHORT_DESCRIPTION",
+        "value": "TV LED Philips 40PFS6009 - Classe de diagonale 40\" TV LCD rétro-éclairée par LED - Smart TV - TITAN OS - 1080p 1920 x 1080 - HDR - noir mat",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "TV LED Philips 40PFS6009 - Classe de diagonale 40\" TV LCD rétro-éclairée par LED - Smart TV - TITAN OS - 1080p 1920 x 1080 - HDR - noir mat",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "STORE_PRICE": {
+        "name": "STORE_PRICE",
+        "value": "377.2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "377.2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "COMMISSION_GROUP": {
+        "name": "COMMISSION_GROUP",
+        "value": "category_10",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "category_10",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ECHELLE D'EFFICACITE ENERGETIQUE": {
+        "name": "ECHELLE D'EFFICACITE ENERGETIQUE",
+        "value": "A-G",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "A-G",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "NORME": {
+        "name": "NORME",
+        "value": "Full HD",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Full HD",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MINAVAILABILITYSOFTWAREUPDATESYEARS": {
+        "name": "MINAVAILABILITYSOFTWAREUPDATESYEARS",
+        "value": "8",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "8",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MINGUARANTEEDSUPPORTYEARS": {
+        "name": "MINGUARANTEEDSUPPORTYEARS",
+        "value": "7",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "7",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MINAVAILABILITYSPAREPARTSYEARS": {
+        "name": "MINAVAILABILITYSPAREPARTSYEARS",
+        "value": "7",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "7",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY": {
+        "name": "CLASSE_ENERGY",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "REPAIRABILITY_INDEX": {
+        "name": "REPAIRABILITY_INDEX",
+        "value": "8.6",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "8.6",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "YEAR": {
+        "name": "YEAR",
+        "value": "2024",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2024",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HDMI_PORTS_QUANTITY": {
+        "name": "HDMI_PORTS_QUANTITY",
+        "value": "3",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "3",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "COLOR": {
+        "name": "COLOR",
+        "value": "NOIR",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "NOIR",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "WEIGHT": {
+        "name": "WEIGHT",
+        "value": "5.4",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "5.4",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_TYPICAL": {
+        "name": "POWER_CONSUMPTION_TYPICAL",
+        "value": "27",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "27",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_OFF": {
+        "name": "POWER_CONSUMPTION_OFF",
+        "value": "0.5",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "0.5",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "WARRANTY": {
+        "name": "WARRANTY",
+        "value": "2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DIAGONALE_POUCES": {
+        "name": "DIAGONALE_POUCES",
+        "value": "40",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "40",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DISPLAY_TECHNOLOGY": {
+        "name": "DISPLAY_TECHNOLOGY",
+        "value": "LED",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "LED",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FREQUENCY_RATE": {
+        "name": "FREQUENCY_RATE",
+        "value": "60 Hz",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "60 Hz",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "VOICE_AVAILABLE": {
+        "name": "VOICE_AVAILABLE",
+        "value": "FALSE",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "FALSE",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "AUTO_BRIGHTNESS_CONTROL_AVAILABLE": {
+        "name": "AUTO_BRIGHTNESS_CONTROL_AVAILABLE",
+        "value": "TRUE",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "TRUE",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_STANDBY": {
+        "name": "POWER_CONSUMPTION_STANDBY",
+        "value": "0.5 W",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "0.5 W",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_STANDBY_NETWORKD": {
+        "name": "POWER_CONSUMPTION_STANDBY_NETWORKD",
+        "value": "2 W",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2 W",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_SDR": {
+        "name": "POWER_CONSUMPTION_SDR",
+        "value": "27 W",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "27 W",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWER_CONSUMPTION_HDR": {
+        "name": "POWER_CONSUMPTION_HDR",
+        "value": "42 W",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "42 W",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY_HDR": {
+        "name": "CLASSE_ENERGY_HDR",
+        "value": "F",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "F",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CLASSE_ENERGY_SDR": {
+        "name": "CLASSE_ENERGY_SDR",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ROOMPRESENCEAVAILABLE": {
+        "name": "ROOMPRESENCEAVAILABLE",
+        "value": "false",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "false",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PANELTECHNOLOGY": {
+        "name": "PANELTECHNOLOGY",
+        "value": "LED",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "LED",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "SIZERATIOY": {
+        "name": "SIZERATIOY",
+        "value": "9",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "9",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWERSTANDBY": {
+        "name": "POWERSTANDBY",
+        "value": "0.5",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "0.5",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "AUTOBRIGHTNESSCONTROLAVAILABLE": {
+        "name": "AUTOBRIGHTNESSCONTROLAVAILABLE",
+        "value": "false",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "false",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASSIMAGE": {
+        "name": "ENERGYCLASSIMAGE",
+        "value": "D-Left-Yellow-WithAGScale.svg",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D-Left-Yellow-WithAGScale.svg",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASSIMAGEWITHSCALE": {
+        "name": "ENERGYCLASSIMAGEWITHSCALE",
+        "value": "D-Left-Yellow-WithAGScale.svg",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D-Left-Yellow-WithAGScale.svg",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "RESOLUTIONHORIZONTALPIXELS": {
+        "name": "RESOLUTIONHORIZONTALPIXELS",
+        "value": "1920",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1920",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DIAGONALCM": {
+        "name": "DIAGONALCM",
+        "value": "99",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "99",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASS": {
+        "name": "ENERGYCLASS",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "CALCULATEDDIAGONALINCH": {
+        "name": "CALCULATEDDIAGONALINCH",
+        "value": "false",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "false",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWERSTANDBYNETWORKED": {
+        "name": "POWERSTANDBYNETWORKED",
+        "value": "2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "EXPORTDATETS": {
+        "name": "EXPORTDATETS",
+        "value": "1772669239946",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1772669239946",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "DIAGONALINCH": {
+        "name": "DIAGONALINCH",
+        "value": "40",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "40",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASSHDR": {
+        "name": "ENERGYCLASSHDR",
+        "value": "F",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "F",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWERSUPPLYTYPE": {
+        "name": "POWERSUPPLYTYPE",
+        "value": "INTERNAL",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "INTERNAL",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASSSDR": {
+        "name": "ENERGYCLASSSDR",
+        "value": "D",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "D",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "ENERGYCLASSRANGE": {
+        "name": "ENERGYCLASSRANGE",
+        "value": "A_G",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "A_G",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "VISIBLEAREAV2": {
+        "name": "VISIBLEAREAV2",
+        "value": "43.3",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "43.3",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MINGUARANTEEDGUARANTEE": {
+        "name": "MINGUARANTEEDGUARANTEE",
+        "value": "2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "RESOLUTIONVERTICALPIXELS": {
+        "name": "RESOLUTIONVERTICALPIXELS",
+        "value": "1080",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "1080",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWERONMODEHDR": {
+        "name": "POWERONMODEHDR",
+        "value": "42",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "42",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POWERONMODESDR": {
+        "name": "POWERONMODESDR",
+        "value": "27",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "27",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "SIZERATIOX": {
+        "name": "SIZERATIOX",
+        "value": "16",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "16",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FREQUENCYRATE": {
+        "name": "FREQUENCYRATE",
+        "value": "60",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "60",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "VOICEAVAILABLE": {
+        "name": "VOICEAVAILABLE",
+        "value": "false",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "false",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MODELAVAILABILITYINOTHERCOUNTRIES[0]": {
+        "name": "MODELAVAILABILITYINOTHERCOUNTRIES[0]",
+        "value": "XI",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "XI",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "AVAILABILITYINEUEEACOUNTRIES": {
+        "name": "AVAILABILITYINEUEEACOUNTRIES",
+        "value": "ALL",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "ALL",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "MODELAVAILABILITYINCOUNTRIES[0]": {
+        "name": "MODELAVAILABILITYINCOUNTRIES[0]",
+        "value": "XI",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "XI",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "HAUTEUR DU COLIS": {
+        "name": "HAUTEUR DU COLIS",
+        "value": "620",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "620",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "POIDS DU PAQUET": {
+        "name": "POIDS DU PAQUET",
+        "value": "7800",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "7800",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "INDICE DE DURABILITE": {
+        "name": "INDICE DE DURABILITE",
+        "value": "5.2",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "5.2",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "PROFONDEUR DU COLIS": {
+        "name": "PROFONDEUR DU COLIS",
+        "value": "142",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "142",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "FORMAT D'IMAGE": {
+        "name": "FORMAT D'IMAGE",
+        "value": "16:9",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "16:9",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "TYPE D'ALIMENTATION D'ENERGIE": {
+        "name": "TYPE D'ALIMENTATION D'ENERGIE",
+        "value": "Internal",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "Internal",
+          "sources": [],
+          "conflicts": false
+        }
+      },
+      "LARGEUR DU COLIS": {
+        "name": "LARGEUR DU COLIS",
+        "value": "985",
+        "icecatTaxonomyIds": [],
+        "sourcing": {
+          "bestValue": "985",
+          "sources": [],
+          "conflicts": false
+        }
+      }
+    }
+  },
+  "resources": {
+    "images": [
+      {
+        "url": "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.jpg",
+        "originalMimeType": "image/jpeg",
+        "timeStamp": 1772366618323,
+        "cacheKey": "15808763329093099305",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 52006,
+        "fileName": "televiseur-full-hd-40-99-cm-philips-40pfs6009-12",
+        "extension": "jpg",
+        "md5": "cc0293b581cc1ec1476b10d97aaf38a1",
+        "resourceType": "IMAGE",
+        "height": 700,
+        "width": 700,
+        "group": 0,
+        "datasourceName": "JoomFR",
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-12_5378884590408971486.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-12_5378884590408971486.jpg",
+        "originalMimeType": "image/jpeg",
+        "timeStamp": 1772366618855,
+        "cacheKey": "5378884590408971486",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 1128594,
+        "fileName": "40pfs6009-12",
+        "extension": "jpg",
+        "md5": "e20c8155721942def4d1d08691ff0ba9",
+        "resourceType": "IMAGE",
+        "height": 1500,
+        "width": 1500,
+        "group": 1,
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/tv-led-40-philips-40pfs6009-full-hd_15922473777908868768.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/tv-led-40-philips-40pfs6009-full-hd_15922473777908868768.png",
+        "originalMimeType": "image/png",
+        "timeStamp": 1772366618263,
+        "cacheKey": "15922473777908868768",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 19254,
+        "fileName": "tv-led-40-philips-40pfs6009-full-hd",
+        "extension": "png",
+        "md5": "a03a3bb52f6835412fe0310dcad96e1c",
+        "resourceType": "IMAGE",
+        "height": 574,
+        "width": 275,
+        "group": 2,
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/philips-40pfs6009-12-tv_6645143788206223620.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/philips-40pfs6009-12-tv_6645143788206223620.jpg",
+        "originalMimeType": "image/jpeg",
+        "timeStamp": 1772366618710,
+        "cacheKey": "6645143788206223620",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 279831,
+        "fileName": "philips-40pfs6009-12-tv",
+        "extension": "jpg",
+        "md5": "55f5f1deda17ab477ec49914535fbc12",
+        "resourceType": "IMAGE",
+        "height": 1500,
+        "width": 1500,
+        "group": 3,
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_15569389970405869458.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_15569389970405869458.webp",
+        "originalMimeType": "image/webp",
+        "timeStamp": 1781263137051,
+        "cacheKey": "15569389970405869458",
+        "evicted": false,
+        "processed": true,
+        "status": "PERCEPTIV_HASH_FAIL",
+        "fileSize": 10118,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "webp",
+        "md5": "547cec02b109ac731170baefba7d9470",
+        "resourceType": "IMAGE",
+        "height": 200,
+        "width": 200,
+        "group": 4,
+        "datasourceName": "rueducommerce.fr",
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_10471061631441602438.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_10471061631441602438.webp",
+        "originalMimeType": "image/webp",
+        "timeStamp": 1781263137006,
+        "cacheKey": "10471061631441602438",
+        "evicted": false,
+        "processed": true,
+        "status": "PERCEPTIV_HASH_FAIL",
+        "fileSize": 51746,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "webp",
+        "md5": "4eefbdac7f0f5ad6fab2bf9f4cd228cb",
+        "resourceType": "IMAGE",
+        "height": 1200,
+        "width": 1200,
+        "group": 5,
+        "datasourceName": "rueducommerce.fr",
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-12_6031342495460144869.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-12_6031342495460144869.jpg",
+        "originalMimeType": "image/jpeg",
+        "timeStamp": 1772366622549,
+        "cacheKey": "6031342495460144869",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 888448,
+        "fileName": "40pfs6009-12",
+        "extension": "jpg",
+        "md5": "6e6ad102f16b2059cbfef4413f25f476",
+        "resourceType": "IMAGE",
+        "height": 1500,
+        "width": 1500,
+        "group": 6,
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_14566810809364907244.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_14566810809364907244.png",
+        "originalMimeType": "image/png",
+        "timeStamp": 1794139537927,
+        "cacheKey": "14566810809364907244",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 27287,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "png",
+        "md5": "8161ae4491100de946db1052fcb70b87",
+        "resourceType": "IMAGE",
+        "height": 165,
+        "width": 300,
+        "group": 7,
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": []
+      },
+      {
+        "url": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_645024437182763509.webp",
+        "mimeType": "image/webp",
+        "originalUrl": "https://static.nudger.fr/images/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_645024437182763509.png",
+        "originalMimeType": "image/png",
+        "timeStamp": 1794139537955,
+        "cacheKey": "645024437182763509",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 18255,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "png",
+        "md5": "3ca74c295035aad0b254a58339ad6c8b",
+        "resourceType": "IMAGE",
+        "height": 167,
+        "width": 200,
+        "group": 8,
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": []
+      }
+    ],
+    "videos": [
+      {
+        "url": "https://static.nudger.fr/videos/tv-intelligente-philips-40pfs6009-full-hd-40-led_11097530251970563064.qt",
+        "originalUrl": "https://objects.icecat.biz/objects/120315188_45921356.mp4",
+        "mimeType": "video/quicktime",
+        "timeStamp": 1772366618247,
+        "cacheKey": "11097530251970563064",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 3661678,
+        "fileName": "tv-intelligente-philips-40pfs6009-full-hd-40-led",
+        "extension": "qt",
+        "md5": "ac67583ad435d1ff3445235a36f9805c",
+        "resourceType": "VIDEO",
+        "tags": [],
+        "hardTags": [],
+        "name": "gallery",
+        "uploadDate": "2026-03-01T12:03:38.247Z",
+        "contentUrl": "https://static.nudger.fr/videos/tv-intelligente-philips-40pfs6009-full-hd-40-led_11097530251970563064.qt"
+      }
+    ],
+    "pdfs": [
+      {
+        "url": "https://static.nudger.fr/pdfs/repairability_sheet-tv-led-40-philips-40pfs6009-full-hd_6717438306613367971.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1772366618234,
+        "cacheKey": "6717438306613367971",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 47725,
+        "fileName": "repairability_sheet-tv-led-40-philips-40pfs6009-full-hd",
+        "extension": "pdf",
+        "md5": "e47d56386d53a531db969164b8ab8a54",
+        "resourceType": "PDF",
+        "tags": [],
+        "hardTags": [],
+        "extractedTitle": "CALCUL DE L'INDICE DE RÉPARABILITÉ ET  PRÉSENTATION DES PARAMÈTRES AYANT PERMIS DE L'ÉTABLIR",
+        "numberOfPages": 1,
+        "author": "ADEME",
+        "creationDate": 1708324378000,
+        "modificationDate": 1708324378000,
+        "producer": "Microsoft® Excel® 2016",
+        "language": "fr",
+        "languageConfidence": 0.9999957084655762
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_1785217073240666388.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1781005094697,
+        "cacheKey": "1785217073240666388",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 49357,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "pdf",
+        "md5": "e51058ea4b7400af357c894b7e5a70e8",
+        "resourceType": "PDF",
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": [],
+        "metadataTitle": "",
+        "extractedTitle": "CALCUL DE L'INDICE DE DURABILITÉ ET PRÉSENTATION DES PARAMÈTRES AYANT PERMIS DE L'ÉTABLIR",
+        "numberOfPages": 1,
+        "author": "ADEME",
+        "subject": "",
+        "keywords": "",
+        "creationDate": 1734517979000,
+        "modificationDate": 1734517979000,
+        "producer": "Microsoft® Excel® 2016",
+        "language": "en",
+        "languageConfidence": 0.42937058210372925
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_16165390952797117520.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1781005094833,
+        "cacheKey": "16165390952797117520",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 76132,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "pdf",
+        "md5": "d66b0ff34d8792898aae323720f11494",
+        "resourceType": "PDF",
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": [],
+        "extractedTitle": "27",
+        "numberOfPages": 1,
+        "creationDate": 1764202983000,
+        "producer": "Apache FOP Version SVN branches/fop-2_3/fop-core: PDF Transcoder for Batik",
+        "language": "vi",
+        "languageConfidence": 0.8571144938468933
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_13784789567513652154.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1781005095052,
+        "cacheKey": "13784789567513652154",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 57904,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "pdf",
+        "md5": "6fa52554531beb52288efbd8abfe58fd",
+        "resourceType": "PDF",
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": [],
+        "extractedTitle": "Fiche d'information sur le produit",
+        "numberOfPages": 2,
+        "creationDate": 1714791746000,
+        "producer": "Apache FOP Version SVN branches/fop-2_3/fop-core",
+        "language": "fr",
+        "languageConfidence": 0.999996542930603
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/product_sheet-tv-intelligente-philips-40pfs6009-full-hd-40-led_13505402599772844170.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1772366619029,
+        "cacheKey": "13505402599772844170",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 400708,
+        "fileName": "product_sheet-tv-intelligente-philips-40pfs6009-full-hd-40-led",
+        "extension": "pdf",
+        "md5": "8ab3797b53822db5782632898d6f8fa9",
+        "resourceType": "PDF",
+        "tags": [],
+        "hardTags": [],
+        "metadataTitle": "Leaflet 40PFS6009_12 Released Switzerland (French) High-res A4.fm",
+        "extractedTitle": "C",
+        "numberOfPages": 3,
+        "author": "NLYEHVITA1-SYS216",
+        "creationDate": 1708174964000,
+        "modificationDate": 1708174974000,
+        "producer": "Acrobat Elements 8.0.0 (Windows)",
+        "language": "fr",
+        "languageConfidence": 0.9999979138374329
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/manual-tv-philips-40pfs6009-full-hd-40-led_1039563312724814607.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1772366619157,
+        "cacheKey": "1039563312724814607",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 24818982,
+        "fileName": "manual-tv-philips-40pfs6009-full-hd-40-led",
+        "extension": "pdf",
+        "md5": "22cffe980e903ad9d9b01a7cb06edd23",
+        "resourceType": "PDF",
+        "tags": [],
+        "hardTags": [],
+        "metadataTitle": "6009 (French)",
+        "extractedTitle": "",
+        "numberOfPages": 76,
+        "author": "Philips",
+        "subject": "User Manual",
+        "creationDate": 1709210074000,
+        "modificationDate": 1709216609000,
+        "producer": "Adobe PDF library 16.03",
+        "language": "",
+        "languageConfidence": 0
+      },
+      {
+        "url": "https://static.nudger.fr/pdfs/40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat_10478874016048801442.pdf",
+        "mimeType": "application/pdf",
+        "timeStamp": 1781005095136,
+        "cacheKey": "10478874016048801442",
+        "evicted": false,
+        "processed": true,
+        "fileSize": 1304879,
+        "fileName": "40pfs6009-classe-de-diagonale-40-tv-lcd-retro-eclairee-par-led-smart-tv-titan-os-1080p-1920-x-1080-hdr-noir-mat",
+        "extension": "pdf",
+        "md5": "579a3de687a92922c41a39ea6b80ff38",
+        "resourceType": "PDF",
+        "datasourceName": "icecat.biz",
+        "tags": [],
+        "hardTags": [],
+        "extractedTitle": "Philips 40PFS6009/12 TV 101,6 cm (40\") Full HD Smart TV Wifi Noir",
+        "numberOfPages": 3,
+        "creationDate": 1727616800000,
+        "modificationDate": 1727616800000,
+        "producer": "mPDF 8.0.7",
+        "language": "en",
+        "languageConfidence": 0.8571382164955139
+      }
+    ],
+    "coverImagePath": "https://static.nudger.fr/images/televiseur-full-hd-40-99-cm-philips-40pfs6009-12_15808763329093099305.webp",
+    "externalCover": "https://images.icecat.biz/img/feature_logo/980-6359.png"
+  },
+  "scores": {
+    "scores": {
+      "MINAVAILABILITYSPAREPARTSYEARS": {
+        "id": "MINAVAILABILITYSPAREPARTSYEARS",
+        "name": "Disponibilité pièces détachées",
+        "description": "Durée minimale de disponibilité des pièces détachées",
+        "virtual": false,
+        "value": 7,
+        "absolute": {
+          "min": 1,
+          "max": 10,
+          "avg": 7.274489795918368,
+          "count": 1960,
+          "sum": 14258,
+          "stdDev": 0.8238549536112211,
+          "value": 7
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 3.485827664399093,
+          "count": 1960,
+          "sum": 14258,
+          "stdDev": 0.8238549536112211,
+          "value": 3.333333333333333
+        },
+        "metadatas": {
+          "source": "AI,eprel"
+        },
+        "ranking": 593,
+        "percent": 67,
+        "on20": 13,
+        "absoluteValue": "7",
+        "relativeValue": "3.3",
+        "letter": "B"
+      },
+      "POWER_CONSUMPTION_HDR": {
+        "id": "POWER_CONSUMPTION_HDR",
+        "name": "Consommation électrique (HDR)",
+        "description": "La consommation électrique du téléviseur en mode HDR (haute définition)",
+        "virtual": false,
+        "value": 42,
+        "absolute": {
+          "min": 16,
+          "max": 879,
+          "avg": 154.2354555433589,
+          "count": 1822,
+          "sum": 281016.99999999994,
+          "stdDev": 102.72319564210609,
+          "value": 42
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 0.8009006694284988,
+          "count": 1822,
+          "sum": 281016.99999999994,
+          "stdDev": 102.72319564210609,
+          "value": 4.849362688296639
+        },
+        "metadatas": {
+          "source": "eprel"
+        },
+        "ranking": 1695,
+        "percent": 97,
+        "on20": 19,
+        "absoluteValue": "42",
+        "relativeValue": "4.8",
+        "letter": "A"
+      },
+      "POWER_CONSUMPTION_TYPICAL": {
+        "id": "POWER_CONSUMPTION_TYPICAL",
+        "name": "Consommation électrique (en marche)",
+        "description": "La consommation électrique de l'objet en fonctionnement",
+        "virtual": false,
+        "value": 27,
+        "absolute": {
+          "min": 0.5,
+          "max": 950,
+          "avg": 151.1507376185458,
+          "count": 949,
+          "sum": 143442.04999999996,
+          "stdDev": 125.07676112842425,
+          "value": 27
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 0.7933161538628004,
+          "count": 949,
+          "sum": 143442.04999999996,
+          "stdDev": 125.07676112842425,
+          "value": 4.860452869931543
+        },
+        "metadatas": {
+          "source": "AI"
+        },
+        "ranking": 914,
+        "percent": 97,
+        "on20": 19,
+        "absoluteValue": "27",
+        "relativeValue": "4.9",
+        "letter": "A"
+      },
+      "MINAVAILABILITYSOFTWAREUPDATESYEARS": {
+        "id": "MINAVAILABILITYSOFTWAREUPDATESYEARS",
+        "name": "Mises à jour logicielles",
+        "description": "Durée minimale de disponibilité des mises à jour logicielles",
+        "virtual": false,
+        "value": 8,
+        "absolute": {
+          "min": 1,
+          "max": 11,
+          "avg": 7.88208269525268,
+          "count": 1959,
+          "sum": 15441,
+          "stdDev": 0.8767198084703283,
+          "value": 8
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 3.4410413476263404,
+          "count": 1959,
+          "sum": 15441,
+          "stdDev": 0.8767198084703283,
+          "value": 3.5
+        },
+        "metadatas": {
+          "source": "AI,eprel"
+        },
+        "ranking": 801,
+        "percent": 70,
+        "on20": 14,
+        "absoluteValue": "8",
+        "relativeValue": "3.5",
+        "letter": "B"
+      },
+      "POWER_CONSUMPTION_OFF": {
+        "id": "POWER_CONSUMPTION_OFF",
+        "name": "Consommation électrique (arrêt)",
+        "description": "La consommation électrique à l'arrêt, ou en veille",
+        "virtual": false,
+        "value": 0.5,
+        "absolute": {
+          "min": 0,
+          "max": 110,
+          "avg": 0.5370731707317066,
+          "count": 1640,
+          "sum": 880.7999999999987,
+          "stdDev": 2.8348146959721565,
+          "value": 0.5
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 0.02441241685144121,
+          "count": 1640,
+          "sum": 880.7999999999987,
+          "stdDev": 2.8348146959721565,
+          "value": 4.9772727272727275
+        },
+        "metadatas": {
+          "source": "icecat.biz"
+        },
+        "ranking": 301,
+        "percent": 100,
+        "on20": 20,
+        "absoluteValue": "0.5",
+        "relativeValue": "5",
+        "letter": "A"
+      },
+      "MINGUARANTEEDSUPPORTYEARS": {
+        "id": "MINGUARANTEEDSUPPORTYEARS",
+        "name": "Support garanti",
+        "description": "Durée minimale du support garanti",
+        "virtual": false,
+        "value": 7,
+        "absolute": {
+          "min": 1,
+          "max": 15,
+          "avg": 7.2789393166751655,
+          "count": 1961,
+          "sum": 14274,
+          "stdDev": 1.34896038951207,
+          "value": 7
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.2424783273839877,
+          "count": 1961,
+          "sum": 14274,
+          "stdDev": 1.34896038951207,
+          "value": 2.142857142857143
+        },
+        "metadatas": {
+          "source": "AI,eprel"
+        },
+        "ranking": 534,
+        "percent": 43,
+        "on20": 9,
+        "absoluteValue": "7",
+        "relativeValue": "2.1",
+        "letter": "C"
+      },
+      "DURABILITY_INDEX": {
+        "id": "DURABILITY_INDEX",
+        "name": "Indice de durabilité",
+        "description": "L'indice de durabilité de l'objet, note officielle sur 10",
+        "virtual": false,
+        "value": 5.2,
+        "absolute": {
+          "min": 4.4,
+          "max": 8.7,
+          "avg": 7.337192982456139,
+          "count": 285,
+          "sum": 2091.0999999999995,
+          "stdDev": 0.8669886467740006,
+          "value": 5.2
+        },
+        "relativ": {
+          "min": 2.2,
+          "max": 4.35,
+          "avg": 3.6685964912280693,
+          "count": 285,
+          "sum": 2091.0999999999995,
+          "stdDev": 0.8669886467740006,
+          "value": 2.6
+        },
+        "metadatas": {
+          "source": "icecat.biz"
+        },
+        "ranking": 10,
+        "percent": 52,
+        "on20": 10,
+        "absoluteValue": "5.2",
+        "relativeValue": "2.6",
+        "letter": "C"
+      },
+      "CLASSE_ENERGY_SDR": {
+        "id": "CLASSE_ENERGY_SDR",
+        "name": "Classe énergétique (SDR)",
+        "description": "La classe énergétique du téléviseur en mode SDR",
+        "virtual": false,
+        "value": 55,
+        "absolute": {
+          "min": 10,
+          "max": 70,
+          "avg": 28.998538011695906,
+          "count": 2052,
+          "sum": 59505,
+          "stdDev": 13.601416686297275,
+          "value": 55
+        },
+        "relativ": {
+          "min": 0,
+          "max": 3.333333333333333,
+          "avg": 1.0554743339831059,
+          "count": 2052,
+          "sum": 59505,
+          "stdDev": 13.601416686297275,
+          "value": 2.5
+        },
+        "metadatas": {
+          "source": "eprel,icecat.biz"
+        },
+        "ranking": 1976,
+        "percent": 50,
+        "on20": 10,
+        "absoluteValue": "55",
+        "relativeValue": "2.5",
+        "letter": "C"
+      },
+      "POWER_CONSUMPTION_STANDBY": {
+        "id": "POWER_CONSUMPTION_STANDBY",
+        "name": "Consommation électrique (mode veille)",
+        "description": "La consommation électrique de l'appareil en mode veille",
+        "virtual": false,
+        "value": 0.5,
+        "absolute": {
+          "min": 0.1,
+          "max": 5,
+          "avg": 0.4891006842619733,
+          "count": 2046,
+          "sum": 1000.6999999999973,
+          "stdDev": 0.16138293055102723,
+          "value": 0.5
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 0.397041514553034,
+          "count": 2046,
+          "sum": 1000.6999999999973,
+          "stdDev": 0.16138293055102723,
+          "value": 4.591836734693878
+        },
+        "metadatas": {
+          "source": "eprel"
+        },
+        "ranking": 685,
+        "percent": 92,
+        "on20": 18,
+        "absoluteValue": "0.5",
+        "relativeValue": "4.6",
+        "letter": "A"
+      },
+      "WARRANTY": {
+        "id": "WARRANTY",
+        "name": "Garantie",
+        "description": "Durée de garantie du produit",
+        "virtual": false,
+        "value": 2,
+        "absolute": {
+          "min": 0,
+          "max": 10,
+          "avg": 1.9380246913580248,
+          "count": 2025,
+          "sum": 3924.5,
+          "stdDev": 0.7763390180811957,
+          "value": 2
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.5,
+          "count": 2025,
+          "sum": 3924.5,
+          "stdDev": 0.7763390180811957,
+          "value": 2.599787765393967
+        },
+        "metadatas": {
+          "source": "AI,eprel"
+        },
+        "ranking": 939,
+        "percent": 52,
+        "on20": 10,
+        "absoluteValue": "2",
+        "relativeValue": "2.6",
+        "letter": "C"
+      },
+      "POWER_CONSUMPTION_STANDBY_NETWORKD": {
+        "id": "POWER_CONSUMPTION_STANDBY_NETWORKD",
+        "name": "Consommation électrique (veille réseau)",
+        "description": "La consommation électrique de l'appareil en mode veille ou réseau",
+        "virtual": false,
+        "value": 2,
+        "absolute": {
+          "min": 0,
+          "max": 5.7,
+          "avg": 1.9128944504896637,
+          "count": 1838,
+          "sum": 3515.900000000002,
+          "stdDev": 0.3600148116311173,
+          "value": 2
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 1.6779775881488277,
+          "count": 1838,
+          "sum": 3515.900000000002,
+          "stdDev": 0.3600148116311173,
+          "value": 3.245614035087719
+        },
+        "metadatas": {
+          "source": "eprel"
+        },
+        "ranking": 601,
+        "percent": 65,
+        "on20": 13,
+        "absoluteValue": "2",
+        "relativeValue": "3.2",
+        "letter": "B"
+      },
+      "WEIGHT": {
+        "id": "WEIGHT",
+        "name": "Poids de l'objet",
+        "description": "Le poids de l'objet",
+        "virtual": false,
+        "value": 5.4,
+        "absolute": {
+          "min": 0.5,
+          "max": 100,
+          "avg": 22.446588799007447,
+          "count": 806,
+          "sum": 18091.950572,
+          "stdDev": 16.480529850538407,
+          "value": 5.4
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 1.1028436582415804,
+          "count": 806,
+          "sum": 18091.950572,
+          "stdDev": 16.480529850538407,
+          "value": 4.7537688442211055
+        },
+        "metadatas": {
+          "source": "AI"
+        },
+        "ranking": 724,
+        "percent": 95,
+        "on20": 19,
+        "absoluteValue": "5.4",
+        "relativeValue": "4.8",
+        "letter": "A"
+      },
+      "REPAIRABILITY_INDEX": {
+        "id": "REPAIRABILITY_INDEX",
+        "name": "Indice de réparabilité",
+        "description": "L'indice de réparabilité de l'objet",
+        "virtual": false,
+        "value": 8.6,
+        "absolute": {
+          "min": 4.1,
+          "max": 9,
+          "avg": 7.298561151079138,
+          "count": 278,
+          "sum": 2029.0000000000002,
+          "stdDev": 1.0903425381856156,
+          "value": 8.6
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 3.2638379092644265,
+          "count": 278,
+          "sum": 2029.0000000000002,
+          "stdDev": 1.0903425381856156,
+          "value": 4.591836734693877
+        },
+        "metadatas": {
+          "source": "AI,rakuten.com"
+        },
+        "ranking": 271,
+        "percent": 92,
+        "on20": 18,
+        "absoluteValue": "8.6",
+        "relativeValue": "4.6",
+        "letter": "A"
+      },
+      "CLASSE_ENERGY_HDR": {
+        "id": "CLASSE_ENERGY_HDR",
+        "name": "Classe énergétique (HDR)",
+        "description": "La classe énergétique du téléviseur en mode HDR",
+        "virtual": false,
+        "value": 25,
+        "absolute": {
+          "min": 10,
+          "max": 70,
+          "avg": 11.858552631578947,
+          "count": 1824,
+          "sum": 21630,
+          "stdDev": 6.589444750178195,
+          "value": 25
+        },
+        "relativ": {
+          "min": 0,
+          "max": 3.333333333333333,
+          "avg": 0.10325292397660815,
+          "count": 1824,
+          "sum": 21630,
+          "stdDev": 6.589444750178195,
+          "value": 0.8333333333333333
+        },
+        "metadatas": {
+          "source": "eprel,icecat.biz"
+        },
+        "ranking": 1732,
+        "percent": 17,
+        "on20": 3,
+        "absoluteValue": "25",
+        "relativeValue": "0.8",
+        "letter": "E"
+      },
+      "DIAGONALE_POUCES": {
+        "id": "DIAGONALE_POUCES",
+        "name": "Taille de l'écran",
+        "description": "Diagonale de l'écran en pouces",
+        "virtual": false,
+        "value": 40,
+        "absolute": {
+          "min": 10,
+          "max": 116,
+          "avg": 55.51624293785311,
+          "count": 2124,
+          "sum": 117916.5,
+          "stdDev": 18.1755561832364,
+          "value": 40
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.1469925914081656,
+          "count": 2124,
+          "sum": 117916.5,
+          "stdDev": 18.1755561832364,
+          "value": 3.5849056603773586
+        },
+        "metadatas": {
+          "source": "AI,eprel,icecat.biz,rakuten.com"
+        },
+        "ranking": 1761,
+        "percent": 72,
+        "on20": 14,
+        "absoluteValue": "40",
+        "relativeValue": "3.6",
+        "letter": "B"
+      },
+      "CLASSE_ENERGY": {
+        "id": "CLASSE_ENERGY",
+        "name": "Classe énergétique",
+        "description": "La classe énergétique",
+        "virtual": false,
+        "value": 55,
+        "absolute": {
+          "min": 10,
+          "max": 100,
+          "avg": 30.752739399714148,
+          "count": 2099,
+          "sum": 64550,
+          "stdDev": 17.12633704434987,
+          "value": 55
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 1.152929966650786,
+          "count": 2099,
+          "sum": 64550,
+          "stdDev": 17.12633704434987,
+          "value": 2.5
+        },
+        "metadatas": {
+          "source": "AI,eprel,rakuten.com"
+        },
+        "ranking": 1970,
+        "percent": 50,
+        "on20": 10,
+        "absoluteValue": "55",
+        "relativeValue": "2.5",
+        "letter": "C"
+      },
+      "POWER_CONSUMPTION_SDR": {
+        "id": "POWER_CONSUMPTION_SDR",
+        "name": "Consommation électrique (SDR)",
+        "description": "La consommation électrique du téléviseur en mode SDR (basse définition)",
+        "virtual": false,
+        "value": 27,
+        "absolute": {
+          "min": 7.3,
+          "max": 360,
+          "avg": 76.26749755620719,
+          "count": 2046,
+          "sum": 156043.2999999999,
+          "stdDev": 40.97731370894536,
+          "value": 27
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 0.9777076489397107,
+          "count": 2046,
+          "sum": 156043.2999999999,
+          "stdDev": 40.97731370894536,
+          "value": 4.7207258293167
+        },
+        "metadatas": {
+          "source": "eprel"
+        },
+        "ranking": 1800,
+        "percent": 94,
+        "on20": 19,
+        "absoluteValue": "27",
+        "relativeValue": "4.7",
+        "letter": "A"
+      },
+      "BRAND_CDP_SCORING": {
+        "id": "BRAND_CDP_SCORING",
+        "name": "Score climat CDP de la marque",
+        "description": "Score de transparence climatique CDP de la marque",
+        "virtual": true,
+        "value": 100,
+        "absolute": {
+          "min": 100,
+          "max": 100,
+          "avg": 100,
+          "count": 2,
+          "sum": 200,
+          "stdDev": 0,
+          "value": 100
+        },
+        "relativ": {
+          "min": 2.5,
+          "max": 2.5,
+          "avg": 2.5,
+          "count": 2,
+          "sum": 200,
+          "stdDev": 0,
+          "value": 2.5
+        },
+        "metadatas": {},
+        "percent": 50,
+        "on20": 10,
+        "absoluteValue": "100",
+        "relativeValue": "2.5",
+        "letter": "C"
+      },
+      "DATA_QUALITY": {
+        "id": "DATA_QUALITY",
+        "name": "Qualité de la donnée",
+        "description": "Complétude des données produit",
+        "virtual": false,
+        "value": 17,
+        "absolute": {
+          "min": 1,
+          "max": 17,
+          "avg": 13.048964218455744,
+          "count": 2124,
+          "sum": 27716,
+          "stdDev": 2.488098575293377,
+          "value": 17
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 3.76530131826742,
+          "count": 2124,
+          "sum": 27716,
+          "stdDev": 2.488098575293377,
+          "value": 5
+        },
+        "metadatas": {},
+        "ranking": 2094,
+        "percent": 100,
+        "on20": 20,
+        "absoluteValue": "17",
+        "relativeValue": "5",
+        "letter": "A"
+      },
+      "ECOSCORE": {
+        "id": "ECOSCORE",
+        "name": "ECOSCORE",
+        "virtual": false,
+        "value": 15.500981605278572,
+        "absolute": {
+          "min": 9.152397353509425,
+          "max": 15.500981605278572,
+          "avg": 12.901410812034246,
+          "count": 2124,
+          "sum": 27402.59656476074,
+          "stdDev": 0.8139435669529314,
+          "value": 15.500981605278572
+        },
+        "relativ": {
+          "min": 2.2880993383773562,
+          "max": 3.875245401319643,
+          "avg": 3.2253527030085616,
+          "count": 2124,
+          "sum": 27402.59656476074,
+          "stdDev": 0.8139435669529314,
+          "value": 3.875245401319643
+        },
+        "metadatas": {},
+        "ranking": 2123,
+        "percent": 78,
+        "on20": 16,
+        "absoluteValue": "15.5",
+        "relativeValue": "3.9",
+        "letter": "B"
+      },
+      "REPARABILITY": {
+        "id": "REPARABILITY",
+        "name": "REPARABILITY",
+        "virtual": false,
+        "value": 4.134199134199134,
+        "absolute": {
+          "min": 0.39682539682539725,
+          "max": 4.531024531024531,
+          "avg": 3.344561456586178,
+          "count": 2124,
+          "sum": 7103.8485337890415,
+          "stdDev": 0.3103781407874821,
+          "value": 4.134199134199134
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.5,
+          "count": 2124,
+          "sum": 7103.8485337890415,
+          "stdDev": 0.3103781407874821,
+          "value": 5
+        },
+        "metadatas": {},
+        "ranking": 2108,
+        "percent": 100,
+        "on20": 20,
+        "absoluteValue": "4.1",
+        "relativeValue": "5",
+        "letter": "A"
+      },
+      "DURABILITY": {
+        "id": "DURABILITY",
+        "name": "DURABILITY",
+        "virtual": false,
+        "value": 2.8112000037917624,
+        "absolute": {
+          "min": 0.2781954887218045,
+          "max": 4.345864661654136,
+          "avg": 2.755882458635489,
+          "count": 2124,
+          "sum": 5853.494342141778,
+          "stdDev": 0.39136048678252394,
+          "value": 2.8112000037917624
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.5,
+          "count": 2124,
+          "sum": 5853.494342141778,
+          "stdDev": 0.39136048678252394,
+          "value": 2.6766834766938707
+        },
+        "metadatas": {},
+        "ranking": 795,
+        "percent": 54,
+        "on20": 11,
+        "absoluteValue": "2.8",
+        "relativeValue": "2.7",
+        "letter": "C"
+      },
+      "ENERGY_CONSUMPTION": {
+        "id": "ENERGY_CONSUMPTION",
+        "name": "ENERGY_CONSUMPTION",
+        "virtual": false,
+        "value": 3.900469915857867,
+        "absolute": {
+          "min": 1.1913227886676294,
+          "max": 4.125845945042645,
+          "avg": 3.243623923096274,
+          "count": 2124,
+          "sum": 6889.457212656486,
+          "stdDev": 0.3525614635000742,
+          "value": 3.900469915857867
+        },
+        "relativ": {
+          "min": 0,
+          "max": 5,
+          "avg": 2.5,
+          "count": 2124,
+          "sum": 6889.457212656486,
+          "stdDev": 0.3525614635000742,
+          "value": 4.8288350428345055
+        },
+        "metadatas": {},
+        "ranking": 2100,
+        "percent": 97,
+        "on20": 19,
+        "absoluteValue": "3.9",
+        "relativeValue": "4.8",
+        "letter": "A"
+      }
+    },
+    "ecoscore": {
+      "id": "ECOSCORE",
+      "name": "ECOSCORE",
+      "virtual": false,
+      "value": 15.500981605278572,
+      "absolute": {
+        "min": 9.152397353509425,
+        "max": 15.500981605278572,
+        "avg": 12.901410812034246,
+        "count": 2124,
+        "sum": 27402.59656476074,
+        "stdDev": 0.8139435669529314,
+        "value": 15.500981605278572
+      },
+      "relativ": {
+        "min": 2.2880993383773562,
+        "max": 3.875245401319643,
+        "avg": 3.2253527030085616,
+        "count": 2124,
+        "sum": 27402.59656476074,
+        "stdDev": 0.8139435669529314,
+        "value": 3.875245401319643
+      },
+      "metadatas": {},
+      "ranking": 2123,
+      "percent": 78,
+      "on20": 16,
+      "absoluteValue": "15.5",
+      "relativeValue": "3.9",
+      "letter": "B"
+    },
+    "ranking": {
+      "globalPosition": 1,
+      "globalCount": 2124,
+      "specializedPosition": 0,
+      "specializedCount": 0
+    },
+    "impactScore": {
+      "status": "RATED",
+      "methodologyVersion": 1,
+      "methodologyRevision": "0038e8fd",
+      "scoredAt": 1795608402207,
+      "currentMethodologyVersion": 1,
+      "realWeightCoverage": 1,
+      "realCriteriaCount": 13,
+      "totalCriteriaCount": 13,
+      "position": 1,
+      "ratedCount": 2124,
+      "betterThanPercent": 100
+    }
+  },
+  "offers": {
+    "offersCount": 1,
+    "hasOccasions": false,
+    "bestPrice": {
+      "datasourceName": "rueducommerce.fr",
+      "favicon": "/api/favicon?url=https://rueducommerce.fr",
+      "offerName": "PHILIPS 40PFS6009/12",
+      "url": "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiMWRhZmY4MjctZmUyNC00MTc0LTg5ZDItMjNkZTZjYjgyNmUxIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+      "compensation": 1.2374250000000002,
+      "condition": "NEW",
+      "price": 329.98,
+      "currency": "EUR",
+      "timeStamp": 1795656709802,
+      "shortPrice": "330",
+      "shippingCost": 0,
+      "shippingTimeDays": 1
+    },
+    "bestNewOffer": {
+      "datasourceName": "rueducommerce.fr",
+      "favicon": "/api/favicon?url=https://rueducommerce.fr",
+      "offerName": "PHILIPS 40PFS6009/12",
+      "url": "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiOGE0YzYxNGEtOTE1Ni00ZDRjLWFmMzYtYjZiNDFlZmM0YTQwIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+      "compensation": 1.2374250000000002,
+      "condition": "NEW",
+      "price": 329.98,
+      "currency": "EUR",
+      "timeStamp": 1795656709802,
+      "shortPrice": "330",
+      "shippingCost": 0,
+      "shippingTimeDays": 1
+    },
+    "offersByCondition": {
+      "NEW": [
+        {
+          "datasourceName": "rueducommerce.fr",
+          "favicon": "/api/favicon?url=https://rueducommerce.fr",
+          "offerName": "PHILIPS 40PFS6009/12",
+          "url": "/contrib/eyJkYXRhc291cmNlTmFtZSI6InJ1ZWR1Y29tbWVyY2UuZnIiLCJndGluIjoiODcxODg2MzA0MTAwMCIsImlkIjoiODgxNGY2MjUtOWEwMS00MjljLWE4YWQtMjNkMzhmZGE2ZGEyIiwidHMiOjE3OTU2NjI0ODA5OTksInVybCI6Imh0dHBzOi8vd3d3LmF3aW4xLmNvbS9wY2xpY2sucGhwP3A9NDI3NDEzODU3NjMmYT01MzAwMzMmbT02OTAxIn0%3D",
+          "compensation": 1.2374250000000002,
+          "condition": "NEW",
+          "affiliationToken": null,
+          "price": 329.98,
+          "currency": "EUR",
+          "timeStamp": 1795656709802,
+          "shortPrice": "330",
+          "quantityInStock": null,
+          "shippingCost": 0,
+          "shippingTimeDays": 1
+        }
+      ]
+    },
+    "newHistory": {
+      "entries": [
+        {
+          "timestamp": 1732664971400,
+          "price": 263.45
+        },
+        {
+          "timestamp": 1732748469554,
+          "price": 247.42
+        },
+        {
+          "timestamp": 1732830070560,
+          "price": 244.86
+        },
+        {
+          "timestamp": 1733002665206,
+          "price": 262.79
+        },
+        {
+          "timestamp": 1733176967475,
+          "price": 251.22
+        },
+        {
+          "timestamp": 1733185817214,
+          "price": 262.79
+        },
+        {
+          "timestamp": 1733361841080,
+          "price": 266.06
+        },
+        {
+          "timestamp": 1733528046802,
+          "price": 278.38
+        },
+        {
+          "timestamp": 1733608155353,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1733618910348,
+          "price": 278.38
+        },
+        {
+          "timestamp": 1733870019676,
+          "price": 277.31
+        },
+        {
+          "timestamp": 1734047915442,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1734215767277,
+          "price": 263.94
+        },
+        {
+          "timestamp": 1734301625997,
+          "price": 294.42
+        },
+        {
+          "timestamp": 1734560171065,
+          "price": 254.4
+        },
+        {
+          "timestamp": 1734645240034,
+          "price": 273.72
+        },
+        {
+          "timestamp": 1734655767331,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1734819408844,
+          "price": 259.7
+        },
+        {
+          "timestamp": 1734828075949,
+          "price": 257.06
+        },
+        {
+          "timestamp": 1734915277331,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1735074870774,
+          "price": 259.7
+        },
+        {
+          "timestamp": 1735169015655,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1735340360325,
+          "price": 259.7
+        },
+        {
+          "timestamp": 1735422663404,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1735601344381,
+          "price": 262.41
+        },
+        {
+          "timestamp": 1735605203116,
+          "price": 259.7
+        },
+        {
+          "timestamp": 1735853925046,
+          "price": 287.99
+        },
+        {
+          "timestamp": 1735943318153,
+          "price": 278.41
+        },
+        {
+          "timestamp": 1735952833731,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1736210735482,
+          "price": 280.98
+        },
+        {
+          "timestamp": 1736378347255,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1736386156105,
+          "price": 280.98
+        },
+        {
+          "timestamp": 1736548300896,
+          "price": 318.07
+        },
+        {
+          "timestamp": 1736633099884,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1736805339712,
+          "price": 280.98
+        },
+        {
+          "timestamp": 1736815654901,
+          "price": 277.33
+        },
+        {
+          "timestamp": 1736979468985,
+          "price": 283.98
+        },
+        {
+          "timestamp": 1737151323606,
+          "price": 277.31
+        },
+        {
+          "timestamp": 1737239883017,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1737498314251,
+          "price": 270.39
+        },
+        {
+          "timestamp": 1737758596701,
+          "price": 264.1
+        },
+        {
+          "timestamp": 1737927974439,
+          "price": 271.99
+        },
+        {
+          "timestamp": 1738017310128,
+          "price": 264.5
+        },
+        {
+          "timestamp": 1738368086619,
+          "price": 265
+        },
+        {
+          "timestamp": 1738534301204,
+          "price": 272.99
+        },
+        {
+          "timestamp": 1738622235272,
+          "price": 272.89
+        },
+        {
+          "timestamp": 1738716388564,
+          "price": 270.84
+        },
+        {
+          "timestamp": 1738802115690,
+          "price": 294.32
+        },
+        {
+          "timestamp": 1738967832481,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1739311239673,
+          "price": 294.42
+        },
+        {
+          "timestamp": 1739319088703,
+          "price": 272.98
+        },
+        {
+          "timestamp": 1739481546667,
+          "price": 292.99
+        },
+        {
+          "timestamp": 1739662447987,
+          "price": 272.98
+        },
+        {
+          "timestamp": 1739834815389,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1739913469557,
+          "price": 272.98
+        },
+        {
+          "timestamp": 1740098194601,
+          "price": 294.42
+        },
+        {
+          "timestamp": 1740264108693,
+          "price": 269.03
+        },
+        {
+          "timestamp": 1740358223383,
+          "price": 251.29
+        },
+        {
+          "timestamp": 1740444919215,
+          "price": 269.27
+        },
+        {
+          "timestamp": 1740618104827,
+          "price": 251.52
+        },
+        {
+          "timestamp": 1740784070483,
+          "price": 261.31
+        },
+        {
+          "timestamp": 1740865554055,
+          "price": 264.76
+        },
+        {
+          "timestamp": 1741045451348,
+          "price": 262.3
+        },
+        {
+          "timestamp": 1741123286458,
+          "price": 270.7
+        },
+        {
+          "timestamp": 1741300617425,
+          "price": 262.3
+        },
+        {
+          "timestamp": 1741395320745,
+          "price": 270.7
+        },
+        {
+          "timestamp": 1741480159638,
+          "price": 262.3
+        },
+        {
+          "timestamp": 1741649485687,
+          "price": 271
+        },
+        {
+          "timestamp": 1741727033224,
+          "price": 262.3
+        },
+        {
+          "timestamp": 1741822030894,
+          "price": 270.7
+        },
+        {
+          "timestamp": 1741902738598,
+          "price": 262.3
+        },
+        {
+          "timestamp": 1742076692554,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1742086322198,
+          "price": 280.6
+        },
+        {
+          "timestamp": 1742256921928,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1742424450892,
+          "price": 269.59
+        },
+        {
+          "timestamp": 1742432111279,
+          "price": 274.97
+        },
+        {
+          "timestamp": 1742681051118,
+          "price": 257.45
+        },
+        {
+          "timestamp": 1742850078050,
+          "price": 268.24
+        },
+        {
+          "timestamp": 1742938335987,
+          "price": 257.45
+        },
+        {
+          "timestamp": 1743029294256,
+          "price": 268.24
+        },
+        {
+          "timestamp": 1743203473901,
+          "price": 257.17
+        },
+        {
+          "timestamp": 1743370087179,
+          "price": 268.24
+        },
+        {
+          "timestamp": 1743460968237,
+          "price": 260.5
+        },
+        {
+          "timestamp": 1743544165718,
+          "price": 268.24
+        },
+        {
+          "timestamp": 1743723483413,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1743802678495,
+          "price": 242.15
+        },
+        {
+          "timestamp": 1743983595964,
+          "price": 242.15
+        },
+        {
+          "timestamp": 1743987045895,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1744242884593,
+          "price": 268.24
+        },
+        {
+          "timestamp": 1744326228899,
+          "price": 258.99
+        },
+        {
+          "timestamp": 1744409595190,
+          "price": 247.99
+        },
+        {
+          "timestamp": 1744419302270,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1744750814076,
+          "price": 247.5
+        },
+        {
+          "timestamp": 1744773309477,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1744949415467,
+          "price": 250.8
+        },
+        {
+          "timestamp": 1745042950891,
+          "price": 248
+        },
+        {
+          "timestamp": 1745200098711,
+          "price": 261.9
+        },
+        {
+          "timestamp": 1745285513560,
+          "price": 257.7
+        },
+        {
+          "timestamp": 1745381903638,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1745461782035,
+          "price": 257.5
+        },
+        {
+          "timestamp": 1745640080536,
+          "price": 247.5
+        },
+        {
+          "timestamp": 1745718444131,
+          "price": 238.99
+        },
+        {
+          "timestamp": 1745894381938,
+          "price": 260.29
+        },
+        {
+          "timestamp": 1745980950449,
+          "price": 247.07
+        },
+        {
+          "timestamp": 1746164421312,
+          "price": 261.7
+        },
+        {
+          "timestamp": 1746240084777,
+          "price": 260.29
+        },
+        {
+          "timestamp": 1746331647223,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1746419160186,
+          "price": 260.29
+        },
+        {
+          "timestamp": 1746590714917,
+          "price": 247.99
+        },
+        {
+          "timestamp": 1746764196932,
+          "price": 268.5
+        },
+        {
+          "timestamp": 1746847323476,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1747104581531,
+          "price": 247.5
+        },
+        {
+          "timestamp": 1747203022465,
+          "price": 247.99
+        },
+        {
+          "timestamp": 1747289552399,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1747361985851,
+          "price": 251.01
+        },
+        {
+          "timestamp": 1747535147733,
+          "price": 261
+        },
+        {
+          "timestamp": 1747707845472,
+          "price": 262.22
+        },
+        {
+          "timestamp": 1748062593691,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1748137727805,
+          "price": 242.82
+        },
+        {
+          "timestamp": 1748236457191,
+          "price": 245.99
+        },
+        {
+          "timestamp": 1748397614898,
+          "price": 243.48
+        },
+        {
+          "timestamp": 1748488053144,
+          "price": 235.99
+        },
+        {
+          "timestamp": 1748574853560,
+          "price": 232.85
+        },
+        {
+          "timestamp": 1748754394108,
+          "price": 235.99
+        },
+        {
+          "timestamp": 1748832966746,
+          "price": 252.99
+        },
+        {
+          "timestamp": 1749006680837,
+          "price": 244.53
+        },
+        {
+          "timestamp": 1749184410373,
+          "price": 246.15
+        },
+        {
+          "timestamp": 1749358264368,
+          "price": 260.62
+        },
+        {
+          "timestamp": 1749438299301,
+          "price": 250.99
+        },
+        {
+          "timestamp": 1749532107087,
+          "price": 260.62
+        },
+        {
+          "timestamp": 1749618034457,
+          "price": 250.99
+        },
+        {
+          "timestamp": 1749791414564,
+          "price": 255.99
+        },
+        {
+          "timestamp": 1750128784775,
+          "price": 257.37
+        },
+        {
+          "timestamp": 1750210271851,
+          "price": 255.99
+        },
+        {
+          "timestamp": 1750394565169,
+          "price": 253.99
+        },
+        {
+          "timestamp": 1750473656924,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1750651735168,
+          "price": 253.99
+        },
+        {
+          "timestamp": 1750826227071,
+          "price": 256.6
+        },
+        {
+          "timestamp": 1750999669669,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1751170539801,
+          "price": 271.9
+        },
+        {
+          "timestamp": 1751343684108,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1751429532476,
+          "price": 270.1
+        },
+        {
+          "timestamp": 1751613188997,
+          "price": 248.99
+        },
+        {
+          "timestamp": 1751768599242,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1751862018414,
+          "price": 276.61
+        },
+        {
+          "timestamp": 1751951582442,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1752122006974,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1752198480037,
+          "price": 262.47
+        },
+        {
+          "timestamp": 1752297345379,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1752465663913,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1752550722960,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1752728851940,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1753156610293,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1753241688606,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1753324254982,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1753420921503,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1753505594349,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1753599532091,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1753764755097,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1753851432013,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1754024624879,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1754102472576,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1754197791529,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1754363704952,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1754532569580,
+          "price": 273.61
+        },
+        {
+          "timestamp": 1754630840930,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1754714782386,
+          "price": 273.61
+        },
+        {
+          "timestamp": 1754878661381,
+          "price": 263.22
+        },
+        {
+          "timestamp": 1755138412480,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1755398950515,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1755494471306,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1755576508798,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1755741335549,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1756001359017,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1756179711176,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1756358282212,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1756432338224,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1756617193371,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1756779861719,
+          "price": 273.8
+        },
+        {
+          "timestamp": 1756866329035,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1756958996641,
+          "price": 273.8
+        },
+        {
+          "timestamp": 1757056052878,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1757135974834,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1757307424918,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1757389797958,
+          "price": 265.82
+        },
+        {
+          "timestamp": 1757555809669,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1757652606789,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1757741661615,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1757907944478,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1757994187252,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1758084853276,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1758252148978,
+          "price": 260.22
+        },
+        {
+          "timestamp": 1758513230113,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1758606691164,
+          "price": 260.13
+        },
+        {
+          "timestamp": 1758687720262,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1758854923214,
+          "price": 260.13
+        },
+        {
+          "timestamp": 1758955419672,
+          "price": 271.8
+        },
+        {
+          "timestamp": 1759037986646,
+          "price": 262.22
+        },
+        {
+          "timestamp": 1759117541747,
+          "price": 273.8
+        },
+        {
+          "timestamp": 1759300130503,
+          "price": 260.13
+        },
+        {
+          "timestamp": 1759467325161,
+          "price": 269.46
+        },
+        {
+          "timestamp": 1759546040653,
+          "price": 260.13
+        },
+        {
+          "timestamp": 1759634712551,
+          "price": 271.15
+        },
+        {
+          "timestamp": 1759802774223,
+          "price": 262.22
+        },
+        {
+          "timestamp": 1760239191847,
+          "price": 273.1
+        },
+        {
+          "timestamp": 1760408818433,
+          "price": 263.47
+        },
+        {
+          "timestamp": 1760578636493,
+          "price": 309.54
+        },
+        {
+          "timestamp": 1760669256385,
+          "price": 313.49
+        },
+        {
+          "timestamp": 1760852037736,
+          "price": 317.71
+        },
+        {
+          "timestamp": 1761013535530,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1761614585769,
+          "price": 303.19
+        },
+        {
+          "timestamp": 1761712315668,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1762147356726,
+          "price": 374.7
+        },
+        {
+          "timestamp": 1762309376760,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1762488903276,
+          "price": 387.78
+        },
+        {
+          "timestamp": 1762576045743,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1762658619426,
+          "price": 382.74
+        },
+        {
+          "timestamp": 1762826310895,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1763005754362,
+          "price": 336.17
+        },
+        {
+          "timestamp": 1763103856986,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1763175771941,
+          "price": 375.84
+        },
+        {
+          "timestamp": 1763365221974,
+          "price": 336.17
+        },
+        {
+          "timestamp": 1763532410944,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1763768320221,
+          "price": 359.09
+        },
+        {
+          "timestamp": 1763770962432,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1763945715174,
+          "price": 359.09
+        },
+        {
+          "timestamp": 1764041158484,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1764286105775,
+          "price": 377.9
+        },
+        {
+          "timestamp": 1764292019197,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1764458792083,
+          "price": 386.39
+        },
+        {
+          "timestamp": 1764554219190,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1765158238158,
+          "price": 385.45
+        },
+        {
+          "timestamp": 1765323709055,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1765327149916,
+          "price": 379.17
+        },
+        {
+          "timestamp": 1765500495738,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1765927102060,
+          "price": 388.16
+        },
+        {
+          "timestamp": 1765941233624,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1766546452579,
+          "price": 381.51
+        },
+        {
+          "timestamp": 1766722057717,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1766795155401,
+          "price": 383.84
+        },
+        {
+          "timestamp": 1766966219842,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1767146082492,
+          "price": 618.99
+        },
+        {
+          "timestamp": 1767289171469,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1768398529987,
+          "price": 306.43
+        },
+        {
+          "timestamp": 1768614184094,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1768867558907,
+          "price": 376.99
+        },
+        {
+          "timestamp": 1768963627218,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1769838602373,
+          "price": 436.12
+        },
+        {
+          "timestamp": 1770037567631,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1775252649619,
+          "price": 412
+        },
+        {
+          "timestamp": 1775262703826,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1775773913827,
+          "price": 412
+        },
+        {
+          "timestamp": 1775796421467,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1776292095408,
+          "price": 412
+        },
+        {
+          "timestamp": 1776319460693,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1777249076573,
+          "price": 412
+        },
+        {
+          "timestamp": 1777339857608,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1777521736757,
+          "price": 412
+        },
+        {
+          "timestamp": 1777845219242,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1778927300278,
+          "price": 384
+        },
+        {
+          "timestamp": 1779057175937,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1779485327089,
+          "price": 384
+        },
+        {
+          "timestamp": 1779496523451,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1779924492571,
+          "price": 384
+        },
+        {
+          "timestamp": 1779933637051,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1780962873015,
+          "price": 384
+        },
+        {
+          "timestamp": 1780994564134,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1781222869856,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1781820604397,
+          "price": 384
+        },
+        {
+          "timestamp": 1781841271583,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1782338873801,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1782772196436,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1782948359040,
+          "price": 384
+        },
+        {
+          "timestamp": 1782955440288,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1783378703899,
+          "price": 432
+        },
+        {
+          "timestamp": 1783394646495,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1784071537663,
+          "price": 432
+        },
+        {
+          "timestamp": 1784083407054,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1784258152798,
+          "price": 432
+        },
+        {
+          "timestamp": 1784338020245,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1784515830983,
+          "price": 432
+        },
+        {
+          "timestamp": 1784598913919,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1784850073564,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1785107495471,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1785288155844,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1786070147164,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1786244744713,
+          "price": 432
+        },
+        {
+          "timestamp": 1786320499931,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1786744646741,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1789528881660,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1790049432585,
+          "price": 497
+        },
+        {
+          "timestamp": 1790141273578,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1790400173168,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1790653312940,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1790835951142,
+          "price": 497
+        },
+        {
+          "timestamp": 1790903903824,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1791084515227,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1792465555823,
+          "price": 497
+        },
+        {
+          "timestamp": 1792552873340,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1792809410679,
+          "price": 329.98
+        },
+        {
+          "timestamp": 1793918159284,
+          "price": 329.98
+        }
+      ],
+      "lowest": {
+        "timestamp": 1748574853560,
+        "price": 232.85
+      },
+      "highest": {
+        "timestamp": 1767146082492,
+        "price": 618.99
+      },
+      "average": 293.9111627906977
+    },
+    "newTrend": {
+      "trend": "PRICE_STABLE",
+      "period": 2847299123,
+      "actualPrice": 329.98,
+      "lastPrice": 329.98,
+      "variation": 0,
+      "historicalLowestPrice": 232.85,
+      "historicalVariation": 97.13000000000002
+    },
+    "newLastOfferSeen": 1795656709802
+  }
+}

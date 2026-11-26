@@ -54,6 +54,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.mockito.ArgumentCaptor;
+import org.open4goods.nudgerfrontapi.service.ProductDtoFixtures;
 
 
 @SpringBootTest(properties = {"front.cache.path=${java.io.tmpdir}",
@@ -552,5 +553,110 @@ class ProductControllerIT {
         attributesConfig.setConfigs(List.of(attributeConfig));
         config.setAttributesConfig(attributesConfig);
         return config;
+    }
+
+    @Test
+    void productCardsEndpointReturnsLightweightCards() throws Exception {
+        ProductDto full = ProductDtoFixtures.tvListingProduct();
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(full));
+        given(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(),
+                nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class),
+                nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(new ProductSearchResponseDto(page, List.of()));
+        given(verticalsConfigService.getConfigById("tv")).willReturn(ProductDtoFixtures.tvVerticalConfig());
+
+        String body = mockMvc.perform(post("/products/cards")
+                        .param("verticalId", "tv")
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("max-age=3600")))
+                .andExpect(jsonPath("$.products.page.totalElements").value(1))
+                .andExpect(jsonPath("$.products.data[0].gtin").value(full.gtin()))
+                .andExpect(jsonPath("$.products.data[0].fullSlug").value(full.fullSlug()))
+                .andExpect(jsonPath("$.products.data[0].base.vertical").value("tv"))
+                .andExpect(jsonPath("$.products.data[0].names.cardName").value(full.names().cardName()))
+                .andExpect(jsonPath("$.products.data[0].identity.brand").value("PHILIPS"))
+                .andExpect(jsonPath("$.products.data[0].resources.coverImagePath").value(full.resources().coverImagePath()))
+                .andExpect(jsonPath("$.products.data[0].resources.images.length()").value(1))
+                .andExpect(jsonPath("$.products.data[0].scores.scores.ECOSCORE.value").isNumber())
+                .andExpect(jsonPath("$.products.data[0].scores.impactScore.status").value("RATED"))
+                .andExpect(jsonPath("$.products.data[0].scores.impactScore.methodologyVersion").value(1))
+                .andExpect(jsonPath("$.products.data[0].offers.offersCount").value(full.offers().offersCount()))
+                .andExpect(jsonPath("$.products.data[0].offers.bestPrice.price").value(full.offers().bestPrice().price()))
+                .andExpect(jsonPath("$.products.data[0].offers.offersByCondition.NEW").isArray())
+                .andExpect(jsonPath("$.products.data[0].offers.newTrend.trend").value("PRICE_STABLE"))
+                .andExpect(jsonPath("$.products.data[0].attributes.indexedAttributes.DIAGONALE_POUCES.numericValue").value(40.0))
+                .andExpect(jsonPath("$.products.data[0].attributes.indexedAttributes.DIAGONALE_POUCES.sourcing").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].attributes.indexedAttributes.WEIGHT").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].attributes.allAttributes").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].offers.newHistory").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].scores.scores.DATA_QUALITY").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].resources.videos").doesNotExist())
+                .andExpect(jsonPath("$.products.data[0].eprel").doesNotExist())
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+
+        org.assertj.core.api.Assertions.assertThat(body.getBytes(java.nio.charset.StandardCharsets.UTF_8).length)
+                .isLessThan(5_000);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.Set<String>> includes = ArgumentCaptor.forClass(java.util.Set.class);
+        then(searchService).should().searchProducts(any(Pageable.class), any(Locale.class), includes.capture(),
+                nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class),
+                nullable(String.class), nullable(FilterRequestDto.class));
+        org.assertj.core.api.Assertions.assertThat(includes.getValue())
+                .containsExactlyInAnyOrder("base", "identity", "names", "attributes", "resources", "scores", "offers");
+    }
+
+    @Test
+    void productCardsEndpointKeepsTheSortedAttribute() throws Exception {
+        ProductDto full = ProductDtoFixtures.tvListingProduct();
+        PageDto<ProductDto> page = new PageDto<>(new PageMetaDto(0, 20, 1, 1), List.of(full));
+        given(searchService.searchProducts(any(Pageable.class), any(Locale.class), anySet(),
+                nullable(AggregationRequestDto.class), any(DomainLanguage.class), nullable(String.class),
+                nullable(String.class), nullable(FilterRequestDto.class)))
+                .willReturn(new ProductSearchResponseDto(page, List.of()));
+        VerticalConfig config = ProductDtoFixtures.tvVerticalConfig();
+        given(verticalsConfigService.getConfigById("tv")).willReturn(config);
+        org.mockito.BDDMockito.willReturn(new SearchService.SearchCapabilities(java.util.Set.of(),
+                        java.util.Set.of("attributes.indexed.WEIGHT.numericValue"), java.util.Set.of()))
+                .given(searchService).buildSearchCapabilities(any(), any(), any());
+
+        mockMvc.perform(post("/products/cards")
+                        .content("{\"sort\": {\"sorts\": [{\"field\": \"attributes.indexed.WEIGHT.numericValue\", \"order\": \"asc\"}]}}")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .param("verticalId", "tv")
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.products.data[0].attributes.indexedAttributes.WEIGHT.value").exists());
+    }
+
+    @Test
+    void productCardsEndpointValidatesLikeProducts() throws Exception {
+        mockMvc.perform(post("/products/cards")
+                        .content("{\"sort\": {\"sorts\": [{\"field\": \"invalid\", \"order\": \"asc\"}]}}")
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/products/cards")
+                        .param("verticalId", "unknown")
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(post("/products/cards")
+                        .param("pageNumber", "500")
+                        .param("pageSize", "100")
+                        .param("domainLanguage", "fr")
+                        .header("X-Shared-Token", SHARED_TOKEN)
+                        .with(jwt().jwt(jwt -> jwt.claim("roles", List.of(RolesConstants.ROLE_XWIKI_ALL)))))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -45,7 +45,7 @@ describe('GuideProductGrid', () => {
     await flushPromises()
 
     expect(fetchMock).toHaveBeenCalledWith(
-      '/api/products/search',
+      '/api/products/cards',
       expect.objectContaining({ method: 'POST' })
     )
     expect(globalFetchMock).not.toHaveBeenCalled()
@@ -119,7 +119,7 @@ describe('GuideProductGrid', () => {
       await flushPromises()
 
       const searches = fetchMock.mock.calls.filter(
-        c => c[0] === '/api/products/search'
+        c => c[0] === '/api/products/cards'
       )
       expect(searches).toHaveLength(1)
       const body = searches[0]![1].body
@@ -143,7 +143,7 @@ describe('GuideProductGrid', () => {
 
       expect(wrapper.find('.guide-product-grid').exists()).toBe(false)
       expect(
-        fetchMock.mock.calls.some(c => c[0] === '/api/products/search')
+        fetchMock.mock.calls.some(c => c[0] === '/api/products/cards')
       ).toBe(false)
       expect(warn).toHaveBeenCalled()
       warn.mockRestore()

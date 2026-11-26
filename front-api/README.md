@@ -58,6 +58,41 @@ The category page server-renders its listing with the default sort
 still applied. A failed search shows an error with a retry action instead of
 the previous listing.
 
+## Listing cards
+
+`POST /products/cards` (GOU-2710) runs the same search as `POST /products`
+(pagination, sort, filters, aggregations, result window, unknown vertical 404)
+but returns `ProductCardSearchResponseDto`: each product is a
+`ProductCardDto`, about 4 KB instead of about 50 KB for the full `ProductDto`
+of a listing. Category grids, guides, the nudge tool and product alternatives
+use it; the product page keeps `GET /products/{gtin}` and `POST /products`
+stays unchanged for its other consumers (search page, open data, related
+links, BrandShareChart).
+
+`ProductCardMappingService` projects the full DTO, so card values follow the
+same rules (fresh offers, localised names, ImpactScore exposure). A card keeps
+the field names and nesting of `ProductDto` and only carries:
+
+- `gtin`, `slug`, `fullSlug`; `base.{gtin, vertical, bestName,
+  coverImagePath}`; `identity.{brand, model, bestName}`; `names.{displayName,
+  cardName}`;
+- `attributes.referentialAttributes` and the `indexedAttributes` (name, value,
+  numeric value, no sourcing) of the vertical `popularAttributes`,
+  `technicalFilters` and `ecoFilters`, plus the attribute of the active sort;
+- `resources.{coverImagePath, externalCover}` and the first image (`url`,
+  `originalUrl`);
+- `scores.scores.ECOSCORE.{id, value}` and `scores.impactScore` (status and
+  methodology version);
+- `offers.{offersCount, bestPrice, bestNewOffer, bestOccasionOffer,
+  offersByCondition, newTrend, occasionTrend}`, each offer reduced to merchant,
+  favicon, `/contrib/` URL, condition, price and stock.
+
+Absent values are omitted from the JSON, never replaced by zero. A frontend
+listing that needs another field adds it to the card DTO (and to the golden
+file `src/test/resources/fixtures/product-card-tv-listing.json`, regenerated
+with `-Dgolden.update=true` in `ProductCardMappingServiceTest`), not back to
+the full DTO.
+
 ## Global search relevance
 
 `SearchService.globalSearch` (`POST /products/search/global`, page
