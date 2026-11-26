@@ -37,7 +37,8 @@ synonyms:
   all:
   - "POIDS"
   - "WEIGHT"
-  - "TRANCHE DE POIDS"
+  # "TRANCHE DE POIDS" (Rakuten) is a weight class ("70 à 100 kg"), not a weight: it gave 100 kg washing machines
+  # (GOU-2707).
   
 parser:
   clazz: org.open4goods.api.services.aggregation.services.realtime.parser.WeightParser  

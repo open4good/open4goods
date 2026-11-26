@@ -804,6 +804,10 @@ import {
   mdiViewList,
 } from '@mdi/js'
 import { useAuth } from '~/composables/useAuth'
+import {
+  appendAttributeUnit,
+  resolveAttributeUnit,
+} from '~/utils/_product-attributes'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 
@@ -1106,6 +1110,20 @@ const formatMainAttributeValue = (
   return null
 }
 
+const attributeUnitsByKey = computed(() =>
+  (props.attributeConfigs ?? []).reduce<Map<string, string>>(
+    (units, config) => {
+      const key = normalizeAttributeKey(config?.key)
+      const unit = resolveAttributeUnit(config)
+      if (key && unit) {
+        units.set(key, unit)
+      }
+      return units
+    },
+    new Map()
+  )
+)
+
 const mainAttributes = computed<MainAttributeRow[]>(() => {
   const entries =
     (resolvedAttributes.value?.indexedAttributes as Record<
@@ -1116,11 +1134,16 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
   return Object.entries(entries).reduce<MainAttributeRow[]>(
     (accumulator, [key, attribute]) => {
       const fallbackValue = formatMainAttributeValue(attribute)
-      const displayValue = resolveDisplayValue(attribute, fallbackValue)
+      const rawDisplayValue = resolveDisplayValue(attribute, fallbackValue)
 
-      if (!displayValue) {
+      if (!rawDisplayValue) {
         return accumulator
       }
+
+      const unit = attributeUnitsByKey.value.get(
+        normalizeAttributeKey(key) ?? ''
+      )
+      const displayValue = appendAttributeUnit(rawDisplayValue, unit, n)
 
       const label =
         typeof attribute?.name === 'string' && attribute.name.trim().length

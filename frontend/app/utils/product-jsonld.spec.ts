@@ -280,16 +280,16 @@ describe('product-jsonld', () => {
     ).toBe(true)
   })
 
-  it('normalizes compact metric dimensions before emitting schema units', () => {
+  it('emits indexed dimensions in centimetres', () => {
     const graph = buildProductJsonLdGraph({
       ...(mockInput as unknown as ProductJsonLdInput),
       product: {
         ...mockProduct,
         attributes: {
           indexedAttributes: {
-            WIDTH: { numericValue: 0.751 },
-            HEIGHT: { numericValue: 1.62 },
-            DEPTH: { numericValue: 0.0865 },
+            WIDTH: { numericValue: 7.51 },
+            HEIGHT: { numericValue: 16.2 },
+            DEPTH: { numericValue: 0.865 },
           },
         },
       } as unknown as ProductJsonLdInput['product'],
@@ -300,18 +300,18 @@ describe('product-jsonld', () => {
 
     expect(productNode?.width).toEqual({
       '@type': 'QuantitativeValue',
-      value: 75.1,
-      unitCode: 'MMT',
+      value: 7.51,
+      unitCode: 'CMT',
     })
     expect(productNode?.height).toEqual({
       '@type': 'QuantitativeValue',
-      value: 162,
-      unitCode: 'MMT',
+      value: 16.2,
+      unitCode: 'CMT',
     })
     expect(productNode?.depth).toEqual({
       '@type': 'QuantitativeValue',
-      value: 8.65,
-      unitCode: 'MMT',
+      value: 0.865,
+      unitCode: 'CMT',
     })
   })
 

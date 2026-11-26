@@ -23,12 +23,16 @@ referentials:
     - group: "professionalrefrigeratedstoragecabinets"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 20.0
+    minKg: 10.0
     maxKg: 250.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 10.0
+      max: 250.0
 
 order: 8
 # Refrigerators run continuously; annual energy labels are based on 24h/day operation.

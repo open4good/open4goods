@@ -22,12 +22,25 @@ averageHoursPerDay: 24.0
 # Source: refrigerator.yml and wine-cooler.yml bounds (max 250 kg, warranty 10 years); min 5 kg as wine-cooler,
 # for table-top mini freezers. Provisoire, recalcul en PR 2.
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 5.0
+    minKg: 10.0
     maxKg: 250.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 10.0
+      max: 250.0
+    WIDTH:
+      min: 40.0
+      max: 200.0
+    HEIGHT:
+      min: 45.0
+      max: 210.0
+    DEPTH:
+      min: 40.0
+      max: 100.0
 
 # Source: Google product taxonomy en-US, id 681 (see referentials).
 # Kept commented while enabled: false. GoogleTaxonomyService.updateCategoryWithVertical marks the taxonomy node for

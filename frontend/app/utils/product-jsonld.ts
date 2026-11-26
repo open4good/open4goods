@@ -266,7 +266,8 @@ const normalizeMetricDimension = (
       return undefined
     }
 
-    return value > 0 && value < 10 ? Number((value * 100).toFixed(2)) : value
+    // Indexed lengths are stored in cm (GOU-2707): emitted as is, with the CMT unit code.
+    return value
   }
 
   return normalizeString(value)
@@ -863,21 +864,21 @@ export const buildProductJsonLdGraph = (
       ? {
           '@type': 'QuantitativeValue',
           value: widthValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     height: heightValue
       ? {
           '@type': 'QuantitativeValue',
           value: heightValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     depth: depthValue
       ? {
           '@type': 'QuantitativeValue',
           value: depthValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     hasEnergyConsumptionDetails: energyDetails,

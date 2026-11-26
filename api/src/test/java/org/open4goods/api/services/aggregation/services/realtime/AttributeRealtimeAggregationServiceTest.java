@@ -36,6 +36,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig.NumericBoundsConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -900,6 +901,80 @@ class AttributeRealtimeAggregationServiceTest {
 			addSourcedAttribute(product, attribute[0], attribute[1], attribute[2]);
 		}
 		return product;
+	}
+
+	/**
+	 * GOU-2707: Rakuten's weight class "+ de 100 kg" was indexed as a 100 kg washing machine. A weight class is
+	 * not a weight, and nothing is indexed.
+	 */
+	@Test
+	void onProductDoesNotIndexAWeightClass() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "POIDS", "+ de 100 kg", "rakuten.com");
+
+		service.onProduct(product, washingMachine);
+
+		assertThat(product.getAttributes().getIndexed()).doesNotContainKey("WEIGHT");
+	}
+
+	/**
+	 * GOU-2707: a weight outside the plausible range of the vertical (8 kg, the capacity of a washing machine) does
+	 * not vote; the plausible source is indexed.
+	 */
+	@Test
+	void onProductIgnoresAWeightOutsideTheVerticalBounds() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "WEIGHT", "8 kg", "icecat.biz");
+		ProductAttribute poids = new ProductAttribute();
+		poids.setName("POIDS");
+		poids.addSourceAttribute(new SourcedAttribute(new Attribute("POIDS", "68 kg"), "some-merchant.com"));
+		product.getAttributes().getAll().put("POIDS", poids);
+
+		service.onProduct(product, washingMachine);
+
+		IndexedAttribute weight = product.getAttributes().getIndexed().get("WEIGHT");
+		assertThat(weight.getValue()).isEqualTo("68");
+		assertThat(weight.getNumericValue()).isEqualTo(68.0);
+	}
+
+	/**
+	 * GOU-2707: when every source is outside the plausible range, the attribute is not indexed, so neither the
+	 * product page nor the ImpactScore uses it.
+	 */
+	@Test
+	void onProductDoesNotIndexAnImplausibleWeight() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "POIDS", "8 kg", "some-merchant.com");
+
+		service.onProduct(product, washingMachine);
+
+		assertThat(product.getAttributes().getIndexed()).doesNotContainKey("WEIGHT");
+	}
+
+	/**
+	 * GOU-2707: the bounds of the vertical apply to an attribute without a dedicated parser, and take precedence
+	 * over the {@code parser.minValue} / {@code parser.maxValue} of the attribute.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "45|45", "15|", "130|" })
+	void onProductAppliesTheVerticalBoundsOfANumericAttribute(String raw, String expected) throws Exception {
+		AttributeConfig noise = new AttributeConfig();
+		noise.setKey("NOISE_LEVEL");
+		noise.setFilteringType(AttributeType.NUMERIC);
+		noise.setSynonyms(Map.of("all", Set.of("NIVEAU SONORE")));
+		noise.getParser().setMaxValue(200.0);
+		verticalConfig.getAttributesConfig().setConfigs(List.of(noise));
+		verticalConfig.getParsers().getBounds().put("NOISE_LEVEL", new NumericBoundsConfig(20.0, 90.0));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "NIVEAU SONORE", raw, "some-merchant.com");
+
+		service.onProduct(product, verticalConfig);
+
+		IndexedAttribute indexed = product.getAttributes().getIndexed().get("NOISE_LEVEL");
+		assertThat(indexed == null ? null : indexed.getValue()).isEqualTo(expected);
 	}
 
 	/**

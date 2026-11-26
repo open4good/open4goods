@@ -168,7 +168,7 @@ describe('CategoryProductListView', () => {
     )
     expect(
       wrapper.get('.category-product-list__attribute--sorted').text()
-    ).toContain('55 "')
+    ).toContain('55\u00a0"')
     expect(wrapper.find('[data-test="product-compare-toggle"]').exists()).toBe(
       true
     )
