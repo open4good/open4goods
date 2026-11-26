@@ -536,8 +536,7 @@
                           })
                         }}
                       </p>
-
-                                    </v-expansion-panel-text>
+                    </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
               </v-sheet>

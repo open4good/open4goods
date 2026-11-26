@@ -1,9 +1,15 @@
 import { ref } from 'vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fetchMock = vi.fn()
 let stateStore: Map<string, ReturnType<typeof ref>>
+const headersState = vi.hoisted(() => ({
+  current: undefined as Record<string, string> | undefined,
+}))
+
+mockNuxtImport('useRequestHeaders', () => () => headersState.current)
 
 vi.mock('#imports', () => ({
   useState: (key: string, init: () => unknown) => {
@@ -13,7 +19,7 @@ vi.mock('#imports', () => ({
 
     return stateStore.get(key)
   },
-  useRequestHeaders: () => undefined,
+  useRequestHeaders: () => headersState.current,
 }))
 
 vi.mock('#app', () => ({
@@ -24,7 +30,7 @@ vi.mock('#app', () => ({
 
     return stateStore.get(key)
   },
-  useRequestHeaders: () => undefined,
+  useRequestHeaders: () => headersState.current,
 }))
 
 describe('useCategories composable', () => {
@@ -32,6 +38,7 @@ describe('useCategories composable', () => {
     vi.resetModules()
     fetchMock.mockReset()
     stateStore = new Map()
+    headersState.current = undefined
     vi.stubGlobal('$fetch', fetchMock)
   })
 
@@ -184,5 +191,24 @@ describe('useCategories composable', () => {
     fetchMock.mockClear()
     await useCategories().fetchCategoryById('category-1')
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('keys the caches by domain language, not by raw host (GOU-2698)', async () => {
+    fetchMock.mockResolvedValue([{ id: 'category-1' }])
+    const { useCategories } = await import('./useCategories')
+
+    headersState.current = { host: 'unknown-1.example' }
+    await useCategories().fetchCategories()
+    headersState.current = { host: 'unknown-2.example' }
+    await useCategories().fetchCategories()
+    headersState.current = { 'x-forwarded-host': 'nudger.fr' }
+    await useCategories().fetchCategories()
+
+    // Two unknown hosts and the French host share a single entry.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    headersState.current = { host: 'nudger.com' }
+    await useCategories().fetchCategories()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

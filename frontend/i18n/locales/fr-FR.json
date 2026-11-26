@@ -567,14 +567,8 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit des prompts et réponses qui ont servi à configurer l'Impact Score des {category}.",
-          "jsonUnavailable": "Réponse IA indisponible.",
-          "promptHelper": "Instructions envoyées au modèle pour produire la configuration.",
-          "promptTitle": "Prompt YAML générateur",
-          "responseHelper": "Résultat JSON de l'IA ayant servi de base à la configuration.",
-          "responseTitle": "Réponse du modèle",
           "title": "Audit de génération IA",
           "auditTitle": "Données structurées",
-          "yamlUnavailable": "Prompt indisponible.",
           "toggle": "Audit IA : prompt et réponse brute",
           "v1History": "Cet audit IA a servi à configurer la matrice V1 de l'Impact Score {category}. Il n'a pas été refait pour la méthode v{version}, dont les critères et les poids sont présentés plus haut. Le prompt et la réponse brute de la V1 restent consultables dans la configuration publiée sur GitHub."
         },

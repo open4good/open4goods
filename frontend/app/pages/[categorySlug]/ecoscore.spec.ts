@@ -117,17 +117,6 @@ const messages: Record<string, string> = {
     'Impact Score generation audit',
   'category.ecoscorePage.sections.aiAudit.intro':
     'Audit the prompts and responses used to configure the {category} Impact Score.',
-  'category.ecoscorePage.sections.aiAudit.promptTitle':
-    'YAML generation prompt',
-  'category.ecoscorePage.sections.aiAudit.promptHelper':
-    'Instructions sent to the model to produce the configuration.',
-  'category.ecoscorePage.sections.aiAudit.responseTitle': 'Model response',
-  'category.ecoscorePage.sections.aiAudit.responseHelper':
-    'JSON output from the AI used as the basis of the configuration.',
-  'category.ecoscorePage.sections.aiAudit.yamlUnavailable':
-    'Prompt unavailable.',
-  'category.ecoscorePage.sections.aiAudit.jsonUnavailable':
-    'AI response unavailable.',
   'category.ecoscorePage.seo.title': 'Impact Score for {category}',
   'category.ecoscorePage.seo.description':
     'Impact Score insights for {category}.',

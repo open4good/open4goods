@@ -2,6 +2,7 @@ import type {
   VerticalConfigDto,
   VerticalConfigFullDto,
 } from '~~/shared/api-client'
+import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000
 
@@ -61,7 +62,10 @@ export const useCategories = () => {
     return Object.keys(normalizedEntries).length ? normalizedEntries : undefined
   }
   const cacheScope = () =>
-    requestHeaders?.['x-forwarded-host'] ?? requestHeaders?.host ?? 'client'
+    resolveDomainLanguage(
+      requestHeaders?.['x-forwarded-host'] ?? requestHeaders?.host,
+      { logUnknownHost: false }
+    ).domainLanguage
   const loading = useState('categories-loading', () => false)
   const error = useState<string | null>('categories-error', () => null)
   const activeCategoryId = useState<string | null>(
