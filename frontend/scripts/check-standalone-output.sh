@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Boots the built .output bundle from a directory outside frontend/ (no content/ next to it, as in
 # the frontend-ssr container) and checks the blog server routes that depend on Nuxt Content.
+# It also smoke-tests the SSR of / and /blog (no 5xx without API), which catches render-time errors before merge.
 # Usage: scripts/check-standalone-output.sh [port]   (run from frontend/ after `pnpm build`)
 set -euo pipefail
 
@@ -59,3 +60,14 @@ locs=$(grep -o '<loc>[^<]*/blog/[^<]*</loc>' "$WORK_DIR/body" | wc -l)
 [ "$locs" -gt 0 ] || fail "/sitemap/blog-posts.xml lists no blog article for nudger.fr"
 grep -q "/blog/$SLUG</loc>" "$WORK_DIR/body" || fail "/sitemap/blog-posts.xml misses /blog/$SLUG"
 echo "/sitemap/blog-posts.xml: 200, $locs blog URLs"
+
+# SSR smoke: a page that throws at render time (e.g. a composable that is not auto-imported) answers 500.
+# Without API the pages still render (200); anything >= 500 fails, with the server log (error message).
+for path in / /blog; do
+  code=$(fetch "$path")
+  case "$code" in
+    5*) fail "SSR of $path returned $code" ;;
+    000) fail "SSR of $path got no response" ;;
+  esac
+  echo "SSR $path: $code"
+done
