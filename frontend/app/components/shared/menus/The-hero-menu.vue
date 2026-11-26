@@ -27,6 +27,7 @@
                 class="main-menu-item main-menu-item--products"
               >
                 <v-menu
+                  eager
                   open-on-hover
                   location="bottom"
                   transition="fade-transition"
@@ -238,6 +239,7 @@
 
               <div v-else class="main-menu-item main-menu-item--community">
                 <v-menu
+                  eager
                   open-on-hover
                   location="bottom"
                   transition="fade-transition"

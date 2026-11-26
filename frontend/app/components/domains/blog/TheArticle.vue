@@ -11,8 +11,10 @@ import {
 } from '~~/shared/utils/blog-product-widget'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
+import { buildCanonicalUrl } from '~/utils/seo/canonical'
 
 import GuideProductGrid from '~/components/product/GuideProductGrid.vue'
+import TvSizeCalculator from '~/components/content/TvSizeCalculator.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
 
 interface BlogArticle extends BlogPostDto {
@@ -187,7 +189,11 @@ try {
   requestUrl = undefined
 }
 
-const canonicalUrl = computed(() => requestUrl?.href)
+const canonicalUrl = computed(() =>
+  requestUrl
+    ? (buildCanonicalUrl(requestUrl.pathname, requestUrl.origin) ?? undefined)
+    : undefined
+)
 
 const absoluteImageUrl = computed(() => {
   const image = article.value.image
@@ -276,15 +282,6 @@ useHead(() => ({
           {
             rel: 'canonical',
             href: canonicalUrl.value,
-          },
-        ]
-      : []),
-    ...(article.value.image
-      ? [
-          {
-            rel: 'preload',
-            as: 'image',
-            href: article.value.image,
           },
         ]
       : []),
@@ -422,6 +419,10 @@ useHead(() => ({
         width="100%"
         height="100%"
         class="article-hero__image"
+        priority
+        format="webp"
+        :quality="80"
+        sizes="sm:100vw md:100vw lg:900px"
       />
       <figcaption class="d-sr-only">
         {{ t('blog.article.featuredImageAlt', { title: articleTitle }) }}
@@ -456,6 +457,11 @@ useHead(() => ({
             compact
           />
         </div>
+        <TvSizeCalculator
+          v-else-if="part.type === 'tv-size-calculator'"
+          :default-distance="part.calculator.distance"
+          :default-resolution="part.calculator.resolution"
+        />
         <GuideProductGrid
           v-else-if="part.type === 'product-widget'"
           :vertical="part.widget.vertical"

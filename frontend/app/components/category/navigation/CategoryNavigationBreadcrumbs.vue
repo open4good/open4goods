@@ -4,29 +4,21 @@
     class="category-navigation-breadcrumbs"
     :class="`category-navigation-breadcrumbs--${variant}`"
     :aria-label="ariaLabel"
-    itemscope
-    itemtype="https://schema.org/BreadcrumbList"
   >
     <ol class="category-navigation-breadcrumbs__list">
       <li
         v-for="(item, index) in breadcrumbItems"
         :key="`${item.title}-${index}`"
         class="category-navigation-breadcrumbs__item"
-        itemprop="itemListElement"
-        itemscope
-        itemtype="https://schema.org/ListItem"
       >
         <NuxtLink
           v-if="item.type === 'internal'"
           :to="item.to"
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
-          itemprop="item"
         >
-          <span
-            class="category-navigation-breadcrumbs__label"
-            itemprop="name"
-            >{{ item.title }}</span
-          >
+          <span class="category-navigation-breadcrumbs__label">{{
+            item.title
+          }}</span>
         </NuxtLink>
 
         <a
@@ -34,13 +26,10 @@
           :href="item.href"
           rel="noopener noreferrer"
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--interactive"
-          itemprop="item"
         >
-          <span
-            class="category-navigation-breadcrumbs__label"
-            itemprop="name"
-            >{{ item.title }}</span
-          >
+          <span class="category-navigation-breadcrumbs__label">{{
+            item.title
+          }}</span>
         </a>
 
         <span
@@ -48,11 +37,9 @@
           class="category-navigation-breadcrumbs__link category-navigation-breadcrumbs__link--current"
           aria-current="page"
         >
-          <span
-            class="category-navigation-breadcrumbs__label"
-            itemprop="name"
-            >{{ item.title }}</span
-          >
+          <span class="category-navigation-breadcrumbs__label">{{
+            item.title
+          }}</span>
         </span>
 
         <span
@@ -62,8 +49,6 @@
         >
           {{ separator }}
         </span>
-
-        <meta itemprop="position" :content="String(index + 1)" />
       </li>
     </ol>
   </nav>

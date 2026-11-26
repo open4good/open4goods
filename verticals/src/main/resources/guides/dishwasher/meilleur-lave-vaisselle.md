@@ -1,6 +1,6 @@
 ---
-title: "Meilleur lave-vaisselle 2026 : le guide mai 2026 de la Team Nudger"
-description: "Quel lave-vaisselle choisir en 2026 ? Comparatif 60 cm et 45 cm, classe énergie, niveau sonore, réparabilité et score d'impact nudger - guide mai 2026."
+title: "Meilleur lave-vaisselle 2026 : le guide de la Team Nudger"
+description: "Quel lave-vaisselle choisir en 2026 ? Comparatif 60 cm et 45 cm, classe énergie, niveau sonore, réparabilité et score d'impact nudger."
 type: "guide"
 tags: ["language:fr", "guide-achat", "dishwasher"]
 icon: "mdi-dishwasher"

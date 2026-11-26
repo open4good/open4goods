@@ -536,86 +536,6 @@
                           })
                         }}
                       </p>
-
-                      <v-row class="category-ecoscore__ai-grid" align="stretch">
-                        <v-col cols="12" lg="12">
-                          <v-card
-                            class="category-ecoscore__code-card"
-                            elevation="0"
-                            rounded="xl"
-                          >
-                            <h3 class="category-ecoscore__code-title">
-                              {{
-                                t(
-                                  'category.ecoscorePage.sections.aiAudit.promptTitle'
-                                )
-                              }}
-                            </h3>
-                            <p class="category-ecoscore__code-helper">
-                              {{
-                                t(
-                                  'category.ecoscorePage.sections.aiAudit.promptHelper'
-                                )
-                              }}
-                            </p>
-                            <!-- eslint-disable vue/no-v-html -->
-                            <pre
-                              class="category-ecoscore__code-block"
-                              data-test="ai-yaml"
-                              role="region"
-                              aria-live="polite"
-                            >
-                        <code
-                          v-if="highlightedYamlPrompt"
-                          class="hljs language-yaml"
-                          v-html="highlightedYamlPrompt"
-                        />
-                        <code v-else class="category-ecoscore__code-fallback">
-                          {{ t('category.ecoscorePage.sections.aiAudit.yamlUnavailable') }}
-                        </code>
-                      </pre>
-                          </v-card>
-                        </v-col>
-
-                        <v-col cols="12" lg="12">
-                          <v-card
-                            class="category-ecoscore__code-card"
-                            elevation="0"
-                            rounded="xl"
-                          >
-                            <h3 class="category-ecoscore__code-title">
-                              {{
-                                t(
-                                  'category.ecoscorePage.sections.aiAudit.responseTitle'
-                                )
-                              }}
-                            </h3>
-                            <p class="category-ecoscore__code-helper">
-                              {{
-                                t(
-                                  'category.ecoscorePage.sections.aiAudit.responseHelper'
-                                )
-                              }}
-                            </p>
-                            <pre
-                              class="category-ecoscore__code-block"
-                              data-test="ai-json"
-                              role="region"
-                              aria-live="polite"
-                            >
-                        <code
-                          v-if="highlightedAiJson"
-                          class="hljs language-json"
-                          v-html="highlightedAiJson"
-                        />
-                        <code v-else class="category-ecoscore__code-fallback">
-                          {{ t('category.ecoscorePage.sections.aiAudit.jsonUnavailable') }}
-                        </code>
-                      </pre>
-                            <!-- eslint-enable vue/no-v-html -->
-                          </v-card>
-                        </v-col>
-                      </v-row>
                     </v-expansion-panel-text>
                   </v-expansion-panel>
                 </v-expansion-panels>
@@ -640,9 +560,7 @@ import {
   useRoute,
   useSeoMeta,
 } from '#imports'
-import {
-  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-} from '~~/shared/utils/impact-score-versions'
+import { IMPACT_SCORE_VERSIONS_LAST_MODIFIED } from '~~/shared/utils/impact-score-versions'
 import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -651,7 +569,8 @@ import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryImpactMethod from '~/components/category/CategoryImpactMethod.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { useCategories } from '~/composables/categories/useCategories'
-import { loadHighlightJs } from '~/utils/highlight-loader'
+import { buildCanonicalUrl } from '~/utils/seo/canonical'
+import { resolveCategoryEcoscoreSeoMeta } from '~/utils/seo/category-meta'
 import type {
   AttributeConfigDto,
   CategoryBreadcrumbItemDto,
@@ -765,12 +684,6 @@ const methodologyV2Note = computed(() => {
   })
 })
 
-const purposeText = computed(
-  () => impactScoreTexts.value?.purpose?.trim() || null
-)
-const availableDataText = computed(
-  () => impactScoreTexts.value?.availlableDatas?.trim() || null
-)
 const criticalReviewText = computed(
   () => impactScoreTexts.value?.criticalReview?.trim() || null
 )
@@ -898,117 +811,17 @@ const criteriaCards = computed(() => {
   })
 })
 
-const rawYamlPrompt = computed(
-  () => impactScoreConfig.value?.yamlPrompt?.trim() || ''
-)
-const formattedYamlPrompt = computed(() =>
-  rawYamlPrompt.value.length ? rawYamlPrompt.value : null
-)
-
-const rawAiJson = computed(
-  () => impactScoreConfig.value?.aiJsonResponse?.trim() || ''
-)
-const parsedAiJson = computed<Record<string, unknown> | null>(() => {
-  if (!rawAiJson.value.length) {
-    return null
-  }
-
-  try {
-    return JSON.parse(rawAiJson.value)
-  } catch (error) {
-    console.warn('Unable to parse AI JSON response for impact score', error)
-    return null
-  }
-})
-
-const formattedAiJson = computed(() => {
-  if (parsedAiJson.value) {
-    return JSON.stringify(parsedAiJson.value, null, 2)
-  }
-  return rawAiJson.value.length ? rawAiJson.value : null
-})
-
-const highlightedYamlPrompt = ref<string | null>(formattedYamlPrompt.value)
-const highlightedAiJson = ref<string | null>(formattedAiJson.value)
-
-const highlightYamlPrompt = async () => {
-  const content = formattedYamlPrompt.value
-  if (!content) {
-    highlightedYamlPrompt.value = null
-    return
-  }
-
-  highlightedYamlPrompt.value = content
-
-  try {
-    const hljs = await loadHighlightJs(['yaml'])
-
-    if (hljs) {
-      highlightedYamlPrompt.value = hljs.highlight(content, {
-        language: 'yaml',
-      }).value
-    }
-  } catch (error) {
-    console.warn('Unable to highlight YAML prompt for impact score', error)
-  }
-}
-
-const highlightAiJson = async () => {
-  const content = formattedAiJson.value
-  if (!content) {
-    highlightedAiJson.value = null
-    return
-  }
-
-  highlightedAiJson.value = content
-
-  try {
-    const hljs = await loadHighlightJs(['json'])
-
-    if (hljs) {
-      highlightedAiJson.value = hljs.highlight(content, {
-        language: 'json',
-      }).value
-    }
-  } catch (error) {
-    console.warn('Unable to highlight AI JSON response for impact score', error)
-  }
-}
-
-watch(
-  formattedYamlPrompt,
-  () => {
-    highlightYamlPrompt()
-  },
-  { immediate: true }
-)
-
-watch(
-  formattedAiJson,
-  () => {
-    highlightAiJson()
-  },
-  { immediate: true }
-)
-
-const aiCoefficients = computed<Record<string, number>>(() => {
-  const response = parsedAiJson.value
-  if (!response || typeof response !== 'object') {
-    return {}
-  }
-
-  const coefficients = (response as Record<string, unknown>)
-    ?.criteriasPonderation
-  if (coefficients && typeof coefficients === 'object') {
-    return Object.fromEntries(
-      Object.entries(coefficients as Record<string, unknown>).filter(
-        ([, value]) => typeof value === 'number'
+// Weights proposed by the stored AI audit (V1 only); the raw prompt and
+// response are internal and no longer exposed by the API.
+const aiCoefficients = computed<Record<string, number>>(() =>
+  Object.fromEntries(
+    (impactScoreConfig.value?.audit?.criteria ?? [])
+      .filter(
+        criterion => !!criterion.key && typeof criterion.weight === 'number'
       )
-    )
-  }
-
-  return {}
-})
+      .map(criterion => [criterion.key as string, criterion.weight as number])
+  )
+)
 
 const coefficientComparison = computed(() => {
   const applied = impactScoreConfig.value?.criteriasPonderation ?? {}
@@ -1243,23 +1056,21 @@ function formatDecimal(value: number | null) {
   return value.toFixed(2)
 }
 
-const canonicalUrl = computed(() =>
-  new URL(route.fullPath, requestURL.origin).toString()
+const canonicalUrl = computed(
+  () => buildCanonicalUrl(route.fullPath, requestURL.origin) ?? undefined
 )
-const seoTitle = computed(() =>
-  t('category.ecoscorePage.seo.title', { category: categorySeoTitle.value })
-)
-const seoDescription = computed(() => {
-  return (
-    purposeText.value ??
-    availableDataText.value ??
-    category.value?.verticalMetaDescription ??
-    category.value?.verticalHomeDescription ??
-    t('category.ecoscorePage.seo.description', {
+const ecoscoreSeoMeta = computed(() =>
+  resolveCategoryEcoscoreSeoMeta({
+    title: t('category.ecoscorePage.seo.title', {
+      category: categorySeoTitle.value,
+    }),
+    description: t('category.ecoscorePage.seo.description', {
       category: categoryLabel.value,
-    })
-  )
-})
+    }),
+  })
+)
+const seoTitle = computed(() => ecoscoreSeoMeta.value.title)
+const seoDescription = computed(() => ecoscoreSeoMeta.value.description)
 
 const ogImage = computed(() => {
   if (!heroImage.value) {
@@ -1294,6 +1105,10 @@ useHead(() => ({
       ),
     },
   ],
+}))
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
 useSeoMeta({
@@ -1612,62 +1427,6 @@ useSeoMeta({
   margin: 0 0 1.5rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.88)
 
-.category-ecoscore__ai-grid
-  gap: clamp(1.5rem, 3vw, 2.25rem)
-
-.category-ecoscore__code-card
-  display: flex
-  flex-direction: column
-  gap: 0.75rem
-  padding: clamp(1.25rem, 2vw, 2rem)
-  background: rgba(var(--v-theme-surface-muted), 0.9)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.12)
-  height: 100%
-
-.category-ecoscore__code-title
-  margin: 0
-  font-size: 1.1rem
-  font-weight: 600
-
-.category-ecoscore__code-helper
-  margin: 0
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.86)
-
-.category-ecoscore__code-block
-  flex: 1 1 auto
-  margin: 0
-  padding: 1rem
-  border-radius: 12px
-  background: rgba(var(--v-theme-surface-default), 0.9)
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.14)
-  font-family: 'JetBrains Mono', 'Fira Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace
-  font-size: 0.85rem
-  line-height: 1.6
-  color: rgba(var(--v-theme-text-neutral-strong), 0.92)
-  white-space: pre
-  word-break: break-word
-  overflow: auto
-
-.category-ecoscore__code-block :deep(.hljs)
-  background: transparent
-  color: rgba(var(--v-theme-text-neutral-strong), 0.94)
-
-.category-ecoscore__code-block :deep(.hljs-keyword)
-  color: rgb(var(--v-theme-primary))
-
-.category-ecoscore__code-block :deep(.hljs-string)
-  color: rgb(var(--v-theme-accent-supporting))
-
-.category-ecoscore__code-block :deep(.hljs-number)
-  color: rgb(var(--v-theme-accent-primary-highlight))
-
-.category-ecoscore__code-block :deep(.hljs-literal)
-  color: rgb(var(--v-theme-secondary))
-
-.category-ecoscore__code-fallback
-  display: block
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.9)
-
 @media (min-width: 1280px)
   .category-ecoscore__layout
     grid-template-columns: 280px minmax(0, 1fr)
@@ -1691,10 +1450,6 @@ useSeoMeta({
 
   .category-ecoscore__critical-media
     width: 100%
-
-  .category-ecoscore__code-block
-    max-height: 320px
-    font-size: 0.82rem
 
 @media (prefers-reduced-motion: reduce)
   .category-ecoscore *

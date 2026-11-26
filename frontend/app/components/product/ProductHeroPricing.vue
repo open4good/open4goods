@@ -481,7 +481,11 @@ const conditionPanels = computed<ConditionPanel[]>(() => {
       offersCount: count,
       offersCountLabel:
         count > 0 ? t('product.hero.offersCountLabel', count) : null,
-      priceTitle: t('product.hero.bestPriceTitle'),
+      // An out-of-stock offer is never advertised as the best price.
+      priceTitle:
+        offer?.quantityInStock === 0
+          ? t('product.hero.outOfStockPriceTitle')
+          : t('product.hero.bestPriceTitle'),
       priceLabel,
       priceCurrency,
       hasOffer: typeof offer?.price === 'number',

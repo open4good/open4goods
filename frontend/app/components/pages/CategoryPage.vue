@@ -35,6 +35,12 @@
     </v-dialog>
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
+      <CategorySizeGuideLink
+        v-if="!isSubCategoryPage"
+        class="mb-4"
+        :vertical-id="category.id"
+      />
+
       <div
         v-if="!isSubCategoryPage && (hasFastFilters || isDesktop)"
         class="category-page__fast-filters mb-6"
@@ -404,13 +410,12 @@
               </v-btn>
             </div>
 
-            <v-pagination
+            <CategoryPagination
               v-if="pageCount > 1"
               :length="pageCount"
-              :model-value="pageNumber + 1"
+              :current="pageNumber + 1"
+              :build-to="buildPageLocation"
               class="category-page__pagination"
-              density="comfortable"
-              @update:model-value="onPageChange"
             />
           </template>
 
@@ -476,10 +481,12 @@
           <!--
             Hub editorial block (GOU-2716), rendered only when the vertical has a
             published file in content/category-hubs/. Its Top 5 is the SSR listing,
-            which uses the default ImpactScore sort without filters on a hub.
+            which uses the default ImpactScore sort without filters on a hub. Page 1
+            only: on `?page=N` the listing is not the top of the ranking, and the
+            intro and FAQ would be duplicated on every paginated URL.
           -->
           <CategoryHubEditorial
-            v-if="!isSubCategoryPage && verticalId"
+            v-if="!isSubCategoryPage && verticalId && initialPageNumber === 0"
             :vertical-id="verticalId"
             :vertical-home-url="category.verticalHomeUrl"
             :category-name="categoryDisplayName"
@@ -547,8 +554,10 @@ import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.v
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryHubEditorial from '~/components/category/CategoryHubEditorial.vue'
+import CategoryPagination from '~/components/category/CategoryPagination.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategorySizeGuideLink from '~/components/category/CategorySizeGuideLink.vue'
 import CategoryRelatedSubcategoriesCard from '~/components/category/CategoryRelatedSubcategoriesCard.vue'
 import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
@@ -819,8 +828,23 @@ const hasReadMore = computed(
 const pageEyebrow = computed(
   () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle
 )
+// Home → vertical → sub-category. The taxonomy `/categories/**` is left out: those pages are
+// thin and not indexed.
 const pageBreadcrumbs = computed(() => {
-  const breadcrumbs = [...(category.value?.breadCrumb ?? [])]
+  const breadcrumbs: Array<{ title?: string; link?: string }> = [
+    { title: t('navigation.home'), link: '/' },
+  ]
+
+  const verticalUrl = category.value?.verticalHomeUrl?.trim()
+  if (verticalUrl) {
+    breadcrumbs.push({
+      title:
+        category.value?.verticalHomeTitle ??
+        category.value?.verticalMetaTitle ??
+        verticalUrl,
+      link: verticalUrl.startsWith('/') ? verticalUrl : `/${verticalUrl}`,
+    })
+  }
 
   if (activeSubCategory.value) {
     breadcrumbs.push({
@@ -855,9 +879,20 @@ const subCategoryBaseFilters = computed<FilterRequestDto | undefined>(() => {
 const shouldRestrictCategoryProducts = computed(
   () => category.value?.enabled === false && !isLoggedIn.value
 )
-const canonicalUrl = computed(() =>
+const parsePageParam = (value: unknown): number => {
+  const raw = Array.isArray(value) ? value[0] : value
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  return Number.isFinite(parsed) && parsed > 1 ? parsed : 1
+}
+// 1-based page requested through `?page=N` (crawlable pagination, rendered in SSR).
+const queryPage = computed(() => parsePageParam(route.query.page))
+const basePageUrl = computed(() =>
   new URL(route.path, requestURL.origin).toString()
 )
+// Self-referencing canonical per page: page 1 carries no parameter.
+const buildPageUrl = (page: number) =>
+  page > 1 ? `${basePageUrl.value}?page=${page}` : basePageUrl.value
+const canonicalUrl = computed(() => buildPageUrl(queryPage.value))
 const categorySeoMeta = computed(() =>
   resolveCategorySeoMeta({
     category: category.value,
@@ -922,7 +957,7 @@ const breadcrumbJsonLd = computed(() => {
   const elements = pageBreadcrumbs.value.map((item, index) => {
     const href = item.link
       ? new URL(item.link, requestURL.origin).toString()
-      : canonicalUrl.value
+      : basePageUrl.value
 
     return {
       '@type': 'ListItem',
@@ -961,17 +996,15 @@ type StructuredDataScript = {
   children: string
 }
 
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
-
 const verticalId = computed(() => category.value?.id ?? null)
 
 const productError = ref<string | null>(null)
 
+const initialPageNumber = queryPage.value - 1
+
 const { data: initialProductsData, error: initialProductsError } =
   await useAsyncData(
-    `category-products-${slug}-${subCategorySlug ?? 'base'}`,
+    `category-products-${slug}-${subCategorySlug ?? 'base'}-${initialPageNumber}`,
     async () => {
       if (!verticalId.value) {
         return null
@@ -982,7 +1015,7 @@ const { data: initialProductsData, error: initialProductsError } =
         query: { include: LISTING_COMPONENTS },
         body: {
           verticalId: verticalId.value,
-          pageNumber: 0,
+          pageNumber: initialPageNumber,
           pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
           sort: CATEGORY_INITIAL_SORT,
           filters: subCategoryBaseFilters.value,
@@ -1325,7 +1358,7 @@ const onToggleFiltersVisibility = () => {
 }
 
 const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
-const pageNumber = ref(0)
+const pageNumber = ref(initialPageNumber)
 const searchTerm = ref('')
 const MIN_QUERY_LENGTH = 3
 const normalizedSearchTerm = computed(() => (searchTerm.value ?? '').trim())
@@ -1435,11 +1468,6 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
   const nextViewMode = payload?.view ?? CATEGORY_DEFAULT_VIEW_MODE
   if (viewMode.value !== nextViewMode) {
     viewMode.value = nextViewMode
-  }
-
-  const nextPageNumber = payload?.pageNumber ?? 0
-  if (pageNumber.value !== nextPageNumber) {
-    pageNumber.value = nextPageNumber
   }
 
   const nextSearchTerm = payload?.search ?? ''
@@ -1915,6 +1943,18 @@ watch(
 const pageCount = computed(
   () => productsData.value?.products?.page?.totalPages ?? 1
 )
+
+useHead(() => ({
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+    ...(queryPage.value > 1
+      ? [{ rel: 'prev', href: buildPageUrl(queryPage.value - 1) }]
+      : []),
+    ...(queryPage.value < pageCount.value
+      ? [{ rel: 'next', href: buildPageUrl(queryPage.value + 1) }]
+      : []),
+  ],
+}))
 const currentAggregations = computed<AggregationResponseDto[]>(
   () => productsData.value?.aggregations ?? []
 )
@@ -2101,7 +2141,8 @@ const isDefaultQueryState = computed(() => {
   const hasDefaultSubsets = activeSubsetIds.value.length === 0
   const hasDefaultSearch = searchTerm.value === ''
   const hasDefaultPaging =
-    pageNumber.value === 0 && viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
+    pageNumber.value === initialPageNumber &&
+    viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
   const hasDefaultSort =
     (sortField.value === null ||
       sortField.value === lastAppliedDefaultSort.value) &&
@@ -2357,7 +2398,6 @@ const hashState = computed<CategoryHashState>(() => ({
   filters: manualFilters.value.filters?.length ? manualFilters.value : {},
   activeSubsets: activeSubsetIds.value,
   view: viewMode.value,
-  pageNumber: pageNumber.value,
   search: searchTerm.value || undefined,
   sort: sortRequest.value,
   impactExpanded: impactExpanded.value || undefined,
@@ -2616,9 +2656,39 @@ const onFiltersChange = (filters: FilterRequestDto) => {
   })
 }
 
-const onPageChange = (page: number) => {
-  pageNumber.value = page - 1
+const buildPageLocation = (page: number) => {
+  const query = { ...route.query }
+  if (page > 1) {
+    query.page = String(page)
+  } else {
+    delete query.page
+  }
+  return { path: route.path, query }
 }
+
+// The URL is the source of truth for the page: links, back/forward and filter resets all go
+// through the query string, and the list follows.
+watch(queryPage, page => {
+  if (pageNumber.value !== page - 1) {
+    pageNumber.value = page - 1
+  }
+})
+
+watch(pageNumber, value => {
+  if (
+    !import.meta.client ||
+    !hasHydrated.value ||
+    queryPage.value === value + 1
+  ) {
+    return
+  }
+
+  void router.push(buildPageLocation(value + 1)).catch(error => {
+    if (!isNavigationFailure(error)) {
+      console.error('Failed to update category page query.', error)
+    }
+  })
+})
 
 const applyMobileFilters = () => {
   filtersDrawer.value = false

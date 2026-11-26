@@ -16,6 +16,7 @@ export type DocsDoc = {
   icon?: string | null
   weight?: number | null
   updatedAt?: string | null
+  publishedAt?: string | null
   draft?: boolean | null
   published?: boolean | null
   requiresAuth?: boolean | null

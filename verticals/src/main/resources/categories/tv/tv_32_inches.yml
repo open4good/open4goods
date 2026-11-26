@@ -1,0 +1,95 @@
+# Search-intent subcategory for the tv vertical.
+# Maintained: 2026-11-26 from the GOU-2715 plan (Growth, SEO lot K).
+# Intent: comparison of 32-inch (81 cm) TVs.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, audit of 2026-11-25, last 28 days):
+#     80 impressions on 32-inch queries.
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 636 in the vertical, 222 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-26, DIAGONALE_POUCES.value
+#     term "32" and offersCount >= 1).
+# Rationale:
+#   - Same exact-size filter as tv_55_inches; linked from the blog article
+#     "quelle taille de TV choisir pour son salon".
+id: "tv_32_inches"
+slug:
+  en: "32-inch-tv"
+  fr: "televiseur-32-pouces"
+h1Title:
+  en: "32-inch TVs (81 cm)"
+  fr: "Téléviseurs 32 pouces (81 cm)"
+description:
+  en: |-
+    Compare **32-inch TVs (81 cm)**, a small second TV, with energy use,
+    repairability and Impact Score data to compare models.
+  fr: |-
+    Comparez les **téléviseurs 32 pouces (81 cm)**, une petite télé d'appoint,
+    avec la consommation, la réparabilité et l'Impact Score pour comparer les
+    modèles.
+metaTitle:
+  en: "32-inch TVs (81 cm): compare models | Nudger"
+  fr: "Téléviseur 32 pouces (81 cm) : comparer | Nudger"
+metaDescription:
+  en: "Compare 32-inch (81 cm) TVs by panel type, energy use, refresh rate and impact before choosing the right model for your room."
+  fr: >-
+    Comparez les téléviseurs 32 pouces (81 cm) selon la dalle, la
+    consommation, la fréquence et l'impact avant de choisir le bon modèle.
+metaOpenGraphTitle:
+  en: "Compare 32-inch TVs"
+  fr: "Comparer les téléviseurs 32 pouces"
+metaOpenGraphDescription:
+  en: "A focused selection of 32-inch (81 cm) TVs with practical comparison data."
+  fr: "Une sélection ciblée de téléviseurs 32 pouces (81 cm) avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-television"
+  title:
+    en: "The small-room size"
+    fr: "Le format petite pièce"
+  body:
+    en: |-
+      32 inches equals 81 cm diagonal. For a 4K set, plan a viewing
+      distance of about 1 m or less.
+    fr: |-
+      32 pouces correspond à 81 cm de diagonale. Pour un modèle 4K,
+      prévoyez un recul de environ 1 m ou moins.
+readMore:
+  title:
+    en: "32 inches: how big is it, and is it the right size for you?"
+    fr: "32 pouces : quelle taille, et est-ce le bon format pour vous ?"
+  shortText:
+    en: |-
+      A 32-inch screen measures 81 cm on the diagonal, about 71 cm wide and
+      40 cm high. As a rule of thumb, sit about 1 m or less away for a 4K set.
+      This page lists only 32-inch models so you compare like for like.
+    fr: |-
+      Un écran 32 pouces mesure 81 cm de diagonale, environ 71 cm de large et
+      40 cm de haut. En pratique, prévoyez un recul de environ 1 m ou moins pour un
+      modèle 4K. Cette page ne liste que des modèles 32 pouces, pour comparer à
+      format égal.
+  longText:
+    en: |-
+      Once the size is fixed, the real differences are panel technology (OLED,
+      QLED or LED), energy consumption and refresh rate. Check the energy
+      label: yearly running cost varies between an efficient set and a
+      power-hungry one for the same picture. Not sure about the size? Read
+      [which TV size to choose](/blog/quelle-taille-de-tv-choisir-pour-son-salon).
+
+      Nudger keeps this page focused on filterable 32-inch models so each TV
+      stays comparable on price, environmental impact score and key technical
+      attributes, instead of mixing in other sizes.
+    fr: |-
+      Une fois la taille fixée, les vraies différences se jouent sur la
+      technologie de dalle (OLED, QLED ou LED), la consommation et la fréquence
+      d'affichage. Regardez l'étiquette énergie : le coût annuel varie entre un
+      modèle économe et un modèle énergivore, à image équivalente. Un doute sur
+      la taille ? Lisez [quelle taille de TV choisir](/blog/quelle-taille-de-tv-choisir-pour-son-salon).
+
+      Nudger garde cette page centrée sur des modèles 32 pouces filtrables,
+      afin que chaque téléviseur reste comparable sur le prix, le score d'impact
+      environnemental et les caractéristiques techniques, sans mélanger les
+      autres tailles.
+activatedFilters:
+  - field: "attributes.indexed.DIAGONALE_POUCES.value"
+    operator: "EQUALS"
+    value: "32"

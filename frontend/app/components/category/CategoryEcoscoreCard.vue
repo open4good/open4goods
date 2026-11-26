@@ -37,10 +37,14 @@ const ecoscoreUrl = computed(() => {
     return null
   }
 
-  const normalizedBase = props.verticalHomeUrl.endsWith('/')
-    ? props.verticalHomeUrl.slice(0, -1)
-    : props.verticalHomeUrl
+  // verticalHomeUrl est stocké sans « / » initial (« fours ») : un lien relatif
+  // donnerait /fours/fours/ecoscore depuis une sous-catégorie.
+  const trimmed = props.verticalHomeUrl.trim().replace(/\/+$/, '')
 
-  return `${normalizedBase}/ecoscore`
+  if (/^https?:\/\//i.test(trimmed)) {
+    return `${trimmed}/ecoscore`
+  }
+
+  return `/${trimmed.replace(/^\/+/, '')}/ecoscore`
 })
 </script>

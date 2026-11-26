@@ -14,7 +14,7 @@ L'écoscore se déclare dans chaque fichier YAML de verticale sous la clef `impa
 `ImpactScoreConfig` porte deux familles d'informations : 
 1. la map `criteriasPonderation` (nom du score → poids), 
 2. un bloc `texts` multilingue (`ImpactScoreTexts`) qui décrit l'objectif, la revue critique, les données disponibles et une analyse par critère pour la transparence utilisateur.【F:model/src/main/java/org/open4goods/model/vertical/ImpactScoreConfig.java†L1-L49】【F:model/src/main/java/org/open4goods/model/vertical/ImpactScoreTexts.java†L1-L35】  
-Pour assurer l'auditabilité, le fichier conserve également la requête envoyée au moteur IA (`yamlPrompt`) et la réponse JSON (`aiJsonResponse`) ayant permis de générer automatiquement la pondération.【F:model/src/main/java/org/open4goods/model/vertical/ImpactScoreConfig.java†L21-L48】
+Pour assurer l'auditabilité, le fichier conserve également la requête envoyée au moteur IA (`yamlPrompt`) et la réponse JSON (`aiJsonResponse`) ayant permis de générer automatiquement la pondération. Ces deux champs restent internes : l'API publique front-api ne les expose pas (GOU-2698), elle n'en publie que les textes utiles (`audit`).【F:model/src/main/java/org/open4goods/model/vertical/ImpactScoreConfig.java†L21-L48】
 
 ### Catalogue des critères disponibles
 Chaque verticale hérite du référentiel `_default.yml`, qui liste les critères officiellement supportés (`availableImpactScoreCriterias`) avec leur titre et description (classe énergétique, indice de réparabilité, consommation en marche/arrêt, durabilité de la marque, qualité de la donnée, etc.).【F:verticals/src/main/resources/verticals/_default.yml†L114-L158】 Ce catalogue sert à la fois à guider les IA génératives et à alimenter l'interface publique.
