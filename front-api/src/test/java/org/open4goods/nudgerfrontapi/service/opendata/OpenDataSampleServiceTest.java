@@ -3,6 +3,7 @@ package org.open4goods.nudgerfrontapi.service.opendata;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ class OpenDataSampleServiceTest {
             reads.incrementAndGet();
             uris.add(uri);
             return "gtin,name\n123,\"a, b\"\n456,\n";
-        });
+        }, Duration.ofMinutes(5), () -> 0L);
 
         Optional<DatasetManifest> entry = Optional.of(dataset("gtin-open-data-sample.csv", "2026-11-22T02:55:00Z"));
         assertThat(service.rows(entry)).containsExactly(List.of("123", "a, b"), List.of("456", ""));
@@ -50,11 +51,32 @@ class OpenDataSampleServiceTest {
     void returnsNoRowsWithoutSampleBaseUrlOrOnFailure() {
         OpenDataSampleService failing = new OpenDataSampleService(config("https://data.nudger.fr"), uri -> {
             throw new IllegalStateException("404");
-        });
+        }, Duration.ofMinutes(5), () -> 0L);
         assertThat(failing.rows(Optional.of(dataset("s.csv", "x")))).isEmpty();
         assertThat(failing.rows(Optional.of(dataset(null, "x")))).isEmpty();
         assertThat(failing.rows(Optional.empty())).isEmpty();
-        assertThat(new OpenDataSampleService(config(""), uri -> "a\n1\n").rows(Optional.of(dataset("s.csv", "x"))))
+        assertThat(new OpenDataSampleService(config(""), uri -> "a\n1\n", Duration.ofMinutes(5), () -> 0L).rows(Optional.of(dataset("s.csv", "x"))))
                 .isEmpty();
+    }
+
+    @Test
+    void remembersAFailureUntilTheRetryDelayElapses() {
+        AtomicInteger reads = new AtomicInteger();
+        long[] now = {0L};
+        OpenDataSampleService service = new OpenDataSampleService(config("https://data.nudger.fr"), uri -> {
+            if (reads.incrementAndGet() == 1) {
+                throw new IllegalStateException("timeout");
+            }
+            return "a\n1\n";
+        }, Duration.ofMinutes(5), () -> now[0]);
+        Optional<DatasetManifest> entry = Optional.of(dataset("s.csv", "x"));
+
+        assertThat(service.rows(entry)).isEmpty();
+        assertThat(service.rows(entry)).isEmpty();
+        assertThat(reads).hasValue(1);
+
+        now[0] = Duration.ofMinutes(5).toMillis();
+        assertThat(service.rows(entry)).containsExactly(List.of("1"));
+        assertThat(reads).hasValue(2);
     }
 }

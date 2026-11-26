@@ -3,12 +3,14 @@ package org.open4goods.nudgerfrontapi.service.opendata;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 
 import org.open4goods.nudgerfrontapi.config.properties.OpenDataManifestProperties;
 import org.open4goods.services.opendata.config.OpenDataConfig;
@@ -29,7 +31,8 @@ import com.opencsv.exceptions.CsvValidationException;
  * Reads the CSV sample published next to a dataset (header and the first 20 rows, GOU-2744) so that the pages render
  * an extract server-side. The sample file name comes from the {@code sample} field of the dataset in
  * {@code manifest.json}; it only holds columns of the published dataset. A sample is read once per generation of the
- * dataset (key: file name and {@code generatedAt}); a read failure is logged once and the extract is simply absent.
+ * dataset (key: file name and {@code generatedAt}); a read failure is logged once, remembered until
+ * {@code manifestCacheTtl} has elapsed (no call per request) and the extract is simply absent.
  */
 @Service
 public class OpenDataSampleService {
@@ -38,17 +41,25 @@ public class OpenDataSampleService {
 
     private final OpenDataConfig openDataConfig;
     private final Function<URI, String> reader;
+    private final Duration retryDelay;
+    private final LongSupplier clock;
     private final Map<String, List<List<String>>> cache = new ConcurrentHashMap<>();
+    /** Failed reads: key {@code sample@generatedAt} to the epoch millis after which a new read is allowed. */
+    private final Map<String, Long> failures = new ConcurrentHashMap<>();
 
     @Autowired
     public OpenDataSampleService(OpenDataConfig openDataConfig, OpenDataManifestProperties properties,
             RestClient.Builder restClientBuilder) {
-        this(openDataConfig, restReader(restClientBuilder, properties));
+        this(openDataConfig, restReader(restClientBuilder, properties), properties.getManifestCacheTtl(),
+                System::currentTimeMillis);
     }
 
-    OpenDataSampleService(OpenDataConfig openDataConfig, Function<URI, String> reader) {
+    OpenDataSampleService(OpenDataConfig openDataConfig, Function<URI, String> reader, Duration retryDelay,
+            LongSupplier clock) {
         this.openDataConfig = openDataConfig;
         this.reader = reader;
+        this.retryDelay = retryDelay;
+        this.clock = clock;
     }
 
     private static Function<URI, String> restReader(RestClient.Builder restClientBuilder,
@@ -79,14 +90,21 @@ public class OpenDataSampleService {
         if (cached != null) {
             return cached;
         }
+        Long retryAt = failures.get(key);
+        if (retryAt != null && clock.getAsLong() < retryAt) {
+            return List.of();
+        }
         try {
             List<List<String>> rows = parse(reader.apply(sampleUri(entry.sample())));
             cache.keySet().removeIf(old -> old.startsWith(entry.sample() + "@"));
             cache.put(key, rows);
+            failures.remove(key);
             return rows;
         } catch (IOException | CsvValidationException | RuntimeException e) {
             LOGGER.warn("Open data sample {} unreadable, the extract is not rendered: {}", entry.sample(),
                     e.getMessage());
+            failures.keySet().removeIf(old -> old.startsWith(entry.sample() + "@"));
+            failures.put(key, clock.getAsLong() + retryDelay.toMillis());
             return List.of();
         }
     }
