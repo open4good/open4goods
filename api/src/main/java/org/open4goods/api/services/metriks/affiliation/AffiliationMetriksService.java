@@ -11,6 +11,9 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import org.open4goods.api.dto.metriks.MetriksEvent;
 import org.open4goods.services.contribution.model.AffiliationClick;
@@ -70,6 +73,12 @@ public class AffiliationMetriksService {
             .map(AffiliationNetwork::key).toList();
     static final String TOP_MERCHANTS_ID = "affiliation.clicks.top_merchants.28d";
     static final String TOP_ORIGINS_ID = "affiliation.clicks.top_origins.28d";
+    static final String MERCHANTS_SALES_ID = "affiliation.merchants.sales";
+    /** Merchant label of the sales of a network that does not name the advertiser. */
+    static final String SALES_BY_ORIGIN_ID = "affiliation.sales.by_origin.28d";
+    /** Most gtins listed per origin row of {@value #SALES_BY_ORIGIN_ID}. */
+    static final int ORIGIN_TOP_GTINS = 10;
+    static final String UNKNOWN_ADVERTISER = "(annonceur non fourni)";
     private static final Window SHORT = new Window("7d", 7, 0, "7 j");
     private static final Window LONG = new Window("28d", 28, 0, "28 j");
     private static final Window PREV_SHORT = new Window("prev7d", 7, 7, "7 j préc.");
@@ -83,19 +92,27 @@ public class AffiliationMetriksService {
     private final List<AffiliationReportClient> clients;
     private final AffiliationClickStatsService clickStatsService;
     private final Clock clock;
+    private final MerchantDatasourceResolver merchantResolver;
 
     @Autowired
     public AffiliationMetriksService(List<AffiliationReportClient> clients,
-                                     AffiliationClickStatsService clickStatsService) {
-        this(clients, clickStatsService, Clock.system(ZONE));
+                                     AffiliationClickStatsService clickStatsService,
+                                     MerchantDatasourceResolver merchantResolver) {
+        this(clients, clickStatsService, Clock.system(ZONE), merchantResolver);
     }
 
     /**
-     * Package-private constructor allowing tests to fix "today".
+     * Package-private constructor allowing tests to fix "today"; no advertiser is matched to a datasource.
      */
     AffiliationMetriksService(List<AffiliationReportClient> clients, AffiliationClickStatsService clickStatsService,
                               Clock clock) {
+        this(clients, clickStatsService, clock, MerchantDatasourceResolver.none());
+    }
+
+    AffiliationMetriksService(List<AffiliationReportClient> clients, AffiliationClickStatsService clickStatsService,
+                              Clock clock, MerchantDatasourceResolver merchantResolver) {
         this.clickStatsService = clickStatsService;
+        this.merchantResolver = merchantResolver;
         this.clients = clients.stream()
                 .sorted(Comparator.comparingInt(c -> {
                     int index = NETWORK_ORDER.indexOf(c.network());
@@ -109,7 +126,8 @@ public class AffiliationMetriksService {
      * Reads every network and builds the events: for each network then for the totals, and for each window,
      * {@code commission.validated}, {@code commission.pending} and {@code sales}; then the click events.
      *
-     * @return the 6 events of each network, the 6 total events, then the 16 click events
+     * @return the 6 events of each network, the 6 total events, then {@value #MERCHANTS_SALES_ID}, then
+     *         {@value #SALES_BY_ORIGIN_ID}, then the click events
      *         ({@link #clickEvents(LocalDate)})
      */
     public List<MetriksEvent> collectEvents() {
@@ -122,9 +140,11 @@ public class AffiliationMetriksService {
         Map<Window, Figures> totals = new LinkedHashMap<>();
         WINDOWS.forEach(window -> totals.put(window, new Figures(BigDecimal.ZERO, BigDecimal.ZERO, 0)));
         List<String> failedNetworks = new ArrayList<>();
+        Map<String, NetworkResult> results = new LinkedHashMap<>();
 
         for (AffiliationReportClient client : clients) {
             NetworkResult result = read(client, today, startDate, endDate);
+            results.put(client.network(), result);
             for (Window window : WINDOWS) {
                 Figures figures = result.error() == null ? result.figures().get(window) : null;
                 events.addAll(windowEvents(client.network(), client.displayName(), window, window.start(today),
@@ -144,8 +164,241 @@ public class AffiliationMetriksService {
             events.addAll(windowEvents("total", "tous réseaux", window, window.start(today), window.end(today),
                     totalError == null ? totals.get(window) : null, totalError));
         }
+        events.add(merchantsEvent(today, results));
+        events.add(salesByOriginEvent(today, results));
         events.addAll(clickEvents(today));
         return events;
+    }
+
+    /**
+     * Builds {@value #MERCHANTS_SALES_ID}: one row per merchant with at least one sale or one click over the last 28
+     * days, with its sales, commissions and clicks over the four windows.
+     * <p>
+     * Sales come from the network transactions, grouped by advertiser; clicks from the {@code merchant} (datasource
+     * name) of the clicks. An advertiser is attached to its clicks only through {@link MerchantDatasourceResolver}
+     * (exact programme identifier); otherwise it keeps its network name and its clicks are not measured
+     * ({@code null}). A merchant of a network without sales reading (Amazon, other) or whose datasource has no known
+     * programme has its sales not measured ({@code null}, never 0).
+     * <p>
+     * A network in error is a single row in error (no partial row of that network); when the clicks cannot be read
+     * the event has no row. The event is in {@code error} as soon as one network or the clicks are, its value is
+     * then {@code null}; the rows of the healthy networks stay readable under {@code params.rows}.
+     */
+    private MetriksEvent merchantsEvent(LocalDate today, Map<String, NetworkResult> results) {
+        List<String> failedNetworks = results.entrySet().stream().filter(e -> e.getValue().error() != null)
+                .map(Map.Entry::getKey).toList();
+        Map<Window, Map<String, MerchantClicks>> clicks = new LinkedHashMap<>();
+        String clicksError = null;
+        try {
+            for (Window window : WINDOWS) {
+                Map<String, MerchantClicks> perPair = new LinkedHashMap<>();
+                for (MerchantClicks click : clickStatsService.countByMerchant(startMillis(window, today),
+                        endMillis(window, today))) {
+                    perPair.merge(click.network() + "\u0000" + click.merchant(), click,
+                            (a, b) -> new MerchantClicks(a.merchant(), a.network(), a.clicks() + b.clicks()));
+                }
+                clicks.put(window, perPair);
+            }
+        } catch (NoSuchIndexException e) {
+            clicksError = "Clics indisponibles : index " + AffiliationClick.INDEX_NAME + " absent";
+        } catch (RuntimeException e) {
+            clicksError = "Clics indisponibles : Elasticsearch en erreur (" + e.getClass().getSimpleName() + ")";
+        }
+        if (clicksError != null) {
+            LOGGER.warn("Metriks affiliation marchands en erreur : {}", clicksError);
+        }
+
+        List<String> errors = new ArrayList<>();
+        if (!failedNetworks.isEmpty()) {
+            errors.add("réseau(x) en erreur : " + String.join(", ", failedNetworks));
+        }
+        if (clicksError != null) {
+            errors.add(clicksError);
+        }
+        String error = errors.isEmpty() ? null : "Marchands incomplets : " + String.join(" ; ", errors);
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        for (String network : failedNetworks) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("merchant", null);
+            row.put("network", network);
+            row.put("status", "error");
+            row.put("error", results.get(network).error());
+            rows.add(row);
+        }
+        if (clicksError == null) {
+            rows.addAll(merchantRows(today, results, clicks));
+        }
+        MetriksEvent event = event(MERCHANTS_SALES_ID,
+                "Ventes, commissions et clics par marchand (" + LONG.label() + ")", "count", "total",
+                LONG.start(today), LONG.end(today), null, error == null ? rows.size() : null, error);
+        event.getParams().put("rows", rows);
+        return event;
+    }
+
+    /**
+     * Builds {@value #SALES_BY_ORIGIN_ID}: the sales of the last 28 days attached to the click they come from, one
+     * row per origin (the {@code contentPath} of the click, otherwise its {@code originPath}), plus one row
+     * {@code attributed: false} for the sales that cannot be attached.
+     * <p>
+     * A sale is attached when its {@code clickRef} is the id of an {@link AffiliationClick} found in the index;
+     * without {@code clickRef}, or with a click not found, it is counted in the unattached row and never spread over
+     * the origins. Declined sales are ignored. A row holds {@code origin}, {@code attributed}, {@code sales},
+     * {@code commissionValidated}, {@code commissionPending}, {@code clicks} (clicks of the same origin over the same
+     * 28 days, {@code null} when they cannot be read) and {@code gtins} (the most sold products of the origin).
+     * <p>
+     * A network in error is left out of the figures and puts the event in {@code error} (value {@code null}, the rows
+     * of the healthy networks stay under {@code params.rows}); when the clicks cannot be read the event is in
+     * {@code error} with no row.
+     */
+    private MetriksEvent salesByOriginEvent(LocalDate today, Map<String, NetworkResult> results) {
+        List<String> failedNetworks = results.entrySet().stream().filter(e -> e.getValue().error() != null)
+                .map(Map.Entry::getKey).toList();
+        LocalDate start = LONG.start(today);
+        LocalDate end = LONG.end(today);
+        List<AffiliationReportTransaction> sales = new ArrayList<>();
+        for (NetworkResult result : results.values()) {
+            if (result.error() != null) {
+                continue;
+            }
+            for (AffiliationReportTransaction transaction : result.transactions()) {
+                LocalDate date = transaction.transactionDate();
+                if (transaction.status() != AffiliationReportStatus.DECLINED && !date.isBefore(start)
+                        && !date.isAfter(end)) {
+                    sales.add(transaction);
+                }
+            }
+        }
+
+        Map<String, AffiliationClick> found = Map.of();
+        Map<String, Long> originClicks = new LinkedHashMap<>();
+        String clicksError = null;
+        try {
+            found = clickStatsService.findByIds(sales.stream().map(AffiliationReportTransaction::clickRef)
+                    .filter(ref -> ref != null && !ref.isBlank()).map(String::trim).distinct().toList());
+            for (OriginClicks origin : clickStatsService.countByOrigin(startMillis(LONG, today),
+                    endMillis(LONG, today))) {
+                originClicks.put(origin.origin(), origin.clicks());
+            }
+        } catch (NoSuchIndexException e) {
+            clicksError = "Clics indisponibles : index " + AffiliationClick.INDEX_NAME + " absent";
+        } catch (RuntimeException e) {
+            clicksError = "Clics indisponibles : Elasticsearch en erreur (" + e.getClass().getSimpleName() + ")";
+        }
+        if (clicksError != null) {
+            LOGGER.warn("Metriks affiliation ventes par origine en erreur : {}", clicksError);
+        }
+
+        List<String> errors = new ArrayList<>();
+        if (!failedNetworks.isEmpty()) {
+            errors.add("réseau(x) en erreur : " + String.join(", ", failedNetworks));
+        }
+        if (clicksError != null) {
+            errors.add(clicksError);
+        }
+        String error = errors.isEmpty() ? null : "Ventes par origine incomplètes : " + String.join(" ; ", errors);
+
+        List<Map<String, Object>> rows = new ArrayList<>();
+        if (clicksError == null) {
+            Map<String, OriginSales> byOrigin = new LinkedHashMap<>();
+            OriginSales unattached = new OriginSales(null);
+            for (AffiliationReportTransaction transaction : sales) {
+                String ref = transaction.clickRef() == null ? "" : transaction.clickRef().trim();
+                AffiliationClick click = ref.isEmpty() ? null : found.get(ref);
+                OriginSales target = click == null ? unattached
+                        : byOrigin.computeIfAbsent(originOf(click), OriginSales::new);
+                target.add(transaction, click == null ? null : click.getGtin());
+            }
+            byOrigin.values().stream()
+                    .sorted(Comparator.<OriginSales>comparingLong(o -> -o.sales).thenComparing(o -> o.origin))
+                    .forEach(origin -> rows.add(origin.toMap(originClicks.getOrDefault(origin.origin, 0L))));
+            rows.add(unattached.toMap(null));
+        }
+        MetriksEvent event = event(SALES_BY_ORIGIN_ID,
+                "Ventes rattachées à leur clic, par page d'origine (" + LONG.label() + ")", "count", "total", start,
+                end, null, error == null ? rows.size() : null, error);
+        event.getParams().put("rows", rows);
+        return event;
+    }
+
+    /** Article or guide path of a click, otherwise its originating page, otherwise {@value OriginClicks#NO_ORIGIN}. */
+    private static String originOf(AffiliationClick click) {
+        if (click.getContentPath() != null && !click.getContentPath().isBlank()) {
+            return click.getContentPath();
+        }
+        if (click.getOriginPath() != null && !click.getOriginPath().isBlank()) {
+            return click.getOriginPath();
+        }
+        return OriginClicks.NO_ORIGIN;
+    }
+
+    /**
+     * Rows of the merchants with a sale or a click in the 28 days, best sellers first, then most clicked.
+     */
+    private List<Map<String, Object>> merchantRows(LocalDate today, Map<String, NetworkResult> results,
+            Map<Window, Map<String, MerchantClicks>> clicks) {
+        Map<String, MerchantRow> rows = new LinkedHashMap<>();
+        for (Map.Entry<String, NetworkResult> entry : results.entrySet()) {
+            NetworkResult result = entry.getValue();
+            if (result.error() != null) {
+                continue;
+            }
+            String network = entry.getKey();
+            AffiliationReportClient client = result.client();
+            Map<String, List<AffiliationReportTransaction>> byAdvertiser = new LinkedHashMap<>();
+            for (AffiliationReportTransaction transaction : result.transactions()) {
+                byAdvertiser.computeIfAbsent(transaction.advertiserId() == null ? "" : transaction.advertiserId(),
+                        k -> new ArrayList<>()).add(transaction);
+            }
+            for (Map.Entry<String, List<AffiliationReportTransaction>> advertiser : byAdvertiser.entrySet()) {
+                String id = advertiser.getKey().isEmpty() ? null : advertiser.getKey();
+                Optional<String> datasource = id == null ? Optional.empty()
+                        : merchantResolver.datasourceOf(network, id);
+                String name = advertiser.getValue().stream().map(AffiliationReportTransaction::advertiserName)
+                        .filter(Objects::nonNull).findFirst().orElse(null);
+                String merchant = datasource.orElseGet(() -> name != null ? name
+                        : id != null ? "Annonceur " + id : UNKNOWN_ADVERTISER);
+                MerchantRow row = rows.computeIfAbsent(network + "\u0000" + merchant,
+                        k -> new MerchantRow(merchant, network, datasource.isPresent()));
+                row.advertiserIds.add(id);
+                row.salesMeasured = true;
+                for (Window window : WINDOWS) {
+                    try {
+                        row.sales.merge(window, aggregate(client, advertiser.getValue(), window.start(today),
+                                window.end(today)), Figures::plus);
+                    } catch (AffiliationReportException e) {
+                        // Already reported for the whole network by read(): the currency is checked there.
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+        }
+        for (Window window : WINDOWS) {
+            for (MerchantClicks click : clicks.get(window).values()) {
+                String key = click.network() + "\u0000" + click.merchant();
+                NetworkResult result = results.get(click.network());
+                if (result != null && result.error() != null) {
+                    continue;
+                }
+                MerchantRow row = rows.get(key);
+                if (row == null) {
+                    row = new MerchantRow(click.merchant(), click.network(), true);
+                    // A click-only merchant has a real 0 sale only when its network is read and its programme known.
+                    row.salesMeasured = result != null && merchantResolver.hasProgramme(click.network(), click.merchant());
+                    rows.put(key, row);
+                }
+                row.clicksMeasured = true;
+                row.clicks.put(window, click.clicks());
+            }
+        }
+        List<MerchantRow> kept = rows.values().stream()
+                .filter(row -> row.salesOf(LONG).filter(f -> f.sales() > 0).isPresent()
+                        || row.clicks.getOrDefault(LONG, 0L) > 0)
+                .sorted(Comparator.<MerchantRow>comparingLong(row -> -row.salesOf(LONG).map(Figures::sales).orElse(0L))
+                        .thenComparingLong(row -> -row.clicks.getOrDefault(LONG, 0L))
+                        .thenComparing(row -> row.network).thenComparing(row -> row.merchant))
+                .toList();
+        return kept.stream().map(MerchantRow::toMap).toList();
     }
 
     /**
@@ -283,7 +536,7 @@ public class AffiliationMetriksService {
             for (Window window : WINDOWS) {
                 figures.put(window, aggregate(client, transactions, window.start(today), window.end(today)));
             }
-            return new NetworkResult(figures, null);
+            return new NetworkResult(figures, null, transactions, client);
         } catch (AffiliationReportException e) {
             String message = scrub(e.getMessage(), client.secretValues());
             LOGGER.warn("Metriks affiliation {} en erreur : {}", client.network(), message);
@@ -423,9 +676,112 @@ public class AffiliationMetriksService {
     /**
      * Figures per window of one network, or its error message.
      */
-    private record NetworkResult(Map<Window, Figures> figures, String error) {
+    private record NetworkResult(Map<Window, Figures> figures, String error,
+                                 List<AffiliationReportTransaction> transactions, AffiliationReportClient client) {
         static NetworkResult failed(String error) {
-            return new NetworkResult(Map.of(), error);
+            return new NetworkResult(Map.of(), error, List.of(), null);
+        }
+    }
+
+    /**
+     * Sales attached to one origin ({@code null} origin: the sales that cannot be attached).
+     */
+    private static final class OriginSales {
+        final String origin;
+        long sales;
+        BigDecimal validated = BigDecimal.ZERO;
+        BigDecimal pending = BigDecimal.ZERO;
+        final Map<String, Long> gtins = new LinkedHashMap<>();
+
+        OriginSales(String origin) {
+            this.origin = origin;
+        }
+
+        void add(AffiliationReportTransaction transaction, String gtin) {
+            sales++;
+            if (transaction.status() == AffiliationReportStatus.VALIDATED) {
+                validated = validated.add(transaction.commission());
+            } else {
+                pending = pending.add(transaction.commission());
+            }
+            if (gtin != null && !gtin.isBlank()) {
+                gtins.merge(gtin, 1L, Long::sum);
+            }
+        }
+
+        Map<String, Object> toMap(Long clicks) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("origin", origin);
+            row.put("attributed", origin != null);
+            row.put("sales", sales);
+            row.put("commissionValidated", validated.setScale(2, RoundingMode.HALF_UP));
+            row.put("commissionPending", pending.setScale(2, RoundingMode.HALF_UP));
+            row.put("clicks", clicks);
+            List<Map<String, Object>> products = gtins.entrySet().stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed().thenComparing(Map.Entry.comparingByKey()))
+                    .limit(ORIGIN_TOP_GTINS).map(entry -> {
+                        Map<String, Object> product = new LinkedHashMap<>();
+                        product.put("gtin", entry.getKey());
+                        product.put("sales", entry.getValue());
+                        return product;
+                    }).toList();
+            row.put("gtins", products);
+            return row;
+        }
+    }
+
+    /**
+     * One row of the merchant report, filled sales first then clicks.
+     */
+    private static final class MerchantRow {
+        final String merchant;
+        final String network;
+        /** {@code true} when the merchant name is a datasource name (so its clicks can be counted). */
+        final boolean datasource;
+        final Set<String> advertiserIds = new java.util.TreeSet<>(Comparator.nullsFirst(Comparator.naturalOrder()));
+        final Map<Window, Figures> sales = new LinkedHashMap<>();
+        final Map<Window, Long> clicks = new LinkedHashMap<>();
+        boolean salesMeasured;
+        boolean clicksMeasured;
+
+        MerchantRow(String merchant, String network, boolean datasource) {
+            this.merchant = merchant;
+            this.network = network;
+            this.datasource = datasource;
+        }
+
+        Optional<Figures> salesOf(Window window) {
+            return salesMeasured ? Optional.of(sales.getOrDefault(window, new Figures(BigDecimal.ZERO, BigDecimal.ZERO, 0)))
+                    : Optional.empty();
+        }
+
+        Map<String, Object> toMap() {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("merchant", merchant);
+            row.put("network", network);
+            row.put("status", "ok");
+            List<String> ids = advertiserIds.stream().filter(Objects::nonNull).toList();
+            row.put("advertiserId", ids.size() == 1 ? ids.get(0) : null);
+            row.put("datasource", datasource);
+            row.put("salesMeasured", salesMeasured);
+            row.put("clicksMeasured", clicksMeasured);
+            for (Window window : WINDOWS) {
+                Map<String, Object> figures = new LinkedHashMap<>();
+                Optional<Figures> sold = salesOf(window);
+                Long clicked = clicksMeasured ? Long.valueOf(clicks.getOrDefault(window, 0L)) : null;
+                figures.put("sales", sold.map(Figures::sales).orElse(null));
+                figures.put("commissionValidated",
+                        sold.map(f -> f.validated().setScale(2, RoundingMode.HALF_UP)).orElse(null));
+                figures.put("commissionPending",
+                        sold.map(f -> f.pending().setScale(2, RoundingMode.HALF_UP)).orElse(null));
+                figures.put("clicks", clicked);
+                figures.put("salesPerClick", sold.isPresent() && clicked != null && clicked > 0
+                        ? BigDecimal.valueOf(sold.get().sales()).divide(BigDecimal.valueOf(clicked), 4,
+                                RoundingMode.HALF_UP)
+                        : null);
+                row.put(window.key(), figures);
+            }
+            return row;
         }
     }
 }

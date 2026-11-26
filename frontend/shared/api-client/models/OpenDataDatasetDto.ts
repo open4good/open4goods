@@ -13,8 +13,13 @@
  */
 
 import { mapValues } from '../runtime'
+import type { OpenDataColumnDto } from './OpenDataColumnDto'
+import {
+  OpenDataColumnDtoFromJSON,
+  OpenDataColumnDtoToJSON,
+} from './OpenDataColumnDto'
 /**
- * Detailed description of a single OpenData dataset.
+ * Detailed description of a single OpenData dataset. Values read from the published manifest are null while it is not configured or not readable.
  * @export
  * @interface OpenDataDatasetDto
  */
@@ -26,41 +31,83 @@ export interface OpenDataDatasetDto {
    */
   type?: OpenDataDatasetDtoTypeEnum
   /**
-   * Number of rows in the dataset formatted using the requested locale.
+   * Rows of the published file (manifest rows), formatted using the requested locale; null when unknown.
    * @type {string}
    * @memberof OpenDataDatasetDto
    */
-  recordCount?: string
+  recordCount?: string | null
   /**
-   * Raw number of rows in the dataset.
+   * Raw rows of the published file (manifest rows); null when unknown.
    * @type {number}
    * @memberof OpenDataDatasetDto
    */
-  recordCountValue?: number
+  recordCountValue?: number | null
   /**
-   * Last update timestamp formatted using the requested locale.
+   * Generation date of the published file (manifest generatedAt), formatted using the requested locale in the Europe/Paris time zone; null when unknown.
    * @type {string}
    * @memberof OpenDataDatasetDto
    */
   lastUpdated?: string | null
   /**
-   * Human readable size of the dataset formatted using the requested locale.
+   * Size of the published zip (manifest bytes), formatted using the requested locale; null when unknown.
    * @type {string}
    * @memberof OpenDataDatasetDto
    */
-  fileSize?: string
+  fileSize?: string | null
   /**
-   * Absolute URL that can be used to download the dataset.
+   * Lowercase hexadecimal SHA-256 of the published zip (manifest sha256); null when unknown.
    * @type {string}
    * @memberof OpenDataDatasetDto
    */
-  downloadUrl?: string
+  sha256?: string | null
+  /**
+   * Absolute URL of the published zip (open-data-config.public-base-url); null when no public base URL is configured.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  downloadUrl?: string | null
   /**
    *
    * @type {Array<string>}
    * @memberof OpenDataDatasetDto
    */
   headers?: Array<string>
+  /**
+   * Identifier of the dataset in the manifest.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  id?: string | null
+  /**
+   * Generation date of the published file, ISO 8601 UTC.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  generatedAt?: string | null
+  /**
+   * Raw size in bytes of the published zip.
+   * @type {number}
+   * @memberof OpenDataDatasetDto
+   */
+  sizeBytes?: number | null
+  /**
+   * Licence of the dataset.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  license?: string | null
+  /**
+   * Columns of the CSV with their fill rate.
+   * @type {Array<OpenDataColumnDto>}
+   * @memberof OpenDataDatasetDto
+   */
+  columns?: Array<OpenDataColumnDto>
+  /**
+   * Extract of the first rows of the published CSV (header excluded), read from the sample published with the manifest; empty when none.
+   * @type {Array<Array<string>>}
+   * @memberof OpenDataDatasetDto
+   */
+  sampleRows?: Array<Array<string>>
 }
 
 /**
@@ -69,6 +116,7 @@ export interface OpenDataDatasetDto {
 export const OpenDataDatasetDtoTypeEnum = {
   Gtin: 'GTIN',
   Isbn: 'ISBN',
+  Impact: 'IMPACT',
 } as const
 export type OpenDataDatasetDtoTypeEnum =
   (typeof OpenDataDatasetDtoTypeEnum)[keyof typeof OpenDataDatasetDtoTypeEnum]
@@ -100,8 +148,18 @@ export function OpenDataDatasetDtoFromJSONTyped(
       json['recordCountValue'] == null ? undefined : json['recordCountValue'],
     lastUpdated: json['lastUpdated'] == null ? undefined : json['lastUpdated'],
     fileSize: json['fileSize'] == null ? undefined : json['fileSize'],
+    sha256: json['sha256'] == null ? undefined : json['sha256'],
     downloadUrl: json['downloadUrl'] == null ? undefined : json['downloadUrl'],
     headers: json['headers'] == null ? undefined : json['headers'],
+    id: json['id'] == null ? undefined : json['id'],
+    generatedAt: json['generatedAt'] == null ? undefined : json['generatedAt'],
+    sizeBytes: json['sizeBytes'] == null ? undefined : json['sizeBytes'],
+    license: json['license'] == null ? undefined : json['license'],
+    columns:
+      json['columns'] == null
+        ? undefined
+        : (json['columns'] as Array<any>).map(OpenDataColumnDtoFromJSON),
+    sampleRows: json['sampleRows'] == null ? undefined : json['sampleRows'],
   }
 }
 
@@ -123,7 +181,17 @@ export function OpenDataDatasetDtoToJSONTyped(
     recordCountValue: value['recordCountValue'],
     lastUpdated: value['lastUpdated'],
     fileSize: value['fileSize'],
+    sha256: value['sha256'],
     downloadUrl: value['downloadUrl'],
     headers: value['headers'],
+    id: value['id'],
+    generatedAt: value['generatedAt'],
+    sizeBytes: value['sizeBytes'],
+    license: value['license'],
+    columns:
+      value['columns'] == null
+        ? undefined
+        : (value['columns'] as Array<any>).map(OpenDataColumnDtoToJSON),
+    sampleRows: value['sampleRows'],
   }
 }

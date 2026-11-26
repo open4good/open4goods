@@ -222,11 +222,13 @@ class TaxonomyRealTimeAggregationServiceNatureTest {
 		assertThat(verticalService.getNatureForCategories(categories, 0.5)).isNull();
 	}
 
-	/** The default threshold of {@code _default.yml} is 0: one marked category is enough, as before. */
+	/** The default threshold of {@code _default.yml} is 0.5: one marked category out of three is not enough. */
 	@Test
-	void defaultThresholdKeepsOneMarkedCategoryEnough() throws Exception {
+	void defaultThresholdIsHalf() throws Exception {
+		assertThat(verticalService.getConfigByIdOrDefault(null).getNatureMinMarkedCategoryShare()).isEqualTo(0.5);
 		assertThat(natureOf(product("darty.com", "PIECES DETACHEES LAVE-LINGE > JOINT HUBLOT", "cdiscount.com",
-				"MAISON > DIVERS", "leroymerlin.fr", "BRICOLAGE > OUTILLAGE", "fnac.com", "LIVRES > ROMANS")))
-				.isEqualTo(ProductNature.SPARE_PART);
+				"MAISON > DIVERS", "leroymerlin.fr", "BRICOLAGE > OUTILLAGE"))).isNull();
+		assertThat(natureOf(product("darty.com", "PIECES DETACHEES LAVE-LINGE > JOINT HUBLOT", "cdiscount.com",
+				"MAISON > DIVERS"))).isEqualTo(ProductNature.SPARE_PART);
 	}
 }

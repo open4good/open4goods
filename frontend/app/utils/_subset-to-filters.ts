@@ -65,11 +65,14 @@ const convertCriteria = (
     return null
   }
 
+  // Strict operators keep their bound exclusive end to end: LOWER_THAN 8 must
+  // not match 8 (GOU-2586). The *_OR_EQUAL operators stay inclusive.
   if (criteria.operator === 'LOWER_THAN') {
     return {
       field: criteria.field,
       operator: 'range',
       max: numericValue,
+      maxExclusive: true,
     }
   }
 
@@ -86,6 +89,7 @@ const convertCriteria = (
       field: criteria.field,
       operator: 'range',
       min: numericValue,
+      minExclusive: true,
     }
   }
 
@@ -135,7 +139,9 @@ const areTermFiltersEqual = (left: Filter, right: Filter): boolean => {
 const areRangeFiltersEqual = (left: Filter, right: Filter): boolean => {
   return (
     (left.min ?? null) === (right.min ?? null) &&
-    (left.max ?? null) === (right.max ?? null)
+    (left.max ?? null) === (right.max ?? null) &&
+    Boolean(left.minExclusive) === Boolean(right.minExclusive) &&
+    Boolean(left.maxExclusive) === Boolean(right.maxExclusive)
   )
 }
 
@@ -179,15 +185,29 @@ const mergeRangeClauses = (filters: Filter[]): Filter[] => {
     return []
   }
 
-  const mergedRanges = new Map<string, { min?: number; max?: number }>()
+  const mergedRanges = new Map<
+    string,
+    {
+      min?: number
+      max?: number
+      minExclusive?: boolean
+      maxExclusive?: boolean
+    }
+  >()
   const mergedFilters: Filter[] = []
 
   for (const filter of filters) {
     if (filter.operator === 'range' && filter.field) {
       const existing = mergedRanges.get(filter.field) ?? {}
-      const min = filter.min != null ? filter.min : existing.min
-      const max = filter.max != null ? filter.max : existing.max
-      mergedRanges.set(filter.field, { min, max })
+      // A bound keeps the exclusivity of the clause it comes from.
+      const hasMin = filter.min != null
+      const hasMax = filter.max != null
+      mergedRanges.set(filter.field, {
+        min: hasMin ? filter.min : existing.min,
+        max: hasMax ? filter.max : existing.max,
+        minExclusive: hasMin ? filter.minExclusive : existing.minExclusive,
+        maxExclusive: hasMax ? filter.maxExclusive : existing.maxExclusive,
+      })
     } else {
       mergedFilters.push(filter)
     }
@@ -199,6 +219,8 @@ const mergeRangeClauses = (filters: Filter[]): Filter[] => {
       operator: 'range',
       min: bounds.min,
       max: bounds.max,
+      ...(bounds.minExclusive ? { minExclusive: true } : {}),
+      ...(bounds.maxExclusive ? { maxExclusive: true } : {}),
     })
   }
 

@@ -1,0 +1,93 @@
+# Search-intent subcategory for the oven vertical.
+# Maintained: 2026-11-26 from the GOU-2715 plan (Growth, SEO lot K).
+# Intent: comparison of catalytic (self-cleaning walls) ovens.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, audit of 2026-11-25, last 28 days): 547
+#     impressions on "four catalyse" queries.
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 159 in the vertical, 73 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-26, OVEN_CLEANING_MODE.value
+#     term "CATALYSE" and offersCount >= 1).
+# Rationale:
+#   - Counterpart of oven_pyrolysis, linked from the blog article
+#     "quel système choisir entre four pyrolyse et catalyse".
+id: "oven_catalysis"
+slug:
+  en: "catalytic-oven"
+  fr: "four-catalyse"
+h1Title:
+  en: "Catalytic ovens"
+  fr: "Fours catalyse"
+description:
+  en: |-
+    Compare **catalytic ovens**, whose coated walls absorb grease while you
+    cook, with energy use, repairability and Impact Score data.
+  fr: |-
+    Comparez les **fours à catalyse**, dont les parois autonettoyantes
+    absorbent les graisses pendant la cuisson, avec la consommation, la
+    réparabilité et l'Impact Score.
+metaTitle:
+  en: "Catalytic ovens: compare models | Nudger"
+  fr: "Four catalyse : comparer les modèles | Nudger"
+metaDescription:
+  en: "Compare catalytic ovens by capacity, energy use and impact before choosing. Pyrolysis or catalysis: read the guide."
+  fr: >-
+    Comparez les fours à catalyse selon la capacité, la consommation d'énergie
+    et l'impact avant de choisir. Pyrolyse ou catalyse : le guide.
+metaOpenGraphTitle:
+  en: "Compare catalytic ovens"
+  fr: "Comparer les fours à catalyse"
+metaOpenGraphDescription:
+  en: "A focused selection of catalytic ovens with practical comparison data."
+  fr: "Une sélection ciblée de fours à catalyse avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-stove"
+  title:
+    en: "Self-cleaning walls while you cook"
+    fr: "Des parois qui se nettoient en cuisant"
+  body:
+    en: |-
+      A catalytic coating on the oven walls helps break down grease splashes
+      during cooking, without a dedicated cleaning cycle.
+    fr: |-
+      Un revêtement catalytique sur les parois aide à décomposer les
+      projections de graisse pendant la cuisson, sans cycle de nettoyage dédié.
+readMore:
+  title:
+    en: "Catalytic oven: when is it enough?"
+    fr: "Four à catalyse : quand suffit-il ?"
+  shortText:
+    en: |-
+      Catalysis treats grease on the coated walls as you cook, without an extra
+      cleaning cycle. This page lists only catalytic models so you compare like
+      for like.
+    fr: |-
+      La catalyse traite les graisses sur les parois revêtues pendant la
+      cuisson, sans cycle de nettoyage supplémentaire. Cette page ne liste que
+      des fours à catalyse, pour comparer à système égal.
+  longText:
+    en: |-
+      Catalysis suits an occasional or light use: it does not replace a
+      regular wipe, and it does not treat the door, the roof or the floor the
+      way a pyrolysis cycle does. Compare both systems in our article
+      [pyrolysis or catalysis](/blog/quel-systeme-choisir-entre-four-pyrolyse-et-catalyse).
+
+      Nudger keeps this page focused on catalytic ovens so each model stays
+      comparable on price, environmental impact score and key technical
+      attributes such as capacity and energy class.
+    fr: |-
+      La catalyse convient à un usage occasionnel ou léger : elle ne remplace
+      pas un coup d'éponge régulier et ne traite pas la porte, la voûte ou la
+      sole comme le fait un cycle de pyrolyse. Comparez les deux systèmes dans
+      notre article
+      [pyrolyse ou catalyse](/blog/quel-systeme-choisir-entre-four-pyrolyse-et-catalyse).
+
+      Nudger garde cette page centrée sur les fours à catalyse, afin que chaque
+      modèle reste comparable sur le prix, le score d'impact environnemental et
+      les caractéristiques techniques comme la capacité et la classe
+      énergétique.
+activatedFilters:
+  - field: "attributes.indexed.OVEN_CLEANING_MODE.value"
+    operator: "EQUALS"
+    value: "CATALYSE"

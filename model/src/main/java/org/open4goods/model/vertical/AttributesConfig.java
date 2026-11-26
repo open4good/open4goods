@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
+import org.open4goods.model.helper.IdHelper;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonMerge;
@@ -75,12 +76,13 @@ public class AttributesConfig {
 
 
 	/**
-	 * Return the attribute config key name for an attribute name
+	 * Return the attribute config key name for an attribute name. The name is normalized with
+	 * {@link IdHelper#normalizeAttributeName(String)}, like the synonyms of the index.
 	 * @param value
 	 * @return
 	 */
 	public String getKeyForValue(final String value) {
-		return index().keyByValue().get(value);
+		return index().keyByValue().get(IdHelper.normalizeAttributeName(value));
 	}
 
 
@@ -104,6 +106,7 @@ public class AttributesConfig {
 	public AttributeConfig resolveFromProductAttribute(ProductAttribute attr) {
 
 		final Index idx = index();
+		final String name = IdHelper.normalizeAttributeName(attr.getName());
 		AttributeConfig ret = null;
 
 		// 1 - Checking from icecat taxonomy
@@ -124,7 +127,7 @@ public class AttributesConfig {
 				Map<String, String> specSynonyms = idx.synonymsByProvider().get(source.getDataSourcename());
 
 				if (null != specSynonyms) {
-					ret = idx.byKey().get(specSynonyms.get(attr.getName()));
+					ret = idx.byKey().get(specSynonyms.get(name));
 					if (null != ret) {
 						break;
 					}
@@ -137,7 +140,7 @@ public class AttributesConfig {
 				Map<String, String> specSynonyms = idx.synonymsByProvider().get("all");
 
 				if (null != specSynonyms) {
-					ret = idx.byKey().get(specSynonyms.get(attr.getName()));
+					ret = idx.byKey().get(specSynonyms.get(name));
 				}
 		}
 
@@ -234,7 +237,9 @@ public class AttributesConfig {
 	/**
 	 * Immutable lookup indexes of the attribute configs. The maps are unmodifiable views of {@link HashMap}s, so a
 	 * {@code null} lookup key returns {@code null} instead of throwing. When two configs share a synonym or an Icecat
-	 * feature id, the last one in the list wins.
+	 * feature id, the last one in the list wins. Synonyms are stored in their
+	 * {@link IdHelper#normalizeAttributeName(String)} form, so two synonyms differing only by accents or case share
+	 * an entry.
 	 *
 	 * @param byKey              attribute configs by key
 	 * @param synonymsByProvider synonym to key, by datasource name ({@code all} for every datasource)
@@ -269,13 +274,16 @@ public class AttributesConfig {
 						Map<String, String> providerSynonyms = synonymsByProvider.computeIfAbsent(entry.getKey(),
 								k -> new HashMap<>());
 						keyByValue.put(ac.getKey(), ac.getKey());
+						keyByValue.put(IdHelper.normalizeAttributeName(ac.getKey()), ac.getKey());
 						if (null == entry.getValue()) {
 							continue;
 						}
 						for (final String val : entry.getValue()) {
-							providerSynonyms.put(val, ac.getKey());
+							// Normalized as DataFragment normalizes incoming attribute names
+							final String normalized = IdHelper.normalizeAttributeName(val);
+							providerSynonyms.put(normalized, ac.getKey());
 							// Also build a reverse map
-							keyByValue.put(val, ac.getKey());
+							keyByValue.put(normalized, ac.getKey());
 						}
 					}
 				}

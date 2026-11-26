@@ -106,7 +106,7 @@ jobs:
         run: tar -czf beta-backend-bundle.tgz deploy-jars
 
       - name: Upload beta bundle
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: beta-backend-bundle
           path: beta-backend-bundle.tgz
@@ -168,6 +168,7 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_METRIKS_PSI_API_KEY: ${{ secrets.API_METRIKS_PSI_API_KEY }}
           API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
           API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
           API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
@@ -193,6 +194,8 @@ jobs:
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
           GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
+          OPEN_DATA_PUBLIC_BASE_URL: ${{ vars.OPEN_DATA_PUBLIC_BASE_URL }}
+          OPEN_DATA_REDIRECT_BASE_URL: ${{ vars.OPEN_DATA_REDIRECT_BASE_URL }}
         run: |
           set -eu
           for svc in admin api front-api ui; do

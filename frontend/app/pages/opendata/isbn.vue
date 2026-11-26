@@ -44,6 +44,8 @@
       }}</v-btn>
     </v-container>
 
+    <OpendataFreshness :generated-at="dataset?.generatedAt" />
+
     <OpendataDatasetSummary
       :title="t('opendata.datasets.isbn.summary.title')"
       :items="summaryItems"
@@ -68,34 +70,16 @@
       </v-container>
     </section>
 
-    <section class="dataset-columns" aria-labelledby="dataset-columns-heading">
-      <v-container max-width="lg">
-        <div class="dataset-columns__header">
-          <h2 id="dataset-columns-heading">
-            {{ t('opendata.datasets.isbn.columnsTitle') }}
-          </h2>
-          <p>{{ t('opendata.datasets.isbn.columnsSubtitle') }}</p>
-        </div>
-        <v-table class="dataset-columns__table" density="comfortable">
-          <thead>
-            <tr>
-              <th scope="col">
-                {{ t('opendata.datasets.common.columnName') }}
-              </th>
-              <th scope="col">
-                {{ t('opendata.datasets.common.columnDescription') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="column in columnDefinitions" :key="column.key">
-              <th scope="row">{{ column.label }}</th>
-              <td>{{ column.description }}</td>
-            </tr>
-          </tbody>
-        </v-table>
-      </v-container>
-    </section>
+    <OpendataColumnDictionary
+      :title="t('opendata.datasets.isbn.columnsTitle')"
+      :subtitle="t('opendata.datasets.isbn.columnsSubtitle')"
+      :columns="columnDefinitions"
+    />
+
+    <OpendataSampleTable
+      :headers="dataset?.headers ?? []"
+      :rows="dataset?.sampleRows"
+    />
 
     <OpendataDownloadComparison
       :title="t('opendata.datasets.isbn.download.title')"
@@ -103,9 +87,20 @@
       :options="downloadOptions"
     />
 
+    <OpendataReuseGuide
+      :download-url="dataset?.downloadUrl"
+      :sha256="dataset?.sha256"
+    />
+
     <OpendataExploreProducts page="isbn" />
 
     <OpendataMirrors page="isbn" />
+
+    <OpendataCitation
+      :dataset-name="t('opendata.datasets.isbn.seo.title')"
+      :year="generationYear"
+      :page-url="canonicalUrl"
+    />
 
     <OpendataLicenseSection
       :title="t('opendata.license.title')"
@@ -126,10 +121,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type {
-  OpenDataDatasetDto,
-  OpenDataOverviewDto,
-} from '~~/shared/api-client'
+import type { OpenDataDatasetDto } from '~~/shared/api-client'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
@@ -137,35 +129,35 @@ import OpendataDownloadComparison from '~/components/domains/opendata/OpendataDo
 import OpendataExploreProducts from '~/components/domains/opendata/OpendataExploreProducts.vue'
 import OpendataMirrors from '~/components/domains/opendata/OpendataMirrors.vue'
 import OpendataFaqSection from '~/components/domains/opendata/OpendataFaqSection.vue'
+import OpendataFreshness from '~/components/domains/opendata/OpendataFreshness.vue'
+import OpendataColumnDictionary from '~/components/domains/opendata/OpendataColumnDictionary.vue'
+import OpendataSampleTable from '~/components/domains/opendata/OpendataSampleTable.vue'
+import OpendataReuseGuide from '~/components/domains/opendata/OpendataReuseGuide.vue'
+import OpendataCitation from '~/components/domains/opendata/OpendataCitation.vue'
+import { OPENDATA_DOI, buildDatasetJsonLd } from '~/utils/opendata'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 
 definePageMeta({
   ssr: true,
 })
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const requestURL = useRequestURL()
 const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 interface DatasetPayload {
   dataset: OpenDataDatasetDto
-  overview: OpenDataOverviewDto
 }
 
 const { data, pending, error, refresh } = useAsyncData<DatasetPayload>(
   'opendata-isbn',
   async () => {
-    const [dataset, overview] = await Promise.all([
-      $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
-        headers: requestHeaders,
-      }),
-      $fetch<OpenDataOverviewDto>('/api/opendata', {
-        headers: requestHeaders,
-      }),
-    ])
+    const dataset = await $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
+      headers: requestHeaders,
+    })
 
-    return { dataset, overview }
+    return { dataset }
   },
   {
     lazy: true,
@@ -173,7 +165,6 @@ const { data, pending, error, refresh } = useAsyncData<DatasetPayload>(
 )
 
 const dataset = computed(() => data.value?.dataset)
-const overview = computed(() => data.value?.overview)
 const placeholder = computed(() =>
   String(t('opendata.datasets.common.placeholder'))
 )
@@ -209,7 +200,7 @@ const formatBullets = computed(() => [
 
 const downloadOptions = computed(() => {
   const directUrl = dataset.value?.downloadUrl
-  const limits = overview.value?.downloadLimits
+  const sha256 = dataset.value?.sha256
 
   return [
     {
@@ -220,10 +211,6 @@ const downloadOptions = computed(() => {
       ),
       badge: String(t('opendata.datasets.common.download.fast.badge')),
       highlights: [
-        {
-          icon: 'mdi-lightning-bolt-outline',
-          text: String(t('opendata.datasets.common.download.fast.speed')),
-        },
         {
           icon: 'mdi-school-outline',
           text: String(t('opendata.datasets.isbn.download.fast.highlight')),
@@ -247,25 +234,21 @@ const downloadOptions = computed(() => {
       ),
       highlights: [
         {
-          icon: 'mdi-account-multiple-outline',
-          text: String(
-            limits?.concurrentDownloads
-              ? t('opendata.datasets.common.download.direct.concurrent', {
-                  value: limits.concurrentDownloads,
-                })
-              : t('opendata.datasets.common.download.direct.concurrentUnknown')
-          ),
+          icon: 'mdi-restart',
+          text: String(t('opendata.datasets.common.download.direct.resume')),
         },
-        {
-          icon: 'mdi-speedometer',
-          text: String(
-            limits?.downloadSpeed
-              ? t('opendata.datasets.common.download.direct.speed', {
-                  value: limits.downloadSpeed,
-                })
-              : t('opendata.datasets.common.download.direct.speedUnknown')
-          ),
-        },
+        ...(sha256
+          ? [
+              {
+                icon: 'mdi-fingerprint',
+                text: String(
+                  t('opendata.datasets.common.download.direct.checksum', {
+                    value: sha256,
+                  })
+                ),
+              },
+            ]
+          : []),
       ],
       cta: {
         label: String(t('opendata.datasets.common.download.direct.cta.label')),
@@ -281,14 +264,28 @@ const downloadOptions = computed(() => {
 
 const columnDefinitions = computed(() => {
   const headers = dataset.value?.headers ?? []
+  const manifestColumns = new Map(
+    (dataset.value?.columns ?? []).map(column => [column.name, column])
+  )
 
-  return headers.map(header => ({
-    key: header,
-    label: String(t(`opendata.datasets.isbn.columns.${header}.label` as const)),
-    description: String(
-      t(`opendata.datasets.isbn.columns.${header}.description` as const)
-    ),
-  }))
+  return headers.map(header => {
+    const manifestColumn = manifestColumns.get(header)
+    return {
+      name: header,
+      description: String(
+        t(`opendata.datasets.isbn.columns.${header}.description` as const)
+      ),
+      unit: manifestColumn?.unit,
+      fillRate: manifestColumn?.fillRate,
+    }
+  })
+})
+
+const generationYear = computed(() => {
+  const year = dataset.value?.generatedAt
+    ? new Date(dataset.value.generatedAt).getUTCFullYear()
+    : null
+  return year && !Number.isNaN(year) ? year : null
 })
 
 const faqItems = computed(() => [
@@ -351,28 +348,23 @@ useHead(() => ({
   script: [
     {
       type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Dataset',
-        name: t('opendata.datasets.isbn.seo.title'),
-        description: t('opendata.datasets.isbn.seo.description'),
-        url: canonicalUrl.value,
-        isAccessibleForFree: true,
-        license: 'https://opendatacommons.org/licenses/odbl/',
-        distribution: dataset.value?.downloadUrl
-          ? [
-              {
-                '@type': 'DataDownload',
-                encodingFormat: 'application/zip',
-                contentUrl: dataset.value.downloadUrl,
-              },
-            ]
-          : [],
-        creator: {
-          '@type': 'Person',
-          name: t('opendata.datasets.creator.name'),
-        },
-      }),
+      innerHTML: JSON.stringify(
+        buildDatasetJsonLd({
+          name: String(t('opendata.datasets.isbn.seo.title')),
+          description: String(t('opendata.datasets.isbn.seo.description')),
+          pageUrl: canonicalUrl.value,
+          inLanguage: locale.value,
+          organizationName: String(t('opendata.datasets.creator.organization')),
+          organizationUrl: requestURL.origin,
+          doi: OPENDATA_DOI,
+          datasets: dataset.value ? [dataset.value] : [],
+          columns: columnDefinitions.value.map(column => ({
+            name: column.name,
+            description: column.description,
+            unit: column.unit,
+          })),
+        })
+      ),
     },
   ],
 }))
@@ -424,38 +416,4 @@ useHead(() => ({
   align-items: center
   font-size: 0.95rem
   color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
-
-.dataset-columns
-  padding: clamp(3rem, 6vw, 4.5rem) 0
-  background: rgba(var(--v-theme-surface-default), 1)
-
-.dataset-columns__header
-  max-width: 720px
-  margin: 0 auto 2rem
-  text-align: center
-
-.dataset-columns__header h2
-  margin: 0
-  font-size: clamp(1.9rem, 3vw, 2.4rem)
-  color: rgba(var(--v-theme-text-neutral-strong), 1)
-
-.dataset-columns__header p
-  margin: 1rem 0 0
-  font-size: 1rem
-  color: rgba(var(--v-theme-text-neutral-secondary), 0.95)
-
-.dataset-columns__table
-  border-radius: 20px
-  overflow: hidden
-  border: 1px solid rgba(var(--v-theme-border-primary-strong), 0.25)
-
-.dataset-columns__table thead
-  background: rgba(var(--v-theme-surface-primary-080), 0.9)
-
-.dataset-columns__table th,
-.dataset-columns__table td
-  font-size: 0.95rem
-
-.dataset-columns__table tbody tr:nth-child(even)
-  background: rgba(var(--v-theme-surface-primary-050), 0.6)
 </style>

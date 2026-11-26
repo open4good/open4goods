@@ -1,0 +1,7 @@
+# Production-only overrides.
+
+# Publication of the open data zips and manifests on R2 (GOU-2300). Disabled by default and in beta (application.yml).
+# Credentials come from the prod GitHub Environment (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY).
+open-data-config:
+  publication:
+    enabled: true

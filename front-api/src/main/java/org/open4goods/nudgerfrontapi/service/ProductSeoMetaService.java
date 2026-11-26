@@ -70,6 +70,11 @@ public class ProductSeoMetaService {
     public static final int MAX_DESCRIPTION_LENGTH = 160;
 
     /** A trailing all-digit token of 6+ digits, separated by a space or an underscore. */
+    /** Regulatory model numbers such as Apple {@code A3090}: not a commercial name. */
+    private static final Pattern REGULATORY_MODEL = Pattern.compile("^A\\d{4}[A-Z]?$");
+    private static final Pattern IPHONE_NAME = Pattern.compile(
+            "\\biphone\\s+(SE|XS|XR|X|\\d{1,2}e?)(\\s+(?:Pro\\s+Max|Pro|Plus|Max|Mini))?(?![\\p{L}\\d])",
+            Pattern.CASE_INSENSITIVE);
     private static final Pattern TRAILING_REFERENCE = Pattern.compile("^(.*?[^\\s_])[\\s_]+(\\d{6,})$");
 
     /** A word written in capitals that is long enough to be prose rather than an acronym. */
@@ -102,7 +107,7 @@ public class ProductSeoMetaService {
      */
     public String buildMetaTitle(Product product, String fallbackName, VerticalConfig vConfig,
             DomainLanguage domainLanguage) {
-        String label = resolveProductLabel(product, fallbackName);
+        String label = resolveProductLabel(product, fallbackName, domainLanguage);
         if (!StringUtils.hasText(label)) {
             return null;
         }
@@ -149,7 +154,7 @@ public class ProductSeoMetaService {
      */
     public String buildMetaDescription(Product product, String fallbackName, VerticalConfig vConfig,
             DomainLanguage domainLanguage) {
-        String label = resolveProductLabel(product, fallbackName);
+        String label = resolveProductLabel(product, fallbackName, domainLanguage);
         if (!StringUtils.hasText(label)) {
             return null;
         }
@@ -225,11 +230,33 @@ public class ProductSeoMetaService {
      * @return product label or {@code null}
      */
     String resolveProductLabel(Product product, String fallbackName) {
+        return resolveProductLabel(product, fallbackName, DomainLanguage.fr);
+    }
+
+    /**
+     * Resolve the product label. For a model that is only a regulatory number
+     * (Apple {@code A3090}), the commercial name and the storage capacity are
+     * used instead ({@code Apple iPhone 15 128 Go}), which also tells apart the
+     * pages of a same model.
+     *
+     * @param product        product being mapped
+     * @param fallbackName   name used when brand or model is missing
+     * @param domainLanguage requested domain language, drives the capacity unit
+     * @return product label or {@code null}
+     */
+    String resolveProductLabel(Product product, String fallbackName, DomainLanguage domainLanguage) {
         if (product == null) {
             return null;
         }
         String brand = trimToNull(product.brand());
         String model = trimToNull(cleanModel(product.model()));
+        if (brand != null && model != null && REGULATORY_MODEL.matcher(model).matches()) {
+            String commercial = commercialName(product, fallbackName);
+            if (commercial != null) {
+                String capacity = storageLabel(product, domainLanguage);
+                return normalizeSpaces(displayBrand(brand) + " " + commercial + (capacity == null ? "" : " " + capacity));
+            }
+        }
         if (brand != null && model != null) {
             String displayBrand = displayBrand(brand);
             if (model.toLowerCase(Locale.ROOT).startsWith(brand.toLowerCase(Locale.ROOT) + " ")) {
@@ -242,6 +269,54 @@ public class ProductSeoMetaService {
             return null;
         }
         return brand == null ? normalizeSpaces(fallback) : normalizeSpaces(replaceBrand(fallback, brand));
+    }
+
+    /**
+     * Find the commercial name ({@code iPhone 15 Pro}) in the fallback name or the offer names.
+     */
+    private static String commercialName(Product product, String fallbackName) {
+        List<String> sources = new ArrayList<>();
+        sources.add(fallbackName);
+        if (product.getOfferNames() != null) {
+            sources.addAll(product.getOfferNames().stream().sorted().toList());
+        }
+        for (String source : sources) {
+            if (source == null) {
+                continue;
+            }
+            Matcher matcher = IPHONE_NAME.matcher(source);
+            if (matcher.find()) {
+                String name = "iPhone " + matcher.group(1).toUpperCase(Locale.ROOT).replace("E", "e").replace("SE", "SE");
+                String variant = matcher.group(2);
+                if (variant != null) {
+                    name += " " + Arrays.stream(variant.trim().split("\\s+"))
+                            .map(word -> word.substring(0, 1).toUpperCase(Locale.ROOT)
+                                    + word.substring(1).toLowerCase(Locale.ROOT))
+                            .collect(Collectors.joining(" "));
+                }
+                return name;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Storage capacity label ({@code 128 Go}, {@code 1 To}) from the indexed attribute.
+     */
+    private String storageLabel(Product product, DomainLanguage domainLanguage) {
+        if (product.getAttributes() == null || product.getAttributes().getIndexed() == null) {
+            return null;
+        }
+        IndexedAttribute attribute = product.getAttributes().getIndexed().get("STORAGE_CAPACITY");
+        Double gigabytes = attribute == null ? null : attribute.getNumericValue();
+        if (gigabytes == null || !Double.isFinite(gigabytes) || gigabytes <= 0) {
+            return null;
+        }
+        boolean fr = isFrench(domainLanguage);
+        if (gigabytes >= 1024 && gigabytes % 1024 == 0) {
+            return (long) (gigabytes / 1024) + (fr ? " To" : " TB");
+        }
+        return Math.round(gigabytes) + (fr ? " Go" : " GB");
     }
 
     /**

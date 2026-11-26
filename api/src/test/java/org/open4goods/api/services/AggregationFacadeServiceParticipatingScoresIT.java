@@ -2,8 +2,6 @@ package org.open4goods.api.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -15,11 +13,9 @@ import org.open4goods.api.config.yml.ApiProperties;
 import org.open4goods.api.services.aggregation.aggregator.ScoringBatchedAggregator;
 import org.open4goods.commons.services.BarcodeForensicsService;
 import org.open4goods.commons.services.BarcodeValidationService;
-import org.open4goods.commons.services.DataSourceConfigService;
 import org.open4goods.commons.services.Gs1PrefixService;
 import org.open4goods.commons.services.textgen.BlablaService;
 import org.open4goods.icecat.services.IcecatFeatureResolver;
-import org.open4goods.icecat.services.IcecatService;
 import org.open4goods.model.attribute.AttributeType;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.product.Product;
@@ -29,12 +25,9 @@ import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreConfig;
 import org.open4goods.model.vertical.ScoringAggregationConfig;
 import org.open4goods.model.vertical.VerticalConfig;
-import org.open4goods.services.evaluation.service.EvaluationService;
 import org.open4goods.services.productrepository.services.ProductRepository;
-import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.open4goods.brand.service.BrandService;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 class AggregationFacadeServiceParticipatingScoresIT {
 
@@ -59,29 +52,19 @@ class AggregationFacadeServiceParticipatingScoresIT {
     }
 
     private AggregationFacadeService aggregationFacadeService() {
-        EvaluationService evaluationService = mock(EvaluationService.class);
         ProductRepository repository = mock(ProductRepository.class);
         ApiProperties apiProperties = new ApiProperties();
         apiProperties.setRootFolder("/tmp/open4goods/");
 
-        AutowireCapableBeanFactory beanFactory = mock(AutowireCapableBeanFactory.class);
-        doAnswer(invocation -> null).when(beanFactory).autowireBean(any());
-
         return new AggregationFacadeService(
-                evaluationService,
-                mock(org.open4goods.model.StandardiserService.class),
-                beanFactory,
                 repository,
                 apiProperties,
                 mock(Gs1PrefixService.class),
-                mock(DataSourceConfigService.class),
                 mock(VerticalsConfigService.class),
                 mock(BarcodeValidationService.class),
                 mock(BrandService.class),
                 mock(BlablaService.class),
-                mock(IcecatService.class),
                 mock(IcecatFeatureResolver.class),
-                mock(SerialisationService.class),
                 mock(BarcodeForensicsService.class));
     }
 

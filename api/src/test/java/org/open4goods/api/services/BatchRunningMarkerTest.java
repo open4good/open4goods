@@ -118,4 +118,18 @@ class BatchRunningMarkerTest {
 		assertThatThrownBy(service::batch).isInstanceOf(IllegalStateException.class);
 		assertThat(file).doesNotExist();
 	}
+
+	@Test
+	void sharedMarkerSurvivesUntilTheLastHolderEnds() {
+		Path file = dir.resolve("api-batch.marker");
+		BatchRunningMarker marker = new BatchRunningMarker(file.toString());
+
+		marker.begin(); // batch
+		marker.begin(); // open data pass
+		assertThat(file).exists();
+		marker.end();
+		assertThat(file).exists();
+		marker.end();
+		assertThat(file).doesNotExist();
+	}
 }

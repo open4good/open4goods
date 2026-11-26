@@ -123,9 +123,9 @@ class RepairabilityOrDurabilityCriterionTest {
         Properties fixtures = fixtures();
         long realId = Long.parseLong(fixtures.getProperty(vertical.getId() + ".gtin"));
         List<Product> products = cohort(vertical, fixtures, realId);
-        assertThat(vertical.getImpactScoreConfig().effectiveMethodologyVersion()).isEqualTo(1);
 
-        score(vertical, products);
+        // Forced to V1: washing-machine is in V2 since wave 2 (GOU-2605), V1 stays the rollback path
+        withVersion(vertical, ImpactScoreConfig.METHODOLOGY_V1, () -> score(vertical, products));
 
         assertThat(products).allSatisfy(product -> {
             assertThat(product.getScores()).as("scores of %s", product.getId()).doesNotContainKey(CRITERION);
@@ -197,9 +197,13 @@ class RepairabilityOrDurabilityCriterionTest {
     }
 
     private static void withV2(VerticalConfig vertical, Runnable body) {
+        withVersion(vertical, ImpactScoreConfig.METHODOLOGY_V2, body);
+    }
+
+    private static void withVersion(VerticalConfig vertical, int version, Runnable body) {
         ImpactScoreConfig config = vertical.getImpactScoreConfig();
         try {
-            config.setMethodologyVersionOverride(ImpactScoreConfig.METHODOLOGY_V2);
+            config.setMethodologyVersionOverride(version);
             body.run();
         } finally {
             config.setMethodologyVersionOverride(null);

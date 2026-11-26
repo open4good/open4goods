@@ -281,8 +281,8 @@
       <ul v-if="audit?.sources?.length" class="impact-method__list">
         <li v-for="source in audit.sources" :key="source.id ?? source.title">
           <a
-            v-if="source.url"
-            :href="source.url"
+            v-if="sourceHref(source)"
+            :href="sourceHref(source)"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -381,7 +381,7 @@ const itemsLabel = computed(() => {
 
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value))
 const scoreFormat = computed(
-  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }),
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 })
 )
 const fmt = (value: number | undefined) => numberFormat.value.format(value ?? 0)
 
@@ -508,6 +508,15 @@ const histogramRows = computed(() => {
     }
   })
 })
+
+// Stored audits may hold the URL as a Markdown link ("[u](u)"): keep the target.
+const sourceHref = (source: ImpactScoreAuditSourceDto) => {
+  const raw = source.url?.trim() ?? ''
+  const markdown = /^\[[^\]]*\]\(([^)\s]+)\)$/u.exec(raw)
+  const href = markdown?.[1] ?? raw
+
+  return /^https?:\/\//iu.test(href) ? href : undefined
+}
 
 const sourceLabel = (source: ImpactScoreAuditSourceDto) =>
   [source.title, source.authorsOrOrg, source.year]

@@ -80,5 +80,36 @@ export const useOpenDataService = (domainLanguage: DomainLanguage) => {
     }
   }
 
-  return { fetchOverview, fetchGtinDataset, fetchIsbnDataset }
+  const fetchImpactDatasets = async (): Promise<OpenDataDatasetDto[]> => {
+    try {
+      return await resolveApi().impactDatasets({
+        domainLanguage: resolveLanguageEnum(domainLanguage),
+      })
+    } catch (error) {
+      console.error('Error fetching impact dataset list:', error)
+      throw error
+    }
+  }
+
+  const fetchImpactDataset = async (
+    vertical: string
+  ): Promise<OpenDataDatasetDto> => {
+    try {
+      return await resolveApi().impactDataset({
+        vertical,
+        domainLanguage: resolveLanguageEnum(domainLanguage),
+      })
+    } catch (error) {
+      console.error('Error fetching impact dataset metadata:', error)
+      throw error
+    }
+  }
+
+  return {
+    fetchOverview,
+    fetchGtinDataset,
+    fetchIsbnDataset,
+    fetchImpactDatasets,
+    fetchImpactDataset,
+  }
 }

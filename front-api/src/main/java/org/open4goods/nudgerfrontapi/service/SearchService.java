@@ -1007,7 +1007,7 @@ public class SearchService {
 	}
 
 	private void rebuildVerticalSuggestions() {
-		List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault().stream()
+		List<VerticalSuggestionEntry> entries = verticalsConfigService.getConfigsWithoutDefault(true).stream()
 				.flatMap(config -> buildSuggestionsForConfig(config).stream()).toList();
 		verticalSuggestions = List.copyOf(entries);
 	}
@@ -1136,7 +1136,8 @@ public class SearchService {
 			if (filter.operator() == FilterOperator.range && StringUtils.hasText(filter.field())) {
 				String field = filter.field().trim();
 				RangeBounds bounds = rangeByField.computeIfAbsent(field, ignored -> new RangeBounds());
-				bounds.accept(filter.min(), filter.max());
+				bounds.accept(filter.min(), filter.max(), Boolean.TRUE.equals(filter.minExclusive()),
+						Boolean.TRUE.equals(filter.maxExclusive()));
 			} else {
 				merged.add(filter);
 			}
@@ -1151,7 +1152,9 @@ public class SearchService {
 			if (min != null && max != null && min > max) {
 				continue;
 			}
-			merged.add(new Filter(entry.getKey(), FilterOperator.range, null, min, max));
+			merged.add(new Filter(entry.getKey(), FilterOperator.range, null, min, max,
+					min != null && bounds.isMinExclusive() ? Boolean.TRUE : null,
+					max != null && bounds.isMaxExclusive() ? Boolean.TRUE : null));
 		}
 		return merged;
 	}
@@ -1220,7 +1223,8 @@ public class SearchService {
 
 		return switch (operator) {
 		case term -> buildTermQuery(fieldPath, valueType, filter.terms());
-		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max());
+		case range -> buildRangeQuery(fieldPath, filter.min(), filter.max(), Boolean.TRUE.equals(filter.minExclusive()),
+				Boolean.TRUE.equals(filter.maxExclusive()));
 		case rankingPercentile -> buildRankingPercentileQuery(fieldPath, filter.min(), filter.max());
 		case contains -> buildContainsQuery(fieldPath, filter.terms());
 		};
@@ -1276,17 +1280,36 @@ public class SearchService {
 		return values;
 	}
 
-	private Query buildRangeQuery(String fieldPath, Double min, Double max) {
+	/**
+	 * Builds a numeric range query.
+	 *
+	 * @param fieldPath    indexed field
+	 * @param min          lower bound, ignored when {@code null}
+	 * @param max          upper bound, ignored when {@code null}
+	 * @param minExclusive {@code true} to apply {@code gt} instead of {@code gte}
+	 * @param maxExclusive {@code true} to apply {@code lt} instead of {@code lte}
+	 * @return the range query, or {@code null} when no bound is set
+	 */
+	private Query buildRangeQuery(String fieldPath, Double min, Double max, boolean minExclusive,
+			boolean maxExclusive) {
 		if (min == null && max == null) {
 			return null;
 		}
 		return Query.of(q -> q.range(r -> r.number(n -> {
 			n.field(fieldPath);
 			if (min != null) {
-				n.gte(min);
+				if (minExclusive) {
+					n.gt(min);
+				} else {
+					n.gte(min);
+				}
 			}
 			if (max != null) {
-				n.lte(max);
+				if (maxExclusive) {
+					n.lt(max);
+				} else {
+					n.lte(max);
+				}
 			}
 			return n;
 		})));
@@ -1354,22 +1377,46 @@ public class SearchService {
 		return FilterValueType.keyword;
 	}
 
+	/**
+	 * Intersects the range clauses targeting the same field: the highest lower bound and the lowest upper bound win.
+	 * When two clauses share the same bound value, the exclusive one wins since it is the stricter.
+	 */
 	private static final class RangeBounds {
 
 		private Double highestMin;
 		private Double lowestMax;
+		private boolean minExclusive;
+		private boolean maxExclusive;
 		private boolean hasMin;
 		private boolean hasMax;
 
-		void accept(Double min, Double max) {
+		void accept(Double min, Double max, boolean minIsExclusive, boolean maxIsExclusive) {
 			if (min != null) {
 				hasMin = true;
-				highestMin = highestMin == null ? min : Math.max(highestMin, min);
+				if (highestMin == null || min > highestMin) {
+					highestMin = min;
+					minExclusive = minIsExclusive;
+				} else if (min.equals(highestMin)) {
+					minExclusive = minExclusive || minIsExclusive;
+				}
 			}
 			if (max != null) {
 				hasMax = true;
-				lowestMax = lowestMax == null ? max : Math.min(lowestMax, max);
+				if (lowestMax == null || max < lowestMax) {
+					lowestMax = max;
+					maxExclusive = maxIsExclusive;
+				} else if (max.equals(lowestMax)) {
+					maxExclusive = maxExclusive || maxIsExclusive;
+				}
 			}
+		}
+
+		boolean isMinExclusive() {
+			return minExclusive;
+		}
+
+		boolean isMaxExclusive() {
+			return maxExclusive;
 		}
 
 		boolean isEmpty() {
@@ -1493,6 +1540,11 @@ public class SearchService {
 		return responses;
 	}
 
+	private boolean isVerticalEnabled(String verticalId) {
+		VerticalConfig config = verticalsConfigService.getConfigById(verticalId);
+		return config != null && config.isEnabled();
+	}
+
 	/**
 	 * Group mapped hits by vertical identifier.
 	 *
@@ -1507,7 +1559,7 @@ public class SearchService {
 
 		Map<String, List<GlobalSearchHit>> grouped = new LinkedHashMap<>();
 		for (GlobalSearchHit hit : hits) {
-			if (hit == null || !StringUtils.hasText(hit.verticalId())) {
+			if (hit == null || !StringUtils.hasText(hit.verticalId()) || !isVerticalEnabled(hit.verticalId())) {
 				continue;
 			}
 			grouped.computeIfAbsent(hit.verticalId(), key -> new ArrayList<>()).add(hit);
@@ -1556,6 +1608,8 @@ public class SearchService {
 	 * in order and serves the requested slice; only that slice is then fetched in full. {@code totalElements} is
 	 * exact when every candidate was read, otherwise it is the Elasticsearch total scaled by the share of
 	 * displayable candidates read. Pages beyond {@code longTailMaxCandidates} candidates are not reachable.
+	 * Displayable candidates whose names put the object of the query after another head noun
+	 * ({@link GlobalSearchRelevance#isForeignHeadProduct}) join the accessories, merged by score.
 	 * </p>
 	 *
 	 * @param sanitizedQuery sanitized query string
@@ -1579,6 +1633,14 @@ public class SearchService {
 		SearchHits<Product> candidates = searchCandidates(globalSearchRelevance.rank(longTailQuery, sanitizedQuery),
 				candidatesToRead);
 		List<SearchHit<Product>> displayable = displayableCandidates(candidates);
+		List<SearchHit<Product>> foreignHeads = List.of();
+		if (accessoryQuery != null) {
+			// Names "<part> <query object>" that Elasticsearch cannot tell (GOU-2474): set apart in Java.
+			Map<Boolean, List<SearchHit<Product>>> split = displayable.stream().collect(Collectors.partitioningBy(
+					hit -> globalSearchRelevance.isForeignHeadProduct(sanitizedQuery, hit.getContent())));
+			foreignHeads = split.get(true);
+			displayable = split.get(false);
+		}
 
 		int from = pageNumber * pageSize;
 		List<SearchHit<Product>> pageCandidates = from >= displayable.size() ? List.of()
@@ -1591,8 +1653,10 @@ public class SearchService {
 			List<SearchHit<Product>> displayableAccessories = displayableCandidates(searchCandidates(
 					globalSearchRelevance.rank(accessories, sanitizedQuery),
 					accessoryLimit * globalSearchRelevance.overRead()));
-			accessoryCandidates = displayableAccessories.subList(0,
-					Math.min(accessoryLimit, displayableAccessories.size()));
+			accessoryCandidates = Stream.concat(displayableAccessories.stream(), foreignHeads.stream())
+					.sorted(Comparator.comparing(SearchHit<Product>::getScore).reversed())
+					.limit(accessoryLimit)
+					.toList();
 		}
 
 		Map<String, SearchHit<Product>> products = fetchProducts(Stream
@@ -1747,7 +1811,9 @@ public class SearchService {
 			return List.of();
 		}
 		List<SearchHit<Product>> sortedHits = sortGlobalHits(hits.getSearchHits(), sort);
+		// GOU-2590: the indexed offersCount keeps expired offers; a product without fresh offer shows no price
 		return sortedHits.stream()
+				.filter(hit -> hit.getContent() != null && offerFreshnessService.offersCount(hit.getContent()) > 0)
 				.map(hit -> mapHit(hit, domainLanguage, hit.getScore()))
 				.filter(Objects::nonNull)
 				.toList();

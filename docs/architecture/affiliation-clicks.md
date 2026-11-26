@@ -97,6 +97,11 @@ recognised by their signature, read on the full URL: query parameters `c`, `m`
 and `a` all numeric and `u` present. Only the host is stored. A direct merchant
 link without this signature stays `other`.
 
+Kwanko links on a merchant's own tracking domain (e.g. `qby.mda-electromenager.com`)
+are recognised the same way: the whole query string, or the value of `mclic`,
+has the form `P<hex>S<digit>U<alphanumeric>V<digit>` (GOU-2319). Clicks already
+stored keep their network.
+
 Clicks stored before this classification (since 2026-10-26) keep `network =
 other`: they are not rewritten, so Kwanko and TradeTracker counts start at the
 deployment date.
@@ -147,6 +152,34 @@ were not touched by this change. Their purge (board approval 2f4935d1) runs in
 front-api at startup, see `ContributionVoteIpUaPurgeService` and the front-api
 README, "Contribution votes ip/ua purge" (GOU-1230).
 
+## Click reference in the redirect (GOU-2522)
+
+To join a sale reported by a network to its click, `AffiliationService.trackRedirect`
+can write the `id` of the `AffiliationClick` (a random UUID, no personal data) into
+the publisher reference parameter of the target network
+(`AffiliationClickRefService`). The id is written even when the click could not be
+saved; the legacy `ContributionVote` keeps the URL of the token.
+
+| Network | Parameter | Source of the name |
+|---|---|---|
+| Awin | `clickref` | Awin Link Builder API and "Click appends" docs; reported as `clickRef` (feedservice) |
+| TradeTracker | `r` | TradeTracker FAQ (reference / sub-id, name not public); built by `TradeTrackerFeedService`, reported as `reference` |
+| Effiliation | `effi_id` | No public doc; reported as `effiId` (feedservice) |
+| Kwanko | `argsite`, `mclic` links only | No public doc; reported in `argsites` (feedservice). A bare token link on a merchant domain (`?P...V4`) is unchanged |
+| Amazon, other | none | No sub-id per click: URL unchanged |
+
+Only that parameter changes: other query pairs, the fragment and the encoding of
+the destination (`ued`, `p` on `cread.php`, `u`, `url`) are kept byte for byte.
+An existing reference is replaced; the reference never goes after the destination
+parameter.
+
+Awin is switched on by default since 2026-11-21 (GOU-2526); TradeTracker, Effiliation
+and Kwanko are switched off by default
+(`front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled`,
+env `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`): the redirect is then exactly
+the token URL (`FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED=false` switches Awin off again). A network is switched on by a separate change, after a test click
+on a real link in beta and a test sale showing the reference in its report.
+
 ## Metriks events
 
 Added after the commission events of `/api/metriks/affiliation`:
@@ -194,6 +227,8 @@ declined) change with time.
 | Commissions and sales | `affiliation.<awin\|effiliation\|kwanko\|tradetracker\|total>.<commission.validated\|commission.pending\|sales>.<7d\|28d\|prev7d\|prev28d>` | 5 x 3 x 4 = 60 |
 | Clicks | `affiliation.<awin\|effiliation\|kwanko\|tradetracker\|amazon\|other\|total>.clicks.<window>` | 7 x 4 = 28 |
 | Tops | `affiliation.clicks.top_merchants.28d`, `affiliation.clicks.top_origins.28d` | 2 |
+| Merchants | `affiliation.merchants.sales` | 1 |
+| Sales by origin | `affiliation.sales.by_origin.28d` | 1 |
 
 Each commission network is read once, over the 56 days `[D-56, D-1]`, and the
 four windows are derived from that single read. The Awin transactions API
@@ -203,6 +238,51 @@ starts: no gap, no duplicate at the bounds). Effiliation (90 days), Kwanko and
 TradeTracker (paginated) read 56 days in one go. Error rules are unchanged: a
 failing network (or a failing chunk) puts all its windows in `error`, a total
 is in `error` as soon as one network is, a missing figure is never `0`.
+
+### Sales and commissions per merchant (GOU-2521)
+
+`affiliation.merchants.sales` (window `[D-28, D-1]`, `unit` `count`, `value` = number of rows) lists, in
+`params.rows`, one row per merchant with at least one sale (validated or pending) or one click over 28 days, most
+sales first then most clicks. A row holds `merchant`, `network`, `status` (`ok`), `advertiserId` (network
+identifier, `null` when unknown or when several advertisers share the datasource), `datasource` (`true` when
+`merchant` is a datasource name), `salesMeasured` and `clicksMeasured`, then one object per window (`7d`, `28d`,
+`prev7d`, `prev28d`) with `sales`, `commissionValidated`, `commissionPending` (EUR), `clicks` and `salesPerClick`
+(sales / clicks, 4 decimals, `null` unless both are measured and clicks > 0).
+
+- Sales come from the network transactions grouped by advertiser (`AffiliationReportTransaction.advertiserId`):
+  Awin `advertiserId` (name from `GET /publishers/{id}/programmes`, left empty when that call fails), Kwanko
+  `campaign.id` / `campaign.name` when present. Effiliation and TradeTracker transactions carry no advertiser in
+  the response mapping: their sales fall on a single `(annonceur non fourni)` row, their merchants' clicks are
+  not measured. `clickRef` is read (Awin `clickRefs.clickRef`) for the sale-to-click matching, not reported yet.
+- Clicks come from `AffiliationClickStatsService.countByMerchant` (merchant = datasource name).
+- Advertiser to datasource: `DatasourceMerchantResolver`, exact match of the Awin programme id (`awinmid` / `mid` of
+  an `awin1.com` link in the datasource `affiliationLinkPrefix` or `affiliatedPortalUrl`); a programme claimed by
+  two datasources matches none; no name matching. An advertiser without datasource keeps its network name and
+  `clicksMeasured: false` (`clicks` and `salesPerClick` `null`).
+- Sales not measured (`salesMeasured: false`, all sales fields `null`, never 0): merchants of a network without
+  transactions reading (Amazon, other) or whose datasource has no known programme. A click-only merchant of a
+  known programme has a real 0.
+- A network in error is one row `{merchant: null, network, status: "error", error}`, never partial rows; when the
+  clicks cannot be read the event has no row. The event is then in `error` (`value` `null`), the rows of the
+  healthy networks stay under `params.rows`.
+
+### Sales attached to their click (GOU-2523)
+
+`affiliation.sales.by_origin.28d` (window `[D-28, D-1]`, `unit` `count`, `value` = number of rows) attaches each sale
+to the click it comes from, through the `clickRef` of the transaction (the id of an `AffiliationClick`, injected in
+the tracking link by `AffiliationClickRefService`, GOU-2522). Rows are in `params.rows`:
+
+- one row per origin with at least one attached sale, most sales first: `origin` (`contentPath` of the click,
+  otherwise its `originPath`, otherwise `(none)`), `attributed` (`true`), `sales`, `commissionValidated`,
+  `commissionPending` (EUR), `clicks` (clicks of the same origin over the same 28 days, `AffiliationClickStatsService.countByOrigin`)
+  and `gtins` (the 10 most sold products of the origin, `{gtin, sales}`; a click without gtin adds none);
+- one last row `{origin: null, attributed: false}` with the sales that cannot be attached (no `clickRef`, or no click
+  with that id in `affiliation-clicks`, read by ids in batches of 500): counted, never spread over the origins; its
+  `clicks` is `null`.
+
+Declined sales are ignored. A network in error is left out and puts the event in `error` (`value` `null`, rows of the
+healthy networks kept); when the clicks cannot be read the event is in `error` with no row (message with the
+exception type only). A network that does not echo the click reference sends all its sales to the unattached row.
 
 ## Kwanko revenues (GOU-1379)
 

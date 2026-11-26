@@ -24,12 +24,25 @@ order: 4
 averageHoursPerDay: 1.0
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
     minKg: 15.0
     maxKg: 80.0
-  warranty:
-    minYears: 1.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 15.0
+      max: 80.0
+    WIDTH:
+      min: 40.0
+      max: 70.0
+    HEIGHT:
+      min: 40.0
+      max: 95.0
+    DEPTH:
+      min: 40.0
+      max: 70.0
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
@@ -109,6 +122,8 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "lave-vaisselles"
     verticalHomeTitle: "Lave-vaisselles"
+    verticalMetaTitle: "Comparatif lave-vaisselle : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les lave-vaisselle par prix, litres d'eau et kWh par cycle et Impact Score noté sur 20 pour choisir un modèle économe."
     verticalHomeDescription: "Comparez les lave-vaisselles (pose libre, encastrables, 45/60 cm, nombre de couverts, niveau sonore…) selon l’Impact Score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
@@ -137,6 +152,8 @@ i18n:
 
     verticalHomeUrl: "dishwashers"
     verticalHomeTitle: "Dishwashers"
+    verticalMetaTitle: "Dishwashers comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare dishwashers by price, litres of water and kWh per cycle and Impact Score out of 20 to pick an efficient model."
     verticalHomeDescription: "Compare dishwashers (built-in or freestanding, 45/60 cm, capacity, noise level) by Impact Score and price."
 
 #####################################################################################################################################
@@ -211,7 +228,7 @@ nudgeToolConfig:
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "2"
         - field: "scores.ECOSCORE.value"
           operator: "LOWER_THAN"
@@ -221,8 +238,8 @@ nudgeToolConfig:
         en: "medium-impact"
         fr: "impact-moyen"
       caption:
-        en: "> 2 < 4"
-        fr: "> 2 < 4"
+        en: "≥ 2 < 4"
+        fr: "≥ 2 < 4"
       title:
         en: "Relativ impact"
         fr: "Moyen"
@@ -234,21 +251,21 @@ nudgeToolConfig:
       group: "impactscore"
       criterias:
         - field: "scores.ECOSCORE.value"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "4"
       image: "example-image.png"
       url:
         en: "impact-moderate"
         fr: "impact-modere"
       caption:
-        en: "> 4"
-        fr: "> 4"
+        en: "≥ 4"
+        fr: "≥ 4"
       title:
         en: "Moderated impact"
         fr: "Bon"
       description:
-        en: "Products with an ImpactScore greater than 4/5"
-        fr: "Produits avec un ImpactScore supérieur à 4/5"
+        en: "Products with an ImpactScore of 4/5 or more"
+        fr: "Produits avec un ImpactScore supérieur ou égal à 4/5"
 
     - id: "price_lower_400"
       group: "price"
@@ -277,7 +294,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "400"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -300,21 +317,21 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "700"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 700 €"
-        fr: "> 700 €"
+        en: "≥ 700 €"
+        fr: "≥ 700 €"
       title:
         en: "Premium dishwashers"
         fr: "Lave-vaisselles haut de gamme"
       description:
-        en: "dishwashers priced over €700."
-        fr: "Les lave-vaisselles dont le prix est supérieur à 700€."
+        en: "dishwashers priced at €700 or more."
+        fr: "Les lave-vaisselles dont le prix est supérieur ou égal à 700€."
 
     - id: "capacity_small"
       group: "capacity"
@@ -340,7 +357,7 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "10"
         - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
           operator: "LOWER_THAN"
@@ -363,21 +380,21 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "14"
       image: "large-capacity.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 14 settings"
-        fr: "> 14 couverts"
+        en: "≥ 14 settings"
+        fr: "≥ 14 couverts"
       title:
         en: "Large Capacity"
         fr: "Grande Capacité"
       description:
-        en: "Dishwashers with more than 14 place settings."
-        fr: "Lave-vaisselles de plus de 14 couverts."
+        en: "Dishwashers with 14 or more place settings."
+        fr: "Lave-vaisselles de 14 couverts ou plus."
 
     - id: "installation_builtin"
       group: "installation"
@@ -447,7 +464,7 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "400"
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
@@ -470,21 +487,21 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "700"
   image: "example-image.png"
   url:
     en: "premium-price"
     fr: "haut-de-gamme"
   caption:
-    en: "> 700 €"
-    fr: "> 700 €"
+    en: "≥ 700 €"
+    fr: "≥ 700 €"
   title:
     en: "Premium dishwashers"
     fr: "Lave-vaisselles haut de gamme"
   description:
-    en: "dishwashers priced over €700."
-    fr: "Les lave-vaisselles dont le prix est supérieur à 700€."
+    en: "dishwashers priced at €700 or more."
+    fr: "Les lave-vaisselles dont le prix est supérieur ou égal à 700€."
 
 - id: "capacity_small"
   group: "capacity"
@@ -510,7 +527,7 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "10"
     - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
       operator: "LOWER_THAN"
@@ -533,21 +550,21 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.PLACE_SETTINGS.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "14"
   image: "large-capacity.png"
   url:
     en: "large-capacity"
     fr: "grande-capacite"
   caption:
-    en: "> 14 settings"
-    fr: "> 14 couverts"
+    en: "≥ 14 settings"
+    fr: "≥ 14 couverts"
   title:
     en: "Large Capacity"
     fr: "Grande Capacité"
   description:
-    en: "Dishwashers with more than 14 place settings."
-    fr: "Lave-vaisselles de plus de 14 couverts."
+    en: "Dishwashers with 14 or more place settings."
+    fr: "Lave-vaisselles de 14 couverts ou plus."
 
 - id: "installation_builtin"
   group: "installation"

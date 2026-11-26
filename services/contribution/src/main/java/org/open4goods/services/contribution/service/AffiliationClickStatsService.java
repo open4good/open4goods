@@ -42,6 +42,12 @@ public class AffiliationClickStatsService {
     public static final int TOP_MERCHANTS = 20;
     /** Number of rows of the top origins. */
     public static final int TOP_ORIGINS = 50;
+    /** Largest number of (merchant, network) pairs read by {@link #countByMerchant(long, long)}. */
+    public static final int MAX_MERCHANT_PAIRS = 5000;
+    /** Largest number of origins read by {@link #countByOrigin(long, long)}. */
+    public static final int MAX_ORIGINS = 5000;
+    /** Number of click ids per request of {@link #findByIds}. */
+    public static final int IDS_BATCH = 500;
 
     private static final String AGG_NETWORKS = "networks";
     private static final String AGG_SHORT = "short";
@@ -147,6 +153,108 @@ public class AffiliationClickStatsService {
             throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
         }
         return new ClickCounts(perNetwork(aggregate(aggregations, AGG_NETWORKS)), hits.getTotalHits());
+    }
+
+    /**
+     * Counts the clicks of {@code [start, end)} per (merchant, network) pair, every pair, with a single aggregation
+     * request.
+     *
+     * @param start start of the window, epoch milliseconds, inclusive
+     * @param end   end of the window, epoch milliseconds, exclusive
+     * @return the clicks of each pair, most clicked first
+     * @throws IllegalStateException when there are more than {@value #MAX_MERCHANT_PAIRS} pairs (never truncated)
+     * @throws RuntimeException      when Elasticsearch cannot answer (unreachable, missing index...)
+     */
+    public List<MerchantClicks> countByMerchant(long start, long end) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(tsRange(start, end))
+                .withAggregation(AGG_TOP, Aggregation.of(a -> a.multiTerms(m -> m
+                        .terms(MultiTermLookup.of(t -> t.field(AffiliationClick.FIELD_MERCHANT)),
+                                MultiTermLookup.of(t -> t.field(AffiliationClick.FIELD_NETWORK)))
+                        .size(MAX_MERCHANT_PAIRS))))
+                .withMaxResults(0)
+                .build();
+        SearchHits<AffiliationClick> hits = elasticsearchOperations.search(query, AffiliationClick.class,
+                IndexCoordinates.of(AffiliationClick.INDEX_NAME));
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) hits.getAggregations();
+        if (aggregations == null) {
+            throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
+        }
+        var multiTerms = aggregate(aggregations, AGG_TOP).multiTerms();
+        if (multiTerms.sumOtherDocCount() > 0) {
+            throw new IllegalStateException("More than " + MAX_MERCHANT_PAIRS + " (merchant, network) pairs in "
+                    + AffiliationClick.INDEX_NAME);
+        }
+        List<MerchantClicks> clicks = new ArrayList<>();
+        for (MultiTermsBucket bucket : multiTerms.buckets().array()) {
+            List<FieldValue> key = bucket.key();
+            clicks.add(new MerchantClicks(key.get(0).stringValue(), key.get(1).stringValue(), bucket.docCount()));
+        }
+        return List.copyOf(clicks);
+    }
+
+    /**
+     * Counts the clicks of {@code [start, end)} per origin (the {@code contentPath} of the click, otherwise its
+     * {@code originPath}, otherwise {@value OriginClicks#NO_ORIGIN}), every origin, with a single aggregation request.
+     *
+     * @param start start of the window, epoch milliseconds, inclusive
+     * @param end   end of the window, epoch milliseconds, exclusive
+     * @return the clicks of each origin, most clicked first
+     * @throws IllegalStateException when there are more than {@value #MAX_ORIGINS} origins (never truncated)
+     * @throws RuntimeException      when Elasticsearch cannot answer (unreachable, missing index...)
+     */
+    public List<OriginClicks> countByOrigin(long start, long end) {
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(tsRange(start, end))
+                .withAggregation(AGG_CONTENT, Aggregation.of(a -> a.terms(t -> t
+                        .field(AffiliationClick.FIELD_CONTENT_PATH)
+                        .size(MAX_ORIGINS))))
+                .withAggregation(AGG_NO_CONTENT, Aggregation.of(a -> a
+                        .filter(f -> f.bool(b -> b.mustNot(n -> n.exists(e -> e.field(
+                                AffiliationClick.FIELD_CONTENT_PATH)))))
+                        .aggregations(AGG_ORIGIN, Aggregation.of(o -> o.terms(t -> t
+                                .field(AffiliationClick.FIELD_ORIGIN_PATH)
+                                .missing(OriginClicks.NO_ORIGIN)
+                                .size(MAX_ORIGINS))))))
+                .withMaxResults(0)
+                .build();
+        SearchHits<AffiliationClick> hits = elasticsearchOperations.search(query, AffiliationClick.class,
+                IndexCoordinates.of(AffiliationClick.INDEX_NAME));
+        ElasticsearchAggregations aggregations = (ElasticsearchAggregations) hits.getAggregations();
+        if (aggregations == null) {
+            throw new IllegalStateException("Elasticsearch returned no aggregation for " + AffiliationClick.INDEX_NAME);
+        }
+        Aggregate content = aggregate(aggregations, AGG_CONTENT);
+        Aggregate origin = aggregate(aggregations, AGG_NO_CONTENT).filter().aggregations().get(AGG_ORIGIN);
+        if ((content.isSterms() && content.sterms().sumOtherDocCount() > 0)
+                || (origin != null && origin.isSterms() && origin.sterms().sumOtherDocCount() > 0)) {
+            throw new IllegalStateException("More than " + MAX_ORIGINS + " origins in " + AffiliationClick.INDEX_NAME);
+        }
+        return topOrigins(content, origin, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Reads clicks by id, in batches of {@value #IDS_BATCH}. An unknown id is absent from the result (never an
+     * error).
+     *
+     * @param ids click ids (blank and duplicate ids are ignored)
+     * @return the clicks found, by id
+     * @throws RuntimeException when Elasticsearch cannot answer (unreachable, missing index...)
+     */
+    public Map<String, AffiliationClick> findByIds(java.util.Collection<String> ids) {
+        List<String> distinct = ids.stream().filter(id -> id != null && !id.isBlank()).distinct().toList();
+        Map<String, AffiliationClick> found = new LinkedHashMap<>();
+        for (int from = 0; from < distinct.size(); from += IDS_BATCH) {
+            List<String> batch = distinct.subList(from, Math.min(from + IDS_BATCH, distinct.size()));
+            NativeQuery query = NativeQuery.builder()
+                    .withQuery(Query.of(q -> q.ids(i -> i.values(batch))))
+                    .withMaxResults(batch.size())
+                    .build();
+            SearchHits<AffiliationClick> hits = elasticsearchOperations.search(query, AffiliationClick.class,
+                    IndexCoordinates.of(AffiliationClick.INDEX_NAME));
+            hits.forEach(hit -> found.put(hit.getContent().getId(), hit.getContent()));
+        }
+        return Collections.unmodifiableMap(found);
     }
 
     /**

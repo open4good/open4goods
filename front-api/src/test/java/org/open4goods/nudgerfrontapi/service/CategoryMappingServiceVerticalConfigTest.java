@@ -74,6 +74,19 @@ class CategoryMappingServiceVerticalConfigTest {
     }
 
     @Test
+    void fullDtoDoesNotSerializeAttributeExclusions() throws Exception {
+        VerticalConfig config = createVerticalConfig("washing-machines", 3);
+        AttributesConfig attributesConfig = new AttributesConfig(List.of());
+        attributesConfig.setExclusions(Set.of("CLASSIFICATION DECITRE 1"));
+        config.setAttributesConfig(attributesConfig);
+
+        String json = new com.fasterxml.jackson.databind.ObjectMapper()
+                .writeValueAsString(service.toVerticalConfigFullDto(config, DomainLanguage.fr));
+
+        assertThat(json).contains("attributesConfig").doesNotContain("exclusions").doesNotContain("DECITRE");
+    }
+
+    @Test
     void toVerticalConfigDtoExposesAggregatedScores() {
         VerticalConfig config = createVerticalConfig("washing-machines", 3);
 

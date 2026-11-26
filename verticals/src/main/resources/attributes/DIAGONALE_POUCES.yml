@@ -71,4 +71,11 @@ parser:
   trim: false
   lowerCase: false
   upperCase: true
+  # Un identifiant ou des centimètres sans unité (ex. "PRD_PM255575188" chez Rakuten) ne sont pas une diagonale :
+  # hors de ces bornes la source ne vote pas (GOU-2377). Les valeurs avec unité sont converties en pouces.
+  minValue: 1.0
+  maxValue: 120.0
+  unitFactors:
+    cm: 0.3937007874
+    mm: 0.03937007874
   removeParenthesis: false

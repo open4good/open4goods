@@ -150,16 +150,22 @@ class WeightParserTest {
     }
 
     @Test
-    void writtenRangeKeepsValueWithUnit() throws ParseException {
-        // TV bounds from tv.yml; "TRANCHE DE POIDS" values look like "15 à 30 kg".
-        VerticalConfig tvConfig = new VerticalConfig();
-        tvConfig.setParsers(new ParsersConfig());
-        tvConfig.getParsers().getWeight().setMinKg(1.0);
-        tvConfig.getParsers().getWeight().setMaxKg(100.0);
+    void writtenWeightClassIsRejected() throws ParseException {
+        // GOU-2707: Rakuten's "TRANCHE DE POIDS" ("70 à 100 kg", "+ de 100 kg") gave 100 kg washing machines.
+        VerticalConfig washingMachine = new VerticalConfig();
+        washingMachine.setParsers(new ParsersConfig());
+        washingMachine.getParsers().getWeight().setMinKg(30.0);
+        washingMachine.getParsers().getWeight().setMaxKg(150.0);
 
-        assertThat(parser.parse("15 à 30 kg", null, tvConfig)).isEqualTo("30");
-        assertThat(parser.parse("3 à 10 kg", null, tvConfig)).isEqualTo("10");
-        assertThat(parser.parse("+ de 100 kg", null, tvConfig)).isEqualTo("100");
+        assertThat(parser.parse("70 à 100 kg", null, washingMachine)).isNull();
+        assertThat(parser.parse("15 kg à 30 kg", null, washingMachine)).isNull();
+        assertThat(parser.parse("+ de 100 kg", null, washingMachine)).isNull();
+        assertThat(parser.parse("plus de 100 kg", null, washingMachine)).isNull();
+        assertThat(parser.parse("Moins de 50 kg", null, washingMachine)).isNull();
+        assertThat(parser.parse("> 50 kg", null, washingMachine)).isNull();
+        // A measured weight is still read.
+        assertThat(parser.parse("68,5 kg", null, washingMachine)).isEqualTo("68.5");
+        assertThat(parser.parse("68 kg (à vide)", null, washingMachine)).isEqualTo("68");
     }
 
     @Test

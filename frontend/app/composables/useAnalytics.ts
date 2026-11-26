@@ -30,7 +30,7 @@ type OpenDataDownloadContext = {
 export type OpenDataLinkBlock = 'explore-products' | 'mirrors'
 export type OpenDataLinkTarget =
   'category' | 'product' | 'datagouv' | 'zenodo' | 'kaggle' | 'figshare'
-export type OpenDataLinkPage = 'opendata' | 'gtin' | 'isbn'
+export type OpenDataLinkPage = 'opendata' | 'gtin' | 'isbn' | 'impact'
 
 type OpenDataLinkContext = {
   block: OpenDataLinkBlock

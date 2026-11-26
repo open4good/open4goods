@@ -57,7 +57,8 @@ class ProductControllerTest {
     @BeforeEach
     void setUp() {
         controller = new ProductController(productMappingService, verticalsConfigService, searchService,
-                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties());
+                new org.open4goods.nudgerfrontapi.config.properties.ApiProperties(),
+                new org.open4goods.nudgerfrontapi.service.ProductCardMappingService(verticalsConfigService));
         // Default lenient mock for vertical existence check
         org.mockito.Mockito.lenient().when(verticalsConfigService.getConfigById(any())).thenReturn(new VerticalConfig());
     }
@@ -68,7 +69,7 @@ class ProductControllerTest {
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
-        Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0);
+        Filter filter = new Filter("scores.ENERGY_CONSUMPTION.value", FilterOperator.range, null, 0.0, 100.0, null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null, null);
 
@@ -120,7 +121,7 @@ class ProductControllerTest {
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
         Filter filter = new Filter("attributes.indexed.DATA_QUALITY.value", FilterOperator.term,
-                List.of("AA"), null, null);
+                List.of("AA"), null, null, null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null, null);
 
@@ -148,7 +149,7 @@ class ProductControllerTest {
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Set.of(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
-        Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0);
+        Filter filter = new Filter("scores.ECOSCORE.value", FilterOperator.range, null, 0.0, 100.0, null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null, null);
 
@@ -168,7 +169,7 @@ class ProductControllerTest {
         SearchService.SearchCapabilities capabilities = new SearchService.SearchCapabilities(Collections.emptySet(), Set.of(), Set.of());
         when(searchService.buildSearchCapabilities(any(), any(), any())).thenReturn(capabilities);
 
-        Filter filter = new Filter("scores.UNKNOWN_FIELD.ranking", FilterOperator.rankingPercentile, null, 0.0, 100.0);
+        Filter filter = new Filter("scores.UNKNOWN_FIELD.ranking", FilterOperator.rankingPercentile, null, 0.0, 100.0, null, null);
         ProductSearchRequestDto searchRequest = new ProductSearchRequestDto(null, null,
                 new FilterRequestDto(List.of(filter), List.of()), null, null);
 

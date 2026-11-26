@@ -26,12 +26,19 @@ referentials:
     - group: "airconditioners"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
     minKg: 5.0
     maxKg: 120.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 5.0
+      max: 120.0
+    COOLING_CAPACITY:
+      min: 0.5
+      max: 30.0
 
 order: 9
 
@@ -101,6 +108,8 @@ i18n:
       - "de la climatisation"
     verticalHomeUrl: "climatiseurs"
     verticalHomeTitle: "Climatiseurs"
+    verticalMetaTitle: "Comparatif climatiseurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les climatiseurs par prix, puissance, efficacité énergétique et Impact Score noté sur 20 pour rafraîchir en consommant moins."
     verticalHomeDescription: "Comparez les climatiseurs selon leur consommation électrique, leur efficacité et leur impact environnemental. Nudger vous aide à choisir un modèle adapté à votre logement sans négliger le coût d’usage ni la consommation (kWh/an, étiquette énergie)."
     productMetaOpenGraphType: "product"
 
@@ -118,6 +127,8 @@ i18n:
       - "of the AC unit"
     verticalHomeUrl: "air-conditioners"
     verticalHomeTitle: "Air conditioners"
+    verticalMetaTitle: "Air conditioners comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare air conditioners by price, power, energy efficiency and Impact Score out of 20 to cool your home while using less energy."
     verticalHomeDescription: "Compare air conditioners by electricity use, efficiency, and environmental impact. Nudger helps you choose a model that fits your room while keeping running costs and energy use (kWh/year, energy label) in view."
     productMetaOpenGraphType: "product"
 
@@ -292,7 +303,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "450"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -314,7 +325,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1000"
       image: "example-image.png"
       url:
@@ -324,11 +335,11 @@ nudgeToolConfig:
         en: "Over 1000 EUR"
         fr: "Plus de 1000 EUR"
       title:
-        en: "> 1000 EUR"
-        fr: "> 1000 EUR"
+        en: "≥ 1000 EUR"
+        fr: "≥ 1000 EUR"
       description:
-        en: "Air conditioners priced above 1000 EUR."
-        fr: "Climatiseurs dont le prix est supérieur à 1000 EUR."
+        en: "Air conditioners priced at 1000 EUR or more."
+        fr: "Climatiseurs dont le prix est supérieur ou égal à 1000 EUR."
     - id: "quiet_air_conditioners"
       group: "noise"
       criterias:
@@ -352,7 +363,7 @@ nudgeToolConfig:
       group: "noise"
       criterias:
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "61"
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
           operator: "LOWER_THAN"
@@ -374,7 +385,7 @@ nudgeToolConfig:
       group: "noise"
       criterias:
         - field: "attributes.indexed.NOISE_LEVEL.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "64"
       image: "example-image.png"
       url:
@@ -387,8 +398,8 @@ nudgeToolConfig:
         en: "Louder models"
         fr: "Modèles plus bruyants"
       description:
-        en: "Air conditioners with a declared noise level above 64 dB."
-        fr: "Climatiseurs dont le niveau sonore déclaré dépasse 64 dB."
+        en: "Air conditioners with a declared noise level of 64 dB or more."
+        fr: "Climatiseurs dont le niveau sonore déclaré atteint ou dépasse 64 dB."
 
 subsets:
   - id: "impact_high"
@@ -474,7 +485,7 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "450"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
@@ -496,21 +507,21 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "1000"
     image: "example-image.png"
     url:
       en: "premium-price"
       fr: "haut-de-gamme"
     caption:
-      en: "> 1000 EUR"
-      fr: "> 1000 EUR"
+      en: "≥ 1000 EUR"
+      fr: "≥ 1000 EUR"
     title:
       en: "Premium air conditioners"
       fr: "Climatiseurs haut de gamme"
     description:
-      en: "Air conditioners priced above 1000 EUR."
-      fr: "Climatiseurs dont le prix est supérieur à 1000 EUR."
+      en: "Air conditioners priced at 1000 EUR or more."
+      fr: "Climatiseurs dont le prix est supérieur ou égal à 1000 EUR."
   - id: "quiet_air_conditioners"
     group: "noise"
     criterias:
@@ -534,7 +545,7 @@ subsets:
     group: "noise"
     criterias:
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "61"
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
         operator: "LOWER_THAN"
@@ -556,21 +567,21 @@ subsets:
     group: "noise"
     criterias:
       - field: "attributes.indexed.NOISE_LEVEL.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "64"
     image: "example-image.png"
     url:
       en: "loud-air-conditioners"
       fr: "climatiseurs-bruyants"
     caption:
-      en: "> 64 dB"
-      fr: "> 64 dB"
+      en: "≥ 64 dB"
+      fr: "≥ 64 dB"
     title:
       en: "Louder air conditioners"
       fr: "Climatiseurs plus bruyants"
     description:
-      en: "Air conditioners with a declared noise level above 64 dB."
-      fr: "Climatiseurs dont le niveau sonore déclaré dépasse 64 dB."
+      en: "Air conditioners with a declared noise level of 64 dB or more."
+      fr: "Climatiseurs dont le niveau sonore déclaré atteint ou dépasse 64 dB."
 
 dataviz:
   chartOverrides:

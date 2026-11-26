@@ -29,6 +29,15 @@ export interface IsbnRequest {
   domainLanguage: IsbnDomainLanguageEnum
 }
 
+export interface ImpactDatasetsRequest {
+  domainLanguage: ImpactDatasetsDomainLanguageEnum
+}
+
+export interface ImpactDatasetRequest {
+  vertical: string
+  domainLanguage: ImpactDatasetDomainLanguageEnum
+}
+
 export interface OverviewRequest {
   domainLanguage: OverviewDomainLanguageEnum
 }
@@ -182,6 +191,167 @@ export class OpenDataApi extends runtime.BaseAPI {
   }
 
   /**
+   * Return the impact datasets (one per vertical) listed in the published manifest.
+   * List impact datasets
+   */
+  async impactDatasetsRaw(
+    requestParameters: ImpactDatasetsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<runtime.ApiResponse<Array<OpenDataDatasetDto>>> {
+    if (requestParameters['domainLanguage'] == null) {
+      throw new runtime.RequiredError(
+        'domainLanguage',
+        'Required parameter "domainLanguage" was null or undefined when calling impactDatasets().'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (requestParameters['domainLanguage'] != null) {
+      queryParameters['domainLanguage'] = requestParameters['domainLanguage']
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    if (
+      this.configuration &&
+      (this.configuration.username !== undefined ||
+        this.configuration.password !== undefined)
+    ) {
+      headerParameters['Authorization'] =
+        'Basic ' +
+        btoa(this.configuration.username + ':' + this.configuration.password)
+    }
+    if (this.configuration && this.configuration.accessToken) {
+      const token = this.configuration.accessToken
+      const tokenString = await token('bearerAuth', [])
+
+      if (tokenString) {
+        headerParameters['Authorization'] = `Bearer ${tokenString}`
+      }
+    }
+
+    let urlPath = `/opendata/impact`
+
+    const response = await this.request(
+      {
+        path: urlPath,
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters,
+      },
+      initOverrides
+    )
+
+    if (this.isJsonMime(response.headers.get('content-type'))) {
+      return new runtime.JSONApiResponse<Array<OpenDataDatasetDto>>(response)
+    } else {
+      return new runtime.TextApiResponse(response) as any
+    }
+  }
+
+  /**
+   * Return the impact datasets (one per vertical) listed in the published manifest.
+   * List impact datasets
+   */
+  async impactDatasets(
+    requestParameters: ImpactDatasetsRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<Array<OpenDataDatasetDto>> {
+    const response = await this.impactDatasetsRaw(
+      requestParameters,
+      initOverrides
+    )
+    return await response.value()
+  }
+
+  /**
+   * Return the impact dataset of one vertical.
+   * Get an impact dataset
+   */
+  async impactDatasetRaw(
+    requestParameters: ImpactDatasetRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<runtime.ApiResponse<{ [key: string]: any }>> {
+    if (requestParameters['domainLanguage'] == null) {
+      throw new runtime.RequiredError(
+        'domainLanguage',
+        'Required parameter "domainLanguage" was null or undefined when calling impactDataset().'
+      )
+    }
+
+    if (requestParameters['vertical'] == null) {
+      throw new runtime.RequiredError(
+        'vertical',
+        'Required parameter "vertical" was null or undefined when calling impactDataset().'
+      )
+    }
+
+    const queryParameters: any = {}
+
+    if (requestParameters['domainLanguage'] != null) {
+      queryParameters['domainLanguage'] = requestParameters['domainLanguage']
+    }
+
+    const headerParameters: runtime.HTTPHeaders = {}
+
+    if (
+      this.configuration &&
+      (this.configuration.username !== undefined ||
+        this.configuration.password !== undefined)
+    ) {
+      headerParameters['Authorization'] =
+        'Basic ' +
+        btoa(this.configuration.username + ':' + this.configuration.password)
+    }
+    if (this.configuration && this.configuration.accessToken) {
+      const token = this.configuration.accessToken
+      const tokenString = await token('bearerAuth', [])
+
+      if (tokenString) {
+        headerParameters['Authorization'] = `Bearer ${tokenString}`
+      }
+    }
+
+    let urlPath = `/opendata/impact/{vertical}`
+    urlPath = urlPath.replace(
+      `{${'vertical'}}`,
+      encodeURIComponent(String(requestParameters['vertical']))
+    )
+
+    const response = await this.request(
+      {
+        path: urlPath,
+        method: 'GET',
+        headers: headerParameters,
+        query: queryParameters,
+      },
+      initOverrides
+    )
+
+    if (this.isJsonMime(response.headers.get('content-type'))) {
+      return new runtime.JSONApiResponse<{ [key: string]: any }>(response)
+    } else {
+      return new runtime.TextApiResponse(response) as any
+    }
+  }
+
+  /**
+   * Return the impact dataset of one vertical.
+   * Get an impact dataset
+   */
+  async impactDataset(
+    requestParameters: ImpactDatasetRequest,
+    initOverrides?: RequestInit | runtime.InitOverrideFunction
+  ): Promise<{ [key: string]: any }> {
+    const response = await this.impactDatasetRaw(
+      requestParameters,
+      initOverrides
+    )
+    return await response.value()
+  }
+
+  /**
    * Return aggregated metadata about the available GTIN and ISBN datasets.
    * Get OpenData overview
    */
@@ -281,3 +451,15 @@ export const OverviewDomainLanguageEnum = {
 } as const
 export type OverviewDomainLanguageEnum =
   (typeof OverviewDomainLanguageEnum)[keyof typeof OverviewDomainLanguageEnum]
+export const ImpactDatasetsDomainLanguageEnum = {
+  Fr: 'fr',
+  En: 'en',
+} as const
+export type ImpactDatasetsDomainLanguageEnum =
+  (typeof ImpactDatasetsDomainLanguageEnum)[keyof typeof ImpactDatasetsDomainLanguageEnum]
+export const ImpactDatasetDomainLanguageEnum = {
+  Fr: 'fr',
+  En: 'en',
+} as const
+export type ImpactDatasetDomainLanguageEnum =
+  (typeof ImpactDatasetDomainLanguageEnum)[keyof typeof ImpactDatasetDomainLanguageEnum]

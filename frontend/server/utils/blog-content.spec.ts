@@ -72,6 +72,34 @@ describe('blog-content', () => {
       const notFound = await findBlogDocBySlug(fakeEvent, 'does-not-exist')
       expect(notFound).toBeNull()
     })
+
+    const draftAndUnpublished = () =>
+      queryCollectionMock.mockReturnValue({
+        all: vi.fn().mockResolvedValue([
+          doc({ path: '/blog/fr/en-relecture', draft: true }),
+          doc({ path: '/blog/fr/retire', draft: true, published: false }),
+        ]),
+      })
+
+    it('does not find a draft by default (prod: 404)', async () => {
+      draftAndUnpublished()
+
+      expect(await findBlogDocBySlug(fakeEvent, 'en-relecture')).toBeNull()
+    })
+
+    it('finds a draft with includeDrafts (beta review), never an unpublished post', async () => {
+      draftAndUnpublished()
+
+      const found = await findBlogDocBySlug(fakeEvent, 'en-relecture', { includeDrafts: true })
+      expect(found?.draft).toBe(true)
+      expect(await findBlogDocBySlug(fakeEvent, 'retire', { includeDrafts: true })).toBeNull()
+    })
+
+    it('keeps drafts out of listBlogDocs', async () => {
+      draftAndUnpublished()
+
+      expect(await listBlogDocs(fakeEvent)).toEqual([])
+    })
   })
 
   describe('toBlogPostDto', () => {
@@ -119,6 +147,39 @@ describe('blog-content', () => {
       expect(body).toBe(
         '<p>Before</p>\n<div data-product-widget="tv|tv_55_inches|3"></div>\n<p>After</p>\n'
       )
+    })
+
+    it('renders the tv-size-calculator directive as a validated marker', async () => {
+      const body = await render(
+        'Before\n\n::tv-size-calculator{default-distance="2.5" default-resolution="full-hd"}\n::\n\nAfter'
+      )
+
+      expect(body).toBe(
+        '<p>Before</p>\n<div data-tv-size-calculator="2.5|full-hd"></div>\n<p>After</p>\n'
+      )
+    })
+
+    it('renders the three TV widgets of the Black Friday article', async () => {
+      const rawbody = readFileSync(
+        resolve(
+          process.cwd(),
+          'content/blog/fr/black-friday-tv-reperer-fausses-promotions.md'
+        ),
+        'utf-8'
+      )
+      const dto = await toBlogPostDto(
+        doc({
+          path: '/blog/fr/black-friday-tv-reperer-fausses-promotions',
+          rawbody,
+        })
+      )
+
+      const markers = dto.body.match(/data-product-widget="[^"]*"/g)
+      expect(markers).toEqual([
+        'data-product-widget="tv|tv_43_inches|3"',
+        'data-product-widget="tv|tv_55_inches|3"',
+        'data-product-widget="tv|tv_65_inches|3"',
+      ])
     })
 
     it('accepts a directive without closing line, right after a paragraph', async () => {

@@ -24,8 +24,30 @@ const stripMarkdownSyntax = (value?: string | null) =>
     .replace(/\s+/g, ' ')
     .trim()
 
+export const META_DESCRIPTION_MAX_LENGTH = 155
+
+/**
+ * Clamp a meta description to the length Google shows, cutting on a word
+ * boundary and ending with an ellipsis.
+ */
+export const clampMetaDescription = (
+  value: string,
+  maxLength = META_DESCRIPTION_MAX_LENGTH
+) => {
+  if (value.length <= maxLength) {
+    return value
+  }
+
+  const cut = value.slice(0, maxLength - 1)
+  const lastSpace = cut.lastIndexOf(' ')
+  const base = lastSpace > maxLength / 2 ? cut.slice(0, lastSpace) : cut
+
+  return `${base.replace(/[\s,;:.\-–]+$/, '')}…`
+}
+
 const firstText = (...values: Array<string | null | undefined>) =>
-  values.find(value => typeof value === 'string' && value.trim().length > 0)
+  values
+    .find(value => typeof value === 'string' && value.trim().length > 0)
     ?.trim() ?? ''
 
 /**
@@ -74,8 +96,36 @@ export const resolveCategorySeoMeta = ({
 
   return {
     title,
-    description,
+    description: clampMetaDescription(description),
     ogTitle,
-    ogDescription,
+    ogDescription: clampMetaDescription(ogDescription),
+  }
+}
+
+export interface CategoryEcoscoreSeoMetaOptions {
+  /** Localised title, built from the category label. */
+  title: string
+  /** Localised description. Never the long category description. */
+  description: string
+}
+
+/**
+ * SEO metadata of the `/{vertical}/ecoscore` page. It gets its own title and
+ * description so it does not duplicate the category page (GOU-2695).
+ */
+export const resolveCategoryEcoscoreSeoMeta = ({
+  title,
+  description,
+}: CategoryEcoscoreSeoMetaOptions): CategorySeoMeta => {
+  const cleanTitle = stripMarkdownSyntax(title)
+  const cleanDescription = clampMetaDescription(
+    stripMarkdownSyntax(description)
+  )
+
+  return {
+    title: cleanTitle,
+    description: cleanDescription,
+    ogTitle: cleanTitle,
+    ogDescription: cleanDescription,
   }
 }

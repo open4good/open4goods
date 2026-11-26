@@ -54,19 +54,15 @@
       <div
         v-else-if="product"
         class="product-page__layout"
-        :class="{ 'product-page__layout--nav-collapsed': isNavCollapsed }"
+        :class="{ 'product-page__layout--nav-collapsed': navCollapsed }"
       >
-        <aside
-          class="product-page__nav"
-          :class="{ 'product-page__nav--mobile': orientation === 'horizontal' }"
-        >
+        <aside class="product-page__nav">
           <ProductSummaryNavigation
             :sections="navigableSections"
             :admin-sections="adminNavigableSections"
             :admin-title="$t('product.navigation.adminPanel.title')"
             :admin-helper="$t('product.navigation.adminPanel.helper')"
             :active-section="activeSection"
-            :orientation="orientation"
             :aria-label="$t('product.navigation.label')"
             @navigate="scrollToSection"
             @collapse-change="handleNavCollapseChange"
@@ -144,6 +140,13 @@
             <ProductLifeTimeline :timeline="product.timeline" />
           </section>
 
+          <ProductSizeGuide
+            v-if="categoryDetail"
+            class="product-page__section"
+            :vertical-id="categoryDetail.id"
+            :indexed-attributes="product.attributes?.indexedAttributes"
+          />
+
           <section
             v-if="showAlternativesSection"
             :id="sectionIds.alternatives"
@@ -155,6 +158,16 @@
               :popular-attributes="categoryDetail?.popularAttributes ?? []"
               :subtitle-params="alternativesSubtitleParams"
               @alternatives-updated="handleAlternativesUpdated"
+            />
+          </section>
+
+          <section class="product-page__section">
+            <ProductRelatedLinks
+              :products="relatedLinks.products"
+              :sub-category="relatedLinks.subCategory"
+              :vertical-home-url="verticalHomeUrl"
+              :vertical-title="normalizedVerticalTitle"
+              :guides="categoryDetail?.guides ?? []"
             />
           </section>
 
@@ -195,6 +208,17 @@
             <ProductDocumentationSection :pdfs="product.resources.pdfs" />
           </section>
 
+          <!-- Last public section, rendered from the SSR payload: it never
+               pushes content already displayed (CLS, GOU-2302). Absent when
+               no source declares a licence or an attribution. -->
+          <section
+            v-if="attributedSources.length"
+            :id="sectionIds.sources"
+            class="product-page__section"
+          >
+            <ProductSourcesSection :sources="attributedSources" />
+          </section>
+
           <section
             v-if="showAdminSection"
             :id="sectionIds.adminPanel"
@@ -222,10 +246,10 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  hydrateOnVisible,
   ref,
   watch,
 } from 'vue'
-import { useDisplay } from 'vuetify'
 import { createError } from 'h3'
 import {
   mdiAlertCircleOutline,
@@ -245,7 +269,6 @@ import type {
   AggregationResponseDto,
   AttributeConfigDto,
   CommercialEvent,
-  FilterRequestDto,
   ProductIndexedAttributeDto,
   ProductDto,
   ProductReferenceDto,
@@ -254,6 +277,7 @@ import type {
 } from '~~/shared/api-client'
 import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import { normalizeTimestamp } from '~/utils/date-parsing'
+import { PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY } from '~/constants/product-navigation'
 import { isDataQualityBelowCategoryAverage } from '~/utils/_product-verdict'
 import { resolveImpactScoreV2 } from '~/utils/_impact-score-v2'
 import type { ScoreView } from '~/components/product/impact/impact-types'
@@ -265,37 +289,53 @@ import { buildProductMeta } from '~/utils/seo/product-meta'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
+import ProductSizeGuide from '~/components/product/ProductSizeGuide.vue'
 import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.vue'
-import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
+import {
+  attributedProductSources,
+  provideProductSources,
+} from '~/composables/useProductSources'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from 'vue-i18n'
-import { buildCategoryHash } from '~/utils/_category-filter-state'
 import { resolveScoreNumericValue } from '~/utils/score-values'
 import { formatBrandModelTitle, humanizeSlug } from '~/utils/_product-title'
 import { resolveProductTitle } from '~/utils/_product-title-resolver'
+import ProductRelatedLinks from '~/components/product/ProductRelatedLinks.vue'
+import { useProductRelatedLinks } from '~/composables/product/useProductRelatedLinks'
 import {
   buildImpactAggregateAnchorId,
   buildImpactScoreGroups,
 } from '~/components/product/impact/impact-score-groups'
 import { transformRadarValue } from '~/utils/radar-utils'
 
+const ProductPriceSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductPriceSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
 const ProductStickyPriceBanner = defineAsyncComponent(
   () => import('~/components/product/ProductStickyPriceBanner.vue')
 )
 const ProductAttributesSection = defineAsyncComponent(
   () => import('~/components/product/ProductAttributesSection.vue')
 )
-const ProductImpactSection = defineAsyncComponent(
-  () => import('~/components/product/ProductImpactSection.vue')
-)
-const ProductAlternatives = defineAsyncComponent(
-  () => import('~/components/product/impact/ProductAlternatives.vue')
-)
-const ProductDocumentationSection = defineAsyncComponent(
-  () => import('~/components/product/ProductDocumentationSection.vue')
-)
+const ProductImpactSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductImpactSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductAlternatives = defineAsyncComponent({
+  loader: () => import('~/components/product/impact/ProductAlternatives.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductDocumentationSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductDocumentationSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductSourcesSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductSourcesSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
 )
@@ -315,7 +355,6 @@ const { $fetch: csrfFetch } = useNuxtApp()
 const { t, locale } = useI18n()
 const { isLoggedIn } = useAuth()
 const { y: scrollY } = useWindowScroll()
-const display = useDisplay()
 
 const isStickyBannerOpen = ref(false)
 
@@ -337,6 +376,8 @@ const PRODUCT_COMPONENTS = [
   'eprel',
   'attributes',
   'timeline',
+  // Sources with their licence and attribution (GOU-2302).
+  'datasources',
 ].join(',')
 
 const impactSectionRef = ref<HTMLElement | null>(null)
@@ -428,6 +469,14 @@ if (error.value?.statusCode === 404) {
 }
 
 const product = computed(() => productData.value)
+
+// Licence and portal of each source, read by every sourcing tooltip (GOU-2302).
+provideProductSources(() => product.value?.datasources?.sources)
+// Sources credited in the "Sources" block: those declaring a licence or an
+// attribution only.
+const attributedSources = computed(() =>
+  attributedProductSources(product.value?.datasources?.sources)
+)
 
 if (product.value?.fullSlug) {
   const currentPath = route.path.startsWith('/') ? route.path : `/${route.path}`
@@ -597,6 +646,9 @@ const { data: aggregationsData } = await useAsyncData<
 
 const aggregations = computed(() => aggregationsData.value ?? {})
 
+// Crawlable internal links (sub-category, sibling products, guides), resolved during SSR.
+const relatedLinks = await useProductRelatedLinks(product, categoryDetail)
+
 const productTitle = computed(() => {
   const rawSlug = product.value?.slug ?? ''
   const normalizedSlug = rawSlug.trim()
@@ -619,6 +671,23 @@ const productTitle = computed(() => {
   })
 
   return resolvedTitle || slugFallback || gtinFallback
+})
+
+// Structured-data name: the brand casing is kept as in the data (no forced
+// capitals), unlike the display title.
+const productJsonLdName = computed(() => {
+  if (!product.value) {
+    return productTitle.value
+  }
+
+  return (
+    resolveProductTitle(product.value, locale.value, {
+      preferH1Title: true,
+      gtinFallback: product.value.gtin
+        ? t('product.meta.gtinFallback', { gtin: product.value.gtin })
+        : '',
+    }) || productTitle.value
+  )
 })
 
 const heroPopularAttributes = computed(
@@ -661,30 +730,6 @@ const normalizedVerticalTitle = computed(() => {
 
     return title.toLowerCase()
   }
-})
-
-const BRAND_FILTER_FIELD = 'attributes.referentielAttributes.BRAND' as const
-
-const normalizedCategoryPath = computed(() => {
-  const raw =
-    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
-    categoryDetail.value?.verticalHomeUrl ??
-    null ??
-    null
-
-  if (!raw) {
-    return null
-  }
-
-  const trimmed = raw.toString().trim()
-  if (!trimmed.length) {
-    return null
-  }
-
-  const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
-  const sanitized = withLeadingSlash.split('?')[0]?.split('#')[0]
-
-  return sanitized?.length ? sanitized : withLeadingSlash
 })
 
 const handleAlternativesUpdated = (payload: {
@@ -832,109 +877,31 @@ const productMetaTitle = computed(() => {
     : productTitle.value
 })
 
-const brandBreadcrumb = computed<ProductHeroBreadcrumb | null>(() => {
-  const brand = productBrand.value
-  if (!brand.length) {
-    return null
-  }
-
-  const basePath = normalizedCategoryPath.value
-  if (!basePath) {
-    return { title: brand }
-  }
-
-  const filters: FilterRequestDto = {
-    filters: [
-      {
-        field: BRAND_FILTER_FIELD,
-        operator: 'term',
-        terms: [brand],
-      },
-    ],
-  }
-
-  const hash = buildCategoryHash({ filters })
-  const link = `${basePath}${hash}`
-
-  return {
-    title: brand,
-    link,
-  }
-})
-
+// Home → vertical → sub-category (→ product, appended by the hero). The taxonomy
+// `/categories/**` is deliberately left out: those pages are thin and not indexed.
 const productBreadcrumbs = computed<ProductHeroBreadcrumb[]>(() => {
-  const breadcrumbs = categoryDetail.value?.breadCrumb ?? []
-  const categoryFullSlug =
-    (categoryDetail.value as { fullSlug?: string | null } | null)?.fullSlug ??
-    null
-
-  const resolvedCategories = breadcrumbs.reduce<ProductHeroBreadcrumb[]>(
-    (acc, crumb, index, array) => {
-      const rawTitle = crumb?.title ?? crumb?.link ?? ''
-      const title = rawTitle.toString().trim()
-      if (!title.length) {
-        return acc
-      }
-
-      const crumbFullSlug =
-        (crumb as { fullSlug?: string | null }).fullSlug ?? null
-      const rawLink =
-        crumbFullSlug ??
-        (index === array.length - 1
-          ? (categoryFullSlug ?? crumb?.link)
-          : crumb?.link) ??
-        null
-
-      const trimmed = rawLink?.toString().trim() ?? ''
-      const normalized = trimmed
-        ? trimmed.startsWith('http')
-          ? trimmed
-          : trimmed.startsWith('/')
-            ? trimmed
-            : `/${trimmed}`
-        : undefined
-
-      acc.push({
-        title,
-        link: normalized ?? undefined,
-      })
-
-      return acc
-    },
-    []
-  )
-
-  const brandCrumb = brandBreadcrumb.value
-  if (brandCrumb) {
-    const duplicateIndex = resolvedCategories.findIndex(
-      entry =>
-        entry.title.trim().toLowerCase() ===
-        brandCrumb.title.trim().toLowerCase()
-    )
-
-    if (duplicateIndex >= 0) {
-      resolvedCategories.splice(duplicateIndex, 1, brandCrumb)
-    } else {
-      resolvedCategories.push(brandCrumb)
-    }
+  if (!categoryDetail.value) {
+    return []
   }
 
-  // Fallback: If no category breadcrumbs (uncategorized), ensure we have Home
-  if (
-    resolvedCategories.length &&
-    (!resolvedCategories[0].link || resolvedCategories[0].link !== '/')
-  ) {
-    // Check if the first item effectively is Home (e.g. title is Home but link is something else? Unlikely)
-    // Simply check if we started with category crumbs. If categoryDetail is null, resolvedCategories came from empty array.
-    if (!categoryDetail.value) {
-      resolvedCategories.unshift({
-        title: t('navigation.home'), // Ensure key exists or use fallback
-        link: '/',
-      })
-    }
+  const crumbs: ProductHeroBreadcrumb[] = [
+    { title: t('navigation.home'), link: '/' },
+  ]
+
+  const homeUrl = verticalHomeUrl.value
+  if (homeUrl) {
+    crumbs.push({
+      title: verticalTitle.value || homeUrl,
+      link: homeUrl.startsWith('/') ? homeUrl : `/${homeUrl}`,
+    })
   }
 
-  return resolvedCategories
+  const subCategory = relatedLinks.value.subCategory
+  if (subCategory) {
+    crumbs.push({ title: subCategory.title, link: subCategory.href })
+  }
+
+  return crumbs
 })
 
 const productMetaDescription = computed(() => {
@@ -1758,6 +1725,7 @@ const sectionIds = {
   attributes: 'caracteristiques',
   vigilance: 'vigilance',
   docs: 'documentation',
+  sources: 'sources',
   adminPanel: 'admin-panel',
   adminJson: 'admin-json',
   adminDatasources: 'admin-datasources',
@@ -1949,14 +1917,12 @@ const sections = computed<NavigableSection[]>(() => [
 const navigableSections = computed(() => primarySections.value)
 const adminNavigableSections = computed(() => adminSections.value)
 
-const orientation = computed<'vertical' | 'horizontal'>(() =>
-  display.mdAndDown.value ? 'horizontal' : 'vertical'
-)
-
+// The navigation layout (sticky sidebar or horizontal bar) is driven by CSS media
+// queries only, so the server HTML never depends on the viewport. Binding a
+// layout class to `useDisplay` (0px wide during SSR and hydration) rendered the
+// horizontal bar first on desktop and shifted the page (CLS).
+// The collapsed grid only applies from the `lg` breakpoint (see the styles).
 const navCollapsed = ref(false)
-const isNavCollapsed = computed(
-  () => navCollapsed.value && orientation.value === 'vertical'
-)
 
 const handleNavCollapseChange = (collapsed: boolean) => {
   navCollapsed.value = collapsed
@@ -2109,7 +2075,10 @@ const scrollToSection = async (sectionId: string) => {
 
   activeSection.value = targetId
 
-  const offset = orientation.value === 'horizontal' ? 96 : 120
+  const offset = window.matchMedia?.(PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY)
+    .matches
+    ? 96
+    : 120
   const top = element.getBoundingClientRect().top + window.scrollY - offset
   window.scrollTo({ top, behavior: 'smooth' })
 }
@@ -2226,7 +2195,7 @@ const productJsonLdGraph = computed(() => {
 
   return buildProductJsonLdGraph({
     product: product.value,
-    productTitle: productTitle.value,
+    productTitle: productJsonLdName.value,
     canonicalUrl: canonicalUrl.value,
     locale: locale.value,
     breadcrumbs: jsonLdBreadcrumbs.value,
@@ -2582,9 +2551,15 @@ useHead(() => {
   gap: 2rem;
 }
 
-.product-page__layout--nav-collapsed {
-  grid-template-columns: minmax(40px, 40px) minmax(0, 1fr);
-  gap: 1rem;
+@media (min-width: 1280px) {
+  .product-page__layout--nav-collapsed {
+    grid-template-columns: minmax(40px, 40px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .product-page__layout--nav-collapsed .product-page__nav {
+    width: 40px;
+  }
 }
 
 .product-page__nav {
@@ -2592,17 +2567,6 @@ useHead(() => {
   top: 108px; /* 64px header + 44px banner */
   align-self: start;
   height: fit-content;
-}
-
-.product-page__layout--nav-collapsed .product-page__nav {
-  width: 40px;
-}
-
-.product-page__nav--mobile {
-  position: static;
-  top: auto;
-  transform: none;
-  align-self: stretch;
 }
 
 .product-page__content {
@@ -2725,7 +2689,8 @@ useHead(() => {
   margin-inline-start: 0.5rem;
 }
 
-@media (max-width: 1280px) {
+/* PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY (~/constants/product-navigation). */
+@media (max-width: 1279.98px) {
   .product-page__layout {
     grid-template-columns: minmax(0, 1fr);
   }

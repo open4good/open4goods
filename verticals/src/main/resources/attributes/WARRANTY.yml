@@ -16,7 +16,7 @@ name:
   fr: "Durée de garantie"
 suffix:
   default: "Year(s)"
-  fr: "An(s)"
+  fr: "an(s)"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

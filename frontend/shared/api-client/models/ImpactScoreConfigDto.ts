@@ -68,18 +68,6 @@ export interface ImpactScoreConfigDto {
    * @memberof ImpactScoreConfigDto
    */
   audit?: ImpactScoreAuditDto | null
-  /**
-   * Prompt used to produce the YAML configuration.
-   * @type {string}
-   * @memberof ImpactScoreConfigDto
-   */
-  yamlPrompt?: string
-  /**
-   * AI response that generated the configuration.
-   * @type {string}
-   * @memberof ImpactScoreConfigDto
-   */
-  aiJsonResponse?: string
 }
 
 /**
@@ -129,9 +117,6 @@ export function ImpactScoreConfigDtoFromJSONTyped(
       json['audit'] == null
         ? undefined
         : ImpactScoreAuditDtoFromJSON(json['audit']),
-    yamlPrompt: json['yamlPrompt'] == null ? undefined : json['yamlPrompt'],
-    aiJsonResponse:
-      json['aiJsonResponse'] == null ? undefined : json['aiJsonResponse'],
   }
 }
 
@@ -159,7 +144,5 @@ export function ImpactScoreConfigDtoToJSONTyped(
           ),
     methodologyRevision: value['methodologyRevision'],
     audit: ImpactScoreAuditDtoToJSON(value['audit']),
-    yamlPrompt: value['yamlPrompt'],
-    aiJsonResponse: value['aiJsonResponse'],
   }
 }

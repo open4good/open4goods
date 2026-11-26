@@ -571,6 +571,35 @@ describe('ProductAttributesSection', () => {
     expect(richValue.text()).toContain('2 kg')
   })
 
+  it('appends the configured unit to indexed numeric values', async () => {
+    const product = buildProduct()
+    product.attributes = {
+      ...product.attributes,
+      indexedAttributes: {
+        WIDTH: { name: 'Width', value: '59.5', numericValue: 59.5 },
+        WARRANTY: { name: 'Warranty', value: '2', numericValue: 2 },
+        YEAR: { name: 'Year', value: '2023', numericValue: 2023 },
+      },
+    } as ProductDto['attributes']
+
+    const wrapper = await mountComponent(product, {
+      attributeConfigs: [
+        { key: 'WIDTH', unit: 'cm' },
+        { key: 'WARRANTY', suffix: 'year(s)' },
+        { key: 'YEAR' },
+      ],
+    })
+
+    const mainText = wrapper
+      .findAll('table.v-table-stub tbody tr')
+      .map(row => row.text())
+      .join(' ')
+    expect(mainText).toContain('59.5\u00a0cm')
+    expect(mainText).toContain('2\u00a0year(s)')
+    expect(mainText).toContain('2023')
+    expect(mainText).not.toContain('2,023')
+  })
+
   it('formats identity dates in UTC whatever the runtime time zone (SSR/client hydration)', async () => {
     const originalTimeZone = process.env.TZ
     // Browser time zone ahead of the UTC server: 23:30 UTC is already the next day.

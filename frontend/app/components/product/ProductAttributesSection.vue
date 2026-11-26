@@ -804,6 +804,10 @@ import {
   mdiViewList,
 } from '@mdi/js'
 import { useAuth } from '~/composables/useAuth'
+import {
+  appendAttributeUnit,
+  resolveAttributeUnit,
+} from '~/utils/_product-attributes'
 import ProductAttributeSourcingLabel from '~/components/product/attributes/ProductAttributeSourcingLabel.vue'
 import ProductAttributesDetailCard from '~/components/product/attributes/ProductAttributesDetailCard.vue'
 
@@ -1106,6 +1110,20 @@ const formatMainAttributeValue = (
   return null
 }
 
+const attributeUnitsByKey = computed(() =>
+  (props.attributeConfigs ?? []).reduce<Map<string, string>>(
+    (units, config) => {
+      const key = normalizeAttributeKey(config?.key)
+      const unit = resolveAttributeUnit(config)
+      if (key && unit) {
+        units.set(key, unit)
+      }
+      return units
+    },
+    new Map()
+  )
+)
+
 const mainAttributes = computed<MainAttributeRow[]>(() => {
   const entries =
     (resolvedAttributes.value?.indexedAttributes as Record<
@@ -1116,11 +1134,16 @@ const mainAttributes = computed<MainAttributeRow[]>(() => {
   return Object.entries(entries).reduce<MainAttributeRow[]>(
     (accumulator, [key, attribute]) => {
       const fallbackValue = formatMainAttributeValue(attribute)
-      const displayValue = resolveDisplayValue(attribute, fallbackValue)
+      const rawDisplayValue = resolveDisplayValue(attribute, fallbackValue)
 
-      if (!displayValue) {
+      if (!rawDisplayValue) {
         return accumulator
       }
+
+      const unit = attributeUnitsByKey.value.get(
+        normalizeAttributeKey(key) ?? ''
+      )
+      const displayValue = appendAttributeUnit(rawDisplayValue, unit, n)
 
       const label =
         typeof attribute?.name === 'string' && attribute.name.trim().length
@@ -1221,6 +1244,23 @@ const getImplementationAims = (
   return aims
 }
 
+// Raw feed description columns ("Product short description"): free text in the
+// merchant's language, never a labelled attribute. The description is shown by
+// the product text blocks, so these keys are not listed as attributes.
+const RAW_DESCRIPTION_KEYS = new Set([
+  'DESCRIPTION',
+  'SHORT_DESCRIPTION',
+  'LONG_DESCRIPTION',
+  'PRODUCT_DESCRIPTION',
+  'PRODUCT_SHORT_DESCRIPTION',
+  'DESCRIPTIF',
+])
+
+const isRawDescriptionKey = (value: unknown): boolean => {
+  const key = normalizeAttributeKey(value)
+  return key ? RAW_DESCRIPTION_KEYS.has(key.replace(/[\s-]+/g, '_')) : false
+}
+
 const auditRows = computed<AuditAttributeRow[]>(() => {
   const configs = props.attributeConfigs ?? []
   const indexedAttributes =
@@ -1310,6 +1350,8 @@ const auditRows = computed<AuditAttributeRow[]>(() => {
   const allRawAttributes = Array.from(rawAttributesMap.values())
 
   allRawAttributes.forEach((attr, index) => {
+    if (isRawDescriptionKey(attr.name)) return
+
     // Find matching config
     const matchedConfig = configs.filter(config =>
       checkAttributeMatchesConfig(attr, config)

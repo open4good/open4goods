@@ -39,6 +39,7 @@ import org.open4goods.nudgerfrontapi.config.properties.OfferFreshnessProperties;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.AggregationBucketDto;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.search.FilterRequestDto;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchResult;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -83,7 +84,7 @@ class SearchServiceTest {
         frElements.setVerticalHomeUrl("televiseurs");
         tvConfig.setI18n(Map.of("fr", frElements));
 
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(tvConfig));
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(tvConfig));
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
 
         searchService.initializeSuggestIndex();
@@ -106,12 +107,63 @@ class SearchServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    void globalSearch_shouldHideDisabledVertical_inCtaAndGroups() {
+        VerticalConfig enabled = verticalConfig("tv", "Téléviseurs", "televiseurs", true);
+        VerticalConfig disabled = verticalConfig("frz", "Congélateurs", "congelateurs", false);
+        // Same filtering as VerticalsConfigService.getConfigsWithoutDefault(boolean)
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(enabled));
+        when(verticalsConfigService.getConfigById("tv")).thenReturn(enabled);
+        when(verticalsConfigService.getConfigById("frz")).thenReturn(disabled);
+        when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
+        searchService.initializeSuggestIndex();
+
+        long now = System.currentTimeMillis();
+        SearchHits<Product> hits = mock(SearchHits.class);
+        SearchHit<Product> tvHit = freshHit(1L, "tv", now);
+        SearchHit<Product> frzHit = freshHit(2L, "frz", now);
+        when(hits.isEmpty()).thenReturn(false);
+        when(hits.getSearchHits()).thenReturn(List.of(tvHit, frzHit));
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(hits);
+        when(productMappingService.mapProduct(any(), any(), any(), any(), anyBoolean()))
+                .thenReturn(mock(ProductDto.class));
+
+        GlobalSearchResult hidden = searchService.globalSearch("congélateurs", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+        assertThat(hidden.verticalCta()).isNull();
+        assertThat(hidden.verticalGroups()).extracting(g -> g.verticalId()).containsExactly("tv");
+    }
+
+    private static VerticalConfig verticalConfig(String id, String title, String url, boolean enabled) {
+        VerticalConfig config = new VerticalConfig();
+        config.setId(id);
+        config.setEnabled(enabled);
+        ProductI18nElements fr = new ProductI18nElements();
+        fr.setVerticalHomeTitle(title);
+        fr.setVerticalHomeUrl(url);
+        config.setI18n(Map.of("fr", fr));
+        return config;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static SearchHit<Product> freshHit(long id, String vertical, long now) {
+        Product product = new Product(id);
+        product.setVertical(vertical);
+        product.setPrice(new AggregatedPrices());
+        product.getPrice().getOffers().add(OfferFreshnessServiceTest.offer("fnac", 12.0,
+                ProductCondition.NEW, now - Duration.ofHours(1).toMillis()));
+        SearchHit<Product> hit = mock(SearchHit.class);
+        when(hit.getContent()).thenReturn(product);
+        return hit;
+    }
+
+    @Test
     void globalSearch_shouldNotReturnVerticalCta_whenQueryDoesNotMatchStrictly() {
         // GIVEN
         VerticalConfig tvConfig = new VerticalConfig();
         tvConfig.setId("tv");
         tvConfig.setI18n(Map.of("fr", new ProductI18nElements()));
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(List.of(tvConfig));
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of(tvConfig));
         when(apiProperties.getResourceRootPath()).thenReturn("https://cdn.nudger.fr");
 
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
@@ -132,7 +184,7 @@ class SearchServiceTest {
     @Test
     void globalSearch_shouldBuildOnlyLexicalQueries_whenNoVerticalCandidates() {
         // GIVEN initial setup
-        when(verticalsConfigService.getConfigsWithoutDefault()).thenReturn(Collections.emptyList());
+        when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(Collections.emptyList());
         searchService.initializeSuggestIndex();
 
         SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f, java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
@@ -531,6 +583,7 @@ class SearchServiceTest {
 
     @Test
     void globalSearch_setsAccessoriesApartFromTheLongTailAndDemotesThemInGroups() throws Exception {
+        lenient().when(verticalsConfigService.getConfigById("coffee-machine")).thenReturn(verticalConfig("coffee-machine", "t", "u", true));
         Product tv = GlobalSearchRelevanceTest.displayable(10, "Machine à café Philips grain", now());
         tv.setVertical("coffee-machine");
         Product machine = GlobalSearchRelevanceTest.displayable(1, "Machine à café Delonghi Magnifica", now());
@@ -551,6 +604,23 @@ class SearchServiceTest {
         assertThat(verticalQuery.getQuery().boosting().positive().isFunctionScore()).isTrue();
         assertThat(queries.stream().filter(SearchServiceTest::isLongTailQuery)).hasSize(1);
         assertThat(queries.stream().filter(SearchServiceTest::isAccessoryQuery)).hasSize(1);
+    }
+
+    @Test
+    void globalSearch_dropsVerticalProductsWithoutFreshOffer() throws Exception {
+        lenient().when(verticalsConfigService.getConfigById("tv")).thenReturn(verticalConfig("tv", "t", "u", true));
+        Product withOffer = GlobalSearchRelevanceTest.displayable(10, "Téléviseur LG OLED", now());
+        withOffer.setVertical("tv");
+        Product expired = GlobalSearchRelevanceTest.displayable(11, "Téléviseur Samsung HG50BU800EU",
+                now() - Duration.ofDays(60).toMillis());
+        expired.setVertical("tv");
+        stubGlobalSearch(List.of(expired, withOffer), List.of(), List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("televiseur", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(result.verticalGroups()).hasSize(1);
+        assertThat(gtins(result.verticalGroups().get(0).results())).containsExactly(10L);
     }
 
     @Test
@@ -609,6 +679,49 @@ class SearchServiceTest {
         assertThat(result.missingVerticalTotalElements()).isEqualTo(5);
         assertThat(result.missingVerticalTotalPages()).isEqualTo(3);
         assertThat(result.missingVerticalPageNumber()).isEqualTo(1);
+    }
+
+    @Test
+    void globalSearch_setsForeignHeadNamesApartFromTheLongTail() throws Exception {
+        Product washer = GlobalSearchRelevanceTest.displayable(1, "Lave-linge Samsung WW10T654DLH", now());
+        washer.setDatasourceCategories(Set.of(
+                "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE HUBLOT | LAVE-LINGE | LAVE-LINGE HUBLOT"));
+        Product spring = GlobalSearchRelevanceTest.displayable(2, "Ressort Lave-linge - Twinstar", now());
+        // Categorized part without accessory marker in its category (GOU-2497).
+        Product stackingKit = GlobalSearchRelevanceTest.displayable(3,
+                "Kit de superposition lave-linge seche-linge unite de rangement au-dessus du lave-linge", now());
+        stackingKit.setDatasourceCategories(Set.of("ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > KIT DE"
+                + " SUPERPOSITION | LAVAGE-SECHAGE | KIT DE SUPERPOSITION"));
+        Product filter = GlobalSearchRelevanceTest.displayable(4, "Filtre pour lave-linge", now());
+        Product dryer = GlobalSearchRelevanceTest.displayable(5, "Lave-linge séchant LG F964V42IXRS", now());
+        dryer.setDatasourceCategories(Set.of(
+                "GROS ELECTROMENAGER / LAVE-LINGE / LAVE-LINGE SECHANT | LAVE-LINGE | LAVE-LINGE SECHANT"));
+        List<NativeQuery> queries = stubGlobalSearch(List.of(), List.of(spring, washer, stackingKit, dryer),
+                List.of(filter));
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("lave-linge", DomainLanguage.fr, null,
+                org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(1L, 5L);
+        assertThat(result.missingVerticalTotalElements()).isEqualTo(2);
+        // Merged by score: the spring (4.0) and the kit (2.0) before the filter (1.0).
+        assertThat(gtins(result.accessoryResults())).containsExactly(2L, 3L, 4L);
+        NativeQuery longTail = queries.stream().filter(SearchServiceTest::isLongTailQuery).findFirst().orElseThrow();
+        assertThat(longTail.getSourceFilter().getIncludes()).contains("datasourceCategories");
+    }
+
+    @Test
+    void globalSearch_queryNamingAnAccessoryKeepsCategorizedForeignHeadNames() throws Exception {
+        Product stackingKit = GlobalSearchRelevanceTest.displayable(3,
+                "Kit de superposition lave-linge seche-linge unite de rangement au-dessus du lave-linge", now());
+        stackingKit.setDatasourceCategories(Set.of("ELECTROMENAGER > LAVAGE-SECHAGE > KIT DE SUPERPOSITION"));
+        stubGlobalSearch(List.of(), List.of(stackingKit), List.of());
+
+        GlobalSearchResult result = serviceWithAccessoryTerms().globalSearch("filtre lave-linge", DomainLanguage.fr,
+                null, org.springframework.data.domain.Sort.unsorted(), null);
+
+        assertThat(gtins(result.missingVerticalResults())).containsExactly(3L);
+        assertThat(result.accessoryResults()).isEmpty();
     }
 
     @Test
@@ -702,5 +815,87 @@ class SearchServiceTest {
 
     private static long now() {
         return System.currentTimeMillis();
+    }
+
+    private static final String WEIGHT_FIELD = "attributes.indexed.WEIGHT.numericValue";
+
+    /**
+     * Runs a search with the given filters and returns the Elasticsearch query sent to the repository.
+     */
+    private String searchQueryWithFilters(FilterRequestDto filters) {
+        SearchHits<Product> emptyHits = new SearchHitsImpl<Product>(0L, TotalHitsRelation.EQUAL_TO, 0.0f,
+                java.time.Duration.ZERO, null, null, java.util.Collections.emptyList(), null, null, null);
+        when(repository.search(any(), eq(ProductRepository.MAIN_INDEX_NAME))).thenReturn(emptyHits);
+
+        searchService.search(org.springframework.data.domain.PageRequest.of(0, 20), null, null, null, filters);
+
+        ArgumentCaptor<org.springframework.data.elasticsearch.core.query.Query> queryCaptor = ArgumentCaptor
+                .forClass(org.springframework.data.elasticsearch.core.query.Query.class);
+        verify(repository).search(queryCaptor.capture(), eq(ProductRepository.MAIN_INDEX_NAME));
+        return ((NativeQuery) queryCaptor.getValue()).getQuery().toString();
+    }
+
+    @Test
+    void search_exclusiveUpperBoundExcludesTheBoundValue() {
+        // LOWER_THAN 8 (subcategory "moins de 8 kg"): a product weighing exactly 8 kg must not match (GOU-2586)
+        FilterRequestDto.Filter lowerThan8 = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, null, 8.0, null, true);
+
+        String query = searchQueryWithFilters(new FilterRequestDto(List.of(lowerThan8), null));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"lt\":8.0}}}")
+                .doesNotContain("\"lte\":8.0");
+    }
+
+    @Test
+    void search_exclusiveBoundsInAShouldGroupUseGtAndLt() {
+        FilterRequestDto.Filter between8And10 = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 10.0, true, true);
+
+        String query = searchQueryWithFilters(
+                new FilterRequestDto(null, List.of(new FilterRequestDto.FilterGroup(null, List.of(between8And10)))));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"gt\":8.0,\"lt\":10.0}}}");
+    }
+
+    @Test
+    void search_rangeBoundsStayInclusiveByDefault() {
+        // Manual range sliders send neither minExclusive nor maxExclusive
+        FilterRequestDto.Filter slider = new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 10.0, null, null);
+        FilterRequestDto.Filter explicitInclusive = new FilterRequestDto.Filter("price.minPrice.price",
+                FilterRequestDto.FilterOperator.range, null, 100.0, 500.0, false, false);
+
+        String query = searchQueryWithFilters(new FilterRequestDto(List.of(slider, explicitInclusive), null));
+
+        assertThat(query).contains("{\"range\":{\"" + WEIGHT_FIELD + "\":{\"gte\":8.0,\"lte\":10.0}}}")
+                .contains("{\"range\":{\"price.minPrice.price\":{\"gte\":100.0,\"lte\":500.0}}}");
+    }
+
+    @Test
+    void normalizeFilters_keepsTheStricterBoundWhenMergingRanges() {
+        FilterRequestDto merged = searchService.normalizeFilters(new FilterRequestDto(List.of(
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        null, null),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        true, null),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, null, 9.0,
+                        null, true)), null));
+
+        // Same lower bound: the exclusive one wins. Lower upper bound: it replaces 10 with its own exclusivity.
+        assertThat(merged.filters()).containsExactly(new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 8.0, 9.0, true, true));
+    }
+
+    @Test
+    void normalizeFilters_dropsTheExclusivityOfAReplacedBound() {
+        FilterRequestDto merged = searchService.normalizeFilters(new FilterRequestDto(List.of(
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 8.0, 10.0,
+                        true, true),
+                new FilterRequestDto.Filter(WEIGHT_FIELD, FilterRequestDto.FilterOperator.range, null, 9.0, 9.5,
+                        null, null)), null));
+
+        assertThat(merged.filters()).containsExactly(new FilterRequestDto.Filter(WEIGHT_FIELD,
+                FilterRequestDto.FilterOperator.range, null, 9.0, 9.5, null, null));
     }
 }

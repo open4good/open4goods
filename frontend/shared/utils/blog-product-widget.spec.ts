@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 
 import {
   parseProductWidgetAttributes,
+  parseTvSizeCalculatorAttributes,
+  renderTvSizeCalculatorMarker,
   renderProductWidgetMarker,
   splitBlogBody,
 } from './blog-product-widget'
@@ -73,6 +75,41 @@ describe('blog-product-widget', () => {
         splitBlogBody(renderProductWidgetMarker({ vertical: 'oven', top: 3 }))
       ).toEqual([
         { type: 'product-widget', widget: { vertical: 'oven', top: 3 } },
+      ])
+    })
+  })
+
+  describe('tv-size-calculator', () => {
+    it('reads the default distance and resolution', () => {
+      expect(
+        parseTvSizeCalculatorAttributes(
+          'default-distance="2,5" default-resolution="full-hd"'
+        )
+      ).toEqual({ distance: 2.5, resolution: 'full-hd' })
+    })
+
+    it('falls back to 3 m / 4K on missing or invalid values', () => {
+      const defaults = { distance: 3, resolution: '4k' }
+      expect(parseTvSizeCalculatorAttributes('')).toEqual(defaults)
+      expect(
+        parseTvSizeCalculatorAttributes(
+          'default-distance="99" default-resolution="<x>"'
+        )
+      ).toEqual(defaults)
+    })
+
+    it('round-trips through the marker in splitBlogBody', () => {
+      const marker = renderTvSizeCalculatorMarker({
+        distance: 2,
+        resolution: 'full-hd',
+      })
+      expect(splitBlogBody(`<p>A</p>${marker}<p>B</p>`)).toEqual([
+        { type: 'html', content: '<p>A</p>' },
+        {
+          type: 'tv-size-calculator',
+          calculator: { distance: 2, resolution: 'full-hd' },
+        },
+        { type: 'html', content: '<p>B</p>' },
       ])
     })
   })

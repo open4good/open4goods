@@ -28,8 +28,7 @@
           />
           <div
             v-if="description"
-            class="category-hero__description animate-in-up"
-            style="--delay: 160ms"
+            class="category-hero__description"
           >
             <MDC :value="description" />
           </div>

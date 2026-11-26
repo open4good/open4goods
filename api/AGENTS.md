@@ -49,6 +49,15 @@ mvn --offline -pl api -am clean install
   (`metriks-key`, secret `API_METRIKS_KEY`, GOU-1412) → `ROLE_METRIKS` seul, et seulement sur un chemin
   `/api/metriks/<segment>` (hors context path, segments littéraux) : ailleurs elle n'authentifie rien (401).
   `MetriksController` accepte `XWIKIADMINGROUP` ou `ROLE_METRIKS`. Sans `metriks-key`, aucune clé Metriks.
+- Metriks SEO par gabarit et PSI (GOU-2703) : `GET /api/metriks/seo-templates` classe les pages Search Console par
+  motif d'URL (`SeoTemplate` : fiche, categorie, sous-categorie, blog, guide, opendata, pdf, autre ; sous-categorie et
+  guide par categorie partagent la forme `/<categorie>/<slug>`), sur 35 jours. Alerte `seo.gsc.template.alerts` (valeur =
+  nombre de gabarits dont les impressions des 7 derniers jours sont a moins de 50 % de la moyenne des 28 jours
+  precedents ramenee a 7 jours ; 0 = pas d'alerte) et KPI site hors billet "taille de TV"
+  (`SeoTemplateAnalyzer.DEFAULT_EXCLUDED_PATHS`). `GET /api/metriks/psi` sert le dernier releve PageSpeed Insights
+  mobile de 10 URL (`metriks.psi.paths`), calcule chaque lundi 04:15 (`metriks.psi.cron`) ou par
+  `POST /api/metriks/psi/refresh` (cle admin seulement) ; cle `API_METRIKS_PSI_API_KEY` (`METRIKS_PSI_API_KEY`), sans cle
+  l'evenement est en erreur. Les deux endpoints sont a ajouter au provider `open4goods-api` de open4goods-config.
 - Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
   (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
   vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de
@@ -295,7 +304,7 @@ Après une reprise du run, ces compteurs ne couvrent que la partie reprise.
 
 1. Vérifier que le champ existe dans l'index : `GET products-moustik/_mapping/field/nature` doit renvoyer `keyword`.
 2. Lancer le dry-run et publier son résultat sur GOU-2234.
-3. Le CTO fixe `natureMinMarkedCategoryShare` dans `_default.yml`, puis le changement est mergé et déployé.
+3. `natureMinMarkedCategoryShare` est fixé à 0,5 dans `_default.yml` (GOU-2430) ; l'écriture attend le déploiement de ce changement.
 4. Lancer l'écriture, sans `threshold`, après le premier batch de 13 h qui suit le déploiement de #3649, hors des
    fenêtres de 13 h et de 23 h.
 
@@ -321,16 +330,25 @@ GOU-2248. `api` est le seul module qui génère les jeux GTIN et ISBN (`services
   le place pas dans la fenêtre batch (à partir de 12:30) ni dans la fenêtre de release.
 - `OpenDataController` (rôle admin) : `POST /opendata/generate` (202, ou 409 si un passage tourne ou si la génération
   est désactivée) et `GET /opendata/generation` (état du processus, non persisté).
-- Lecture ES projetée (`OpenDataService.EXPORT_SOURCE_FIELDS`) par pages de `export-page-size`, avec `page-pause`.
-  N'ajoute pas l'objet `attributes` complet ni une clé Decitre à la projection, et ne relève pas le buffer du client
+- Lecture ES projetée en deux passes, avec `page-pause` (GOU-2556) : passe principale GTIN/ISBN sur tout le catalogue
+  (`OpenDataService.EXPORT_SOURCE_FIELDS` seuls, pages de `export-page-size`, 2000), puis passe impact limitée aux
+  verticales impact (`ProductRepository.exportAllInVerticals`, `terms` sur `vertical` ; colonnes communes et
+  `ImpactDataset.sourceFields()`, pages de `impact-export-page-size`, 500). N'ajoute aucun critère impact à la passe
+  principale, ni l'objet `attributes` complet ni une clé Decitre à une projection, et ne relève pas le buffer du client
   ES (GOU-2249).
+- Progression : une ligne INFO par passe au plus toutes les `progress-log-interval` (5 min) avec produits lus, total
+  attendu, %, débit et durée (`Open data main pass: ...`, `Open data impact pass: ...`). `application.yml` garde
+  `org.open4goods.services.opendata` en INFO : beta et prod passent `org.open4goods` en WARN.
 - Un échec ne touche pas aux fichiers publiés et se voit : log `ERROR`, health `openData` DOWN, métrique
   `opendata_generation_failed`.
 - Publication sur R2 (GOU-2289, `OpenDataPublisher`) après un passage réussi, si
-  `open-data-config.publication.enabled` (faux par défaut et en bêta ; l'activation en prod est une PR dédiée).
+  `open-data-config.publication.enabled` (faux par défaut et en bêta ; vrai en prod, dans `application-prod.yml`).
   N'écris jamais un zip directement sur sa clé publique : clé `.staging/`, relecture et sha256, copie, manifests par jeu,
   `manifest.json` en dernier, suppression des anciens objets ensuite. Le garde-fou `max-bucket-size` (9 Go) reste sous
-  les 10 Go-mois gratuits. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.
+  les 10 Go-mois gratuits : ne le relève pas, réduis les jeux (GOU-2616 : `url` et `categories` retirées,
+  `last_updated` en date, guillemets au besoin, compression maximale). `WARN` et gauge
+  `opendata.publication.bucket.projected.ratio` au-delà de 80 %. Une colonne ajoutée se mesure d'abord en octets
+  compressés ; aucun filtrage de lignes sans décision. Identifiants `R2_*` : config tree rendu par `render-service-secrets.sh`, jamais en YAML.
 
 Doc : [architecture](../docs/architecture/opendata.md), [exploitation](../docs/operations/opendata-generation.md).
 
@@ -367,16 +385,37 @@ porté par une autre datasource, ni une catégorie qui ne correspond plus ne la 
 une verticale. Dénombrement et reprise des produits touchés :
 [runbook](../docs/operations/product-recreation-recovery.md).
 
+Avec `categoryVoteEnabled: true` dans `verticals/_default.yml` (GOU-2256, désactivé par défaut), la verticale sort
+d'un vote entre datasources au lieu de "première catégorie trouvée, un seul jeton d'exclusion suffit" : une
+verticale gagne si ses voix pour dépassent strictement ses voix contre, et le groupe EPREL garde la priorité. Règle,
+choix ouverts et populations touchées : [verticals/README.md](../verticals/README.md). La `nature` est calculée
+après, sans changement.
+
 Après la verticale, `onProduct` calcule `nature` (`ProductNature`, GOU-2233) avec
 `VerticalsConfigService.getNatureForCategories`, à partir des `datasourceCategories` normalisées. Clés de
 `verticals/_default.yml` : `natureNeutralCategoryFragments`, fragments retirés de chaque catégorie avant la recherche ;
 `sparePartCategoryMarkers` donne `SPARE_PART`, qui l'emporte ; `accessoryCategoryMarkers` donne `ACCESSORY`. Aucun
-marqueur : champ absent. `natureMinMarkedCategoryShare` (0 par défaut) est la part minimale des catégories distinctes
-normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il sera fixé d'après le dry-run de la reprise
-(GOU-2234), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
+marqueur : champ absent. Les marqueurs de composant PC (`BOITIER PC`, `COMPOSANT PC`, `COMPOSANTS PC`,
+`INFORMATIQUE | COMPOSANTS |`, GOU-2317) ne servent qu'au vote des verticales : ils sont aussi des fragments neutres,
+donc la nature ne change pas (`PcComponentMarkersTest` dans `verticals`). `natureMinMarkedCategoryShare` (0,5 par défaut, GOU-2284) est la part minimale des catégories distinctes
+normalisées qui doivent porter un marqueur ; en dessous, champ absent. Il a été fixé d'après le dry-run de la reprise
+(GOU-2234, GOU-2284 : 0 marquait 5,8 % de produits en plus, presque tous des faux positifs), qui le passe en paramètre de `getNatureForCategories(categories, minMarkedShare)`. Un produit qui a une verticale n'a jamais de `nature`, même si EPREL l'y garde malgré une
 catégorie "accessoire". La nature est recalculée, donc effacée au besoin, à chaque agrégation complète. La mise à
 jour partielle d'une ligne de flux inchangée n'envoie que `lastChange`, `price` et `offersCount` : elle ne touche pas
 à `nature`. Ce champ ne change ni la verticale ni le score.
+
+Un attribut `NUMERIC` de suffixe `W` (`POWER_CONSUMPTION_*`, `OVEN_POWER`) est indexé en watts : `parseValue`
+convertit d'abord les kW, mW et les énergies par heure (`0,85 kWh/h` donne 850). Une énergie (`0,5 kWh`, `84 kWh/an`)
+n'est pas une puissance : la valeur est refusée, donc absente. Une valeur sans unité est lue en watts, sauf si
+`parser.sourceUnits` donne l'unité de son attribut brut : `POWER_CONSUMPTION_TYPICAL` lit en kWh/h la consommation
+horaire EPREL des climatiseurs (`COOLINGCHARACTERISTICS-HOURLYELECTRICITYCONSUMPTION`, GOU-2315). Retirer l'entrée
+rend l'ancienne lecture. Une source qui ne se lit plus ne vote pas : sa `cleanedValue` est vidée, l'ancienne ne reste
+pas. Les valeurs déjà indexées sont relues au batch de 13 h, qui réagrège chaque verticale.
+
+Un attribut `NUMERIC` peut borner ses valeurs (`parser.minValue`, `parser.maxValue`) : une source hors bornes ne vote
+pas (comme une valeur illisible). `parser.unitFactors` convertit une valeur écrite avec unité (`165 cm` donne 64.96
+avec `cm: 0.3937`). `DIAGONALE_POUCES` les utilise (1 à 120 pouces) : un identifiant poussé sous la clé `DIAGONALE`
+(Rakuten `PRD_PM255575188`) ou des cm sans unité ne sont plus indexés (GOU-2377).
 
 ### Slug produit figé
 
@@ -452,5 +491,34 @@ appellent `AggregationFacadeService.sanitizeVertical` (GOU-2274). Le runbook
 - Un produit qui lève `AggregationSkipException` est journalisé et n'est pas réécrit.
 - L'appel rend la main une fois les produits mis en file, pas une fois indexés : attendre que la file se vide avant
   de vérifier ou d'enchaîner sur `POST /batch/{vertical}` (voir le runbook). À lancer hors du batch de 13 h.
+- Un id de verticale inconnu donne un 404 (`ResourceNotFoundException`), ici comme sur `POST /batch/{vertical}`
+  (GOU-2280).
+- `POST /aggregate/verticals` isole les verticales comme le batch : une verticale qui lève une exception est journalisée
+  en `ERROR` (`Sanitisation of vertical <id> failed`), les suivantes passent, et une dernière ligne `ERROR` liste les
+  verticales en échec (GOU-2280).
 
-Preuve : `AggregationFacadeServiceSanitizeVerticalTest`.
+Preuve : `AggregationFacadeServiceSanitizeVerticalTest`, `AggregationControllerTest`,
+`BatchControllerBatchVerticalTest`.
+
+## Chaîne d'agrégation standard partagée
+
+GOU-2280. `AggregationFacadeService` construit **une seule** `StandardAggregator` avec les 7 services temps réel
+(identité, taxonomie, attributs, coût d'usage, noms, prix, médias), et une chaîne réduite identité + taxonomie pour la
+classification du batch. `getStandardAggregator()` renvoie cette instance à l'ingestion temps réel (`updateOne`), aux
+4 complétions (Icecat, EPREL, Wikidata, Amazon), au batch (`aggregateProducts`) et à `sanitizeVertical`.
+
+- Elle est appelée en parallèle (worker de fragments, `api.completion-concurrency` threads de complétion, batch) :
+  un service de cette chaîne ne doit garder **aucun état modifiable** (champs `final` vers des collaborateurs
+  singletons sûrs entre threads, constantes immuables). Un état propre à un run va dans la chaîne de notation.
+- La chaîne de notation (`getScoringAggregator()`) reste construite à chaque run : ses services gardent un état
+  (`init`, `done`). Une exception dans `init` ou `done` arrête la notation, et le log nomme le service et la verticale.
+- Ni injection Spring ni cycle de vie dans les agrégateurs : chaque service reçoit ses collaborateurs par son
+  constructeur (pas d'`autowireBean`, pas de `close`).
+- Journaux dédiés (`<logs>/aggregation/`) : la chaîne partagée écrit dans `realtime.log`, quel que soit l'appelant
+  (`sanitisation.log` et les `*-aggregation.log` des complétions ne sont plus écrits), la classification dans
+  `categores_classif.log`, la notation dans `score.log`.
+- `IcecatFeatureResolver` et `IcecatIndexService` gardent leurs caches LRU bornés (`BoundedLruCache`), mais la requête
+  Elasticsearch d'un défaut de cache se fait hors du verrou : les threads de complétion ne s'attendent plus les uns les
+  autres. Deux défauts simultanés sur le même nom font deux lectures, et la première valeur stockée gagne.
+
+Conception : [ADR 0004](../docs/adr/0004-aggregation-service-design.md).

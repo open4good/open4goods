@@ -39,7 +39,7 @@ class DecitreExclusionTest {
 	void decitreKeysAreRemovedFromAProductWithoutVertical() throws Exception {
 		// Product without vertical: the default config is the one applied
 		VerticalConfig config = configService.getConfigByIdOrDefault(null);
-		AttributeRealtimeAggregationService service = new AttributeRealtimeAggregationService(configService,
+		AttributeRealtimeAggregationService service = new AttributeRealtimeAggregationService(
 				mock(BrandService.class), LoggerFactory.getLogger(DecitreExclusionTest.class),
 				mock(IcecatFeatureResolver.class));
 

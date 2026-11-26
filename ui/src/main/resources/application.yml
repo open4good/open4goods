@@ -118,17 +118,12 @@ remote-file-caching:
   read-timeout: 30000
 
 ###############################################
-# Open data export service
-# Bound to: OpenDataConfig (prefix="open-data-config")
+# Legacy open data download URLs
+# Bound to: OpenDataRedirectProperties (prefix="open-data-config")
 ###############################################
 open-data-config:
-  # Max download speed per client connection in kilobytes per second.
-  download-speed-kb: 256
-  # Maximum parallel downloads allowed.
-  concurrent-downloads: 4
-  # Generation runs in the api only (GOU-2248): ui never generates the files.
-  generation-enabled: false
-  # When set, GET/HEAD on /opendata/{gtin,isbn}-open-data.zip answer 301 to {redirect-base-url}/{name}.
+  # ui never generates nor serves the files (GOU-2290). When set, GET/HEAD on /opendata/{gtin,isbn}-open-data.zip
+  # answer 301 to {redirect-base-url}/{name}; empty, they answer 404.
   redirect-base-url: ${OPEN_DATA_REDIRECT_BASE_URL:}
 
 ###############################################

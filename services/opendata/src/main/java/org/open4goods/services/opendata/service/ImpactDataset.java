@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.open4goods.model.Localisable;
 import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.SourcedAttribute;
 import org.open4goods.model.localization.DomainLanguage;
@@ -22,8 +24,11 @@ import org.open4goods.services.opendata.model.ColumnManifest;
 
 /**
  * Columns and rows of the impact dataset of one vertical (GOU-2250): the raw values of the criteria listed by
- * {@code availableImpactScoreCriterias} in the vertical YAML, without any aggregated score, normalised sub-score,
- * percentile or rank. A missing value stays empty: no default and no imputation.
+ * {@code availableImpactScoreCriterias} of the ImpactScore (from {@code impactscores/{vertical}.yml}, available for 5
+ * verticals out of 7), not the vertical YAML, without any aggregated score, normalised sub-score, percentile or rank.
+ * A published criterion is a criterion that enters the score: {@code MINAVAILABILITYSPAREPARTSYEARS} (dishwasher) and
+ * {@code OVEN_ENERGY_EFFICIENCY_INDEX} (oven) are not in their ImpactScore, so they stay unpublished until a later
+ * batch decides otherwise. A missing value stays empty: no default and no imputation.
  */
 final class ImpactDataset {
 
@@ -32,6 +37,14 @@ final class ImpactDataset {
 
     static final String[] COMMON_HEADER = {"gtin", "brand", "model", "name", "vertical", "nudger_url",
             "eprel_registration_number", "offers_count", "last_updated"};
+
+    /**
+     * {@code _source} fields of the {@link #COMMON_HEADER} columns (GOU-2556): {@code gtin}, brand and model from the id
+     * and the referential attributes, the name from the offer names, the URL from {@code names.url}. The impact pass
+     * reads them with the {@link #sourceFields()} of each impact vertical.
+     */
+    static final List<String> COMMON_SOURCE_FIELDS = List.of("id", "vertical", "externalIds.eprel", "names.url",
+            "lastChange", "offersCount", "offerNames", "attributes.referentielAttributes");
 
     private static final String SOURCE_SEPARATOR = " | ";
 
@@ -108,10 +121,16 @@ final class ImpactDataset {
     }
 
     /**
-     * @return the {@code _source} fields the rows read, on top of those of the GTIN and ISBN datasets
+     * @return the {@code _source} fields the rows read, on top of {@link #COMMON_SOURCE_FIELDS}: the value of
+     *         each criterion and, per source, the datasource name, raw and cleaned values (GOU-2327). Never the whole
+     *         {@code attributes.indexed.<criterion>}, whose sources weigh tens of KB per product.
      */
     List<String> sourceFields() {
-        return criteria.stream().map(key -> "attributes.indexed." + key).toList();
+        return criteria.stream().flatMap(key -> Stream.of(
+                "attributes.indexed." + key + ".value",
+                "attributes.indexed." + key + ".source.dataSourcename",
+                "attributes.indexed." + key + ".source.value",
+                "attributes.indexed." + key + ".source.cleanedValue")).toList();
     }
 
     boolean accepts(Product product) {
@@ -124,7 +143,7 @@ final class ImpactDataset {
         row[0] = StringUtils.defaultString(product.gtin());
         row[1] = StringUtils.defaultString(product.brand());
         row[2] = StringUtils.defaultString(product.model());
-        row[3] = StringUtils.defaultString(product.shortestOfferName());
+        row[3] = StringUtils.defaultString(OpenDataService.exportName(product));
         row[4] = vertical;
         String slug = ProductCanonicalUrl.fullSlug(product, verticalConfig, DomainLanguage.fr);
         row[5] = StringUtils.isBlank(slug) || siteBaseUrl.isEmpty() ? "" : siteBaseUrl + slug;
@@ -148,31 +167,31 @@ final class ImpactDataset {
             }
             int column = valueColumns[i];
             row[column] = attribute.getValue().trim();
-            row[column + 1] = sourcesOf(attribute);
+            row[column + 1] = sourcesOf(criteria.get(i), attribute);
         }
         return row;
     }
 
     /**
-     * @return the datasources that contributed the published value, or all contributors when none matches it
+     * @return the datasources whose value is the published one; empty when none matches it (never all contributors)
      */
-    private static String sourcesOf(IndexedAttribute attribute) {
+    private static String sourcesOf(String criterion, IndexedAttribute attribute) {
         String published = attribute.getValue().trim();
         Set<String> matching = new TreeSet<>();
-        Set<String> all = new TreeSet<>();
         if (attribute.getSource() != null) {
             for (SourcedAttribute source : attribute.getSource()) {
                 if (StringUtils.isBlank(source.getDataSourcename())) {
                     continue;
                 }
-                all.add(source.getDataSourcename());
-                String value = source.getCleanedValue() != null ? source.getCleanedValue() : source.getValue();
-                if (value != null && StringUtils.normalizeSpace(value).equalsIgnoreCase(StringUtils.normalizeSpace(published))) {
+                // The raw value is the one the aggregation parsers read; the generic cleaned one may differ (GOU-2313).
+                String value = source.getValue() != null ? source.getValue() : source.getCleanedValue();
+                if (SourceValueComparator.matches(criterion, value, published)
+                        || SourceValueComparator.matches(criterion, source.getCleanedValue(), published)) {
                     matching.add(source.getDataSourcename());
                 }
             }
         }
-        return String.join(SOURCE_SEPARATOR, matching.isEmpty() ? all : matching);
+        return String.join(SOURCE_SEPARATOR, matching);
     }
 
     /**
@@ -184,14 +203,22 @@ final class ImpactDataset {
     }
 
     private static String unitOf(AttributeConfig config) {
-        if (config == null || config.getSuffix() == null) {
+        if (config == null) {
             return "";
         }
-        String suffix = config.getSuffix().get("default");
-        if (suffix == null) {
-            suffix = config.getSuffix().get("fr");
+        String unit = firstOf(config.getSuffix());
+        return unit.isEmpty() ? firstOf(config.getUnit()) : unit;
+    }
+
+    private static String firstOf(Localisable<String, String> values) {
+        if (values == null) {
+            return "";
         }
-        return StringUtils.defaultString(suffix).trim();
+        String value = values.get("default");
+        if (value == null) {
+            value = values.get("fr");
+        }
+        return StringUtils.defaultString(value).trim();
     }
 
     private static String labelOf(AttributeConfig config, String criterion) {

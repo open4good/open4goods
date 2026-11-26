@@ -52,7 +52,7 @@ class EprelCompletionServiceTest {
         when(apiProperties.aggLogLevel()).thenReturn(Level.INFO);
         when(apiProperties.getEprelRefreshDays()).thenReturn(1);
         when(apiProperties.getEprelMissRefreshDays()).thenReturn(7);
-        when(aggregationFacadeService.getStandardAggregator("eprel-aggregation")).thenReturn(aggregator);
+        when(aggregationFacadeService.getStandardAggregator()).thenReturn(aggregator);
 
         service = new EprelCompletionService(verticalConfigService, productRepository, apiProperties,
                 eprelSearchService, aggregationFacadeService);

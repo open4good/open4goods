@@ -13,7 +13,7 @@ name:
   fr: "Disponibilité des pièces détachées"
 suffix:
   default: "Year(s)"
-  fr: "An(s)"
+  fr: "an(s)"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

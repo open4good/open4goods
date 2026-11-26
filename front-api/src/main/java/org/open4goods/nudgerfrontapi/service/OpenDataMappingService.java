@@ -1,21 +1,26 @@
 package org.open4goods.nudgerfrontapi.service;
 
-import java.io.File;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
-import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
-import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDownloadLimitsDto;
-import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataOverviewDto;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataColumnDto;
+import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
+import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataOverviewDto;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestService;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataSampleService;
 import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.model.ColumnManifest;
+import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,7 +28,9 @@ import org.springframework.util.StringUtils;
 /**
  * Service assembling OpenData DTOs for the frontend REST API.
  * <p>
- * The service translates raw data statistics into localised DTOs so controllers can remain thin and deterministic.
+ * Rows, date, size and sha256 come from the published {@code manifest.json} ({@link OpenDataManifestService},
+ * GOU-2290), never from the live index: the index counts differ from the published files (ISBN: 10.1 M in the index,
+ * 8.7 M in the file on 15/11/2026). Without a readable manifest those fields are null; the endpoints never fail.
  * </p>
  */
 @Service
@@ -31,44 +38,51 @@ public class OpenDataMappingService {
 
     private static final String[] SIZE_UNITS = {"B", "kB", "MB", "GB", "TB", "PB", "EB"};
 
-    private final OpenDataService openDataService;
-    private final OpenDataConfig openDataConfig;
-    private final ApiProperties apiProperties;
+    /** Zone of the displayed dates, independent of the host's default zone. */
+    private static final String IMPACT_PREFIX = "impact-";
+    private static final String IMPACT_ALL = "impact-all";
 
-    public OpenDataMappingService(OpenDataService openDataService,
-                                OpenDataConfig openDataConfig,
-                                ApiProperties apiProperties) {
-        this.openDataService = openDataService;
+    static final ZoneId DISPLAY_ZONE = ZoneId.of("Europe/Paris");
+
+    private final OpenDataManifestService manifestService;
+    private final OpenDataConfig openDataConfig;
+    private final OpenDataSampleService sampleService;
+
+    /**
+     * @param manifestService reader of the published manifest
+     * @param openDataConfig  public base URL and public file names
+     * @param sampleService   reader of the published CSV samples
+     */
+    public OpenDataMappingService(OpenDataManifestService manifestService, OpenDataConfig openDataConfig,
+                                  OpenDataSampleService sampleService) {
+        this.manifestService = manifestService;
         this.openDataConfig = openDataConfig;
-        this.apiProperties = apiProperties;
+        this.sampleService = sampleService;
     }
 
     /**
-     * Build an overview of the available datasets.
+     * Build an overview of the GTIN and ISBN datasets (impact datasets excluded: same products).
      *
      * @param domainLanguage caller requested language
-     * @return overview DTO with localised values
+     * @return overview DTO with localised values, every field null without a readable manifest
      */
     public OpenDataOverviewDto overview(DomainLanguage domainLanguage) {
         Locale locale = resolveLocale(domainLanguage);
+        OpenDataManifestSnapshot snapshot = manifestService.snapshot();
+        List<DatasetManifest> datasets = Stream.of(OpenDataManifestService.GTIN, OpenDataManifestService.ISBN)
+                .map(snapshot::dataset)
+                .flatMap(Optional::stream)
+                .toList();
+        if (datasets.isEmpty()) {
+            return new OpenDataOverviewDto(null, null, null);
+        }
 
-        long isbnCount = openDataService.totalItemsISBN();
-        long gtinCount = openDataService.totalItemsGTIN();
-        long totalProducts = isbnCount + gtinCount;
-        int datasetCount = 2; // GTIN + ISBN datasets
-        long totalSize = safeLength(openDataConfig.isbnZipFile()) + safeLength(openDataConfig.gtinZipFile());
-
-        OpenDataDownloadLimitsDto limits = new OpenDataDownloadLimitsDto(
-                openDataConfig.getDownloadSpeedKb(),
-                formatDownloadSpeed(openDataConfig.getDownloadSpeedKb(), locale),
-                openDataConfig.getConcurrentDownloads());
-
+        long rows = datasets.stream().mapToLong(DatasetManifest::rows).sum();
+        long bytes = datasets.stream().mapToLong(DatasetManifest::bytes).sum();
         return new OpenDataOverviewDto(
-                formatInteger(totalProducts, locale),
-                formatInteger(datasetCount, locale),
-                formatDataSize(totalSize, locale),
-                limits
-        );
+                formatInteger(rows, locale),
+                formatInteger(datasets.size(), locale),
+                bytes > 0 ? formatDataSize(bytes, locale) : null);
     }
 
     /**
@@ -80,9 +94,8 @@ public class OpenDataMappingService {
     public OpenDataDatasetDto gtin(DomainLanguage domainLanguage) {
         return dataset(domainLanguage,
                 "GTIN",
-                openDataService.totalItemsGTIN(),
-                openDataConfig.gtinZipFile(),
-                "/opendata/gtin-open-data.zip",
+                OpenDataManifestService.GTIN,
+                openDataConfig.getGtinPublicFilename(),
                 List.of(OpenDataService.GTIN_HEADER));
     }
 
@@ -95,10 +108,51 @@ public class OpenDataMappingService {
     public OpenDataDatasetDto isbn(DomainLanguage domainLanguage) {
         return dataset(domainLanguage,
                 "ISBN",
-                openDataService.totalItemsISBN(),
-                openDataConfig.isbnZipFile(),
-                "/opendata/isbn-open-data.zip",
+                OpenDataManifestService.ISBN,
+                openDataConfig.getIsbnPublicFilename(),
                 List.of(OpenDataService.ISBN_HEADER));
+    }
+
+    /**
+     * Build the description of every impact dataset listed in the manifest (GOU-2251), without the global
+     * {@code impact-all} archive.
+     *
+     * @param domainLanguage caller requested language
+     * @return impact datasets in manifest order, empty without a readable manifest
+     */
+    public List<OpenDataDatasetDto> impactDatasets(DomainLanguage domainLanguage) {
+        OpenDataManifestSnapshot snapshot = manifestService.snapshot();
+        if (snapshot.manifest() == null || snapshot.manifest().datasets() == null) {
+            return List.of();
+        }
+        return snapshot.manifest().datasets().stream()
+                .filter(Objects::nonNull)
+                .filter(entry -> isImpactVertical(entry.id()))
+                .map(entry -> impact(domainLanguage, entry))
+                .toList();
+    }
+
+    /**
+     * Build the description of the impact dataset of one vertical.
+     *
+     * @param domainLanguage caller requested language
+     * @param vertical       vertical identifier ({@code dishwasher}), without the {@code impact-} prefix
+     * @return the dataset, empty when the manifest has no such impact dataset
+     */
+    public Optional<OpenDataDatasetDto> impactDataset(DomainLanguage domainLanguage, String vertical) {
+        return manifestService.snapshot().dataset(IMPACT_PREFIX + vertical)
+                .filter(entry -> isImpactVertical(entry.id()))
+                .map(entry -> impact(domainLanguage, entry));
+    }
+
+    private static boolean isImpactVertical(String id) {
+        return id != null && id.startsWith(IMPACT_PREFIX) && !IMPACT_ALL.equals(id);
+    }
+
+    private OpenDataDatasetDto impact(DomainLanguage domainLanguage, DatasetManifest entry) {
+        List<String> headers = entry.columns() == null ? List.of()
+                : entry.columns().stream().map(ColumnManifest::name).toList();
+        return dataset(domainLanguage, "IMPACT", entry.id(), entry.file(), headers);
     }
 
     /**
@@ -125,45 +179,43 @@ public class OpenDataMappingService {
     }
 
     /**
-     * Build a dataset description for the specified OpenData export.
+     * Build a dataset description from its manifest entry.
      *
      * @param domainLanguage caller requested language
-     * @param type human readable dataset name
-     * @param recordCount number of records advertised by the export
-     * @param file physical file reference used to determine size and timestamp
-     * @param relativeDownloadPath path exposed by the static assets application
-     * @param headers CSV headers used to describe the export format
-     * @return assembled dataset DTO
+     * @param type           dataset name exposed to the frontend
+     * @param manifestId     identifier of the dataset in the manifest
+     * @param publicFilename public object name of the zip
+     * @param headers        CSV headers used to describe the export format
+     * @return assembled dataset DTO, manifest values null when the entry is unknown
      */
     private OpenDataDatasetDto dataset(DomainLanguage domainLanguage,
                                        String type,
-                                       long recordCount,
-                                       File file,
-                                       String relativeDownloadPath,
+                                       String manifestId,
+                                       String publicFilename,
                                        List<String> headers) {
         Locale locale = resolveLocale(domainLanguage);
+        Optional<DatasetManifest> entry = manifestService.snapshot().dataset(manifestId);
         return new OpenDataDatasetDto(
                 type,
-                formatInteger(recordCount, locale),
-                recordCount,
-                formatTimestamp(file, locale),
-                formatDataSize(safeLength(file), locale),
-                buildDownloadUrl(relativeDownloadPath),
-                List.copyOf(headers)
+                entry.map(dataset -> formatInteger(dataset.rows(), locale)).orElse(null),
+                entry.map(DatasetManifest::rows).orElse(null),
+                entry.flatMap(OpenDataManifestSnapshot::generatedAt).map(at -> formatTimestamp(at, locale)).orElse(null),
+                entry.map(DatasetManifest::bytes).filter(bytes -> bytes > 0)
+                        .map(bytes -> formatDataSize(bytes, locale)).orElse(null),
+                entry.map(DatasetManifest::sha256).filter(StringUtils::hasText).orElse(null),
+                buildDownloadUrl(publicFilename),
+                List.copyOf(headers),
+                entry.map(DatasetManifest::id).orElse(null),
+                entry.flatMap(OpenDataManifestSnapshot::generatedAt).map(Instant::toString).orElse(null),
+                entry.map(DatasetManifest::bytes).filter(bytes -> bytes > 0).orElse(null),
+                entry.map(DatasetManifest::license).filter(StringUtils::hasText).orElse(null),
+                entry.map(DatasetManifest::columns).map(columns -> columns.stream()
+                        .filter(Objects::nonNull)
+                        .map(column -> new OpenDataColumnDto(column.name(), column.fillRate(), column.unit(),
+                                column.description(), column.source()))
+                        .toList()).orElse(List.of()),
+                sampleService.rows(entry)
         );
-    }
-
-    /**
-     * Return the file size while gracefully handling missing files.
-     *
-     * @param file target file
-     * @return file size in bytes, {@code 0} when the file is missing
-     */
-    private long safeLength(File file) {
-        if (file == null || !file.exists()) {
-            return 0L;
-        }
-        return file.length();
     }
 
     /**
@@ -179,17 +231,13 @@ public class OpenDataMappingService {
     }
 
     /**
-     * Format a raw byte size using SI units.
+     * Format a positive byte size using SI units.
      *
-     * @param bytes  raw size in bytes
+     * @param bytes  raw size in bytes, greater than zero (an unknown size is null, never "0 B")
      * @param locale locale used for formatting
      * @return localised human readable size
      */
     private String formatDataSize(long bytes, Locale locale) {
-        if (bytes <= 0) {
-            return NumberFormat.getIntegerInstance(locale).format(0) + " " + SIZE_UNITS[0];
-        }
-
         double value = bytes;
         int unitIndex = 0;
         while (value >= 1000 && unitIndex < SIZE_UNITS.length - 1) {
@@ -211,58 +259,34 @@ public class OpenDataMappingService {
     }
 
     /**
-     * Format the last modification timestamp of a dataset.
+     * Format the generation date of a dataset in the {@link #DISPLAY_ZONE}.
      *
-     * @param file   dataset file
-     * @param locale locale used for formatting
-     * @return formatted timestamp or {@code null} when the file is missing
+     * @param instant generation date from the manifest
+     * @param locale  locale used for formatting
+     * @return formatted timestamp
      */
-    private String formatTimestamp(File file, Locale locale) {
-        if (file == null || !file.exists()) {
+    private String formatTimestamp(Instant instant, Locale locale) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+                .withLocale(locale)
+                .withZone(DISPLAY_ZONE);
+        return formatter.format(instant);
+    }
+
+    /**
+     * Build the public download URL of a zip: {@code {open-data-config.public-base-url}/{name}}.
+     *
+     * @param publicFilename public object name of the zip
+     * @return absolute URL, {@code null} when no public base URL is configured (ui no longer serves the files)
+     */
+    private String buildDownloadUrl(String publicFilename) {
+        String publicBase = openDataConfig.getPublicBaseUrl();
+        if (!StringUtils.hasText(publicBase)) {
             return null;
         }
-        Instant instant = Instant.ofEpochMilli(file.lastModified());
-        ZonedDateTime dateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-                .withLocale(locale);
-        return formatter.format(dateTime);
-    }
-
-    /**
-     * Format the download speed limit defined in the configuration.
-     *
-     * @param downloadSpeedKb speed expressed in kilobytes per second
-     * @param locale          locale used for formatting
-     * @return human readable download speed
-     */
-    private String formatDownloadSpeed(int downloadSpeedKb, Locale locale) {
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(locale);
-        numberFormat.setMaximumFractionDigits(0);
-        return numberFormat.format(downloadSpeedKb) + " kB/s";
-    }
-
-    /**
-     * Construct an absolute download URL by combining the configured static asset root and the provided path.
-     *
-     * @param relativePath path exposed by the static assets application
-     * @return absolute URL accessible by the frontend
-     */
-    private String buildDownloadUrl(String relativePath) {
-        String publicBase = openDataConfig.getPublicBaseUrl();
-        if (StringUtils.hasText(publicBase)) {
-            String fileName = relativePath.substring(relativePath.lastIndexOf('/') + 1);
-            String base = publicBase.endsWith("/") ? publicBase.substring(0, publicBase.length() - 1) : publicBase;
-            return base + "/" + fileName;
+        String base = publicBase.trim();
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
         }
-
-        String root = apiProperties.getResourceRootPath();
-
-        if (!StringUtils.hasText(root)) {
-            return relativePath;
-        }
-
-        String normalisedRoot = root.endsWith("/") ? root.substring(0, root.length() - 1) : root;
-        String normalisedPath = relativePath.startsWith("/") ? relativePath : "/" + relativePath;
-        return normalisedRoot + normalisedPath;
+        return base + "/" + publicFilename;
     }
 }

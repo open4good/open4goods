@@ -223,4 +223,36 @@ class ProductTest
                 assertEquals("NV7B4550VAS/U1", product.model());
                 assertTrue(product.getAkaModels().contains("NV7B4550"));
         }
+
+    @org.junit.jupiter.api.Test
+    void sourcesExcludeTechnicalDatasourceCodes() {
+        Product product = new Product(1L);
+        product.getDatasourceCodes().put("rakuten.com", 1L);
+        product.getDatasourceCodes().put("eprel", 2L);
+        product.getDatasourceCodes().put(Product.EPREL_SEARCH_SIGNATURE_CODE, -3L);
+        product.getDatasourceCodes().put(Product.WIKIDATA_MISS_CODE, 4L);
+        product.getDatasourceCodes().put(Product.ICECAT_MISS_CODE, 5L);
+
+        product.refreshSources();
+
+        org.assertj.core.api.Assertions.assertThat(product.getSources()).containsExactly("eprel", "rakuten.com");
+        product.removeDatasourceData("eprel");
+        product.refreshSources();
+        org.assertj.core.api.Assertions.assertThat(product.getSources()).containsExactly("rakuten.com");
+    }
+
+    @org.junit.jupiter.api.Test
+    void sourcesOfValueNamesTheDatasourcesHoldingTheRetainedValue() {
+        org.open4goods.model.attribute.IndexedAttribute attribute = new org.open4goods.model.attribute.IndexedAttribute("K", "Noir");
+        org.open4goods.model.attribute.SourcedAttribute a = new org.open4goods.model.attribute.SourcedAttribute();
+        a.setDataSourcename("eprel");
+        a.setValue(" noir ");
+        org.open4goods.model.attribute.SourcedAttribute b = new org.open4goods.model.attribute.SourcedAttribute();
+        b.setDataSourcename("rakuten.com");
+        b.setValue("Blanc");
+        attribute.setSource(new java.util.HashSet<>(java.util.List.of(a, b)));
+
+        org.assertj.core.api.Assertions.assertThat(attribute.sourcesOfValue("Noir")).containsExactly("eprel");
+        org.assertj.core.api.Assertions.assertThat(attribute.sourcesOfValue(null)).isEmpty();
+    }
 }

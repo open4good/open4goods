@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Filter, VerticalSubsetDto } from '~~/shared/api-client'
 
 import {
+  areFiltersEquivalent,
+  convertCriteriaListToFilters,
   convertSubsetCriteriaToFilters,
   buildFilterRequestFromCriteria,
   buildFilterRequestFromSubsets,
@@ -33,7 +35,7 @@ describe('_subset-to-filters helpers', () => {
 
   it('deduplicates filters when merging manual and subset clauses', () => {
     const existing: Filter[] = [
-      { field: 'price.min', operator: 'range', max: 500 },
+      { field: 'price.min', operator: 'range', max: 500, maxExclusive: true },
     ]
     const additions = convertSubsetCriteriaToFilters(sampleSubset)
 
@@ -121,8 +123,18 @@ describe('_subset-to-filters helpers', () => {
       filterGroups: [
         {
           should: [
-            { field: 'price.min', operator: 'range', max: 800 },
-            { field: 'price.min', operator: 'range', max: 500 },
+            {
+              field: 'price.min',
+              operator: 'range',
+              max: 800,
+              maxExclusive: true,
+            },
+            {
+              field: 'price.min',
+              operator: 'range',
+              max: 500,
+              maxExclusive: true,
+            },
           ],
         },
       ],
@@ -207,8 +219,18 @@ describe('_subset-to-filters helpers', () => {
       filterGroups: [
         {
           should: [
-            { field: 'price.min', operator: 'range', max: 500 },
-            { field: 'price.min', operator: 'range', min: 1000 },
+            {
+              field: 'price.min',
+              operator: 'range',
+              max: 500,
+              maxExclusive: true,
+            },
+            {
+              field: 'price.min',
+              operator: 'range',
+              min: 1000,
+              minExclusive: true,
+            },
           ],
         },
       ],
@@ -271,8 +293,81 @@ describe('_subset-to-filters helpers', () => {
           operator: 'term',
           terms: ['ENCASTRABLE'],
         },
-        { field: 'price.min', operator: 'range', min: 300, max: 800 },
+        {
+          field: 'price.min',
+          operator: 'range',
+          min: 300,
+          max: 800,
+          minExclusive: true,
+          maxExclusive: true,
+        },
       ],
+    })
+  })
+
+  describe('bound exclusivity (GOU-2586)', () => {
+    const field = 'attributes.indexed.WASHING_CAPACITY.numericValue'
+
+    it.each([
+      ['LOWER_THAN', { max: 8, maxExclusive: true }],
+      ['LOWER_THAN_OR_EQUAL', { max: 8 }],
+      ['GREATER_THAN', { min: 8, minExclusive: true }],
+      ['GREATER_THAN_OR_EQUAL', { min: 8 }],
+    ] as const)(
+      'converts %s into the matching range bound',
+      (operator, bound) => {
+        const [filter] = convertCriteriaListToFilters([
+          { field, operator, value: '8' },
+        ])
+
+        expect(filter).toStrictEqual({ field, operator: 'range', ...bound })
+      }
+    )
+
+    it('keeps the exclusive upper bound of the "8-9 kg" sub-category', () => {
+      const request = buildFilterRequestFromCriteria([
+        { field, operator: 'GREATER_THAN_OR_EQUAL', value: '8' },
+        { field, operator: 'LOWER_THAN', value: '10' },
+      ])
+
+      expect(request).toStrictEqual({
+        filters: [
+          { field, operator: 'range', min: 8, max: 10, maxExclusive: true },
+        ],
+      })
+    })
+
+    it('takes the exclusivity of the clause that sets each merged bound', () => {
+      const request = buildFilterRequestFromCriteria([
+        { field, operator: 'GREATER_THAN', value: '6' },
+        { field, operator: 'LOWER_THAN', value: '12' },
+        { field, operator: 'GREATER_THAN_OR_EQUAL', value: '8' },
+      ])
+
+      expect(request).toStrictEqual({
+        filters: [
+          { field, operator: 'range', min: 8, max: 12, maxExclusive: true },
+        ],
+      })
+    })
+
+    it('does not treat exclusive and inclusive bounds as duplicates', () => {
+      const inclusive: Filter = { field, operator: 'range', max: 8 }
+      const exclusive: Filter = {
+        field,
+        operator: 'range',
+        max: 8,
+        maxExclusive: true,
+      }
+
+      expect(areFiltersEquivalent(inclusive, exclusive)).toBe(false)
+      expect(
+        areFiltersEquivalent(exclusive, { ...exclusive, minExclusive: false })
+      ).toBe(true)
+      expect(mergeFiltersWithoutDuplicates([inclusive], [exclusive])).toEqual([
+        inclusive,
+        exclusive,
+      ])
     })
   })
 })

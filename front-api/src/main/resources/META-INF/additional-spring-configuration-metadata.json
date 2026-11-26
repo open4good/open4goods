@@ -90,6 +90,30 @@
       "defaultValue": "https://www.amazon.fr/s?k={gtin}&tag={tag}"
     },
     {
+      "name": "front.affiliation-click-ref.awin-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the clickref parameter of Awin redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.tradetracker-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the r parameter of TradeTracker redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.effiliation-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the effi_id parameter of Effiliation redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
+      "name": "front.affiliation-click-ref.kwanko-enabled",
+      "type": "java.lang.Boolean",
+      "description": "Write the affiliation click id into the argsite parameter of Kwanko mclic redirect links (GOU-2522).",
+      "defaultValue": false
+    },
+    {
       "name": "front.affiliation-partners.api-base-url",
       "type": "java.lang.String",
       "description": "Base URL of the backend exposing affiliation partner data."
@@ -405,6 +429,30 @@
       "defaultValue": "2d"
     },
     {
+      "name": "front.opendata.connect-timeout",
+      "type": "java.time.Duration",
+      "description": "Connection timeout of a read of the published open data manifest (open-data-config.public-base-url/manifest.json).",
+      "defaultValue": "2s"
+    },
+    {
+      "name": "front.opendata.manifest-cache-ttl",
+      "type": "java.time.Duration",
+      "description": "How long a read of the open data manifest, successful or not, is reused before the next read (the manifests are served with max-age=300).",
+      "defaultValue": "5m"
+    },
+    {
+      "name": "front.opendata.max-age",
+      "type": "java.time.Duration",
+      "description": "Age of a published open data file (now minus its manifest generatedAt) above which the openDataManifest health component turns DEGRADED.",
+      "defaultValue": "8d"
+    },
+    {
+      "name": "front.opendata.read-timeout",
+      "type": "java.time.Duration",
+      "description": "Read timeout of a read of the published open data manifest.",
+      "defaultValue": "3s"
+    },
+    {
       "name": "front.partners.ecosystem.partners[].bloc-id",
       "type": "java.lang.String",
       "description": "XWiki bloc identifier for an ecosystem partner."
@@ -664,18 +712,6 @@
       "description": "Icecat account username."
     },
     {
-      "name": "open-data-config.concurrent-downloads",
-      "type": "java.lang.Integer",
-      "description": "Maximum number of concurrent OpenData downloads.",
-      "defaultValue": 4
-    },
-    {
-      "name": "open-data-config.download-speed-kb",
-      "type": "java.lang.Integer",
-      "description": "Maximum OpenData download speed per client in kilobytes.",
-      "defaultValue": 256
-    },
-    {
       "name": "open-data-config.generation-enabled",
       "type": "java.lang.Boolean",
       "description": "Enable scheduled OpenData export generation.",
@@ -684,7 +720,7 @@
     {
       "name": "open-data-config.public-base-url",
       "type": "java.lang.String",
-      "description": "Public base URL of the dataset downloads (for example https://data.nudger.fr). Empty keeps the api.resource-root-path based links.",
+      "description": "Public base URL of the published open data files (for example https://data.nudger.fr): download links and {base}/manifest.json read by /opendata/* (GOU-2290). Empty: no download link and no manifest read, manifest values served as null.",
       "defaultValue": ""
     },
     {
@@ -861,6 +897,32 @@
       "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
       "description": "Minimum length of the alphabetic word, other than the brand, that a readable offer name must hold.",
       "defaultValue": 3
+    },
+    {
+      "name": "front.global-search.foreign-head-enabled",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Sets apart from the long tail the products whose offer names hold the object of the query after another head noun (\"Ressort Lave-linge\" for lave-linge), GOU-2474.",
+      "defaultValue": true
+    },
+    {
+      "name": "front.global-search.foreign-head-uncategorized-only",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Applies the foreign head rule only to products without merchant category (datasourceCategories).",
+      "defaultValue": true
+    },
+    {
+      "name": "front.global-search.head-modifiers",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Words skipped before the head of an offer name and around the object of the query (mini, compact, lot...)."
+    },
+    {
+      "name": "front.global-search.known-brands",
+      "type": "java.util.List<java.lang.String>",
+      "sourceType": "org.open4goods.nudgerfrontapi.config.properties.GlobalSearchProperties",
+      "description": "Known brands skipped before the head of an offer name and around the object of the query."
     },
     {
       "name": "front.css.enabled",

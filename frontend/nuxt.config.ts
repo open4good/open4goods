@@ -24,6 +24,7 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
+import { stripHeavyChunkPreloads } from './config/manifest-preload'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -276,6 +277,10 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: false,
     inlineRouteRules: true,
+    defaults: {
+      // Prefetch on interaction only: 24 product cards must not prefetch on visibility.
+      nuxtLink: { prefetchOn: { visibility: false, interaction: true } },
+    },
   },
 
   typescript: {
@@ -578,6 +583,12 @@ export default defineNuxtConfig({
     // NUXT_MACHINE_TOKEN is the canonical path on prod, but we keep MACHINE_TOKEN as fallback
     machineToken: process.env.NUXT_MACHINE_TOKEN || process.env.MACHINE_TOKEN || 'CHANGE_ME_SHARED_TOKEN',
     apiUrl: process.env.API_URL || 'http://localhost:8082',
+    // Edge cache of anonymous HTML pages (GOU-2700), in seconds. Overridable at
+    // runtime with NUXT_HTML_CACHE_S_MAXAGE / NUXT_HTML_CACHE_STALE_WHILE_REVALIDATE.
+    htmlCache: {
+      sMaxAge: 600,
+      staleWhileRevalidate: 3600,
+    },
     // Google OAuth client id for the confidential "Web" client (GOU-317): the code
     // exchange happens server-side with client_secret, PKCE is kept as defense in
     // depth. The client id itself is not a secret, but must match front-api's
@@ -592,6 +603,14 @@ export default defineNuxtConfig({
     // Runtime directory holding the weekly Metriks reports (deployed by open4goods-config).
     // Falls back to the bundled public dir during local dev when unset.
     metriksDataDir: process.env.METRIKS_DATA_DIR || '',
+    // Blog drafts (`draft: true`) are served at their URL for review, with a banner and noindex,
+    // but stay out of the listings, sitemap and RSS. Read at runtime: NUXT_BLOG_SHOW_DRAFTS=true
+    // in open4goods-config's configs/beta/frontend/.env only, never on prod.
+    blogShowDrafts: false,
+    // Category hub editorial blocks with `published: false` (content/category-hubs/) are rendered
+    // for review. Read at runtime: NUXT_CATEGORY_HUBS_PREVIEW=true on beta or in dev only, never
+    // on prod (GOU-2716).
+    categoryHubsPreview: false,
     // Shared secret used by front-api to sign JWTs (front.security.jwt-secret /
     // FRONT_SECURITY_JWT_SECRET, same .env as front-api). Server-only: lets the
     // frontend verify the access token's signature before trusting its roles
@@ -600,6 +619,10 @@ export default defineNuxtConfig({
     // Extra user-agent substrings (comma separated, case-insensitive) refused on
     // /contrib/ in addition to isbot. Overridden by NUXT_AFFILIATION_BLOCKED_USER_AGENTS.
     affiliationBlockedUserAgents: '',
+    // Client IPs refused on /contrib/ (GOU-2577): comma separated exact IPs or CIDR
+    // prefixes, IPv4 and IPv6 (e.g. 2a01:4f8:210:1459::/64). Client IP = CF-Connecting-IP,
+    // else the request IP. Overridden by NUXT_AFFILIATION_BLOCKED_IPS.
+    affiliationBlockedIps: '',
     // /contrib/ only redirects requests carrying the navigation-signal cookie
     // (GOU-1184); a site Referer alone is refused (GOU-1520). Kill switch, no
     // rebuild needed: NUXT_AFFILIATION_REQUIRE_NAVIGATION_SIGNAL=false.
@@ -627,6 +650,8 @@ export default defineNuxtConfig({
     // Public keys (exposed to the client side)
     public: {
       apiBase: process.env.PUBLIC_API_URL || 'http://localhost:8082',
+      // Share (0..1) of page loads reporting Core Web Vitals to Plausible (GOU-2703)
+      webVitalsSampleRate: process.env.WEB_VITALS_SAMPLE_RATE || '0.1',
       // Name of the cookie storing the JWT
       tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
       // Name of the cookie storing the refresh token
@@ -660,6 +685,8 @@ export default defineNuxtConfig({
     },
   },
   hooks: {
+    // ECharts and the PDF reader are loaded on demand: never preload them in the SSR head (GOU-2711).
+    'build:manifest': stripHeavyChunkPreloads,
     'pages:extend'(pages) {
       const normalizePath = (file?: string) => file?.split('\\').join('/')
 

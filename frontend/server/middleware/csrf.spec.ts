@@ -7,13 +7,13 @@ type MockEvent = {
   context: Record<string, unknown>
 }
 
-const ensureCsrfCookieMock = vi.hoisted(() => vi.fn())
+const ensureCsrfContextTokenMock = vi.hoisted(() => vi.fn())
 const assertSameOriginMock = vi.hoisted(() => vi.fn())
 const assertCsrfTokenMock = vi.hoisted(() => vi.fn())
 const shouldValidateCsrfMock = vi.hoisted(() => vi.fn())
 
 vi.mock('~~/server/utils/csrf', () => ({
-  ensureCsrfCookie: ensureCsrfCookieMock,
+  ensureCsrfContextToken: ensureCsrfContextTokenMock,
   assertSameOrigin: assertSameOriginMock,
   assertCsrfToken: assertCsrfTokenMock,
   shouldValidateCsrf: shouldValidateCsrfMock,
@@ -32,7 +32,7 @@ describe('server/middleware/csrf', () => {
     vi.clearAllMocks()
     vi.resetModules()
     vi.stubGlobal('defineEventHandler', (fn: MiddlewareHandler) => fn)
-    ensureCsrfCookieMock.mockImplementation((event: MockEvent) => {
+    ensureCsrfContextTokenMock.mockImplementation((event: MockEvent) => {
       event.context.csrfToken = 'generated-token'
       return 'generated-token'
     })
@@ -41,7 +41,7 @@ describe('server/middleware/csrf', () => {
     handler = (await import('./csrf')).default
   })
 
-  it('ensures the CSRF cookie/context token even for page (non-/api) requests', () => {
+  it('ensures the CSRF context token for page (non-/api) requests', () => {
     const event = buildEvent('/smartphones')
 
     handler(event)
@@ -50,7 +50,7 @@ describe('server/middleware/csrf', () => {
     // same H3 event, which read event.context.csrfToken. If this token is never
     // populated for the page request itself, those internal calls are sent without
     // a token and fail CSRF validation (403) during SSR.
-    expect(ensureCsrfCookieMock).toHaveBeenCalledWith(event)
+    expect(ensureCsrfContextTokenMock).toHaveBeenCalledWith(event)
     expect(event.context.csrfToken).toBe('generated-token')
   })
 
@@ -68,7 +68,6 @@ describe('server/middleware/csrf', () => {
 
     handler(event)
 
-    expect(ensureCsrfCookieMock).toHaveBeenCalledWith(event)
     expect(assertSameOriginMock).toHaveBeenCalledWith(event)
     expect(assertCsrfTokenMock).toHaveBeenCalledWith(event)
   })
@@ -81,5 +80,13 @@ describe('server/middleware/csrf', () => {
 
     expect(assertSameOriginMock).not.toHaveBeenCalled()
     expect(assertCsrfTokenMock).not.toHaveBeenCalled()
+  })
+
+  it('does not touch the CSRF token of /api requests', () => {
+    const event = buildEvent('/api/products/search', 'POST')
+
+    handler(event)
+
+    expect(ensureCsrfContextTokenMock).not.toHaveBeenCalled()
   })
 })

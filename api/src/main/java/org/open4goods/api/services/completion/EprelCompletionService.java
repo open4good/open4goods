@@ -57,7 +57,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 	 * Key of {@code datasourceCodes} holding the {@link #searchSignature signature} of the inputs of the last
 	 * EPREL search (GOU-2099). Not a datasource: {@link Product#removeDatasourceData(String)} keeps it.
 	 */
-	public static final String EPREL_SEARCH_SIGNATURE_CODE = "eprel.searchSignature";
+	public static final String EPREL_SEARCH_SIGNATURE_CODE = Product.EPREL_SEARCH_SIGNATURE_CODE;
 
 	private static final long DAY_MS = 24L * 3600 * 1000;
 	private static final int MIN_COMPACT_MODEL_CONTAINMENT_LENGTH = 7;
@@ -73,8 +73,7 @@ public class EprelCompletionService extends AbstractCompletionService {
 
 		this.apiProperties = apiProperties;
 		this.eprelSearchService = eprelSearchService;
-		this.aggregator = aggregationFacade.getStandardAggregator("eprel-aggregation");
-		this.aggregator.beforeStart();
+		this.aggregator = aggregationFacade.getStandardAggregator();
 	}
 
 	/**

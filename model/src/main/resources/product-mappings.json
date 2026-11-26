@@ -114,6 +114,9 @@
             "type": "object",
             "enabled": false
         },
+        "sources": {
+            "type": "keyword"
+        },
         "attributes": {
             "properties": {
                 "indexed": {

@@ -117,17 +117,6 @@ const messages: Record<string, string> = {
     'Impact Score generation audit',
   'category.ecoscorePage.sections.aiAudit.intro':
     'Audit the prompts and responses used to configure the {category} Impact Score.',
-  'category.ecoscorePage.sections.aiAudit.promptTitle':
-    'YAML generation prompt',
-  'category.ecoscorePage.sections.aiAudit.promptHelper':
-    'Instructions sent to the model to produce the configuration.',
-  'category.ecoscorePage.sections.aiAudit.responseTitle': 'Model response',
-  'category.ecoscorePage.sections.aiAudit.responseHelper':
-    'JSON output from the AI used as the basis of the configuration.',
-  'category.ecoscorePage.sections.aiAudit.yamlUnavailable':
-    'Prompt unavailable.',
-  'category.ecoscorePage.sections.aiAudit.jsonUnavailable':
-    'AI response unavailable.',
   'category.ecoscorePage.seo.title': 'Impact Score for {category}',
   'category.ecoscorePage.seo.description':
     'Impact Score insights for {category}.',
@@ -265,13 +254,14 @@ const categoryFixture = {
         DATA_QUALITY: 'Data quality analysis.',
       },
     },
-    yamlPrompt: 'key: value',
-    aiJsonResponse: JSON.stringify({
-      criteriasPonderation: {
-        POWER: 0.35,
-        REPAIRABILITY: 0.25,
-      },
-    }),
+    audit: {
+      mitigations: [],
+      criteria: [
+        { key: 'POWER', weight: 0.35 },
+        { key: 'REPAIRABILITY', weight: 0.25 },
+      ],
+      sources: [],
+    },
   },
   availableImpactScoreCriterias: ['POWER', 'REPAIRABILITY', 'DATA_QUALITY'],
   attributesConfig: {
@@ -474,12 +464,8 @@ describe('Category ecosystem Impact Score page', () => {
     expect(wrapper.find('[data-test="ai-audit-panels"]').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('not yet available')
 
-    const yamlBlock = wrapper.get('[data-test="ai-yaml"]').text()
-    expect(yamlBlock).toContain('key: value')
-
-    const jsonBlock = wrapper.get('[data-test="ai-json"]').text()
-    expect(jsonBlock).toContain('"POWER"')
-    expect(jsonBlock).toContain('0.35')
+    expect(wrapper.find('[data-test="ai-yaml"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="ai-json"]').exists()).toBe(false)
 
     const table = wrapper.get('[data-test="comparison-table"]').text()
     expect(table).toContain('Energy efficiency')
@@ -559,12 +545,16 @@ describe('Category ecosystem Impact Score page', () => {
         ...categoryFixture.impactScoreConfig,
         methodologyVersion: 2,
         criteriasPonderation: { POWER_DENSITY: 0.6, REPAIRABILITY: 0.4 },
-        aiJsonResponse: JSON.stringify({
-          criteriasPonderation: { POWER: 0.35, DATA_QUALITY: 0.13 },
+        audit: {
           mitigations: [
             'Raise DATA_QUALITY because missing criteria are imputed to the mean.',
           ],
-        }),
+          criteria: [
+            { key: 'POWER', weight: 0.35 },
+            { key: 'DATA_QUALITY', weight: 0.13 },
+          ],
+          sources: [],
+        },
       },
       attributesConfig: {
         configs: [

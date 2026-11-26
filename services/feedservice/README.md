@@ -80,3 +80,36 @@ Effiliation refresh is controlled by `feed.effiliation.*` properties:
   commissions, EPC, conversion rate, signup URL) stay `null`.
 - The key is a path segment, so request URLs are never logged: logs and the
   remote file cache use the `{apikey}` placeholder.
+
+### Tracked offer URLs
+
+A CSV datasource can require a tracked url for every offer
+(`CsvDataSourceProperties`):
+
+- `trackedUrlPattern`: regular expression searched in the final offer url
+  (after `enforceAffiliatedUrl`). An url that does not match is untracked;
+- `trackingLinkTemplate`: click template whose `{XXX}` placeholder is replaced
+  by the URL-encoded untracked url.
+
+An untracked url is rewritten with the template, or the line is rejected when
+no template contains `{XXX}`: such an offer is never published with a direct
+merchant link. The `Done:` line of the feed log counts both cases
+(`tracking_rewritten`, `untracked_rejected`; rejected lines are also counted in
+`not_validable`).
+
+`KwankoFeedService` sets both on every Kwanko product feed, unless the
+datasource YAML already does:
+
+- the pattern accepts Kwanko tracking hosts (`metaffiliation.com`,
+  `netaffiliation.com`, `kwanko.com` and their sub-domains) and Kwanko click
+  tokens (`P...S1U...V4`), also used by merchant first-party tracking domains
+  (`qby.mda-electromenager.com/?P...V4`);
+- the template is the `tracked_material_per_websites[].urls.click` of the
+  campaign `deeplink` ad, read once per refresh
+  (`GET /publishers/ads?ad_types=deeplink`). A feed whose campaign has none is
+  logged at WARN, and its untracked rows are rejected.
+
+Kwanko feeds (`product page URL` column, no tracking column) carry a tracked
+link on most rows but a direct merchant link on some: in November 2026,
+"Carrefour - marketplace" offers pointed to `www.carrefour.fr` without
+commission (GOU-2320).

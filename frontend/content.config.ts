@@ -6,6 +6,9 @@ const GUIDES_DIR = fileURLToPath(
   new URL('../verticals/src/main/resources/guides', import.meta.url)
 )
 const BLOG_DIR = fileURLToPath(new URL('./content/blog', import.meta.url))
+const CATEGORY_HUBS_DIR = fileURLToPath(
+  new URL('./content/category-hubs', import.meta.url)
+)
 
 export default defineContentConfig({
   collections: {
@@ -23,6 +26,20 @@ export default defineContentConfig({
         draft: z.boolean().default(false),
         published: z.boolean().default(true),
         image: z.string().optional(),
+        // Input of `pnpm blog:cover <slug>`, which draws `image` (scripts/blog-cover/blog-cover.mjs
+        // validates it further). Not read by the site itself.
+        cover: z
+          .object({
+            kicker: z.string().optional(),
+            title: z.string(),
+            figure: z.string().optional(),
+            caption: z.string().optional(),
+            source: z.string().optional(),
+            icon: z.string().optional(),
+            ratio: z.number().min(0).max(1).optional(),
+            ratioLabel: z.string().optional(),
+          })
+          .optional(),
         // Filled by Nuxt Content with the source file's raw Markdown, so the deployed .output bundle
         // can render BlogPostDto.body without content/ next to it (see server/utils/blog-content.ts).
         rawbody: z.string(),
@@ -34,6 +51,27 @@ export default defineContentConfig({
         { columns: ['draft'] },
         { columns: ['date'] },
       ],
+    }),
+    // Editorial block of a category hub, one file per vertical (GOU-2716). Format and word range:
+    // content/category-hubs/README.md, checked by shared/utils/category-hub.content.spec.ts.
+    categoryHubs: defineCollection({
+      type: 'data',
+      source: { include: '*.yml', cwd: CATEGORY_HUBS_DIR },
+      schema: z.object({
+        verticalId: z.string(),
+        language: z.string().default('fr'),
+        published: z.boolean().default(false),
+        title: z.string().optional(),
+        intro: z.string(),
+        faq: z
+          .array(z.object({ question: z.string(), answer: z.string() }))
+          .default([]),
+        subCategories: z.array(z.string()).default([]),
+        guides: z
+          .array(z.object({ slug: z.string(), label: z.string() }))
+          .default([]),
+      }),
+      indexes: [{ columns: ['verticalId', 'language'] }],
     }),
     docs: defineCollection({
       type: 'page',

@@ -49,7 +49,16 @@ public class KwankoFeedService extends AbstractFeedService
     private static final String BASE_URL = "https://api.kwanko.com";
     private static final String PRODUCT_FEED_AD_TYPE = "product_feed";
     private static final String VOUCHER_CODE_AD_TYPE = "voucher_code";
-    private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "Product URL", "url", "URL", "link", "merchant_deep_link"};
+    private static final String DEEPLINK_AD_TYPE = "deeplink";
+    /**
+     * A Kwanko offer url is tracked when it points to a Kwanko tracking host ({@code action.metaffiliation.com}) or
+     * carries a Kwanko click token ({@code P...S1U...V4}), also used by first-party tracking domains such as
+     * {@code qby.mda-electromenager.com/?P5122F758B41F15S1UC41363f080465V4}.
+     */
+    static final String KWANKO_TRACKED_URL_PATTERN =
+            "^(?i:https?://(?:[^/?#]*\\.)?(?:metaffiliation|netaffiliation|kwanko)\\.com)(?:[:/?#]|$)"
+            + "|[?&=/]P[0-9A-F]+S[0-9]+U[0-9A-Za-z]+V[0-9]+(?:[&#/]|$)";
+    private static final String[] KWANKO_PRODUCT_URL_COLUMNS = {"product_url", "Product page URL", "page url", "Product URL", "url", "URL", "link", "merchant_deep_link"};
     private static final String[] KWANKO_TRACKED_URL_COLUMNS = {"tracking_url", "tracked_url", "deeplink", "tracking_link", "merchant_deep_link", "URL"};
     private static final String[] KWANKO_NAME_COLUMNS = {"product_name", "Product name", "Name", "name", "title", "Title", "product_title"};
     private static final String[] KWANKO_PRICE_COLUMNS = {"price", "Price", "Current price", "product_price", "sale_price", "search_price", "price_vat_inc", "StrikePrice"};
@@ -109,11 +118,19 @@ public class KwankoFeedService extends AbstractFeedService
         }
 
         KwankoFeedSelection selection = selectCsvProductFeedAds(adsNode);
+        Map<String, String> clickTemplates = loadClickTemplatesByCampaign();
+        int withoutClickTemplate = 0;
         for (KwankoProductFeedAd adCandidate : selection.csvAds())
         {
             JsonNode ad = adCandidate.ad();
             DataSourceProperties ds = getVolatileDatasource(adCandidate.feedKey(), feedConfig, adCandidate.feedUrl());
             applyKwankoCsvDefaults(ds);
+            if (!applyTrackingDefaults(ds, isBlank(adCandidate.campaignId()) ? null : clickTemplates.get(adCandidate.campaignId())))
+            {
+                withoutClickTemplate++;
+                logger.warn("Kwanko product feed '{}' (campaign {}) has no deeplink click template: its untracked offers will be rejected.",
+                        adCandidate.feedKey(), adCandidate.campaignId());
+            }
             JsonNode campaign = ad.path("campaign");
             ds.setDatasourceConfigName(firstNonBlank(textOrNull(campaign, "name"), adCandidate.feedKey()));
             String campaignUrl = textOrNull(campaign, "url");
@@ -129,7 +146,7 @@ public class KwankoFeedService extends AbstractFeedService
                 selection.xmlReplacedByCsv(),
                 selection.xmlOnly(),
                 selection.ambiguous());
-        logger.info("Kwanko datasources loaded: {} entries", result.size());
+        logger.info("Kwanko datasources loaded: {} entries ({} without deeplink click template)", result.size(), withoutClickTemplate);
         return result;
     }
 
@@ -296,7 +313,7 @@ public class KwankoFeedService extends AbstractFeedService
         }
         try
         {
-            JsonNode root = retrieveKwankoAds("deeplink", programId);
+            JsonNode root = retrieveKwankoAds(DEEPLINK_AD_TYPE, programId);
             JsonNode adsNode = arrayNode(root, "ads", "data", "items");
             if (adsNode == null)
             {
@@ -316,6 +333,74 @@ public class KwankoFeedService extends AbstractFeedService
             logger.warn("Failed to build Kwanko tracking link from deeplink ad.", e);
         }
         return targetUrl;
+    }
+
+    /**
+     * Loads the deeplink click template ({@code tracked_material_per_websites[].urls.click} containing
+     * {@value CsvDataSourceProperties#TRACKING_LINK_PLACEHOLDER}) of every campaign, in a single API call.
+     *
+     * @return click templates by campaign id, empty when the deeplink ads cannot be retrieved
+     */
+    private Map<String, String> loadClickTemplatesByCampaign()
+    {
+        try
+        {
+            return clickTemplatesByCampaign(retrieveKwankoAds(DEEPLINK_AD_TYPE));
+        }
+        catch (Exception e)
+        {
+            logger.warn("Failed to retrieve Kwanko deeplink ads: untracked product feed offers will be rejected.", e);
+            return new LinkedHashMap<>();
+        }
+    }
+
+    /**
+     * Maps each campaign to the first click template of its deeplink ads that contains the url placeholder.
+     *
+     * @param root deeplink ads payload
+     * @return click templates by campaign id
+     */
+    Map<String, String> clickTemplatesByCampaign(JsonNode root)
+    {
+        Map<String, String> templates = new LinkedHashMap<>();
+        JsonNode adsNode = arrayNode(root, "ads", "data", "items");
+        if (adsNode == null)
+        {
+            return templates;
+        }
+        for (JsonNode ad : adsNode)
+        {
+            String campaignId = campaignId(ad);
+            String clickPattern = firstTrackedUrl(ad.path("tracked_material_per_websites"), "click");
+            if (!isBlank(campaignId) && clickPattern != null && clickPattern.contains(CsvDataSourceProperties.TRACKING_LINK_PLACEHOLDER))
+            {
+                templates.putIfAbsent(campaignId, clickPattern);
+            }
+        }
+        return templates;
+    }
+
+    /**
+     * Requires a tracked url for every offer of a Kwanko product feed (see {@link #KWANKO_TRACKED_URL_PATTERN}), and
+     * gives the campaign deeplink click template used to track the rows whose url is direct. Values already set in the
+     * datasource YAML are kept.
+     *
+     * @param datasource datasource generated from the product-feed ad
+     * @param clickTemplate deeplink click template of the campaign, or {@code null}
+     * @return {@code true} if the datasource has a tracking link template
+     */
+    boolean applyTrackingDefaults(DataSourceProperties datasource, String clickTemplate)
+    {
+        CsvDataSourceProperties csv = datasource.getCsvDatasource();
+        if (isBlank(csv.getTrackedUrlPattern()))
+        {
+            csv.setTrackedUrlPattern(KWANKO_TRACKED_URL_PATTERN);
+        }
+        if (isBlank(csv.getTrackingLinkTemplate()))
+        {
+            csv.setTrackingLinkTemplate(clickTemplate);
+        }
+        return !isBlank(csv.getTrackingLinkTemplate());
     }
 
     private boolean isEnabled()

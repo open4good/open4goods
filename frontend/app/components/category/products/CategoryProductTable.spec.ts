@@ -195,7 +195,7 @@ describe('CategoryProductTable', () => {
     expect(
       headers.some(header => header.key === 'attribute:DIAGONALE_POUCES')
     ).toBe(true)
-    expect(items[0]!['attribute:DIAGONALE_POUCES']).toBe('32 "')
+    expect(items[0]!['attribute:DIAGONALE_POUCES']).toBe('32\u00a0"')
   })
 
   it('emits sort updates for attribute columns', async () => {

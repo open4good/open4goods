@@ -18,6 +18,7 @@ import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.nudgerfrontapi.controller.CacheControlConstants;
 import org.open4goods.nudgerfrontapi.config.properties.ApiProperties;
 import org.open4goods.nudgerfrontapi.dto.product.FieldMetadataDto;
+import org.open4goods.nudgerfrontapi.dto.product.ProductCardDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoComponent;
 import org.open4goods.nudgerfrontapi.dto.product.ProductDto.ProductDtoFilterFields;
@@ -35,6 +36,7 @@ import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchResultDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchVerticalGroupDto;
 import org.open4goods.nudgerfrontapi.dto.search.GlobalSearchPageMetaDto;
+import org.open4goods.nudgerfrontapi.dto.search.ProductCardSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchRequestDto;
 import org.open4goods.nudgerfrontapi.dto.search.ProductSearchResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestCategoryDto;
@@ -42,6 +44,7 @@ import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestProductDto;
 import org.open4goods.nudgerfrontapi.dto.search.SearchSuggestResponseDto;
 import org.open4goods.nudgerfrontapi.dto.search.SortRequestDto;
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.service.ProductCardMappingService;
 import org.open4goods.nudgerfrontapi.service.ProductMappingService;
 import org.open4goods.nudgerfrontapi.service.SearchService;
 import org.open4goods.nudgerfrontapi.service.SearchService.GlobalSearchHit;
@@ -99,6 +102,7 @@ public class ProductController {
     private final VerticalsConfigService verticalsConfigService;
     private final SearchService searchService;
     private final ApiProperties apiProperties;
+    private final ProductCardMappingService cardMappingService;
 
     private static final String VALUE_TYPE_NUMERIC = "numeric";
     private static final String VALUE_TYPE_TEXT = "text";
@@ -116,12 +120,15 @@ public class ProductController {
      * @param verticalsConfigService vertical configuration service
      * @param searchService search service
      * @param apiProperties front API settings (Elasticsearch result window)
+     * @param cardMappingService projection of listing products to cards
      */
     public ProductController(ProductMappingService service,
                              VerticalsConfigService verticalsConfigService,
                              SearchService searchService,
-                             ApiProperties apiProperties) {
+                             ApiProperties apiProperties,
+                             ProductCardMappingService cardMappingService) {
         this.apiProperties = apiProperties;
+        this.cardMappingService = cardMappingService;
         this.service = service;
         this.verticalsConfigService = verticalsConfigService;
         this.searchService = searchService;
@@ -348,9 +355,134 @@ public class ProductController {
                 "Entering products(page={}, include={}, verticalId={}, query={}, domainLanguage={}, locale={}, hasSearchPayload={})",
                 page, include, verticalId, query, domainLanguage, locale, searchPayload != null);
 
+        ProductSearchExecution execution = executeProductSearch(page, include, verticalId, query, domainLanguage,
+                locale, searchPayload);
+        if (execution.error() != null) {
+            return castError(execution.error());
+        }
+        return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(execution.body());
+    }
+
+    /**
+     * List product cards: the lightweight variant of {@link #products} used by listings (GOU-2710).
+     *
+     * <p>Same search, pagination, sort, filters and aggregations as {@code POST /products}, but each product is
+     * returned as a {@link ProductCardDto} (about 4 KB instead of about 50 KB): no attribute sourcing, price history,
+     * other scores, videos or PDFs. The product page keeps {@code GET /products/{gtin}}.</p>
+     *
+     * <p>Error codes:</p>
+     * <ul>
+     *   <li><b>UNAUTHORIZED</b> – 401</li>
+     *   <li><b>FORBIDDEN</b> – 403</li>
+     *   <li><b>INTERNAL_ERROR</b> – 500</li>
+     * </ul>
+     */
+    @PostMapping("/cards")
+    @Operation(
+            summary = "List product cards",
+            description = "Return paginated lightweight product cards for listings (category grids, guides, "
+                    + "alternatives). Same search contract as POST /products, without the include parameter: a card "
+                    + "carries identity, card and display names, the indexed attributes of the vertical popular "
+                    + "attributes, technical and eco filters and active sort, the cover image, the ECOSCORE value and "
+                    + "ImpactScore status, best offers, offers per condition and price trends. Absent values are "
+                    + "omitted.",
+            security = @SecurityRequirement(name = "bearer-jwt"),
+            parameters = {
+                    @Parameter(name = "pageNumber", in = ParameterIn.QUERY,
+                            description = "Zero-based page index",
+                            schema = @Schema(type = "integer", minimum = "0")),
+                    @Parameter(name = "pageSize", in = ParameterIn.QUERY,
+                            description = "Page size, capped server-side to 100. (pageNumber + 1) * pageSize must not exceed 10000 (400 otherwise).",
+                            schema = @Schema(type = "integer", minimum = "0", maximum = "100")),
+                    @Parameter(name = "verticalId", in = ParameterIn.QUERY,
+                            description = "Optional vertical identifier used to scope the search.",
+                            schema = @Schema(type = "string")),
+                    @Parameter(name = "query", in = ParameterIn.QUERY,
+                            description = "Optional free text search applied on offer names.",
+                            schema = @Schema(type = "string")),
+                    @Parameter(name = "domainLanguage", in = ParameterIn.QUERY, required = true,
+                            description = "Language driving localisation of textual fields.",
+                            schema = @Schema(implementation = DomainLanguage.class))
+            },
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Optional JSON payload carrying sort, aggregation and filter definitions.",
+                    required = false,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProductSearchRequestDto.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Product cards returned",
+                            headers = {
+                                    @Header(name = "X-Locale", description = "Resolved locale for textual payloads.",
+                                            schema = @Schema(type = "string", example = "fr-FR"))
+                            },
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductCardSearchResponseDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request parameters, or page outside the result window ((pageNumber + 1) * pageSize > 10000)",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class))),
+                    @ApiResponse(responseCode = "401", description = "Authentication required"),
+                    @ApiResponse(responseCode = "403", description = "Access forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Unknown vertical"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error"),
+                    @ApiResponse(responseCode = "503", description = "Search response too large for the backend buffer, reduce page size or aggregations",
+                            content = @Content(mediaType = "application/problem+json",
+                                    schema = @Schema(implementation = ProblemDetail.class)))
+            }
+    )
+    public ResponseEntity<ProductCardSearchResponseDto> productCards(
+            @Parameter(hidden = true) @PageableDefault(size = 20) Pageable page,
+            @RequestParam(required = false) String verticalId,
+            @RequestParam(required = false) String query,
+            @RequestParam() DomainLanguage domainLanguage,
+            Locale locale,
+            @RequestBody(required = false) ProductSearchRequestDto searchPayload) {
+
+        LOGGER.info(
+                "Entering productCards(page={}, verticalId={}, query={}, domainLanguage={}, locale={}, hasSearchPayload={})",
+                page, verticalId, query, domainLanguage, locale, searchPayload != null);
+
+        ProductSearchExecution execution = executeProductSearch(page, ProductCardMappingService.CARD_COMPONENTS,
+                verticalId, query, domainLanguage, locale, searchPayload);
+        if (execution.error() != null) {
+            return castError(execution.error());
+        }
+        ProductCardSearchResponseDto body = cardMappingService.toCardResponse(execution.body(), execution.sort());
+        return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+    }
+
+    /**
+     * Outcome of {@link #executeProductSearch}: either a validation error or the search response with the sort
+     * that produced it.
+     *
+     * @param error validation error response, {@code null} on success
+     * @param body  search response, {@code null} on error
+     * @param sort  effective sort of the search, {@code null} on error
+     */
+    private record ProductSearchExecution(ResponseEntity<?> error, ProductSearchResponseDto body, Sort sort) {
+
+        static ProductSearchExecution failure(ResponseEntity<?> error) {
+            return new ProductSearchExecution(error, null, null);
+        }
+    }
+
+    /**
+     * Validate and run a product search shared by {@code POST /products} and {@code POST /products/cards}.
+     *
+     * @param page           requested page
+     * @param include        DTO components to map, all when {@code null} or empty
+     * @param verticalId     optional vertical identifier
+     * @param query          optional free text query
+     * @param domainLanguage language driving localisation
+     * @param locale         request locale
+     * @param searchPayload  optional sort, aggregation and filter definitions
+     * @return the validation error (400, 404) or the search response and its effective sort
+     */
+    private ProductSearchExecution executeProductSearch(Pageable page, Set<String> include, String verticalId,
+            String query, DomainLanguage domainLanguage, Locale locale, ProductSearchRequestDto searchPayload) {
+
         ResponseEntity<?> windowError = checkResultWindow(page.getPageNumber(), page.getPageSize());
         if (windowError != null) {
-            return castError(windowError);
+            return ProductSearchExecution.failure(windowError);
         }
 
         String normalizedVerticalId = StringUtils.hasText(verticalId) ? verticalId.trim() : null;
@@ -359,7 +491,7 @@ public class ProductController {
         	// We just check existence of vertical
         	if(verticalsConfigService.getConfigById(normalizedVerticalId) == null) {
         		LOGGER.warn("Vertical configuration not found for id='{}'", verticalId);
-                return ResponseEntity.notFound().build();
+                return ProductSearchExecution.failure(ResponseEntity.notFound().build());
         	}
         }
         
@@ -374,7 +506,7 @@ public class ProductController {
         Validation<Pageable> sortValidation = sanitizeSort(page, sortDto, allowedSortMappings);
         if (sortValidation.hasError()) {
             LOGGER.warn("Sort validation failed for request: {}", sortDto);
-            return castError(sortValidation.error());
+            return ProductSearchExecution.failure(sortValidation.error());
         }
         effectivePageable = sortValidation.value();
 
@@ -384,7 +516,7 @@ public class ProductController {
                     ProductDtoComponent.valueOf(component);
                 } catch (IllegalArgumentException ex) {
                     LOGGER.warn("Invalid include parameter encountered: {}", component, ex);
-                    return castError(badRequest("Invalid include parameter", "Unknown component: " + component));
+                    return ProductSearchExecution.failure(badRequest("Invalid include parameter", "Unknown component: " + component));
                 }
             }
         }
@@ -394,7 +526,7 @@ public class ProductController {
                 capabilities.allowedAggregations());
         if (aggregationValidation.hasError()) {
             LOGGER.warn("Aggregation validation failed for request: {}", aggDto);
-            return castError(aggregationValidation.error());
+            return ProductSearchExecution.failure(aggregationValidation.error());
         }
         aggDto = aggregationValidation.value();
 
@@ -402,7 +534,7 @@ public class ProductController {
         Validation<FilterRequestDto> filterValidation = sanitizeFilters(filterDto);
         if (filterValidation.hasError()) {
             LOGGER.warn("Filter validation failed for request: {}", filterDto);
-            return castError(filterValidation.error());
+            return ProductSearchExecution.failure(filterValidation.error());
         }
         filterDto = filterValidation.value();
 
@@ -412,7 +544,7 @@ public class ProductController {
         ProductSearchResponseDto body = searchService.searchProducts(effectivePageable, locale, requestedComponents, aggDto,
                 domainLanguage, normalizedVerticalId, normalizedQuery, filterDto);
 
-        return ResponseEntity.ok().cacheControl(CacheControlConstants.ONE_HOUR_PUBLIC_CACHE).body(body);
+        return new ProductSearchExecution(null, body, effectivePageable.getSort());
     }
 
     /**
@@ -807,7 +939,8 @@ public class ProductController {
             }
             String mapping = filter.field().trim();
             
-            sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max()));
+            sanitized.add(new FilterRequestDto.Filter(mapping, filter.operator(), filter.terms(), filter.min(), filter.max(),
+                    filter.minExclusive(), filter.maxExclusive()));
         }
         return Validation.ok(sanitized.isEmpty() ? List.of() : List.copyOf(sanitized));
     }

@@ -122,7 +122,8 @@ export const buildProductMeta = (options: ProductMetaBuildOptions) => {
   const title = truncateAtWordBoundary(matchingTitle, maxTitleLength)
 
   const sameProductAndBrandModel =
-    brandModel.length > 0 && productName.toLowerCase() === brandModel.toLowerCase()
+    brandModel.length > 0 &&
+    productName.toLowerCase() === brandModel.toLowerCase()
 
   const descriptionTemplate = score
     ? verticalTitle

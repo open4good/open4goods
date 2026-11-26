@@ -1,8 +1,10 @@
+import { BlockList, isIP } from 'node:net'
 import { isbot } from 'isbot'
 import {
   createError,
   getCookie,
   getQuery,
+  getRequestIP,
   getRouterParam,
   send,
   setResponseHeader,
@@ -131,6 +133,69 @@ const isBlockedUserAgent = (event: H3Event, userAgent?: string): boolean => {
   )
 }
 
+/**
+ * Client IP: Cloudflare's header when present (prod is behind Cloudflare then
+ * Caddy), else the request IP honouring X-Forwarded-For.
+ */
+const resolveClientIp = (event: H3Event): string | undefined => {
+  const header = event.node.req.headers['cf-connecting-ip']
+  const cfIp = (Array.isArray(header) ? header[0] : header)?.trim()
+
+  return cfIp || getRequestIP(event, { xForwardedFor: true })
+}
+
+/**
+ * Own hosts (GOU-2577): NUXT_AFFILIATION_BLOCKED_IPS, comma separated exact IPs
+ * or CIDR prefixes, IPv4 and IPv6. Invalid entries are ignored.
+ */
+const isBlockedIp = (event: H3Event): boolean => {
+  const { affiliationBlockedIps: raw } = useRuntimeConfig(event) as {
+    affiliationBlockedIps?: unknown
+  }
+  const entries =
+    typeof raw === 'string'
+      ? raw
+          .split(',')
+          .map(entry => entry.trim())
+          .filter(Boolean)
+      : []
+
+  if (!entries.length) {
+    return false
+  }
+
+  const clientIp = resolveClientIp(event)?.replace(/^::ffff:/i, '')
+  const clientFamily = clientIp ? isIP(clientIp) : 0
+
+  if (!clientIp || !clientFamily) {
+    return false
+  }
+
+  const list = new BlockList()
+  for (const entry of entries) {
+    const [address = '', prefix] = entry.split('/')
+    const family = isIP(address)
+    if (!family) {
+      continue
+    }
+    const type = family === 4 ? 'ipv4' : 'ipv6'
+    const prefixLength = prefix === undefined ? undefined : Number(prefix)
+    const maxPrefix = family === 4 ? 32 : 128
+
+    if (prefixLength === undefined) {
+      list.addAddress(address, type)
+    } else if (
+      Number.isInteger(prefixLength) &&
+      prefixLength >= 0 &&
+      prefixLength <= maxPrefix
+    ) {
+      list.addSubnet(address, prefixLength, type)
+    }
+  }
+
+  return list.check(clientIp, clientFamily === 4 ? 'ipv4' : 'ipv6')
+}
+
 export const MISSING_NAVIGATION_SIGNAL_MESSAGE =
   'Ouvrez ce lien depuis la fiche produit sur nudger.fr'
 
@@ -239,6 +304,13 @@ export const resolveAffiliationRedirect = async (
   const { domainLanguage } = resolveDomainLanguage(rawHost)
   const userAgent = normalizeUserAgent(event.node.req.headers['user-agent'])
   const method = resolveMethod(event)
+
+  if (isBlockedIp(event)) {
+    console.warn(
+      `Affiliation redirect refused for a blocked IP, token "${token.slice(0, MAX_LOGGED_TOKEN_LENGTH)}…"`
+    )
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
 
   if (isBlockedUserAgent(event, userAgent)) {
     console.warn(

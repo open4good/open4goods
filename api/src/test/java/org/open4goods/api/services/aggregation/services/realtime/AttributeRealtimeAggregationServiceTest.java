@@ -36,6 +36,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.ImpactScoreV2Config;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig.NumericBoundsConfig;
 import org.open4goods.services.serialisation.service.SerialisationService;
 import org.open4goods.verticals.GoogleTaxonomyService;
 import org.open4goods.verticals.VerticalsConfigService;
@@ -65,9 +66,8 @@ class AttributeRealtimeAggregationServiceTest {
                 brandService = Mockito.mock(BrandService.class);
                 Mockito.when(brandService.resolve(Mockito.anyString(), Mockito.anyMap()))
                                 .thenAnswer(invocation -> new Brand(invocation.getArgument(0, String.class).toUpperCase()));
-                VerticalsConfigService verticalConfigService = Mockito.mock(VerticalsConfigService.class);
                 icecatFeatureResolver = Mockito.mock(IcecatFeatureResolver.class);
-                service = new AttributeRealtimeAggregationService(verticalConfigService, brandService, logger, icecatFeatureResolver);
+                service = new AttributeRealtimeAggregationService(brandService, logger, icecatFeatureResolver);
 
                 verticalConfig = new VerticalConfig();
                 verticalConfig.setRequiredAttributes(Set.of("required_attr"));
@@ -453,7 +453,9 @@ class AttributeRealtimeAggregationServiceTest {
 	@ParameterizedTest
 	@CsvSource(delimiter = '|', value = {
 			"1,2 KW|1200", "1.2kW|1200", "1 200 W|1200", "1\u00a0200 W|1200", "1200 W|1200", "2,5 kW|2500",
-			"0,3 W|0.3", "0, 3 W|0.3", "0.5 W|0.5", "500 mW|0.5", "1,2 kilowatts|1200", "900 Watts|900", "1500|1500" })
+			"0,3 W|0.3", "0, 3 W|0.3", "0.5 W|0.5", "500 mW|0.5", "1,2 kilowatts|1200", "900 Watts|900", "1500|1500",
+			// GOU-2315: an energy per hour is a power
+			"0,85 kWh/h|850", "0.85 KWH/H|850", "1,1 kWh/60 min|1100", "2 kWh / heure|2000", "500 Wh/h|500" })
 	void powerIsConvertedToWatts(String raw, String expected) throws Exception {
 		AttributeConfig attrConfig = wattAttribute();
 
@@ -475,6 +477,18 @@ class AttributeRealtimeAggregationServiceTest {
 		attrConfig.getParser().setDeleteTokens(java.util.List.of("/10", "/ 10", "SUR 10"));
 
 		assertThat(service.parseValue(raw, attrConfig, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2315: an energy (per cycle, per year) is not a power; it used to lose its unit and read as watts.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = { "0.543 kWh", "84 kWh/an", "52 kWh/100 cycles", "300 Wh" })
+	void energyIsNotReadAsWatts(String raw) {
+		AttributeConfig attrConfig = wattAttribute();
+
+		assertThatThrownBy(() -> service.parseValue(raw, attrConfig, verticalConfig))
+				.isInstanceOf(ValidationException.class);
 	}
 
 	private static AttributeConfig wattAttribute() {
@@ -684,6 +698,31 @@ class AttributeRealtimeAggregationServiceTest {
 		assertThat(service.parseValue(raw, attribute, verticalConfig)).isEqualTo(expected);
 	}
 
+	/**
+	 * GOU-2377: a diagonal with an explicit unit is converted to inches ("165 cm" is about 65").
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "tv|165 cm|64.96", "tv|165cm|64.96", "tv|139,7 cm|55", "tv|1651 mm|65",
+			"tv|65\"|65", "smartphones|6,1|6.1" })
+	void diagonalWithAUnitIsConvertedToInches(String vertical, String raw, String expected) throws Exception {
+		AttributeConfig diagonal = realAttribute(vertical, "DIAGONALE_POUCES");
+
+		assertThat(service.parseValue(raw, diagonal, verticalConfig)).isEqualTo(expected);
+	}
+
+	/**
+	 * GOU-2377: a code pushed under the DIAGONALE key (Rakuten "PRD_PM255575188") or a bare number of centimetres is
+	 * no diagonal: the source is rejected instead of being indexed.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = { "PRD_PM255575188", "255575188", "123636", "165", "0" })
+	void implausibleDiagonalIsRejected(String raw) throws Exception {
+		AttributeConfig diagonal = realAttribute("smartphones", "DIAGONALE_POUCES");
+
+		assertThatThrownBy(() -> service.parseValue(raw, diagonal, verticalConfig))
+				.isInstanceOf(ValidationException.class);
+	}
+
 	@Test
 	void onProductIndexesTheSpinSpeedWithItsThousands() throws Exception {
 		verticalConfig.getAttributesConfig().setConfigs(List.of(realAttribute("washing-machine", "SPIN_SPEED")));
@@ -695,6 +734,50 @@ class AttributeRealtimeAggregationServiceTest {
 		IndexedAttribute spinSpeed = product.getAttributes().getIndexed().get("SPIN_SPEED");
 		assertThat(spinSpeed.getValue()).isEqualTo("1400");
 		assertThat(spinSpeed.getNumericValue()).isEqualTo(1400.0);
+	}
+
+	/**
+	 * GOU-2315: EPREL sends the hourly consumption of an air conditioner without a unit, in kWh/h; the shipped
+	 * {@code sourceUnits} reads it in watts. A unitless Icecat value of the same attribute stays in watts.
+	 */
+	@Test
+	void onProductReadsTheUnitlessEprelHourlyConsumptionInKilowatts() throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("air-conditioner", "POWER_CONSUMPTION_TYPICAL")));
+		Product eprel = new Product(123L);
+		addSourcedAttribute(eprel, "coolingCharacteristics-hourlyElectricityConsumption", "1.1",
+				EprelCompletionService.EPREL_DS_NAME);
+		Product icecat = new Product(124L);
+		addSourcedAttribute(icecat, "CONSOMMATION ELECTRIQUE TYPIQUE", "950", "icecat.biz");
+
+		service.onProduct(eprel, verticalConfig);
+		service.onProduct(icecat, verticalConfig);
+
+		IndexedAttribute fromEprel = eprel.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL");
+		assertThat(fromEprel.getValue()).isEqualTo("1100");
+		assertThat(fromEprel.getNumericValue()).isEqualTo(1100.0);
+		assertThat(fromEprel.getSource()).extracting(SourcedAttribute::getCleanedValue).containsExactly("1100");
+		assertThat(icecat.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL").getValue()).isEqualTo("950");
+	}
+
+	/**
+	 * GOU-2315: a source that no longer parses (an energy in kWh) does not vote with the cleaned value left by an
+	 * earlier aggregation, even when its datasource ranks first.
+	 */
+	@Test
+	void onProductDropsTheStaleCleanedValueOfASourceThatNoLongerParses() throws Exception {
+		verticalConfig.getAttributesConfig()
+				.setConfigs(List.of(realAttribute("air-conditioner", "POWER_CONSUMPTION_TYPICAL")));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "CONSOMMATION ELECTRIQUE TYPIQUE", "950 W", "icecat.biz");
+		SourcedAttribute energy = new SourcedAttribute(new Attribute("CONSOMMATION ELECTRIQUE TYPIQUE", "0,5 kWh"),
+				EprelCompletionService.EPREL_DS_NAME);
+		energy.setCleanedValue("0.5");
+		product.getAttributes().getAll().get("CONSOMMATION ELECTRIQUE TYPIQUE").addSourceAttribute(energy);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("POWER_CONSUMPTION_TYPICAL").getValue()).isEqualTo("950");
 	}
 
 	/**
@@ -763,6 +846,51 @@ class AttributeRealtimeAggregationServiceTest {
 	}
 
 	/**
+	 * GOU-2295: three merchants vote X, one source votes Y. X wins by votes unless the attribute lists Y's source
+	 * in {@code preferredSources}; without the field, eprel and icecat.biz keep their rank.
+	 */
+	@Test
+	void onProductElectsTheValueOfAPreferredSourceOverTheVotes() throws Exception {
+		Product byVotes = productWithRegulatorAndThreeMerchants();
+		Product preferred = productWithRegulatorAndThreeMerchants();
+
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(null)));
+		service.onProduct(byVotes, verticalConfig);
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(List.of("regulator"))));
+		service.onProduct(preferred, verticalConfig);
+
+		assertThat(byVotes.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("5");
+		assertThat(preferred.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("8");
+	}
+
+	@Test
+	void onProductKeepsEprelFirstWithoutPreferredSources() throws Exception {
+		verticalConfig.getAttributesConfig().setConfigs(List.of(indexAttribute(null)));
+		Product product = productWithRegulatorAndThreeMerchants();
+		addSourcedAttribute(product, "D", "9", EprelCompletionService.EPREL_DS_NAME);
+
+		service.onProduct(product, verticalConfig);
+
+		assertThat(product.getAttributes().getIndexed().get("INDEX").getValue()).isEqualTo("9");
+	}
+
+	private static AttributeConfig indexAttribute(List<String> preferredSources) {
+		AttributeConfig config = new AttributeConfig();
+		config.setKey("INDEX");
+		config.setSynonyms(Map.of("all", Set.of("A", "B", "C", "D")));
+		config.setPreferredSources(preferredSources);
+		return config;
+	}
+
+	private Product productWithRegulatorAndThreeMerchants() {
+		return productWithAttributesInOrder(
+				new String[] { "A", "5", "shop-a.com" },
+				new String[] { "B", "5", "shop-b.com" },
+				new String[] { "C", "5", "shop-c.com" },
+				new String[] { "D", "8", "regulator" });
+	}
+
+	/**
 	 * Builds a product whose raw attributes are visited in the given order, each one being
 	 * {@code {name, value, datasource}}.
 	 */
@@ -773,6 +901,80 @@ class AttributeRealtimeAggregationServiceTest {
 			addSourcedAttribute(product, attribute[0], attribute[1], attribute[2]);
 		}
 		return product;
+	}
+
+	/**
+	 * GOU-2707: Rakuten's weight class "+ de 100 kg" was indexed as a 100 kg washing machine. A weight class is
+	 * not a weight, and nothing is indexed.
+	 */
+	@Test
+	void onProductDoesNotIndexAWeightClass() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "POIDS", "+ de 100 kg", "rakuten.com");
+
+		service.onProduct(product, washingMachine);
+
+		assertThat(product.getAttributes().getIndexed()).doesNotContainKey("WEIGHT");
+	}
+
+	/**
+	 * GOU-2707: a weight outside the plausible range of the vertical (8 kg, the capacity of a washing machine) does
+	 * not vote; the plausible source is indexed.
+	 */
+	@Test
+	void onProductIgnoresAWeightOutsideTheVerticalBounds() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "WEIGHT", "8 kg", "icecat.biz");
+		ProductAttribute poids = new ProductAttribute();
+		poids.setName("POIDS");
+		poids.addSourceAttribute(new SourcedAttribute(new Attribute("POIDS", "68 kg"), "some-merchant.com"));
+		product.getAttributes().getAll().put("POIDS", poids);
+
+		service.onProduct(product, washingMachine);
+
+		IndexedAttribute weight = product.getAttributes().getIndexed().get("WEIGHT");
+		assertThat(weight.getValue()).isEqualTo("68");
+		assertThat(weight.getNumericValue()).isEqualTo(68.0);
+	}
+
+	/**
+	 * GOU-2707: when every source is outside the plausible range, the attribute is not indexed, so neither the
+	 * product page nor the ImpactScore uses it.
+	 */
+	@Test
+	void onProductDoesNotIndexAnImplausibleWeight() throws Exception {
+		VerticalConfig washingMachine = realVerticals.getConfigById("washing-machine");
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "POIDS", "8 kg", "some-merchant.com");
+
+		service.onProduct(product, washingMachine);
+
+		assertThat(product.getAttributes().getIndexed()).doesNotContainKey("WEIGHT");
+	}
+
+	/**
+	 * GOU-2707: the bounds of the vertical apply to an attribute without a dedicated parser, and take precedence
+	 * over the {@code parser.minValue} / {@code parser.maxValue} of the attribute.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = { "45|45", "15|", "130|" })
+	void onProductAppliesTheVerticalBoundsOfANumericAttribute(String raw, String expected) throws Exception {
+		AttributeConfig noise = new AttributeConfig();
+		noise.setKey("NOISE_LEVEL");
+		noise.setFilteringType(AttributeType.NUMERIC);
+		noise.setSynonyms(Map.of("all", Set.of("NIVEAU SONORE")));
+		noise.getParser().setMaxValue(200.0);
+		verticalConfig.getAttributesConfig().setConfigs(List.of(noise));
+		verticalConfig.getParsers().getBounds().put("NOISE_LEVEL", new NumericBoundsConfig(20.0, 90.0));
+		Product product = new Product(123L);
+		addSourcedAttribute(product, "NIVEAU SONORE", raw, "some-merchant.com");
+
+		service.onProduct(product, verticalConfig);
+
+		IndexedAttribute indexed = product.getAttributes().getIndexed().get("NOISE_LEVEL");
+		assertThat(indexed == null ? null : indexed.getValue()).isEqualTo(expected);
 	}
 
 	/**

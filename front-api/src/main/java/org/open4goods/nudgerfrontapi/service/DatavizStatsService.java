@@ -269,9 +269,9 @@ public class DatavizStatsService {
             case "brandMarketShare" -> new AggregationRequestDto.Agg("brand-market-share",
                     "attributes.referentielAttributes.BRAND", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
             case "productsByPlatform" -> new AggregationRequestDto.Agg("products-by-platform",
-                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+                    "sources", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
             case "offersByPlatform" -> new AggregationRequestDto.Agg("offers-by-platform",
-                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+                    "sources", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
             case "conditionByPlatform" -> new AggregationRequestDto.Agg("condition-by-platform",
                     "price.conditions", AggregationRequestDto.AggType.terms, null, null, 10, null);
 
@@ -295,7 +295,7 @@ public class DatavizStatsService {
             case "priceBoxplotByBrand" -> new AggregationRequestDto.Agg("price-boxplot-by-brand",
                     "attributes.referentielAttributes.BRAND", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
             case "priceDistributionByPlatform" -> new AggregationRequestDto.Agg("price-distribution-by-platform",
-                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+                    "sources", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
 
             // Exclusion causes (pareto over top exclusion reasons)
             case "excludedCausesPareto" -> new AggregationRequestDto.Agg("excluded-causes-pareto",
@@ -303,7 +303,7 @@ public class DatavizStatsService {
 
             // Brand × platform heatmap approximation (platform terms distribution)
             case "brandPlatformHeatmap" -> new AggregationRequestDto.Agg("brand-platform-heatmap",
-                    "datasourceCodes", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
+                    "sources", AggregationRequestDto.AggType.terms, null, null, DEFAULT_TERMS_SIZE, null);
 
             // Price charts
             case "minimumPriceHistogram" -> new AggregationRequestDto.Agg("min-price-histogram",
@@ -341,6 +341,8 @@ public class DatavizStatsService {
                 FilterRequestDto.FilterOperator.range,
                 null,
                 1d,
+                null,
+                null,
                 null));
 
         // Apply overrides from request
@@ -353,7 +355,9 @@ public class DatavizStatsService {
                             FilterRequestDto.FilterOperator.range,
                             null,
                             override.min(),
-                            override.max()));
+                            override.max(),
+                            null,
+                            null));
                 }
             }
         }
@@ -371,6 +375,8 @@ public class DatavizStatsService {
                         FilterRequestDto.FilterOperator.range,
                         null,
                         1d,
+                        null,
+                        null,
                         null)
         ), null);
     }

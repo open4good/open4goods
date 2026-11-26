@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -944,19 +946,45 @@ public class VerticalsConfigService {
 	/**
 	 * Resolves the vertical of a categories bag.
 	 *
+	 * <p>When {@code categoryVoteEnabled} is true in {@code _default.yml}, the
+	 * vertical is decided by a vote between the datasources, see
+	 * {@link #getVerticalByCategoryVote(Map, String)} (GOU-2256). Otherwise the
+	 * historical rule below applies, unchanged.
+	 *
 	 * <p>The first category matching a vertical wins. The vertical is then dropped
 	 * when any category of any datasource contains one of its
 	 * {@code excludingTokensFromCategoriesMatching}, unless the product EPREL group
 	 * belongs to that vertical: an EPREL registration proves the product is the
 	 * appliance, so a single marketplace row categorised as an accessory or a
 	 * piece of furniture cannot remove it from its vertical (GOU-1700). EPREL never
-	 * assigns a vertical on its own.
+	 * assigns a vertical on its own. The result depends on the iteration order of
+	 * the map when two categories match different verticals, and a single row
+	 * decides in both directions: one matching row assigns the vertical, one
+	 * excluding token removes it.
 	 *
 	 * @param productCategoriessByDatasource product categories keyed by datasource
 	 * @param eprelProductGroup              EPREL product group of the product, or null
 	 * @return the matching vertical, or null
 	 */
 	public VerticalConfig getVerticalForCategories(Map<String, String> productCategoriessByDatasource,
+			String eprelProductGroup) {
+
+		if (isCategoryVoteEnabled()) {
+			return getVerticalByCategoryVote(productCategoriessByDatasource, eprelProductGroup);
+		}
+		return getVerticalByHistoricalRule(productCategoriessByDatasource, eprelProductGroup);
+	}
+
+	/**
+	 * The historical rule of {@link #getVerticalForCategories(Map, String)},
+	 * whatever the {@code categoryVoteEnabled} flag: the vote falls back on it to
+	 * break a tie (GOU-2317).
+	 *
+	 * @param productCategoriessByDatasource product categories keyed by datasource
+	 * @param eprelProductGroup              EPREL product group of the product, or null
+	 * @return the matching vertical, or null
+	 */
+	private VerticalConfig getVerticalByHistoricalRule(Map<String, String> productCategoriessByDatasource,
 			String eprelProductGroup) {
 
 		VerticalConfig vc = null;
@@ -996,6 +1024,230 @@ public class VerticalsConfigService {
 		}
 
 		return vc;
+	}
+
+	/**
+	 * Tells whether {@code _default.yml} enables the vote between datasources
+	 * (GOU-2256).
+	 *
+	 * @return the {@code categoryVoteEnabled} flag of the default configuration,
+	 *         false when it is not loaded
+	 */
+	public boolean isCategoryVoteEnabled() {
+		return defaultConfig != null && defaultConfig.isCategoryVoteEnabled();
+	}
+
+	/**
+	 * Resolves the vertical of a categories bag by a vote between its datasources
+	 * (GOU-2256), whatever the {@code categoryVoteEnabled} flag:
+	 * {@link #getVerticalForCategories(Map, String)} only calls it when the flag is
+	 * on, and a before/after replay can call both. Open choices of the rule:
+	 * {@code verticals/README.md}.
+	 *
+	 * <p><b>Voters.</b> Each entry of the map is one voter: the map holds one
+	 * category per datasource (the last one received), so a datasource never votes
+	 * twice. Two datasource names of the same merchant (legacy {@code darty.com}
+	 * and {@code Darty FR}) are two voters. A blank category abstains.
+	 *
+	 * <p><b>Matched vertical.</b> A category matches at most one vertical, looked
+	 * up as in the historical rule: the {@code matchingCategories} of its
+	 * datasource first, then those under {@code all}. Every vertical matched by at
+	 * least one category is a candidate.
+	 *
+	 * <p><b>Vote of a datasource on a candidate vertical V</b>, in this order:
+	 * <ol>
+	 * <li><i>against</i> when its category contains one of the
+	 * {@code excludingTokensFromCategoriesMatching} of V, or one of the
+	 * {@code sparePartCategoryMarkers} or {@code accessoryCategoryMarkers} of
+	 * {@code _default.yml} (GOU-2233), as substrings. The marker wins over the
+	 * match: a category of V carrying a marker votes against V. The
+	 * {@code natureNeutralCategoryFragments} are not removed: they keep a PC
+	 * component from being a "spare part" for the nature, whereas for the vote
+	 * {@code COMPOSANT - PIECE DETACHEE} is precisely what says the product is not
+	 * a phone or a fridge. The PC component markers ({@code BOITIER PC},
+	 * {@code COMPOSANT PC}, {@code COMPOSANTS PC}, {@code INFORMATIQUE | COMPOSANTS |},
+	 * GOU-2317) are in both lists: they vote against, and the nature removes them;</li>
+	 * <li><i>for</i> when its category matches V;</li>
+	 * <li><i>against</i> when its category matches another vertical;</li>
+	 * <li><i>abstains</i> otherwise: a category that matches no vertical and
+	 * carries no marker (most merchant categories are not mapped) says nothing
+	 * about V.</li>
+	 * </ol>
+	 *
+	 * <p><b>Decision.</b>
+	 * <ol>
+	 * <li>EPREL first (GOU-1700): a candidate whose {@code eprelGroupNames}
+	 * contain the product EPREL group wins, whatever the votes. A group belongs to
+	 * one vertical at most, and EPREL still never assigns a vertical that no
+	 * category matches.</li>
+	 * <li>When the EPREL group belongs to a vertical that no category matches, no
+	 * vertical: the categories contradict EPREL, and the aggregation then keeps
+	 * an EPREL-confirmed current vertical instead of moving the product to the
+	 * vertical of the categories.</li>
+	 * <li>Otherwise V wins when its votes for are strictly more than its votes
+	 * against. At most one vertical can win this way: a datasource that votes for
+	 * W votes against V, hence
+	 * {@code for(V) > against(V) >= for(W) > against(W) >= for(V)} would be needed
+	 * for both to win.</li>
+	 * <li>When no vertical wins, a tie goes to the historical rule (GOU-2317): V
+	 * wins when its votes for equal its votes against, none of these votes against
+	 * comes from a marker or an excluding token, and the historical rule gives V.
+	 * A tie between two verticals is a conflict of merchant mappings (a Fnac
+	 * "LAVAGE" row mapped to washing machines on a real dishwasher), not evidence
+	 * of an accessory. A tie with a marker against V loses: one marked row is
+	 * enough doubt against one row for V (the Lian-Li cooler filed as a TV).</li>
+	 * </ol>
+	 * Only the tie of the last step depends on the order of the map, through the
+	 * historical rule.
+	 *
+	 * <p>Outside four populations this rule gives the historical result: products
+	 * with a vertical and a category carrying a nature marker that is not an
+	 * excluding token (they may lose it), products without vertical with a matched
+	 * category and a category carrying an excluding token (they may gain one when
+	 * the votes for outnumber it), products whose categories match several
+	 * verticals, and products whose EPREL group belongs to a vertical that no
+	 * category matches while a category matches another one (they get none).
+	 *
+	 * @param categoriesByDatasource product categories keyed by datasource, may be
+	 *                               null
+	 * @param eprelProductGroup      EPREL product group of the product, or null
+	 * @return the winning vertical, or null
+	 */
+	public VerticalConfig getVerticalByCategoryVote(Map<String, String> categoriesByDatasource,
+			String eprelProductGroup) {
+		if (categoriesByDatasource == null || categoriesByDatasource.isEmpty()) {
+			return null;
+		}
+
+		// The vertical matched by each non-blank category (null when none), and the candidates sorted by id
+		List<String> categories = new ArrayList<>();
+		List<VerticalConfig> matchedVerticals = new ArrayList<>();
+		Map<String, VerticalConfig> candidates = new TreeMap<>();
+		for (Entry<String, String> entry : categoriesByDatasource.entrySet()) {
+			if (StringUtils.isBlank(entry.getValue())) {
+				continue;
+			}
+			VerticalConfig matched = matchingVertical(entry.getKey(), entry.getValue());
+			categories.add(entry.getValue());
+			matchedVerticals.add(matched);
+			if (matched != null) {
+				candidates.put(matched.getId(), matched);
+			}
+		}
+
+		for (VerticalConfig candidate : candidates.values()) {
+			if (isConfirmedByEprel(candidate, eprelProductGroup)) {
+				logger.debug("Vertical {} kept by its EPREL group {}", candidate.getId(), eprelProductGroup);
+				return candidate;
+			}
+		}
+		if (StringUtils.isNotBlank(eprelProductGroup)
+				&& configs.values().stream().anyMatch(vertical -> isConfirmedByEprel(vertical, eprelProductGroup))) {
+			logger.debug("No vertical: EPREL group {} belongs to a vertical that no category matches",
+					eprelProductGroup);
+			return null;
+		}
+
+		VerticalConfig winner = null;
+		Set<String> tiedWithoutMarker = new HashSet<>();
+		for (VerticalConfig candidate : candidates.values()) {
+			int votesFor = 0;
+			int votesAgainst = 0;
+			int markedAgainst = 0;
+			for (int i = 0; i < categories.size(); i++) {
+				switch (categoryVote(candidate, categories.get(i), matchedVerticals.get(i))) {
+				case FOR -> votesFor++;
+				case AGAINST -> votesAgainst++;
+				case MARKED_AGAINST -> {
+					votesAgainst++;
+					markedAgainst++;
+				}
+				case ABSTAIN -> {
+					// Says nothing about this vertical
+				}
+				}
+			}
+			logger.debug("Vertical {}: {} votes for, {} against ({} marked), {} categories", candidate.getId(),
+					votesFor, votesAgainst, markedAgainst, categories.size());
+			if (votesFor > votesAgainst) {
+				winner = candidate;
+			} else if (votesFor == votesAgainst && markedAgainst == 0) {
+				tiedWithoutMarker.add(candidate.getId());
+			}
+		}
+		if (winner != null || tiedWithoutMarker.isEmpty()) {
+			return winner;
+		}
+
+		// A tie opposed only by other verticals: the historical rule decides (GOU-2317)
+		VerticalConfig historical = getVerticalByHistoricalRule(categoriesByDatasource, eprelProductGroup);
+		if (historical != null && tiedWithoutMarker.contains(historical.getId())) {
+			logger.debug("Vertical {} kept on a tie by the historical rule", historical.getId());
+			return historical;
+		}
+		return null;
+	}
+
+	/**
+	 * Vote of one datasource category on a candidate vertical (GOU-2256).
+	 * {@code MARKED_AGAINST} is a vote against carried by a marker or an excluding
+	 * token, {@code AGAINST} one carried by a category of another vertical: only
+	 * the second leaves a tie to the historical rule (GOU-2317).
+	 */
+	private enum CategoryVote {
+		FOR, AGAINST, MARKED_AGAINST, ABSTAIN
+	}
+
+	/**
+	 * @param candidate the candidate vertical
+	 * @param category  the datasource category, not blank
+	 * @param matched   the vertical matched by this category, or null
+	 * @return the vote of this category on the candidate
+	 * @see #getVerticalByCategoryVote(Map, String)
+	 */
+	private CategoryVote categoryVote(VerticalConfig candidate, String category, VerticalConfig matched) {
+		if (containsAny(category, candidate.getExcludingTokensFromCategoriesMatching())
+				|| carriesNatureMarker(category)) {
+			return CategoryVote.MARKED_AGAINST;
+		}
+		if (matched == null) {
+			return CategoryVote.ABSTAIN;
+		}
+		return candidate.getId().equals(matched.getId()) ? CategoryVote.FOR : CategoryVote.AGAINST;
+	}
+
+	/**
+	 * Tells whether a category carries a {@code sparePartCategoryMarkers} or
+	 * {@code accessoryCategoryMarkers} marker of {@code _default.yml}, as the vote
+	 * reads it: the raw category, without removing the
+	 * {@code natureNeutralCategoryFragments} (GOU-2256). Package-private for the
+	 * before/after replay of the tests (GOU-2317).
+	 *
+	 * @param category the datasource category, not null
+	 * @return true when the vote counts this category against every candidate
+	 */
+	boolean carriesNatureMarker(String category) {
+		return defaultConfig != null && (containsAny(category, defaultConfig.getSparePartCategoryMarkers())
+				|| containsAny(category, defaultConfig.getAccessoryCategoryMarkers()));
+	}
+
+	/**
+	 * The vertical a datasource category matches: the {@code matchingCategories}
+	 * of the datasource first, then those under {@code all}, as in the historical
+	 * rule. Package-private for the before/after replay of the tests (GOU-2317).
+	 *
+	 * @param datasource the datasource name
+	 * @param category   the category
+	 * @return the matched vertical, or null
+	 */
+	VerticalConfig matchingVertical(String datasource, String category) {
+		Map<String, VerticalConfig> byDatasource = categoriesToVertical.get(datasource);
+		VerticalConfig matched = byDatasource == null ? null : byDatasource.get(category);
+		if (matched == null) {
+			Map<String, VerticalConfig> all = categoriesToVertical.get("all");
+			matched = all == null ? null : all.get(category);
+		}
+		return matched;
 	}
 
 	/**
@@ -1072,7 +1324,12 @@ public class VerticalsConfigService {
 		return sparePart ? ProductNature.SPARE_PART : ProductNature.ACCESSORY;
 	}
 
-	private static boolean containsAny(String category, Set<String> markers) {
+	/**
+	 * @param category the category, not null
+	 * @param markers  substrings searched, may be null; blank ones are ignored
+	 * @return true when the category contains one of the markers
+	 */
+	static boolean containsAny(String category, Set<String> markers) {
 		if (markers == null) {
 			return false;
 		}

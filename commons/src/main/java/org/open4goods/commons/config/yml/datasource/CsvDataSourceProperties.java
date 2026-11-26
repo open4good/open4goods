@@ -15,6 +15,9 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class CsvDataSourceProperties {
 
+	/** Placeholder of {@link #trackingLinkTemplate} replaced by the URL-encoded product url. */
+	public static final String TRACKING_LINK_PLACEHOLDER = "{XXX}";
+
 	/**
 	 * For datasourceregression tests, allow to specify CSV header rows
 	 */
@@ -104,6 +107,21 @@ public class CsvDataSourceProperties {
 	 * If true, the url will be trimed of its parameters
 	 */
 	private Boolean trimUrlParameters = false;
+
+	/**
+	 * If set, the final offer url must match this regular expression (searched, not fully matched) to be
+	 * considered as tracked. An url that does not match is rewritten with {@link #trackingLinkTemplate}, or
+	 * the line is rejected when no template is set: an offer of such a datasource is never published with an
+	 * untracked direct link.
+	 */
+	private String trackedUrlPattern;
+
+	/**
+	 * Click template used to track an url that does not match {@link #trackedUrlPattern}. The
+	 * {@value #TRACKING_LINK_PLACEHOLDER} placeholder is replaced by the URL-encoded product url. Ignored
+	 * when it does not contain the placeholder.
+	 */
+	private String trackingLinkTemplate;
 
 
 	/**
@@ -285,6 +303,22 @@ public class CsvDataSourceProperties {
 
 	public void setTrimUrlParameters(final Boolean trimUrlParameters) {
 		this.trimUrlParameters = trimUrlParameters;
+	}
+
+	public String getTrackedUrlPattern() {
+		return trackedUrlPattern;
+	}
+
+	public void setTrackedUrlPattern(final String trackedUrlPattern) {
+		this.trackedUrlPattern = trackedUrlPattern;
+	}
+
+	public String getTrackingLinkTemplate() {
+		return trackingLinkTemplate;
+	}
+
+	public void setTrackingLinkTemplate(final String trackingLinkTemplate) {
+		this.trackingLinkTemplate = trackingLinkTemplate;
 	}
 
 

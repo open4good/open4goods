@@ -1,0 +1,29 @@
+criteriasPonderation:
+  CLASSE_ENERGY: 0.30
+  ENERGY_CONSUMPTION_ANNUAL: 0.25
+  NOISE_LEVEL: 0.10
+  WARRANTY: 0.12
+  WEIGHT: 0.08
+  DATA_QUALITY: 0.15
+# ImpactScore V2 (GOU-1880). V1 matrix above without DATA_QUALITY, renormalised to 1 pro rata.
+# Thresholds approved by the board on 24/11/2026 (approval bd50d2b9-b5e3-4fd8-a16b-51dd75b69808, GOU-2629).
+methodologyVersion: 2
+v2:
+  criteriasPonderation:
+    CLASSE_ENERGY: 0.3529412
+    ENERGY_CONSUMPTION_ANNUAL: 0.2941176
+    NOISE_LEVEL: 0.1176471
+    WARRANTY: 0.1411765
+    WEIGHT: 0.0941176
+  minRealWeightCoverage: 0.5
+  eprelRequired: true
+  minRatedForPositionLabel: 100
+  positionLabels:
+    - level: excellent
+      minBetterThan: 0.90
+    - level: good
+      minBetterThan: 0.50
+    - level: fair
+      minBetterThan: 0.10
+    - level: poor
+      minBetterThan: 0.0

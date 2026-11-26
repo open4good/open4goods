@@ -45,6 +45,7 @@
   "blog": {
     "article": {
       "back": "Back",
+      "draftBanner": "Draft: this article is not published. It is only visible on beta, for review.",
       "empty": "The content of this article will be available soon.",
       "featuredImageAlt": "Featured image for {title}",
       "readingTime": "Approx. {minutes} min read",
@@ -79,9 +80,32 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
       "tagTitle": "{tag} articles - Nudger Blog"
+    },
+    "tvSizeCalculator": {
+      "title": "Calculator: which TV size for your viewing distance?",
+      "distanceLabel": "Viewing distance (in meters)",
+      "distanceHint": "Between {min} and {max} m",
+      "resolutionLabel": "TV resolution",
+      "resolution": {
+        "4k": "4K (Ultra HD)",
+        "full-hd": "Full HD"
+      },
+      "range": "Recommended diagonal: {minInches} to {maxInches} inches ({minCm} to {maxCm} cm)",
+      "recommended": "Recommended size: {inches} inches",
+      "beyond": {
+        "above": "(your distance allows a screen larger than the usual sizes)",
+        "below": "(your distance is short for the usual sizes: pick the smallest one)"
+      },
+      "dimensions": "Width x height: {width} x {height} cm (16:9 screen)",
+      "link": "See TVs of this size"
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Guides and products to explore",
+      "guides": "Buying guides",
+      "products": "Products to compare"
+    },
     "seo": {
       "title": "Nudger - Price and Impact Score comparator",
       "description": "Compare prices and Impact Scores for over 50 million products: a score out of 20, published methodology.",
@@ -165,7 +189,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -658,6 +684,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Product pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Helpful guides",
       "postsTitle": "Related articles",
@@ -686,13 +718,7 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
-          "jsonUnavailable": "AI response unavailable.",
-          "promptHelper": "Instructions sent to the model to produce the configuration.",
-          "promptTitle": "YAML generation prompt",
-          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
-          "responseTitle": "Model response",
           "title": "Impact Score generation audit",
-          "yamlUnavailable": "Prompt unavailable.",
           "toggle": "AI audit: prompt and raw response",
           "v1History": "This AI audit was used to configure the V1 matrix of the {category} Impact Score. It was not rerun for method v{version}, whose criteria and weights are shown above. The V1 prompt and raw response remain available in the configuration published on GitHub."
         },
@@ -779,8 +805,8 @@
         "USE": "Product use"
       },
       "seo": {
-        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
-        "title": "{category} - Impact Score breakdown"
+        "description": "How Nudger scores {category} out of 20: Impact Score criteria, weights and sources. Published, versioned method.",
+        "title": "{category} Impact Score: criteria, weights and method"
       },
       "title": "{category} - {label}",
       "method": {
@@ -812,7 +838,7 @@
           "title": "Compared products",
           "scope": "Compared products are those of the {category} category in the Nudger catalogue with at least one offer.",
           "rated": "{count} products rated.",
-          "ratedCompared": "{count} {items} rated and compared. | {count} {items} rated and compared.",
+          "ratedCompared": "{count} product rated and compared in the {items} category. | {count} products rated and compared in the {items} category.",
           "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
           "outdated": "{count} products waiting to be recalculated with the current method.",
           "excluded": "{count} products excluded from the comparison. Products are excluded when they have no brand, no model, no associated EPREL record (depending on the category) or lack an attribute required by the category.",
@@ -864,7 +890,9 @@
       },
       "operator": {
         "greaterThan": "≥ {value}",
-        "lowerThan": "≤ {value}"
+        "lowerThan": "≤ {value}",
+        "strictlyGreaterThan": "> {value}",
+        "strictlyLowerThan": "< {value}"
       },
       "reset": "Clear fast filters"
     },
@@ -967,6 +995,14 @@
       "subtitle": "Other focused selections",
       "itemSubtitle": "Explore this subcategory",
       "fallbackTitle": "Related selection"
+    },
+    "hub": {
+      "defaultTitle": "{category}: what matters when choosing",
+      "previewNotice": "Preview: this block is not published. It is only visible on beta or in development.",
+      "topTitle": "Top {count} Impact Score",
+      "rankingDate": "Ranking calculated on {date}",
+      "faqTitle": "Frequently asked questions",
+      "linksTitle": "Learn more"
     },
     "readMore": {
       "showMore": "Read more",
@@ -1107,7 +1143,7 @@
           "fair": "Below the median",
           "poor": "Among the lowest ranked"
         },
-        "betterThan": "Ranked better than {percent}% of the {count} {items} rated by Nudger",
+        "betterThan": "Ranked better than {percent}% of the products rated by Nudger in the {items} category",
         "productsFallback": "products",
         "onlyRated": "Only rated product in its category",
         "criteria": "{count} of {total} criterion filled in | {count} of {total} criteria filled in",
@@ -1124,8 +1160,8 @@
       },
       "why": {
         "title": "Why this score?",
-        "headline": "{score}/20: this product ranks above {percent}% of the {count} {items} rated by Nudger.",
-        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the {count} {items} rated by Nudger.",
+        "headline": "{score}/20: this product ranks above {percent}% of the products rated by Nudger in the {items} category.",
+        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the products rated by Nudger in the {items} category.",
         "onlyRated": "{score}/20: the only rated product in its category, so no position comparison is possible.",
         "criterion": "{label} ({value})",
         "criterionVsAverage": "{label} ({value}, versus {average} on average in the category)",
@@ -1455,7 +1491,7 @@
     "intro": "The Impact Score evolves. Each method version is dated; a score is only compared with scores of the same version.",
     "backLink": "← The Impact Score",
     "noDate": "Since the beginning",
-    "planned": "Announced, not yet in force",
+    "partial": "In force by category; version 1 remains in force for the others",
     "scopeLabel": "Categories concerned:",
     "changeLabel": "Change:",
     "reasonLabel": "Reason:",
@@ -1466,7 +1502,7 @@
     "entries": {
       "v2": {
         "title": "Version 2",
-        "scope": "Categories switch one by one; none is concerned until version 2 is announced as in force.",
+        "scope": "Refrigerators and dishwashers (since 16 November 2026), washing machines, ovens and smartphones (since 25 November 2026). Other categories remain on version 1; both versions coexist, category by category.",
         "changes": [
           {
             "change": "A score is computed only from criteria that are actually provided; the weight of missing criteria is spread over the provided criteria.",
@@ -1506,7 +1542,7 @@
       },
       "v1": {
         "title": "Version 1",
-        "scope": "All rated categories.",
+        "scope": "All categories rated at the start. It remains in force for categories not yet moved to version 2.",
         "changes": [
           {
             "change": "First method: score out of 20, weighted average of criteria per category, normalised against the category's products; an average value is assigned to missing criteria.",
@@ -1630,6 +1666,19 @@
             "research": "Great for catalogue enrichment, research and cultural analytics"
           },
           "title": "ISBN library"
+        },
+        "impact": {
+          "title": "Impact by category",
+          "description": "One CSV file per product category with the raw criteria Nudger uses to assess impact, their coverage and their source.",
+          "features": {
+            "refresh": "Updated every week",
+            "coverage": "Fill rate published for every column",
+            "sources": "Source of every value: EPREL, merchant, Icecat"
+          },
+          "cta": {
+            "label": "See the impact datasets",
+            "ariaLabel": "See the list of impact datasets by category"
+          }
         }
       },
       "common": {
@@ -1639,17 +1688,17 @@
         },
         "columnDescription": "Description",
         "columnName": "Column",
+        "sampleCaption": "Extract of the first {count} rows of the file",
+        "sampleTitle": "Data preview",
         "download": {
           "direct": {
-            "concurrent": "Up to {value} simultaneous downloads",
-            "concurrentUnknown": "Concurrent downloads limited",
+            "checksum": "SHA-256: {value}",
             "cta": {
               "ariaLabel": "Start the direct download from Nudger",
               "label": "Download from nudger.fr"
             },
             "description": "Retrieve the ZIP file directly from Nudger's infrastructure.",
-            "speed": "Limited to {value} per client",
-            "speedUnknown": "Download speed limited per client",
+            "resume": "Resumable if the download is interrupted",
             "title": "Direct download from Nudger"
           },
           "fast": {
@@ -1660,8 +1709,7 @@
               "label": "Download from data.gouv.fr"
             },
             "description": "Download via the official open data portal hosted by the French government.",
-            "speed": "High bandwidth infrastructure",
-            "title": "Fast mirror (data.gouv.fr)"
+            "title": "Download from data.gouv.fr"
           }
         },
         "placeholder": "-",
@@ -1674,17 +1722,14 @@
         }
       },
       "creator": {
-        "name": "Goulven Furet"
+        "name": "Goulven Furet",
+        "organization": "Nudger"
       },
       "gtin": {
         "columns": {
           "brand": {
             "description": "Brand declared or inferred for the product.",
             "label": "brand"
-          },
-          "categories": {
-            "description": "Product categories aggregated by Nudger (pipe-separated).",
-            "label": "categories"
           },
           "currency": {
             "description": "Currency code of the lowest price.",
@@ -1703,7 +1748,7 @@
             "label": "gtinType"
           },
           "last_updated": {
-            "description": "Epoch timestamp (ms) of the latest update for this product.",
+            "description": "UTC date (YYYY-MM-DD) of the latest update of this product.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1726,9 +1771,9 @@
             "description": "Number of commercial offers tracked for the product.",
             "label": "offers_count"
           },
-          "url": {
-            "description": "Product page URL when public offers are available.",
-            "label": "url"
+          "sources": {
+            "description": "Sources that contributed to the product, separated by {'|'}.",
+            "label": "sources"
           }
         },
         "columnsSubtitle": "Each row represents a product identifier enriched with metadata gathered by Nudger.",
@@ -1737,7 +1782,7 @@
           "fast": {
             "highlight": "Curated for broad retail and circular economy use cases"
           },
-          "subtitle": "Choose the mirror that matches your bandwidth and automation needs.",
+          "subtitle": "Choose the mirror that matches your automation needs.",
           "title": "Download options"
         },
         "faq": {
@@ -1815,7 +1860,7 @@
             "label": "isbn"
           },
           "last_updated": {
-            "description": "Epoch timestamp (ms) of the last update.",
+            "description": "UTC date (YYYY-MM-DD) of the latest update of this book.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1834,6 +1879,10 @@
             "description": "Number of commercial offers tracked for the book.",
             "label": "offers_count"
           },
+          "sources": {
+            "description": "Sources that contributed to the product, separated by {'|'}.",
+            "label": "sources"
+          },
           "souscategorie": {
             "description": "Primary subcategory assigned to the book.",
             "label": "souscategorie"
@@ -1845,10 +1894,6 @@
           "title": {
             "description": "Book title as provided by sources.",
             "label": "title"
-          },
-          "url": {
-            "description": "Product page URL when offers are available.",
-            "label": "url"
           }
         },
         "columnsSubtitle": "Each row corresponds to a book identified by its ISBN.",
@@ -1857,7 +1902,7 @@
           "fast": {
             "highlight": "Mirror maintained for open culture and library reuse"
           },
-          "subtitle": "Pick the mirror that suits your workflow and traffic needs.",
+          "subtitle": "Pick the mirror that suits your workflow.",
           "title": "Download options"
         },
         "faq": {
@@ -2035,6 +2080,79 @@
     },
     "summary": {
       "title": "The datasets at a glance"
+    },
+    "freshness": {
+      "badge": "File generated {days} d ago",
+      "today": "File generated today",
+      "stale": "This file is more than {days} days old: the weekly generation run did not complete recently. The data is valid as of its generation date but may not reflect the current catalogue."
+    },
+    "reuse": {
+      "title": "Download, verify and read the file",
+      "subtitle": "The file is served from data.nudger.fr. A download can be resumed after an interruption, and its checksum is published in the manifest.",
+      "unavailable": "The download address is not available right now.",
+      "sha256": "SHA-256 of {file}:",
+      "blocks": {
+        "curl": "Download with resume (curl)",
+        "wget": "Download with resume (wget)",
+        "sha256": "Verify the SHA-256 checksum",
+        "pandas": "Read with pandas (Python)",
+        "duckdb": "Query with DuckDB",
+        "r": "Read with R"
+      }
+    },
+    "dictionary": {
+      "unit": "Unit",
+      "source": "Source",
+      "fillRate": "Fill rate"
+    },
+    "citation": {
+      "title": "How to cite this dataset",
+      "doiIntro": "Persistent identifier (Zenodo DOI):",
+      "text": "Nudger ({year}). {name}. ODbL 1.0 licence. DOI: {doi}. Available at {url}",
+      "noYear": "n.d.",
+      "attributionTitle": "Requested attribution",
+      "attribution": "The ODbL licence requires crediting the source: \"Contains data from Nudger (nudger.fr), ODbL 1.0 licence\". Any derived database must be redistributed under the same licence."
+    },
+    "impact": {
+      "verticalLabel": "Category: {vertical}",
+      "noScore": "The aggregated score (out of 20), normalised sub-scores, percentiles and ranks are not published: only the raw criteria are. The scoring method is under audit, and publishing a score that may change would mean releasing figures we cannot yet guarantee.",
+      "hub": {
+        "eyebrow": "Open data",
+        "title": "Impact datasets by category",
+        "subtitle": "One CSV file per product category, with the raw criteria Nudger uses to assess impact, their coverage and their source.",
+        "description": "Download the raw criteria of each product category for free under the ODbL licence: warranty, repairability, consumption, weight. Fill rate and source of every column.",
+        "seoTitle": "Impact open data by product category (CSV, ODbL) - Nudger",
+        "listTitle": "Datasets by category",
+        "empty": "The datasets are not available right now.",
+        "rows": "Rows",
+        "updated": "Generated",
+        "size": "Compressed size",
+        "open": "See the {vertical} dataset"
+      },
+      "category": {
+        "eyebrow": "Impact open data",
+        "title": "Impact criteria: {vertical}",
+        "subtitle": "CSV file of the raw criteria of the {vertical} category, with their coverage and source.",
+        "description": "Raw criteria of the {vertical} category as open data (CSV, ODbL): {rows} products, fill rate and source of each criterion.",
+        "seoTitle": "{vertical} open data: impact criteria (CSV, ODbL) - Nudger",
+        "dictionaryTitle": "Published criteria",
+        "dictionarySubtitle": "Each criterion is published with its raw value and the source that carries it. An empty cell means the value is missing.",
+        "categoryLink": "See the {vertical} category page",
+        "hubLink": "All impact datasets",
+        "notFound": "This dataset does not exist.",
+        "summaryTitle": "Figures of the published file"
+      },
+      "verticals": {
+        "air-conditioner": "Air conditioners",
+        "dishwasher": "Dishwashers",
+        "freezer": "Freezers",
+        "oven": "Ovens",
+        "refrigerator": "Refrigerators",
+        "smartphones": "Smartphones",
+        "tv": "TVs",
+        "washing-machine": "Washing machines",
+        "wine-cooler": "Wine coolers"
+      }
     }
   },
   "opensource": {
@@ -2380,6 +2498,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "In the same category",
+      "navLabel": "Product category",
+      "allOfVertical": "All {vertical}",
+      "sameSubCategory": "More products: {subCategory}",
+      "sameVertical": "More {vertical}",
+      "guides": "Buying guides"
+    },
     "verdict": {
       "title": "Nudger Verdict",
       "summary": "Our evaluation across three dimensions.",
@@ -2609,7 +2735,8 @@
           "conflicts": "Conflicts detected",
           "noConflicts": "No conflicts detected"
         },
-        "tooltipAriaLabel": "View sourcing details"
+        "tooltipAriaLabel": "View sourcing details",
+        "license": "License: {license}"
       },
       "audit": {
         "title": "Attribute sourcing audit",
@@ -2654,6 +2781,11 @@
         "scrollRight": "Scroll right"
       }
     },
+    "sources": {
+      "title": "Data sources",
+      "subtitle": "The information on this page comes from these sources. Their license and credit line are shown when they state them.",
+      "license": "License: {license}"
+    },
     "hero": {
       "aiSummary": {
         "community": "Experts say",
@@ -2661,6 +2793,7 @@
         "technical": "Technically"
       },
       "bestPriceTitle": "Best price",
+      "outOfStockPriceTitle": "Out-of-stock offer",
       "breadcrumbAriaLabel": "Product breadcrumb",
       "compare": {
         "add": "Add to compare",
@@ -3079,13 +3212,13 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName}: best price, specs and reviews {'|'} ImpactScore {score}/20",
+            "full": "{productName}: best price and specs {'|'} ImpactScore {score}/20",
             "fullVertical": "{verticalTitle} {productName}: best price {'|'} ImpactScore {score}/20",
             "compact": "{productName}: best price {'|'} ImpactScore {score}/20",
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName}: best price, specs and reviews",
+            "full": "{productName}: best price and specs",
             "fullVertical": "{verticalTitle} {productName}: best price",
             "compact": "{productName}: best price",
             "minimal": "{productName}"
@@ -3162,6 +3295,9 @@
     "logoAlt": "Return to home page via Nudger logo",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "All our categories"
+      },
       "accessibleTitle": "Footer information",
       "recordingEnabled": "Recording enabled",
       "blogLink": "Our blog",
@@ -3974,6 +4110,15 @@
     "contact": {
       "text": "A question about these rules?",
       "link": "Contact us"
+    }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Which TV size to choose for your living room?",
+      "productTitle": "Which size to choose?",
+      "productText": "The right screen size depends on your viewing distance and the room.",
+      "productTextWithDiagonal": "This TV has a {cm} cm diagonal: the right size depends on your viewing distance and the room.",
+      "productLink": "Which TV size to choose for your living room?"
     }
   }
 }

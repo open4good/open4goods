@@ -104,6 +104,99 @@ front:
     long-tail-max-candidates: 1200
     min-title-words: 3
     min-title-word-length: 3
+    # Long tail rule relative to the query (GOU-2474): a product whose names hold the object of the
+    # query (query without brands, articles, modifiers, numbers) but never at their head ("Ressort
+    # Lave-linge - Twinstar", "Roue Panier Lave-vaisselle Bosch" for lave-linge / lave-vaisselle) is
+    # set apart with the accessories. The head is the first word left once brands (product BRAND and
+    # known-brands), articles, words holding a digit, parenthesised parts and head-modifiers are
+    # skipped. Since GOU-2497 the rule also checks the products with a merchant category, whose
+    # category often carries no accessory marker ("Kit de superposition lave-linge" in
+    # KIT DE SUPERPOSITION, "Wewoo Connecteur TV" in ANTENNE); true restores the GOU-2474 scope
+    # (products without category only).
+    foreign-head-enabled: true
+    foreign-head-uncategorized-only: false
+    head-modifiers:
+      - mini
+      - petit
+      - petite
+      - compact
+      - compacte
+      - grand
+      - grande
+      - machine
+      - nouveau
+      - nouvelle
+      - neuf
+      - reconditionné
+      - série
+      - series
+      - gamme
+      - lot
+      - pack
+      - smart
+      - robot
+      - combiné
+    known-brands:
+      - aeg
+      - amica
+      - apple
+      - asus
+      - beko
+      - bosch
+      - brandt
+      - candy
+      - cello
+      - de dietrich
+      - delonghi
+      - dyson
+      - electrolux
+      - essentielb
+      - fagor
+      - gorenje
+      - grundig
+      - haier
+      - hisense
+      - honor
+      - hoover
+      - hotpoint
+      - huawei
+      - indesit
+      - inn
+      - jvc
+      - kenwood
+      - krups
+      - lenovo
+      - lg
+      - liebherr
+      - loewe
+      - miele
+      - mobilvision
+      - motorola
+      - moulinex
+      - neff
+      - nokia
+      - oneplus
+      - oppo
+      - panasonic
+      - philips
+      - polaroid
+      - proline
+      - qilive
+      - realme
+      - rowenta
+      - samsung
+      - sharp
+      - siemens
+      - smeg
+      - sony
+      - tassimo
+      - tcl
+      - tefal
+      - thomson
+      - toshiba
+      - vestel
+      - whirlpool
+      - xiaomi
   cache:
     path: ./cache
     one-minute-ttl: 1m
@@ -146,6 +239,15 @@ front:
     enabled: true
     tag: nudger-21
     url-template: "https://www.amazon.fr/s?k={gtin}&tag={tag}"
+
+  # Id of the AffiliationClick written into the network's reference parameter of the /contrib/
+  # redirect (GOU-2522): Awin clickref, TradeTracker r, Effiliation effi_id, Kwanko argsite (mclic
+  # links only). Off by default; a network is switched on by a separate change after a test sale.
+  affiliation-click-ref:
+    awin-enabled: ${FRONT_AFFILIATION_CLICK_REF_AWIN_ENABLED:true}
+    tradetracker-enabled: ${FRONT_AFFILIATION_CLICK_REF_TRADETRACKER_ENABLED:false}
+    effiliation-enabled: ${FRONT_AFFILIATION_CLICK_REF_EFFILIATION_ENABLED:false}
+    kwanko-enabled: ${FRONT_AFFILIATION_CLICK_REF_KWANKO_ENABLED:false}
 
   google-taxonomy:
     french-taxonomy-url: "https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt"
@@ -258,7 +360,8 @@ management:
 
 open-data-config:
   generation-enabled: false
-  # Public base URL of the dataset downloads (lot 0c: https://data.nudger.fr). Empty keeps api.resource-root-path.
+  # Public base URL of the published files (lot 0c: https://data.nudger.fr): download links and
+  # {base}/manifest.json read by /opendata/* (GOU-2290, front.opendata.*). Empty: no link, no manifest read.
   public-base-url: ${OPEN_DATA_PUBLIC_BASE_URL:}
 
 google-indexation:

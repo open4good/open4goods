@@ -10,6 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.open4goods.nudgerfrontapi.config.properties.AffiliationClickRefProperties;
 import org.open4goods.nudgerfrontapi.config.properties.AmazonSearchLinkProperties;
 import org.open4goods.services.contribution.model.AffiliationClick;
 import org.open4goods.services.contribution.model.ContributionVote;
@@ -35,7 +36,7 @@ class AmazonSearchLinkServiceTest {
         properties = new AmazonSearchLinkProperties();
         affiliationClickRepository = mock(AffiliationClickRepository.class);
         affiliationService = new AffiliationService(new SerialisationService(), mock(ContributionVoteRepository.class),
-                affiliationClickRepository);
+                affiliationClickRepository, new AffiliationClickRefService(new AffiliationClickRefProperties()));
         service = new AmazonSearchLinkService(properties, affiliationService);
     }
 

@@ -1,102 +1,65 @@
 package org.open4goods.ui.controllers.ui.pages;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.open4goods.model.exceptions.TechnicalException;
-import org.open4goods.ui.controllers.ui.UiService;
-import org.open4goods.services.opendata.config.OpenDataConfig;
-import org.open4goods.services.opendata.service.OpenDataService;
+import org.open4goods.ui.config.properties.OpenDataRedirectProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
 
-import cz.jiripinkas.jsitemapgenerator.ChangeFreq;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-@Controller
 /**
- * This controller maps the opendata page and dataset
- *
- * @author gof
- *
+ * Legacy download URLs of the open data files ({@code /opendata/gtin-open-data.zip},
+ * {@code /opendata/isbn-open-data.zip}).
+ * <p>
+ * ui neither generates nor serves an open data file (GOU-2290): the api publishes them on R2, served by
+ * {@code data.nudger.fr} with resumable downloads. GET and HEAD answer a permanent redirect (301) to
+ * {@code {open-data-config.redirect-base-url}/{name}}. Without a configured base URL (beta, local), they answer 404:
+ * ui has no file to serve.
+ * </p>
  */
+@Controller
 public class OpenDataController {
 
-	public static final String DEFAULT_PATH="/opendata";
-	private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenDataController.class);
 
-    private final OpenDataService openDataService;
-    private final OpenDataConfig openDataConfig;
+    static final String GTIN_FILENAME = "gtin-open-data.zip";
+    static final String ISBN_FILENAME = "isbn-open-data.zip";
 
-    public OpenDataController(OpenDataService openDataService, OpenDataConfig openDataConfig) {
-        this.openDataService = openDataService;
-        this.openDataConfig = openDataConfig;
+    private final OpenDataRedirectProperties redirectProperties;
+
+    public OpenDataController(OpenDataRedirectProperties redirectProperties) {
+        this.redirectProperties = redirectProperties;
     }
 
+    /**
+     * @return 301 to the GTIN zip on the public base URL, 404 when none is configured
+     */
+    @RequestMapping(path = "/opendata/" + GTIN_FILENAME, method = { RequestMethod.GET, RequestMethod.HEAD })
+    public ResponseEntity<Void> downloadGtinData() {
+        return redirect(GTIN_FILENAME);
+    }
 
-	@RequestMapping(path = "/opendata/gtin-open-data.zip", method = { RequestMethod.GET, RequestMethod.HEAD })
-	public void downloadGtinData(final HttpServletRequest request, final HttpServletResponse response) throws IOException, TechnicalException {
-        downloadData(request, response, "gtin-open-data.zip", openDataConfig.gtinZipFile());
-	}
+    /**
+     * @return 301 to the ISBN zip on the public base URL, 404 when none is configured
+     */
+    @RequestMapping(path = "/opendata/" + ISBN_FILENAME, method = { RequestMethod.GET, RequestMethod.HEAD })
+    public ResponseEntity<Void> downloadIsbnData() {
+        return redirect(ISBN_FILENAME);
+    }
 
-	@RequestMapping(path = "/opendata/isbn-open-data.zip", method = { RequestMethod.GET, RequestMethod.HEAD })
-	public void downloadIsbnData(final HttpServletRequest request, final HttpServletResponse response) throws IOException, TechnicalException {
-        downloadData(request, response, "isbn-open-data.zip", openDataConfig.isbnZipFile());
-	}
-
-	private void downloadData(final HttpServletRequest request, final HttpServletResponse response, String fileName, File zipFile) throws IOException, TechnicalException {
-		String redirectBase = openDataConfig.getRedirectBaseUrl();
-		if (StringUtils.isNotBlank(redirectBase)) {
-			String base = redirectBase.endsWith("/") ? redirectBase.substring(0, redirectBase.length() - 1) : redirectBase;
-			response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-			response.setHeader("Location", base + "/" + fileName);
-			return;
-		}
-		if (HttpMethod.HEAD.matches(request.getMethod())) {
-			// A HEAD never starts the throttled stream nor counts as a download.
-			response.setHeader("Content-type", "application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-			response.setContentLengthLong(zipFile.length());
-			return;
-		}
-		try (InputStream str = openDataService.limitedRateStream(zipFile.getAbsolutePath())) {
-			response.setHeader("Content-type", "application/octet-stream");
-			response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-			IOUtils.copy(str, response.getOutputStream());
-		} catch (IOException e) {
-			if (isClientAbort(e)) {
-				LOGGER.info("opendata file download interrupted by client: {}", e.getMessage());
-			} else {
-				LOGGER.error("opendata file download error : {}", e.getMessage(), e);
-			}
-			openDataService.decrementDownloadCounter();
-		}
-	}
-
-	/**
-	 * Detects common servlet container messages for clients closing the download
-	 * before the ZIP stream is fully written.
-	 *
-	 * @param exception download exception
-	 * @return {@code true} when the failure is a client abort
-	 */
-	private boolean isClientAbort(IOException exception) {
-		String message = exception.getMessage();
-		return message != null && (message.contains("Broken pipe") || message.contains("ClientAbortException")
-				|| message.contains("Connection reset by peer"));
-	}
-
+    /**
+     * @param fileName public object name of the file
+     * @return the permanent redirect, or 404 without a configured base URL
+     */
+    private ResponseEntity<Void> redirect(String fileName) {
+        String location = redirectProperties.redirectUrl(fileName);
+        if (location == null) {
+            LOGGER.debug("No open-data-config.redirect-base-url: {} is not served by ui", fileName);
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, location).build();
+    }
 }

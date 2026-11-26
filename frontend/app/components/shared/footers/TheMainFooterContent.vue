@@ -22,6 +22,7 @@ import { useCookie } from '#app'
 
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
+import { useVerticalsLinks } from '~/composables/categories/useVerticalsLinks'
 
 import {
   normalizeLocale,
@@ -133,6 +134,7 @@ const feedbackLinks = computed<FooterLink[]>(() => [
 ])
 
 const footerLogo = useFooterLogoAsset()
+const verticalLinks = await useVerticalsLinks()
 
 const hotjarCookie = useCookie(HOTJAR_RECORDING_COOKIE_NAME, {
   watch: true,
@@ -315,6 +317,46 @@ const isRecording = computed(() =>
       </v-col>
     </v-row>
 
+    <nav
+      v-if="verticalLinks.length"
+      class="footer-verticals mt-8"
+      :aria-label="t('siteIdentity.footer.verticals.title')"
+    >
+      <div class="footer-action-title text-subtitle-1 mb-2">
+        {{ t('siteIdentity.footer.verticals.title') }}
+      </div>
+      <v-row dense>
+        <v-col
+          v-for="vertical in verticalLinks"
+          :key="vertical.id"
+          cols="12"
+          sm="6"
+          md="3"
+        >
+          <NuxtLink
+            :to="vertical.href"
+            class="footer-vertical-link text-body-2 font-weight-bold text-decoration-none"
+          >
+            {{ vertical.title }}
+          </NuxtLink>
+          <ul class="footer-list">
+            <li
+              v-for="subCategory in vertical.subCategories"
+              :key="subCategory.id"
+              class="footer-list-item"
+            >
+              <NuxtLink
+                :to="subCategory.href"
+                class="py-1 px-2 d-flex align-center text-decoration-none"
+              >
+                <span class="text-body-2">{{ subCategory.title }}</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </v-col>
+      </v-row>
+    </nav>
+
     <v-divider class="my-8 footer-divider" color="hero-overlay-strong" />
 
     <v-row class="justify-center text-center footer-bottom">
@@ -419,6 +461,12 @@ const isRecording = computed(() =>
   transition: background-color 0.2s ease;
   color: inherit;
   text-decoration: none;
+}
+
+.footer-vertical-link {
+  color: inherit;
+  display: inline-block;
+  padding: 4px 8px;
 }
 
 .footer-list-item > a {

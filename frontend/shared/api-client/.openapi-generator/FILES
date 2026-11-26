@@ -117,8 +117,8 @@ models/Member.ts
 models/NudgeToolConfigDto.ts
 models/NudgeToolScoreDto.ts
 models/NudgeToolSubsetGroupDto.ts
+models/OpenDataColumnDto.ts
 models/OpenDataDatasetDto.ts
-models/OpenDataDownloadLimitsDto.ts
 models/OpenDataOverviewDto.ts
 models/Organisation.ts
 models/PageDto.ts
@@ -156,6 +156,7 @@ models/ProductScoreDto.ts
 models/ProductScoresDto.ts
 models/ProductSearchRequestDto.ts
 models/ProductSearchResponseDto.ts
+models/ProductSourceDto.ts
 models/ProductSourcedAttributeDto.ts
 models/ProductTimelineDto.ts
 models/ProductTimelineEventDto.ts

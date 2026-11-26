@@ -23,12 +23,25 @@ referentials:
     - group: "ovens"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 10.0
+    minKg: 5.0
     maxKg: 100.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 5.0
+      max: 100.0
+    WIDTH:
+      min: 35.0
+      max: 100.0
+    HEIGHT:
+      min: 25.0
+      max: 100.0
+    DEPTH:
+      min: 25.0
+      max: 80.0
 
 order: 2
 
@@ -132,6 +145,8 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "fours"
     verticalHomeTitle: "Fours"
+    verticalMetaTitle: "Comparatif fours 2026 : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les fours par prix, volume, consommation par cycle et Impact Score noté sur 20 pour limiter le coût d'usage et l'impact."
     verticalHomeDescription: "Comparez les fours encastrables ou posables selon leur volume, leur mode de nettoyage, leur consommation par cycle, leur Impact Score et leur prix pour limiter le coût d'usage et l'impact environnemental."
 
     # A mapping beetween custom page names behind this vertical and wiki pages
@@ -159,6 +174,8 @@ i18n:
 
     verticalHomeUrl: "ovens"
     verticalHomeTitle: "Ovens"
+    verticalMetaTitle: "Ovens comparison 2026: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare ovens by price, capacity, energy use per cycle and Impact Score out of 20 to cut running cost and environmental impact."
     verticalHomeDescription: "Compare built-in and freestanding ovens by capacity, cleaning mode, cycle energy use, Impact Score and price so running cost and environmental impact stay visible."
 
 #####################################################################################################################################
@@ -299,7 +316,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "300"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -322,21 +339,21 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1000"
       image: "example-image.png"
       url:
         en: "premium-price"
         fr: "haut-de-gamme"
       caption:
-        en: "> 1000 €"
-        fr: "> 1000 €"
+        en: "≥ 1000 €"
+        fr: "≥ 1000 €"
       title:
         en: "Premium ovens"
         fr: "Fours haut de gamme"
       description:
-        en: "Ovens priced over €1000."
-        fr: "Les fours dont le prix est supérieur à 1000€."
+        en: "Ovens priced at €1000 or more."
+        fr: "Les fours dont le prix est supérieur ou égal à 1000€."
 
     ################
     # Capacity
@@ -345,7 +362,7 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "60"
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
           operator: "LOWER_THAN"
@@ -368,15 +385,15 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "72"
       image: "example-image.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 72 L"
-        fr: "> 72 L"
+        en: "≥ 72 L"
+        fr: "≥ 72 L"
       title:
         en: "Large capacity"
         fr: "Grande capacité"
@@ -501,7 +518,7 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "300"
     - field: "price.minPrice.price"
       operator: "LOWER_THAN"
@@ -524,21 +541,21 @@ subsets:
   group: "price"
   criterias:
     - field: "price.minPrice.price"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "1000"
   image: "example-image.png"
   url:
     en: "premium-price"
     fr: "haut-de-gamme"
   caption:
-    en: "> 1000 €"
-    fr: "> 1000 €"
+    en: "≥ 1000 €"
+    fr: "≥ 1000 €"
   title:
     en: "Premium ovens"
     fr: "Fours haut de gamme"
   description:
-    en: "Ovens priced over €1000."
-    fr: "Les fours dont le prix est supérieur à 1000€."
+    en: "Ovens priced at €1000 or more."
+    fr: "Les fours dont le prix est supérieur ou égal à 1000€."
 
 ################
 # Capacity
@@ -547,7 +564,7 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "60"
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
       operator: "LOWER_THAN"
@@ -570,15 +587,15 @@ subsets:
   group: "capacity"
   criterias:
     - field: "attributes.indexed.OVEN_CAPACITY.numericValue"
-      operator: "GREATER_THAN"
+      operator: "GREATER_THAN_OR_EQUAL"
       value: "72"
   image: "example-image.png"
   url:
     en: "large-capacity"
     fr: "grande-capacite"
   caption:
-    en: "> 72 L"
-    fr: "> 72 L"
+    en: "≥ 72 L"
+    fr: "≥ 72 L"
   title:
     en: "Large capacity"
     fr: "Grande capacité"
@@ -699,11 +716,20 @@ attributesConfig:
 
 # Merged with the _default.yml tokens. Fnac GEM categories also hold hoods and hobs (GOU-2255).
 # Tokens are searched as substrings in every category of the product: none may appear in an oven category.
+# Microwaves and fryers entered through the Fnac GEM category (GOU-2376). The microwave tokens carry a separator
+# because real oven categories contain "MICRO-ONDES" ("FOUR ET MICRO-ONDES", "FOUR, MICRO-ONDES").
 excludingTokensFromCategoriesMatching:
   - HOTTE
   - TABLE DE CUISSON
   - PLAQUE DE CUISSON
   - PLAQUES DE CUISSON
+  - MICRO ONDES
+  - "> MICRO-ONDES"
+  - "| MICRO-ONDES"
+  - FOUR MICRO-ONDES
+  - MICROWAVE
+  - FRITEUSE
+  - AIRFRYER
 
 matchingCategories:
   darty.com:
@@ -770,8 +796,8 @@ matchingCategories:
     - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
   Référentiel produits Electro Depot:
     - "ELECTRO DEPOT | FOUR, MICRO-ONDES | FOUR ENCASTRABLE"
+  # The bare "ELECTROMENAGER" category of Rakuten is the whole appliance catalogue (GOU-2376): not matched.
   rakuten.com-csv.yml:
-    - "ELECTROMENAGER"
     - "ELECTROMENAGER | FOUR"
     - "ELECTROMENAGER | CUISINIERE"
   Ubaldi:
@@ -780,8 +806,6 @@ matchingCategories:
     - "367 | COOKERS & OVENS | FOUR"
   Back Market FR:
     - "HOME & GARDEN > KITCHEN & DINING > KITCHEN APPLIANCES > OVENS"
-  Joom FR:
-    - "HOME APPLIANCES > KITCHEN ELECTRONICS > ELECTRIC STOVES, OVENS & FRYERS"
   e.leclerc:
     - "HIGH TECH | ELECTROMENAGER > GROS ELECTROMENAGER > FOUR > FOUR ENCASTRABLE | GROS ELECTROMENAGER | FOUR"
   E.Leclerc FR:

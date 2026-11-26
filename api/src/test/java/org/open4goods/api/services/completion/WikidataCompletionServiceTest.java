@@ -44,7 +44,7 @@ class WikidataCompletionServiceTest {
 		when(apiProperties.logsFolder()).thenReturn("/tmp/logs");
 		when(apiProperties.aggLogLevel()).thenReturn(Level.INFO);
 		AggregationFacadeService aggregationFacadeService = mock(AggregationFacadeService.class);
-		when(aggregationFacadeService.getStandardAggregator("wikidata-aggregation"))
+		when(aggregationFacadeService.getStandardAggregator())
 				.thenReturn(mock(StandardAggregator.class));
 		searchService = mock(WikidataSearchService.class);
 		WikidataServiceProperties properties = new WikidataServiceProperties();

@@ -39,12 +39,6 @@ export interface AttributesConfigDto {
    * @memberof AttributesConfigDto
    */
   featuredValues?: Set<string>
-  /**
-   * Attribute names excluded from aggregation.
-   * @type {Set<string>}
-   * @memberof AttributesConfigDto
-   */
-  exclusions?: Set<string>
 }
 
 /**
@@ -76,8 +70,6 @@ export function AttributesConfigDtoFromJSONTyped(
       json['featuredValues'] == null
         ? undefined
         : new Set(json['featuredValues']),
-    exclusions:
-      json['exclusions'] == null ? undefined : new Set(json['exclusions']),
   }
 }
 
@@ -102,9 +94,5 @@ export function AttributesConfigDtoToJSONTyped(
       value['featuredValues'] == null
         ? undefined
         : Array.from(value['featuredValues'] as Set<any>),
-    exclusions:
-      value['exclusions'] == null
-        ? undefined
-        : Array.from(value['exclusions'] as Set<any>),
   }
 }

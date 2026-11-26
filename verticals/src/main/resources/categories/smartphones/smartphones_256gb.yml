@@ -1,0 +1,85 @@
+# Search-intent subcategory for the smartphones vertical.
+# Maintained: 2026-11-25 by Growth (GOU-2666).
+# Intent: choosing a smartphone by internal storage (256 GB).
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 28 days to 2026-11-24, FRA): no impression on the
+#     question "128 ou 256 Go" nor on any query containing "stockage" (new
+#     query, non mesuré).
+#   - Google Autocomplete: non mesuré (no direct access); web search (2026-11-25)
+#     shows the question answered by Actunumerique, ComparatifMobile, Combak,
+#     Samsung and others.
+# Feasibility:
+#   - Matching products with at least one offer: 1 025 (Elasticsearch products-moustik,
+#     vertical smartphones, offersCount >= 1, STORAGE_CAPACITY.numericValue from 256 to under 512,
+#     checked 2026-11-25).
+#   - Overlaps the generic subsets storage_basic / storage_large / storage_xl of
+#     verticals/smartphones.yml (<=128, 129-256, >256 GB): different pages and slugs.
+# Rationale:
+#   - Answers the storage question with a deterministic numeric filter, so the
+#     practical sheet can link each answer to a matching listing.
+id: "smartphones_256gb"
+slug:
+  en: "256gb-smartphone"
+  fr: "smartphone-256-go"
+h1Title:
+  en: "256 GB smartphones"
+  fr: "Smartphones 256 Go"
+description:
+  en: |-
+    Compare **smartphones with 256 GB of storage**, with warranty, repairability and Impact Score data to compare models.
+  fr: |-
+    Comparez les **smartphones de 256 Go de stockage**, avec la garantie, la réparabilité et l'Impact Score pour comparer les modèles.
+metaTitle:
+  en: "256 GB smartphones: compare models | Nudger"
+  fr: "Smartphones 256 Go : comparer | Nudger"
+metaDescription:
+  en: "Compare smartphones with 256 GB of storage by warranty, repairability and Impact Score before choosing the right capacity."
+  fr: "Comparez les smartphones de 256 Go selon la garantie, la réparabilité et l'Impact Score avant de choisir la bonne capacité."
+metaOpenGraphTitle:
+  en: "Compare 256 GB smartphones"
+  fr: "Comparer les smartphones 256 Go"
+metaOpenGraphDescription:
+  en: "A focused selection of 256 GB smartphones with practical comparison data."
+  fr: "Une sélection ciblée de smartphones 256 Go avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-cellphone"
+  title:
+    en: "The balanced choice"
+    fr: "Le bon compromis"
+  body:
+    en: |-
+      This page lists smartphones with 256 GB of internal storage.
+    fr: |-
+      Cette page ne liste que des smartphones de 256 Go de stockage interne.
+readMore:
+  title:
+    en: "Is 256 GB the right storage for a smartphone?"
+    fr: "256 Go, est-ce la bonne capacité pour un smartphone ?"
+  shortText:
+    en: |-
+      256 GB is the best compromise for most buyers. This page lists only 256 GB models so you compare like for like.
+    fr: |-
+      256 Go sont le meilleur compromis pour la plupart des acheteurs. Cette page ne liste que des modèles de 256 Go, pour comparer à capacité égale.
+  longText:
+    en: |-
+      Storage is rarely expandable, so choose the capacity at purchase. Then compare
+      warranty, repairability and Impact Score: they matter more for the lifespan
+      of the phone than the storage itself.
+
+      Nudger keeps this page on a bounded storage range. Each product stays
+      comparable on Impact Score, offers and technical attributes.
+    fr: |-
+      Le stockage est rarement extensible : choisissez la capacité à l'achat.
+      Comparez ensuite la garantie, la réparabilité et l'Impact Score, qui pèsent
+      davantage que la capacité sur la durée de vie du téléphone.
+
+      Nudger garde cette page sur une plage de stockage bornée. Chaque produit
+      reste comparable sur l'Impact Score, les offres et les caractéristiques
+      techniques.
+activatedFilters:
+  - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "256"
+  - field: "attributes.indexed.STORAGE_CAPACITY.numericValue"
+    operator: "LOWER_THAN"
+    value: "512"

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -23,6 +24,10 @@ import com.opencsv.CSVWriter;
 /**
  * Writes one dataset as a single UTF-8 CSV entry of a zip, and computes while writing what its manifest needs: the
  * SHA-256 of the zip bytes, the row count and the non-empty cells per column.
+ * <p>
+ * To keep the publication under the free tier of R2 (GOU-2616), the zip uses the best Deflate compression and a cell
+ * is quoted only when it needs to be (separator, quote or line break inside, RFC 4180): about 3 % of the GTIN zip
+ * saved, with the same values read back by any CSV parser.
  */
 public class DatasetWriter implements AutoCloseable {
     private final DatasetDefinition definition;
@@ -46,11 +51,12 @@ public class DatasetWriter implements AutoCloseable {
         FileOutputStream fos = new FileOutputStream(definition.zipFile());
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new DigestOutputStream(fos, digest));
         this.zipOutputStream = new ZipOutputStream(bufferedOutputStream);
+        zipOutputStream.setLevel(Deflater.BEST_COMPRESSION);
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(zipOutputStream, StandardCharsets.UTF_8));
         this.writer = new CSVWriter(bufferedWriter);
         ZipEntry entry = new ZipEntry(definition.filename());
         zipOutputStream.putNextEntry(entry);
-        writer.writeNext(definition.header());
+        writer.writeNext(definition.header(), false);
     }
 
     public void write(Product product) {
@@ -63,7 +69,7 @@ public class DatasetWriter implements AutoCloseable {
         if (sample.size() < DatasetDefinition.SAMPLE_ROWS) {
             sample.add(row.clone());
         }
-        writer.writeNext(row);
+        writer.writeNext(row, false);
         count.incrementAndGet();
     }
 

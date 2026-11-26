@@ -54,6 +54,8 @@ public class GoogleSearchConsoleService {
     private static final String WEBMASTERS_READONLY_SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
     private static final String SEARCH_ANALYTICS_API = "https://www.googleapis.com/webmasters/v3/sites/%s/searchAnalytics/query";
     private static final int ROW_LIMIT = 25000;
+    /** Maximum number of {@code ROW_LIMIT}-row pages read for the per-template series. */
+    static final int TEMPLATE_MAX_PAGES = 10;
     /** Number of rows kept in the top queries / top pages events. */
     private static final int TOP_LIMIT = 20;
     /** Maximum length of an upstream error body copied into an error message. */
@@ -379,6 +381,55 @@ public class GoogleSearchConsoleService {
     }
 
     /**
+     * Reads the {@code date x page} rows over the {@value SeoTemplateAnalyzer#TOTAL_DAYS} days ending
+     * {@code metriks.gsc.lag-days} days ago and aggregates them per template (series, site KPI without the TV post,
+     * loss alert). Pagination stops at {@value #TEMPLATE_MAX_PAGES} pages of rows: {@link TemplateReport#truncated()}
+     * then warns that totals may be incomplete.
+     *
+     * @return the report, or a failure message (credentials, HTTP error)
+     */
+    public Outcome<TemplateReport> fetchTemplateReport() {
+        LocalDate end = LocalDate.now(ZoneOffset.UTC).minusDays(lagDays);
+        LocalDate start = end.minusDays(SeoTemplateAnalyzer.TOTAL_DAYS - 1L);
+        String token;
+        try {
+            token = tokenSupplier.get();
+        } catch (Exception e) {
+            return Outcome.failure("Search Console credentials unavailable: " + e.getMessage());
+        }
+        URI uri = URI.create(String.format(SEARCH_ANALYTICS_API, URLEncoder.encode(siteUrl, StandardCharsets.UTF_8)));
+        return attempt(() -> {
+            List<SeoTemplateAnalyzer.DatedPageRow> rows = new ArrayList<>();
+            boolean truncated = false;
+            for (int page = 0; page < TEMPLATE_MAX_PAGES; page++) {
+                Map<String, Object> body = new HashMap<>(baseBody(start, end));
+                body.put("dimensions", List.of("date", "page"));
+                body.put("rowLimit", ROW_LIMIT);
+                body.put("startRow", page * ROW_LIMIT);
+                JsonNode pageRows = objectMapper.readTree(post(uri, token, body)).path("rows");
+                int count = 0;
+                if (pageRows.isArray()) {
+                    for (JsonNode row : pageRows) {
+                        JsonNode keys = row.path("keys");
+                        if (keys.isArray() && keys.size() >= 2) {
+                            rows.add(new SeoTemplateAnalyzer.DatedPageRow(LocalDate.parse(keys.get(0).asString()),
+                                    keys.get(1).asString(), row.path("clicks").asLong(0L),
+                                    row.path("impressions").asLong(0L)));
+                            count++;
+                        }
+                    }
+                }
+                if (count < ROW_LIMIT) {
+                    break;
+                }
+                truncated = page == TEMPLATE_MAX_PAGES - 1;
+            }
+            return new TemplateReport(
+                    SeoTemplateAnalyzer.analyse(rows, end, SeoTemplateAnalyzer.DEFAULT_EXCLUDED_PATHS), truncated);
+        }, token);
+    }
+
+    /**
      * The Search Console property this service queries.
      *
      * @return configured site URL
@@ -471,11 +522,11 @@ public class GoogleSearchConsoleService {
 
     /** Value or error message of one metric group. */
     public record Outcome<T>(T value, String error) {
-        static <T> Outcome<T> success(T value) {
+        public static <T> Outcome<T> success(T value) {
             return new Outcome<>(value, null);
         }
 
-        static <T> Outcome<T> failure(String error) {
+        public static <T> Outcome<T> failure(String error) {
             return new Outcome<>(null, error);
         }
 
@@ -488,6 +539,10 @@ public class GoogleSearchConsoleService {
     public record SeoMetrics(Window current, Window previous, Outcome<Totals> currentTotals,
                              Outcome<Totals> previousTotals, Outcome<TopRows> topQueries, Outcome<TopRows> topPages,
                              Outcome<List<DailyRow>> daily) {
+    }
+
+    /** Per-template report and whether the row read hit the pagination cap (totals may then be incomplete). */
+    public record TemplateReport(SeoTemplateAnalyzer.Report report, boolean truncated) {
     }
 
     @FunctionalInterface

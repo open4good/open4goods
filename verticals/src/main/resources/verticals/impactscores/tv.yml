@@ -484,50 +484,50 @@ aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" :
   \ pièces, info réparation) [S2], ce qui justifie un bloc durabilité/réparabilité important.\"\n  },\n  \"sources\" : [ {\n\
   \    \"id\" : \"S1\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Delegated Regulation (EU) 2019/2013\
   \ of 11 March 2019 on energy labelling of electronic displays\",\n    \"authors_or_org\" : \"European Commission\",\n  \
-  \  \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"[https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng)\"\
+  \  \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"energy materiality\", \"energy classes SDR/HDR and consumption framing\", \"diagonal/label standardization\" ],\n  \
   \  \"notes\" : \"Base réglementaire UE pour classes énergie A-G, mesures SDR/HDR et importance énergétique des téléviseurs.\"\
   \n  }, {\n    \"id\" : \"S2\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EU) 2019/2021 of\
   \ 1 October 2019 laying down ecodesign requirements for electronic displays\",\n    \"authors_or_org\" : \"European Commission\"\
-  ,\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"[https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021)\"\
+  ,\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union (EUR-Lex)\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"spare parts availability\", \"software/firmware update availability\", \"off/standby requirements\", \"circularity/dismantling\
   \ context\" ],\n    \"notes\" : \"Exigences écoconception (pièces 7 ans, firmware/sécurité 8 ans, information réparation)\
   \ pour les displays/TV.\"\n  }, {\n    \"id\" : \"S3\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Product Environmental\
   \ Footprint Category Rules (PEFCR) Guidance v6.3\",\n    \"authors_or_org\" : \"European Commission, Joint Research Centre\
   \ (JRC)\",\n    \"year\" : 2019,\n    \"publisher\" : \"European Commission (EPLCA / JRC repository)\",\n    \"url\" : \"\
-  [https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf](https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf)\"\
+  https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"LCA-inspired method framing\", \"data quality (DQR) rationale\", \"hotspot/screening logic\" ],\n    \"notes\" : \"\
   Guide méthodologique EF/PEFCR (screening, priorisation hotspots, DQR) utilisé pour justifier DATA_QUALITY et robustesse.\"\
   \n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Dossier de presse - Campagne \" Nos\
   \ objets ont plein d'avenirs \" (#LongueVieAuxObjets)\",\n    \"authors_or_org\" : \"ADEME; Ministère de la Transition Écologique\
-  \ et Solidaire\",\n    \"year\" : 2019,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"[https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf](https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf)\"\
+  \ et Solidaire\",\n    \"year\" : 2019,\n    \"publisher\" : \"ADEME\",\n    \"url\" : \"https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"lifetime reference (8 years average use in France)\", \"durability materiality (benefits of extending use; manufacturing\
   \ impact emphasis)\" ],\n    \"notes\" : \"Source publique FR mentionnant 8 ans de durée de vie moyenne et bénéfices environnementaux\
   \ d'allonger l'usage.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Allongement\
   \ de la durée de vie des produits\",\n    \"authors_or_org\" : \"ADEME\",\n    \"year\" : 2016,\n    \"publisher\" : \"\
-  ADEME (via Actu-Environnement mirror PDF)\",\n    \"url\" : \"[https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf](https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf)\"\
+  ADEME (via Actu-Environnement mirror PDF)\",\n    \"url\" : \"https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"lifetime reference (12.7 years reported by studies)\", \"relative vs absolute display rationale\", \"durability/repair\
   \ framing\" ],\n    \"notes\" : \"Rapport ADEME discutant définitions de durée de vie, valeurs rapportées pour TV et intérêt\
   \ d'un affichage relatif.\"\n  }, {\n    \"id\" : \"S6\",\n    \"type\" : \"public_agency\",\n    \"title\" : \"Tout savoir\
   \ sur l'indice de durabilité\",\n    \"authors_or_org\" : \"Ministère de l'Économie, des Finances et de la Souveraineté\
   \ industrielle et numérique (Bercy infos)\",\n    \"year\" : 2025,\n    \"publisher\" : \"economie.gouv.fr\",\n    \"url\"\
-  \ : \"[https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite](https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite)\"\
+  \ : \"https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"repairability/durability consumer methodology\", \"warranty and spare parts relevance\", \"France scope context\" ],\n\
   \    \"notes\" : \"Page officielle décrivant l'indice de durabilité (réparabilité + fiabilité, incl. garantie commerciale\
   \ et pièces).\"\n  }, {\n    \"id\" : \"S7\",\n    \"type\" : \"other\",\n    \"title\" : \"Ecodesign and energy labelling\
   \ - electronic displays (Summary of EU Legislation)\",\n    \"authors_or_org\" : \"Publications Office of the European Union\
-  \ (EUR-Lex)\",\n    \"year\" : 2020,\n    \"publisher\" : \"EUR-Lex Summaries of EU Legislation\",\n    \"url\" : \"[https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html](https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html)\"\
+  \ (EUR-Lex)\",\n    \"year\" : 2020,\n    \"publisher\" : \"EUR-Lex Summaries of EU Legislation\",\n    \"url\" : \"https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : false,\n    \"used_for\" : [\
   \ ],\n    \"notes\" : \"Consulté pour contexte mais non utilisé dans la justification finale (sources primaires S1/S2 privilégiées).\"\
   \n  }, {\n    \"id\" : \"S8\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Recommendation 2013/179/EU\
   \ (PEF Guide) - access attempt\",\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2013,\n    \"publisher\"\
-  \ : \"EUR-Lex\",\n    \"url\" : \"[https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179)\"\
+  \ : \"EUR-Lex\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"medium\",\n    \"used\" : false,\n    \"used_for\" :\
   \ [ ],\n    \"notes\" : \"Tentative d'accès bloquée (challenge JS/robot) ; remplacé par le guide PEFCR JRC (S3).\"\n  }\
   \ ],\n  \"search_log\" : [ {\n    \"query\" : \"ADEME durée de vie téléviseur France étude\",\n    \"date\" : \"2026-03-01\"\
@@ -892,7 +892,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2019
     publisher: Official Journal of the European Union (EUR-Lex)
-    url: '[https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng](https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng)'
+    url: 'https://eur-lex.europa.eu/eli/reg_del/2019/2013/oj/eng'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -907,7 +907,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2019
     publisher: Official Journal of the European Union (EUR-Lex)
-    url: '[https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021)'
+    url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?from=DE&uri=CELEX%3A32019R2021'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -923,7 +923,7 @@ aiResult:
     authors_or_org: European Commission, Joint Research Centre (JRC)
     year: 2019
     publisher: European Commission (EPLCA / JRC repository)
-    url: '[https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf](https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf)'
+    url: 'https://eplca.jrc.ec.europa.eu/permalink/PEFCR_guidance_v6.3-2.pdf'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -938,7 +938,7 @@ aiResult:
     authors_or_org: ADEME; Ministère de la Transition Écologique et Solidaire
     year: 2019
     publisher: ADEME
-    url: '[https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf](https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf)'
+    url: 'https://www.ademe.fr/wp-content/uploads/2024/12/DP_Campagne_Objets-plein-d-avenirs_Novembre-2019.pdf'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -952,7 +952,7 @@ aiResult:
     authors_or_org: ADEME
     year: 2016
     publisher: ADEME (via Actu-Environnement mirror PDF)
-    url: '[https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf](https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf)'
+    url: 'https://www.actu-environnement.com/media/pdf/news-26412-rapport-Ademe-allongement-duree-vie.pdf'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -967,7 +967,7 @@ aiResult:
     authors_or_org: Ministère de l'Économie, des Finances et de la Souveraineté industrielle et numérique (Bercy infos)
     year: 2025
     publisher: economie.gouv.fr
-    url: '[https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite](https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite)'
+    url: 'https://www.economie.gouv.fr/particuliers/mes-droits-conso/bien-consommer/tout-savoir-sur-lindice-de-durabilite'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -982,7 +982,7 @@ aiResult:
     authors_or_org: Publications Office of the European Union (EUR-Lex)
     year: 2020
     publisher: EUR-Lex Summaries of EU Legislation
-    url: '[https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html](https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html)'
+    url: 'https://eur-lex.europa.eu/EN/legal-content/summary/ecodesign-and-energy-labelling-electronic-displays.html'
     accessed_date: '2026-03-01'
     reliability: high
     used: false
@@ -993,7 +993,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2013
     publisher: EUR-Lex
-    url: '[https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179)'
+    url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32013H0179'
     accessed_date: '2026-03-01'
     reliability: medium
     used: false

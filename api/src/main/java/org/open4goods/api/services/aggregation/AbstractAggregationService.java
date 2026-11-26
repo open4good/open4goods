@@ -1,7 +1,5 @@
 package org.open4goods.api.services.aggregation;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Collection;
 
 import org.open4goods.commons.exceptions.AggregationSkipException;
@@ -20,22 +18,25 @@ import org.slf4j.Logger;
  *
  * <p>Lifecycle overview:
  * <ol>
- *   <li>{@link #init(Collection)} — called once before batch processing starts to
- *       reset any run-scoped state (cardinalities, caches, etc.).</li>
+ *   <li>{@link #init(Collection)} — batch scoring only: called once before the products of a
+ *       vertical are scored, to reset run-scoped state (cardinalities, etc.).</li>
  *   <li>{@link #onDataFragment(DataFragment, Product, VerticalConfig)} — called for
  *       each incoming {@link DataFragment} in realtime mode.</li>
  *   <li>{@link #onProduct(Product, VerticalConfig)} — called to (re-)derive product-level
  *       fields from the product's aggregated state; used both in the realtime path
  *       (after {@code onDataFragment}) and standalone during batch sanitisation.</li>
- *   <li>{@link #done(Collection, VerticalConfig)} — called once after all products have
- *       been processed in batch mode, for post-compute steps (relativisation, ranking).</li>
- *   <li>{@link #close()} — called on application shutdown to release resources.</li>
+ *   <li>{@link #done(Collection, VerticalConfig)} — batch scoring only: called once after all
+ *       products have been scored, for post-compute steps (relativisation, ranking).</li>
  * </ol>
+ *
+ * <p>The services of the standard chain are built once and shared by the realtime ingestion,
+ * the completion threads and the batch (GOU-2280): they must hold no mutable state. The scoring
+ * services hold run-scoped state and are built again for each scoring run.
  */
-public abstract class AbstractAggregationService implements Closeable {
+public abstract class AbstractAggregationService {
 
 	/** Logger dedicated to the aggregation log channel (separate file from the application log). */
-	protected Logger dedicatedLogger;
+	protected final Logger dedicatedLogger;
 
 	/**
 	 * @param logger dedicated aggregation logger supplied by the factory
@@ -92,14 +93,6 @@ public abstract class AbstractAggregationService implements Closeable {
 	 * @param vConf vertical configuration for this batch
 	 */
 	public void done(final Collection<Product> datas, final VerticalConfig vConf) {
-	}
-
-	/**
-	 * Releases resources held by this service (file handles, thread pools, etc.).
-	 * Default implementation is a no-op.
-	 */
-	@Override
-	public void close() throws IOException {
 	}
 
 }

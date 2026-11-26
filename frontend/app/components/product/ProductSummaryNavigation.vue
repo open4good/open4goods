@@ -181,13 +181,14 @@
 
 <script setup lang="ts">
 import type { PropType } from 'vue'
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import {
   mdiChevronDown,
   mdiChevronLeft,
   mdiChevronRight,
   mdiChevronUp,
 } from '@mdi/js'
+import { PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY } from '~/constants/product-navigation'
 
 const { t: $t } = useI18n()
 
@@ -219,9 +220,14 @@ const _props = defineProps({
     type: String,
     default: '',
   },
+  /**
+   * `responsive` lets CSS media queries pick the layout: horizontal below
+   * 1280px, vertical from it. The server HTML is then the same on every device
+   * and hydration never switches the layout (CLS).
+   */
   orientation: {
-    type: String as PropType<'vertical' | 'horizontal'>,
-    default: 'vertical',
+    type: String as PropType<'vertical' | 'horizontal' | 'responsive'>,
+    default: 'responsive',
   },
   ariaLabel: {
     type: String,
@@ -273,8 +279,38 @@ const isSectionActive = (section: {
   section.id === _props.activeSection ||
   Boolean(section.subsections?.some(sub => sub.id === _props.activeSection))
 
+// Whether the horizontal bar layout is shown. For the `responsive` orientation
+// it is only known after mount (CSS decides the first render), so the server
+// HTML and the hydrated one stay identical.
+const isHorizontalLayout = ref(_props.orientation === 'horizontal')
+let horizontalLayoutQuery: MediaQueryList | null = null
+
+const syncHorizontalLayout = () => {
+  isHorizontalLayout.value = horizontalLayoutQuery?.matches ?? false
+}
+
+onMounted(() => {
+  if (_props.orientation !== 'responsive' || !window.matchMedia) {
+    return
+  }
+
+  horizontalLayoutQuery = window.matchMedia(
+    PRODUCT_COMPACT_NAVIGATION_MEDIA_QUERY
+  )
+  syncHorizontalLayout()
+  horizontalLayoutQuery.addEventListener('change', syncHorizontalLayout)
+})
+
+onBeforeUnmount(() => {
+  horizontalLayoutQuery?.removeEventListener('change', syncHorizontalLayout)
+})
+
+// In the horizontal bar the submenus sit in the page flow: opening the active
+// one while the user scrolls pushes the whole page down (CLS). There, submenus
+// only open on a user action.
 const isSubmenuOpen = (section: { id: string }) =>
-  openSectionId.value === section.id || isSectionActive(section)
+  openSectionId.value === section.id ||
+  (!isHorizontalLayout.value && isSectionActive(section))
 
 const toggleSubmenu = (sectionId: string) => {
   openSectionId.value = openSectionId.value === sectionId ? null : sectionId
@@ -298,7 +334,7 @@ const handleSectionClick = (section: {
 watch(
   () => _props.activeSection,
   newActiveId => {
-    if (!newActiveId) return
+    if (!newActiveId || isHorizontalLayout.value) return
 
     // Find which section this ID belongs to
     const section = _props.sections.find(
@@ -315,7 +351,52 @@ watch(
 )
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+// Horizontal bar layout, shared by the explicit `horizontal` orientation and the
+// `responsive` one below 1280px.
+@mixin horizontal-layout {
+  top: var(--product-sticky-offset, 0px);
+  background: rgba(var(--v-theme-surface-glass), 0.9);
+  border-radius: 0;
+  padding: 0.75rem 1rem;
+  box-shadow: none;
+  width: 100%;
+  max-width: 100vw;
+  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+
+  .product-summary-navigation__list {
+    flex-direction: row;
+    justify-content: flex-start; /* Changed from space-between to allow scrolling start */
+    gap: 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    max-width: 100%; /* Ensure it fits within parent */
+    padding-bottom: 4px; /* Space for scrollbar */
+  }
+
+  .product-summary-navigation__link {
+    justify-content: center;
+  }
+
+  .product-summary-navigation__item {
+    min-width: max-content;
+  }
+
+  .product-summary-navigation__submenu {
+    padding-left: 0.5rem;
+  }
+
+  .product-summary-navigation__admin-panel {
+    margin-top: 1rem;
+  }
+
+  .product-summary-navigation__admin-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
 .product-summary-navigation-wrapper {
   position: relative;
 }
@@ -403,14 +484,14 @@ watch(
 }
 
 .product-summary-navigation--horizontal {
-  top: var(--product-sticky-offset, 0px);
-  background: rgba(var(--v-theme-surface-glass), 0.9);
-  border-radius: 0;
-  padding: 0.75rem 1rem;
-  box-shadow: none;
-  width: 100%;
-  max-width: 100vw;
-  border-bottom: 1px solid rgba(var(--v-theme-border-primary-strong), 0.3);
+  @include horizontal-layout;
+}
+
+/* Same breakpoint as ProductPage (COMPACT_NAVIGATION_MEDIA_QUERY). */
+@media (max-width: 1279.98px) {
+  .product-summary-navigation--responsive {
+    @include horizontal-layout;
+  }
 }
 
 .product-summary-navigation__list {
@@ -420,16 +501,6 @@ watch(
   gap: 0.5rem;
   padding: 0;
   margin: 0;
-}
-
-.product-summary-navigation--horizontal .product-summary-navigation__list {
-  flex-direction: row;
-  justify-content: flex-start; /* Changed from space-between to allow scrolling start */
-  gap: 0.75rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  max-width: 100%; /* Ensure it fits within parent */
-  padding-bottom: 4px; /* Space for scrollbar */
 }
 
 .product-summary-navigation__item {
@@ -633,30 +704,6 @@ watch(
 
 .product-summary-navigation__admin-label {
   white-space: nowrap;
-}
-
-.product-summary-navigation--horizontal .product-summary-navigation__link {
-  justify-content: center;
-}
-
-.product-summary-navigation--horizontal .product-summary-navigation__item {
-  min-width: max-content;
-}
-
-.product-summary-navigation--horizontal .product-summary-navigation__submenu {
-  padding-left: 0.5rem;
-}
-
-.product-summary-navigation--horizontal
-  .product-summary-navigation__admin-panel {
-  margin-top: 1rem;
-}
-
-.product-summary-navigation--horizontal
-  .product-summary-navigation__admin-list {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 0.75rem;
 }
 
 @media (max-width: 960px) {

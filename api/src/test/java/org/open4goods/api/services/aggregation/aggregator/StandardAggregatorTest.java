@@ -1,6 +1,7 @@
 package org.open4goods.api.services.aggregation.aggregator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.open4goods.api.services.aggregation.AbstractAggregationService;
+import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.datafragment.DataFragment;
 import org.open4goods.model.product.Product;
 import org.open4goods.model.vertical.VerticalConfig;
@@ -92,6 +94,69 @@ class StandardAggregatorTest {
         public void onDataFragment(DataFragment input, Product output, VerticalConfig vConf) {
             seenVerticalIds.add(vConf == null ? null : vConf.getId());
         }
+    }
+
+    /**
+     * Aggregation service that throws the exception it is given, on both hooks.
+     */
+    private static final class FailingService extends AbstractAggregationService {
+
+        private final Exception failure;
+
+        private FailingService(Exception failure) {
+            super(LoggerFactory.getLogger(StandardAggregatorTest.class));
+            this.failure = failure;
+        }
+
+        @Override
+        public void onProduct(Product data, VerticalConfig vConf) throws AggregationSkipException {
+            fail();
+        }
+
+        @Override
+        public void onDataFragment(DataFragment input, Product output, VerticalConfig vConf)
+                throws AggregationSkipException {
+            fail();
+        }
+
+        private void fail() throws AggregationSkipException {
+            if (failure instanceof AggregationSkipException skip) {
+                throw skip;
+            }
+            throw (RuntimeException) failure;
+        }
+    }
+
+    @Test
+    void bothHooks_shouldLogAFailingServiceAndRunTheNextOnes() throws Exception {
+        when(verticalsConfigService.getConfigByIdOrDefault(INITIAL_VERTICAL)).thenReturn(initialConfig);
+        RecordingService recorder = new RecordingService();
+        StandardAggregator aggregator = new StandardAggregator(
+                List.of(new FailingService(new IllegalStateException("parser bug")), recorder), verticalsConfigService);
+        Product product = new Product();
+        product.setVertical(INITIAL_VERTICAL);
+
+        assertThat(aggregator.onDatafragment(new DataFragment(), product)).isSameAs(product);
+        assertThat(aggregator.onProduct(product)).isSameAs(product);
+
+        assertThat(recorder.seenVerticalIds).containsExactly(INITIAL_VERTICAL, INITIAL_VERTICAL);
+    }
+
+    @Test
+    void bothHooks_shouldStopTheChainAndRethrow_whenAServiceSkipsTheProduct() {
+        when(verticalsConfigService.getConfigByIdOrDefault(INITIAL_VERTICAL)).thenReturn(initialConfig);
+        RecordingService recorder = new RecordingService();
+        StandardAggregator aggregator = new StandardAggregator(
+                List.of(new FailingService(new AggregationSkipException("invalid barcode")), recorder),
+                verticalsConfigService);
+        Product product = new Product();
+        product.setVertical(INITIAL_VERTICAL);
+
+        assertThatThrownBy(() -> aggregator.onDatafragment(new DataFragment(), product))
+                .isInstanceOf(AggregationSkipException.class);
+        assertThatThrownBy(() -> aggregator.onProduct(product)).isInstanceOf(AggregationSkipException.class);
+
+        assertThat(recorder.seenVerticalIds).isEmpty();
     }
 
     @Test
