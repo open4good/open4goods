@@ -153,7 +153,7 @@ class OpenDataMappingServiceTest {
         DatasetManifest withColumns = new DatasetManifest(1, "gtin", "gtin-open-data.zip", null,
                 DatasetManifest.FORMAT, "ODbL-1.0", 6_400_000_000L, SHA256, 10, 10, GENERATED_AT,
                 List.of(new ColumnManifest("gtin", 1.0),
-                        new ColumnManifest("brand", 0.42, null, "Marque", "EPREL")), null);
+                        new ColumnManifest("brand", 0.42, null, "Marque", "EPREL")), null, null);
         given(manifestService.snapshot()).willReturn(available(withColumns));
 
         OpenDataDatasetDto gtin = service.gtin(DomainLanguage.fr);
@@ -204,6 +204,6 @@ class OpenDataMappingServiceTest {
 
     private static DatasetManifest dataset(String id, long rows, long bytes, String sha256, String generatedAt) {
         return new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, id + "-open-data.zip", null,
-                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, bytes, sha256, rows, rows, generatedAt, List.of(), null);
+                DatasetManifest.FORMAT, OpenDataManifest.LICENSE, bytes, sha256, rows, rows, generatedAt, List.of(), 1, null);
     }
 }

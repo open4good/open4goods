@@ -113,15 +113,16 @@ class OpenDataServiceTest {
         List<String> isbnLines = readZipLines(openDataConfig.isbnZipFile(), ISBN_CSV);
         // Row conversion (GOU-2616): no url nor categories, UTC date, a cell quoted only when it needs to be.
         assertThat(gtinLines).containsExactly(
-                "gtin,brand,model,name,last_updated,gs1_country,gtinType,offers_count,min_price,currency,sources",
-                "1234567890123,TestBrand,ModelX,short name,2024-01-01,FR,GTIN_13,3,42.42,EUR,eprel|rakuten.com");
+                "gtin,brand,model,name,last_updated,gs1_country,gtinType,offers_count,min_price,currency,sources,vertical",
+                "1234567890123,TestBrand,ModelX,short name,2024-01-01,FR,GTIN_13,3,42.42,EUR,eprel|rakuten.com,");
         assertThat(isbnLines).containsExactly(
                 "isbn,title,last_updated,offers_count,min_price,currency,editeur,format,nb_page,souscategorie,"
                         + "souscategorie2,sources",
                 "9781234567890,short name,2024-01-01,3,42.42,EUR,Test Editor,Broché,320,SousCat1,SousCat2,eprel|rakuten.com");
 
         DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
-        assertThat(gtin.schemaVersion()).isEqualTo(OpenDataManifest.SCHEMA_VERSION);
+        assertThat(gtin.schemaVersion()).isEqualTo(OpenDataManifest.SCHEMA_VERSION).isEqualTo(1);
+        assertThat(gtin.datasetVersion()).isEqualTo(2);
         assertThat(gtin.id()).isEqualTo("gtin");
         assertThat(gtin.file()).isEqualTo("gtin-open-data.zip");
         assertThat(gtin.url()).isEqualTo("https://data.nudger.fr/gtin-open-data.zip");
@@ -133,13 +134,15 @@ class OpenDataServiceTest {
         assertThat(gtin.sha256()).isEqualTo(sha256(openDataConfig.gtinZipFile()));
         assertThat(Instant.parse(gtin.generatedAt())).isNotNull();
         assertThat(gtin.columns()).extracting(column -> column.name()).containsExactly(OpenDataService.GTIN_HEADER);
-        assertThat(gtin.columns()).allSatisfy(column -> assertThat(column.fillRate()).isEqualTo(1.0));
+        assertThat(gtin.columns()).filteredOn(column -> !column.name().equals("vertical"))
+                .allSatisfy(column -> assertThat(column.fillRate()).isEqualTo(1.0));
         assertThat(gtin.sample()).isEqualTo("gtin-open-data-sample.csv");
         List<String> sample = java.nio.file.Files.readAllLines(
                 openDataConfig.gtinManifestFile().toPath().resolveSibling("gtin-open-data-sample.csv"));
         assertThat(sample).isEqualTo(gtinLines);
 
         DatasetManifest isbn = manifestStore.readDataset(openDataConfig.isbnManifestFile()).orElseThrow();
+        assertThat(isbn.datasetVersion()).isEqualTo(1);
         assertThat(isbn.sha256()).isEqualTo(sha256(openDataConfig.isbnZipFile()));
 
         OpenDataManifest all = manifestStore.readAll(openDataConfig.manifestFile()).orElseThrow();
@@ -153,6 +156,25 @@ class OpenDataServiceTest {
         assertThat(meterRegistry.get("opendata.generation.runs").tag("outcome", "success").counter().count()).isEqualTo(1);
         assertThat(meterRegistry.get("opendata.dataset.rows").tag("dataset", "gtin").gauge().value()).isEqualTo(1);
         assertThat(meterRegistry.get("opendata.generation.failed").gauge().value()).isZero();
+    }
+
+    @Test
+    void gtinDatasetShouldEndWithTheVerticalColumn() throws Exception {
+        assertThat(OpenDataService.GTIN_HEADER).hasSize(12).endsWith("sources", "vertical");
+        Product inVertical = buildProduct("1234567890123", BarcodeType.GTIN_13);
+        inVertical.setVertical("tv");
+        exportReturns(inVertical, buildProduct("1234567890128", BarcodeType.GTIN_13));
+        when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(0L);
+
+        assertThat(service.generateOpendata()).isTrue();
+
+        assertThat(readZipLines(openDataConfig.gtinZipFile(), GTIN_CSV)).containsExactly(
+                "gtin,brand,model,name,last_updated,gs1_country,gtinType,offers_count,min_price,currency,sources,vertical",
+                "1234567890123,TestBrand,ModelX,short name,2024-01-01,FR,GTIN_13,3,42.42,EUR,eprel|rakuten.com,tv",
+                "1234567890128,TestBrand,ModelX,short name,2024-01-01,FR,GTIN_13,3,42.42,EUR,eprel|rakuten.com,");
+        DatasetManifest gtin = manifestStore.readDataset(openDataConfig.gtinManifestFile()).orElseThrow();
+        assertThat(gtin.columns()).filteredOn(column -> column.name().equals("vertical"))
+                .singleElement().satisfies(column -> assertThat(column.fillRate()).isEqualTo(0.5));
     }
 
     @Test

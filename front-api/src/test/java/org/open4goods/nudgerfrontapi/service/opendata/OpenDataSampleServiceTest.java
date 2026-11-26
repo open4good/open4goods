@@ -17,7 +17,7 @@ class OpenDataSampleServiceTest {
 
     private static DatasetManifest dataset(String sample, String generatedAt) {
         return new DatasetManifest(1, "gtin", "gtin-open-data.zip", null, DatasetManifest.FORMAT, "ODbL-1.0", 1, "a", 2, 2,
-                generatedAt, List.of(), sample);
+                generatedAt, List.of(), null, sample);
     }
 
     private static OpenDataConfig config(String base) {

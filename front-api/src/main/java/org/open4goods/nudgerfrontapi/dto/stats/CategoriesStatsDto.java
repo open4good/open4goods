@@ -18,11 +18,13 @@ public record CategoriesStatsDto(
                 + "never been computed since the front-api started.", nullable = true)
         ActiveMerchantDomainsDto activeMerchantDomains,
 
-        @Schema(description = "Total number of GTIN items available in the OpenData exports.", example = "1250000")
-        long gtinOpenDataItemsCount,
+        @Schema(description = "Rows of the published GTIN file, read from the OpenData manifest. Null when the manifest "
+                + "is unreadable (no fallback on the index).", example = "1250000", nullable = true)
+        Long gtinOpenDataItemsCount,
 
-        @Schema(description = "Total number of ISBN items available in the OpenData exports.", example = "870000")
-        long isbnOpenDataItemsCount,
+        @Schema(description = "Rows of the published ISBN file, read from the OpenData manifest. Null when the manifest "
+                + "is unreadable (no fallback on the index).", example = "870000", nullable = true)
+        Long isbnOpenDataItemsCount,
 
         @Schema(description = "Count of recent products with offers, a valid ImpactScore, and not excluded.", example = "5925")
         long impactScoreProductsCount,

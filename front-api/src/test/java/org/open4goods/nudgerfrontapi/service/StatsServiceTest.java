@@ -19,7 +19,10 @@ import org.open4goods.nudgerfrontapi.model.stats.ActiveMerchantDomains;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.service.SerialisationService;
-import org.open4goods.services.opendata.service.OpenDataService;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestService;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot;
+import org.open4goods.services.opendata.model.DatasetManifest;
+import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -35,7 +38,7 @@ class StatsServiceTest {
         SerialisationService serialisationService = new SerialisationService();
         ResourcePatternResolver resolver = mock(ResourcePatternResolver.class);
         AffiliationPartnerService partnerService = mock(AffiliationPartnerService.class);
-        OpenDataService openDataService = mock(OpenDataService.class);
+        OpenDataManifestService openDataManifestService = mock(OpenDataManifestService.class);
         ProductRepository productRepository = mock(ProductRepository.class);
         ProductMappingService productMappingService = mock(ProductMappingService.class);
 
@@ -46,8 +49,7 @@ class StatsServiceTest {
         given(resolver.getResource("classpath:/verticals/_default.yml")).willReturn(defaultResource);
         given(resolver.getResources("classpath:/verticals/*.yml"))
                 .willReturn(new Resource[]{defaultResource, enabledResource, disabledResource});
-        given(openDataService.totalItemsGTIN()).willReturn(1_234L);
-        given(openDataService.totalItemsISBN()).willReturn(567L);
+        given(openDataManifestService.snapshot()).willReturn(OpenDataManifestSnapshot.NOT_CONFIGURED);
         given(productRepository.countMainIndexHavingVertical("enabled")).willReturn(42L);
         given(productRepository.countMainIndexHavingImpactScore()).willReturn(5_925L);
         given(productRepository.countMainIndexWithoutVertical()).willReturn(3_210L);
@@ -61,15 +63,15 @@ class StatsServiceTest {
         given(merchantDomainsService.current()).willReturn(new ActiveMerchantDomains(domains, computedAt, false,
                 computedAt.minusSeconds(864_000), List.of(), Map.of()));
 
-        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataService, productRepository, productMappingService, merchantDomainsService);
+        StatsService service = new StatsService(serialisationService, resolver, partnerService, openDataManifestService, productRepository, productMappingService, merchantDomainsService);
 
         CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
 
         assertThat(dto.enabledVerticalConfigs()).isEqualTo(1);
         assertThat(dto.affiliationPartnersCount()).isEqualTo(2);
         assertThat(dto.activeMerchantDomains()).isEqualTo(new ActiveMerchantDomainsDto(2, computedAt, false));
-        assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(1_234L);
-        assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(567L);
+        assertThat(dto.gtinOpenDataItemsCount()).isNull();
+        assertThat(dto.isbnOpenDataItemsCount()).isNull();
         assertThat(dto.impactScoreProductsCount()).isEqualTo(5_925L);
         assertThat(dto.productsWithoutVerticalCount()).isEqualTo(3_210L);
         assertThat(dto.productsCountByCategory()).isEqualTo(Map.of("enabled", 42L));
@@ -86,9 +88,35 @@ class StatsServiceTest {
         };
     }
     @Test
+    void categoriesReadOpenDataRowsFromManifest() throws Exception {
+        ResourcePatternResolver resolver = mock(ResourcePatternResolver.class);
+        Resource defaultResource = resource("_default.yml", DEFAULT_YAML);
+        given(resolver.getResource("classpath:/verticals/_default.yml")).willReturn(defaultResource);
+        given(resolver.getResources("classpath:/verticals/*.yml")).willReturn(new Resource[]{defaultResource});
+        OpenDataManifestService manifestService = mock(OpenDataManifestService.class);
+        given(manifestService.snapshot()).willReturn(new OpenDataManifestSnapshot(
+                OpenDataManifestSnapshot.State.AVAILABLE,
+                new OpenDataManifest(1, "2026-11-22T00:00:00Z", "ODbL", List.of(
+                        dataset("gtin", 4_000_000L), dataset("isbn", 8_700_000L))),
+                Instant.now(), null));
+        MerchantDomainsService merchantDomainsService = mock(MerchantDomainsService.class);
+        StatsService service = new StatsService(new SerialisationService(), resolver, mock(AffiliationPartnerService.class),
+                manifestService, mock(ProductRepository.class), mock(ProductMappingService.class), merchantDomainsService);
+
+        CategoriesStatsDto dto = service.categories(DomainLanguage.fr);
+
+        assertThat(dto.gtinOpenDataItemsCount()).isEqualTo(4_000_000L);
+        assertThat(dto.isbnOpenDataItemsCount()).isEqualTo(8_700_000L);
+    }
+
+    private static DatasetManifest dataset(String id, long rows) {
+        return new DatasetManifest(1, id, id + ".zip", null, DatasetManifest.FORMAT, "ODbL", 1L, "x", rows, 0L, null, List.of(), null, null);
+    }
+
+    @Test
     void randomPassesVerticalId() {
         ProductRepository productRepository = mock(ProductRepository.class);
-        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataService.class), productRepository, mock(ProductMappingService.class), mock(MerchantDomainsService.class));
+        StatsService service = new StatsService(mock(SerialisationService.class), mock(ResourcePatternResolver.class), mock(AffiliationPartnerService.class), mock(OpenDataManifestService.class), productRepository, mock(ProductMappingService.class), mock(MerchantDomainsService.class));
         
         service.random(5, 2, "my-vertical", DomainLanguage.fr);
         

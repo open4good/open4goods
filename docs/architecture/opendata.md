@@ -179,6 +179,7 @@ ISO 8601 UTC, à la seconde.
   "indexCount": 115790000,
   "generatedAt": "2026-11-22T02:55:00Z",
   "columns": [ { "name": "gtin", "fillRate": 1.0 } ],
+  "datasetVersion": 2,
   "sample": "gtin-open-data-sample.csv"
 }
 ```
@@ -187,6 +188,8 @@ ISO 8601 UTC, à la seconde.
 - `rows` : lignes de données du CSV, en-tête exclu.
 - `indexCount` : produits du type de code-barres dans l'index au début du passage.
 - `fillRate` : part des lignes dont la cellule n'est pas vide, de 0 à 1, arrondie à 4 décimales.
+- `datasetVersion` (optionnel, GOU-2745) : version des colonnes du jeu, `2` pour gtin, `1` pour les autres. Distinct de
+  `schemaVersion`, qui reste la version du contrat du manifest (`OpenDataManifest.SCHEMA_VERSION` = 1).
 - `sample` : nom public du CSV d'échantillon (en-tête et 20 premières lignes, colonnes du jeu seulement), publié à côté du zip avec les manifests ; absent pour `impact-all`.
 - `url` : absent si `open-data-config.public-base-url` est vide.
 
@@ -199,16 +202,25 @@ GOU-2616 en avance une partie pour tenir le budget R2.
 Colonnes publiées (GOU-2616) :
 
 - GTIN : `gtin`, `brand`, `model`, `name`, `last_updated`, `gs1_country`, `gtinType`, `offers_count`, `min_price`,
-  `currency`, `sources` ;
+  `currency`, `sources`, `vertical` (GOU-2745, dernière colonne : identifiant de la verticale Nudger, même valeur que la
+  colonne `vertical` des jeux impact, vide hors verticale) ;
 - ISBN : `isbn`, `title`, `last_updated`, `offers_count`, `min_price`, `currency`, `editeur`, `format`, `nb_page`,
   `souscategorie`, `souscategorie2`, `sources`.
 
 `last_updated` est une date UTC `AAAA-MM-JJ`, vide si inconnue. `sources` : identifiants des sources séparés par `|`
-(GOU-2301). La fiche produit se déduit du code : `https://nudger.fr/{gtin}`. CSV RFC 4180 en UTF-8, une cellule n'est
+(GOU-2301). `last_updated` est une date ISO 8601 (`AAAA-MM-JJ`, UTC). La fiche produit se déduit du code : `https://nudger.fr/{gtin}`. CSV RFC 4180 en UTF-8, une cellule n'est
 entre guillemets que si elle contient une virgule, un guillemet ou un saut de ligne ; zip en compression Deflate
 maximale.
 
-Journal des modifications du schéma (à compléter par la version 2) :
+**Règle d'évolution** : une colonne s'ajoute seulement en fin de fichier, avec `datasetVersion` + 1 et une entrée au
+journal ci-dessous. Renommer, retirer ou déplacer une colonne exige une décision de Goulven : la double diffusion
+(`-v2`) ne tient pas dans le budget R2. Les noms de fichiers ne changent pas.
+
+Journal des modifications du schéma :
+
+- **GTIN v2 (GOU-2745, décision GOU-2742)** : ajout de `vertical` en dernière colonne (`datasetVersion` 2). Aucune
+  autre colonne ne change. Lue dans le champ `vertical` déjà présent dans le `_source` des produits exportés. Surcoût
+  attendu du zip < 1 % (colonne presque toujours vide, une cellule vide coûte une virgule).
 
 - **GOU-2616** (budget R2, décision de Goulven du 23/11 sur GOU-2544 : rester sous 10 Go-mois, plafond 9 GiB
   inchangé) : `gtin.zip` atteignait 9,19 Go et la publication 9,68 Go. Retrait de `url` (GTIN et ISBN, déductible

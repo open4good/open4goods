@@ -324,7 +324,7 @@ class OpenDataPublisherTest {
         Files.write(zip, content);
         DatasetManifest manifest = new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, publicName,
                 "https://data.nudger.fr/" + publicName, DatasetManifest.FORMAT, OpenDataManifest.LICENSE, size,
-                sha256(content), 10, 10, "2026-11-22T02:55:00Z", List.of(new ColumnManifest(id, 1.0)), null);
+                sha256(content), 10, 10, "2026-11-22T02:55:00Z", List.of(new ColumnManifest(id, 1.0)), 1, null);
         Path manifestFile = config.openDataDirectory().resolve(id + "-manifest.json");
         new OpenDataManifestStore().write(manifest, manifestFile.toFile());
         return new OpenDataPublisher.Dataset(manifest, zip, manifestFile);
