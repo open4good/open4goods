@@ -1,4 +1,5 @@
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { useCategories } from './useCategories'
 
 export interface VerticalLink {
   id: string
