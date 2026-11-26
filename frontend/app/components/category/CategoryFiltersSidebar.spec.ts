@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createVuetify } from 'vuetify'
 import { defineComponent, h } from 'vue'
@@ -156,5 +156,19 @@ describe('CategoryFiltersSidebar', () => {
       .get('[data-testid="category-filters-search"]')
       .trigger('input')
     expect(wrapper.emitted('update:filterSearchTerm')?.[0]).toEqual(['brand'])
+  })
+
+  it('loads the secondary filter blocks as lazily hydrated async components (GOU-2724)', async () => {
+    const wrapper = mountComponent()
+    await flushPromises()
+
+    const source = (
+      await import('./CategoryFiltersSidebar.vue?raw')
+    ).default as string
+    expect(source).toContain("import('./CategoryFiltersPanel.vue')")
+    expect(source).toContain("import('./CategoryDocumentationRail.vue')")
+    expect(source).toContain("import('./CategoryAdminFiltersPanel.vue')")
+    expect(source.match(/hydrateOnVisible/g)?.length).toBeGreaterThanOrEqual(3)
+    expect(wrapper.find('[data-test="filters-panel-stub"]').exists()).toBe(true)
   })
 })

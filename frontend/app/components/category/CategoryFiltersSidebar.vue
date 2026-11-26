@@ -124,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineAsyncComponent, hydrateOnVisible } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type {
   AggregationResponseDto,
@@ -134,9 +134,20 @@ import type {
   WikiPageConfig,
 } from '~~/shared/api-client'
 
-import CategoryFiltersPanel from './CategoryFiltersPanel.vue'
-import CategoryDocumentationRail from './CategoryDocumentationRail.vue'
-import CategoryAdminFiltersPanel from './CategoryAdminFiltersPanel.vue'
+
+// Secondary filters stay server-rendered (indexable links) but hydrate late (GOU-2724).
+const CategoryFiltersPanel = defineAsyncComponent({
+  loader: () => import('./CategoryFiltersPanel.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const CategoryDocumentationRail = defineAsyncComponent({
+  loader: () => import('./CategoryDocumentationRail.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const CategoryAdminFiltersPanel = defineAsyncComponent({
+  loader: () => import('./CategoryAdminFiltersPanel.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
 const props = withDefaults(
   defineProps<{
     filterOptions: ProductFieldOptionsResponse | null
