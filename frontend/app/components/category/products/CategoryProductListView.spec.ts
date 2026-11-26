@@ -53,7 +53,7 @@ const VAvatarStub = defineComponent({
 })
 
 const VImgStub = defineComponent({
-  name: 'VImg',
+  name: 'ProductImage',
   props: {
     src: { type: String, default: undefined },
     alt: { type: String, default: '' },
@@ -98,7 +98,7 @@ const mountList = async (products: ProductDto[]) => {
         VListItem: VListItemStub,
         NuxtLink: NuxtLinkStub,
         VAvatar: VAvatarStub,
-        VImg: VImgStub,
+        ProductImage: VImgStub,
         VSkeletonLoader: true,
         ProductPriceRows: defineComponent({
           name: 'ProductPriceRows',

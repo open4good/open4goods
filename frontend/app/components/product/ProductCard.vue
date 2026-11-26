@@ -40,20 +40,23 @@
 
     <div class="product-card__media-wrapper">
       <div class="product-card__media">
-        <v-img
-          :src="resolveImage(product)"
-          :alt="
-            resolveCardProductName(product) ||
-            $t('category.products.untitledProduct')
-          "
-          contain
+        <ProductImage
+          v-if="resolveImage(product)"
+          :src="resolveImage(product)!"
+          :alt="imageAlt"
+          :width="400"
+          :height="300"
+          sizes="(max-width: 600px) 90vw, (max-width: 1280px) 45vw, 320px"
+          :priority="isPriority"
           class="product-card__image"
-          :fetchpriority="isPriority ? 'high' : undefined"
-        >
-          <template #placeholder>
-            <v-skeleton-loader type="image" class="h-100" />
-          </template>
-        </v-img>
+        />
+        <v-icon
+          v-else
+          :icon="mdiImageOffOutline"
+          size="32"
+          class="product-card__image-missing"
+          aria-hidden="true"
+        />
       </div>
     </div>
 
@@ -124,6 +127,9 @@ import type {
   FieldMetadataDto,
   ProductDto,
 } from '~~/shared/api-client'
+import ProductImage from '~/components/product/ProductImage.vue'
+import { buildProductImageAlt } from '~/utils/images/product-image-alt'
+import { mdiImageOffOutline } from '@mdi/js'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'
 import ProductDesignation from '~/components/product/ProductDesignation.vue'
@@ -152,6 +158,8 @@ const props = withDefaults(
     disabled?: boolean
     nofollowLinks?: boolean
     isPriority?: boolean
+    /** Product type label used in the image alt (« Lave-linge »). */
+    productType?: string | null
   }>(),
   {
     popularAttributes: () => [],
@@ -163,6 +171,7 @@ const props = withDefaults(
     disabled: false,
     nofollowLinks: false,
     isPriority: false,
+    productType: null,
   }
 )
 
@@ -179,6 +188,14 @@ const titleTag = computed(() => (props.size === 'big' ? 'h4' : 'h5'))
 const rounded = computed(() => (props.size === 'small' ? 'lg' : 'xl'))
 
 const linkRel = computed(() => (props.nofollowLinks ? 'nofollow' : undefined))
+
+const imageAlt = computed(
+  () =>
+    buildProductImageAlt(props.product, {
+      productType: props.productType,
+      fallback: resolveCardProductName(props.product),
+    }) || t('category.products.untitledProduct')
+)
 
 const resolveImage = (product: ProductDto) => {
   return (
@@ -309,12 +326,13 @@ const shouldShowSortedField = computed(() => Boolean(sortedFieldDisplay.value))
         width: 100%
         height: 100%
         transition: transform 0.3s ease
+        object-fit: contain
+        padding: 1rem /* Add some breathing room */
+        mix-blend-mode: multiply
+        background: #fff
 
-        :deep(img)
-            object-fit: contain
-            padding: 1rem /* Add some breathing room */
-            mix-blend-mode: multiply
-            background: #fff
+    &__image-missing
+        opacity: 0.4
 
     /* Hover effect on image */
     &:hover &__image

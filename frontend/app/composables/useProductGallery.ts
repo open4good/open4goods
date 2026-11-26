@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
 import type { ProductDto } from '~~/shared/api-client'
+import { buildProductImageAlt } from '~/utils/images/product-image-alt'
 
 export interface ProductGalleryItem {
   id: string
@@ -73,6 +74,10 @@ export const useProductGallery = (
     const images = productData.value.resources?.images ?? []
     const videos = productData.value.resources?.videos ?? []
     const fallbackTitle = title ?? productData.value.identity?.name ?? ''
+    // Descriptive alt from product data; never the image file name.
+    const productAlt =
+      buildProductImageAlt(productData.value, { fallback: fallbackTitle }) ||
+      fallbackTitle
 
     const fallbackPoster =
       coverImageRaw.value ?? images[0]?.url ?? images[0]?.originalUrl ?? ''
@@ -98,7 +103,7 @@ export const useProductGallery = (
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width: DEFAULT_IMAGE_WIDTH,
         height: DEFAULT_IMAGE_HEIGHT,
-        alt: fallbackTitle,
+        alt: productAlt,
         caption: fallbackTitle,
         group: 'cover',
         posterUrl: source,
@@ -124,7 +129,7 @@ export const useProductGallery = (
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width,
         height,
-        alt: image.fileName ?? caption,
+        alt: productAlt,
         caption,
         group: image.group,
         posterUrl: source,
@@ -148,7 +153,7 @@ export const useProductGallery = (
         thumbnailHeight: DEFAULT_THUMBNAIL_SIZE,
         width: DEFAULT_VIDEO_WIDTH,
         height: DEFAULT_VIDEO_HEIGHT,
-        alt: video.fileName ?? caption,
+        alt: productAlt,
         caption,
         group: video.group,
         videoUrl: url,

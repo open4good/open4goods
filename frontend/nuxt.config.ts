@@ -553,6 +553,14 @@ export default defineNuxtConfig({
   },
   image: {
     dir: fileURLToPath(new URL('./app/public', import.meta.url)),
+    // Product images live on the static host (api.resource-root-path of front-api):
+    // IPX only resizes remote images from allowed hosts.
+    domains: [
+      'static.nudger.fr',
+      ...(process.env.FRONT_RESOURCE_ROOT_PATH
+        ? [new URL(process.env.FRONT_RESOURCE_ROOT_PATH).hostname]
+        : []),
+    ],
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
       xs: 320,
