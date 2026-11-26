@@ -92,7 +92,7 @@ const productTitle = (item: ProductDto) =>
 
 const guideLinks = computed(() =>
   props.verticalHomeUrl
-    ? props.guides.map(slug => ({
+    ? (props.guides ?? []).map(slug => ({
         label: humanizeSlug(slug, locale.value) || slug,
         href: `${props.verticalHomeUrl.replace(/\/+$/, '')}/${slug}`,
       }))
@@ -101,7 +101,7 @@ const guideLinks = computed(() =>
 
 const hasContent = computed(
   () =>
-    props.products.length > 0 ||
+    (props.products?.length ?? 0) > 0 ||
     guideLinks.value.length > 0 ||
     Boolean(props.subCategory)
 )

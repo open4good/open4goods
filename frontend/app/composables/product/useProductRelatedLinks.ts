@@ -116,7 +116,8 @@ export const useProductRelatedLinks = async (
     { server: true, immediate: true }
   )
 
-  return computed<ProductRelatedLinks>(
-    () => data.value ?? { subCategory: null, products: [] }
-  )
+  return computed<ProductRelatedLinks>(() => ({
+    subCategory: data.value?.subCategory ?? null,
+    products: data.value?.products ?? [],
+  }))
 }
