@@ -1,6 +1,6 @@
 ---
-title: "Meilleur téléviseur caravane camping-car : le guide mai 2026 de la Team Nudger"
-description: "Quel téléviseur 12V choisir pour sa caravane ou son camping-car ? Comparatif, consommation réelle et score d'impact nudger - guide mai 2026."
+title: "Meilleur téléviseur caravane camping-car : le guide de la Team Nudger"
+description: "Quel téléviseur 12V choisir pour sa caravane ou son camping-car ? Comparatif, consommation réelle et score d'impact nudger."
 type: "guide"
 tags: ["language:fr", "guide-achat", "tv"]
 updatedAt: "2026-05-31"

@@ -780,8 +780,8 @@
         "USE": "Product use"
       },
       "seo": {
-        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
-        "title": "{category} - Impact Score breakdown"
+        "description": "How Nudger scores {category} out of 20: Impact Score criteria, weights and sources. Published, versioned method.",
+        "title": "{category} Impact Score: criteria, weights and method"
       },
       "title": "{category} - {label}",
       "method": {

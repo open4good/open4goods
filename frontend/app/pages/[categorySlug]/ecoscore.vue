@@ -640,9 +640,7 @@ import {
   useRoute,
   useSeoMeta,
 } from '#imports'
-import {
-  IMPACT_SCORE_VERSIONS_LAST_MODIFIED,
-} from '~~/shared/utils/impact-score-versions'
+import { IMPACT_SCORE_VERSIONS_LAST_MODIFIED } from '~~/shared/utils/impact-score-versions'
 import { buildImpactScoreMethodJsonLd } from '~/utils/impact-score-jsonld'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -651,6 +649,8 @@ import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryImpactMethod from '~/components/category/CategoryImpactMethod.vue'
 import StickySectionNavigation from '~/components/shared/ui/StickySectionNavigation.vue'
 import { useCategories } from '~/composables/categories/useCategories'
+import { buildCanonicalUrl } from '~/utils/seo/canonical'
+import { resolveCategoryEcoscoreSeoMeta } from '~/utils/seo/category-meta'
 import { loadHighlightJs } from '~/utils/highlight-loader'
 import type {
   AttributeConfigDto,
@@ -765,12 +765,6 @@ const methodologyV2Note = computed(() => {
   })
 })
 
-const purposeText = computed(
-  () => impactScoreTexts.value?.purpose?.trim() || null
-)
-const availableDataText = computed(
-  () => impactScoreTexts.value?.availlableDatas?.trim() || null
-)
 const criticalReviewText = computed(
   () => impactScoreTexts.value?.criticalReview?.trim() || null
 )
@@ -1243,23 +1237,21 @@ function formatDecimal(value: number | null) {
   return value.toFixed(2)
 }
 
-const canonicalUrl = computed(() =>
-  new URL(route.fullPath, requestURL.origin).toString()
+const canonicalUrl = computed(
+  () => buildCanonicalUrl(route.fullPath, requestURL.origin) ?? undefined
 )
-const seoTitle = computed(() =>
-  t('category.ecoscorePage.seo.title', { category: categorySeoTitle.value })
-)
-const seoDescription = computed(() => {
-  return (
-    purposeText.value ??
-    availableDataText.value ??
-    category.value?.verticalMetaDescription ??
-    category.value?.verticalHomeDescription ??
-    t('category.ecoscorePage.seo.description', {
+const ecoscoreSeoMeta = computed(() =>
+  resolveCategoryEcoscoreSeoMeta({
+    title: t('category.ecoscorePage.seo.title', {
+      category: categorySeoTitle.value,
+    }),
+    description: t('category.ecoscorePage.seo.description', {
       category: categoryLabel.value,
-    })
-  )
-})
+    }),
+  })
+)
+const seoTitle = computed(() => ecoscoreSeoMeta.value.title)
+const seoDescription = computed(() => ecoscoreSeoMeta.value.description)
 
 const ogImage = computed(() => {
   if (!heroImage.value) {
@@ -1294,6 +1286,10 @@ useHead(() => ({
       ),
     },
   ],
+}))
+
+useHead(() => ({
+  link: [{ rel: 'canonical', href: canonicalUrl.value }],
 }))
 
 useSeoMeta({

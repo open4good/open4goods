@@ -1,5 +1,6 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useRequestURL, useRoute } from '#imports'
+import { buildCanonicalUrl } from '~/utils/seo/canonical'
 
 const useSafeRequestURL = (): URL | null => {
   try {
@@ -35,14 +36,7 @@ export const useCanonicalUrl = (
     }
 
     const rawPath = path ? (toValue(path) ?? '') : (route.fullPath ?? '')
-    const [pathWithoutHash] = rawPath.split('#')
-    const normalizedPath =
-      pathWithoutHash && pathWithoutHash.length > 0 ? pathWithoutHash : '/'
 
-    try {
-      return new URL(normalizedPath, origin).toString()
-    } catch {
-      return null
-    }
+    return buildCanonicalUrl(rawPath, origin)
   })
 }

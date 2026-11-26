@@ -11,6 +11,7 @@ import {
 } from '~~/shared/utils/blog-product-widget'
 import { useAuth } from '~/composables/useAuth'
 import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
+import { buildCanonicalUrl } from '~/utils/seo/canonical'
 
 import GuideProductGrid from '~/components/product/GuideProductGrid.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
@@ -187,7 +188,11 @@ try {
   requestUrl = undefined
 }
 
-const canonicalUrl = computed(() => requestUrl?.href)
+const canonicalUrl = computed(() =>
+  requestUrl
+    ? (buildCanonicalUrl(requestUrl.pathname, requestUrl.origin) ?? undefined)
+    : undefined
+)
 
 const absoluteImageUrl = computed(() => {
   const image = article.value.image

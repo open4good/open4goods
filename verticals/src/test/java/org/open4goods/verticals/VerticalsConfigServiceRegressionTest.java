@@ -123,7 +123,7 @@ class VerticalsConfigServiceRegressionTest {
                     assertThat(subCategory.getMetaDescription().i18n("fr"))
                             .contains("Comparez les lave-vaisselles encastrables");
                     assertThat(subCategory.getHeroBlock()).isNotNull();
-                    assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Verifiez la niche");
+                    assertThat(subCategory.getHeroBlock().getTitle().i18n("fr")).isEqualTo("Vérifiez la niche");
                     assertThat(subCategory.getHeroBlock().getMdiIcon()).isEqualTo("mdi-ruler-square");
                     assertThat(subCategory.getReadMore()).isNotNull();
                     assertThat(subCategory.getReadMore().getShortText().i18n("fr"))

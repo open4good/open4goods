@@ -143,6 +143,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Machines à laver"
+    verticalMetaTitle: "Comparatif lave-linge : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les lave-linge par prix, consommation d'eau et d'énergie par cycle et Impact Score noté sur 20 pour choisir une machine sobre."
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le mieux classé à l’Impact Score, tout en répondant à vos besoins du quotidien."
 
@@ -188,6 +190,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Washing machines"
+    verticalMetaTitle: "Washing machines comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare washing machines by price, water and energy use per cycle and Impact Score out of 20 to pick a low-impact machine."
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Explore our selection of washing machines. Water and energy use, noise levels, and durability all matter for environmental impact. Nudger helps you find the model best ranked on the Impact Score that still matches your daily needs."
 

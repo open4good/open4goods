@@ -407,14 +407,14 @@ aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" :
   \  \"id\" : \"S1\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Delegated Regulation (EU) 2019/2014 supplementing\
   \ Regulation (EU) 2017/1369 with regard to energy labelling of household washing machines and household washer-dryers\"\
   ,\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the\
-  \ European Union / EUR-Lex\",\n    \"url\" : \"[https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014)\"\
+  \ European Union / EUR-Lex\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"energy & water metrics definition\", \"noise class harmonisation\", \"double-counting analysis (class vs kWh/100 cycles)\"\
   \ ],\n    \"notes\" : \"Cadre harmonisé UE: kWh/100 cycles, litres/cycle, classes de bruit et méthodes de calcul.\"\n  },\
   \ {\n    \"id\" : \"S2\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Regulation (EU) 2019/2023 laying\
   \ down ecodesign requirements for household washing machines and household washer-dryers\",\n    \"authors_or_org\" : \"\
   European Commission\",\n    \"year\" : 2019,\n    \"publisher\" : \"Official Journal of the European Union / EUR-Lex\",\n\
-  \    \"url\" : \"[https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023)\"\
+  \    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"lifetime reference (EU estimate)\", \"materiality by lifecycle stage (production + use electricity/water)\", \"repairability/resource\
   \ efficiency requirements (spare parts, repair info, low power modes)\" ],\n    \"notes\" : \"Inclut estimation de durée\
@@ -422,40 +422,40 @@ aiJsonResponse: "{\n  \"use_case\" : \"consumer_comparison\",\n  \"geo_scope\" :
   ,\n    \"type\" : \"regulation\",\n    \"title\" : \"Commission Recommendation (EU) 2021/2279 on the use of the Environmental\
   \ Footprint methods to measure and communicate the life cycle environmental performance of products and organisations\"\
   ,\n    \"authors_or_org\" : \"European Commission\",\n    \"year\" : 2021,\n    \"publisher\" : \"Official Journal of the\
-  \ European Union / EUR-Lex\",\n    \"url\" : \"[https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng](https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng)\"\
+  \ European Union / EUR-Lex\",\n    \"url\" : \"https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"weighting principles (materiality, benchmark/representative product)\", \"normalisation/weighting framing\", \"data\
   \ quality rationale\" ],\n    \"notes\" : \"Méthode EF/PEF: principe de matérialité, benchmark produit représentatif, et\
   \ accent sur données ACV de qualité.\"\n  }, {\n    \"id\" : \"S4\",\n    \"type\" : \"public_agency\",\n    \"title\" :\
   \ \"L'indice de durabilité désormais affiché sur les lave-linge (Loi anti-gaspillage)\",\n    \"authors_or_org\" : \"Service\
   \ Public / Direction de l'information légale et administrative (Premier ministre)\",\n    \"year\" : 2025,\n    \"publisher\"\
-  \ : \"service-public.gouv.fr\",\n    \"url\" : \"[https://www.service-public.gouv.fr/particuliers/actualites/A17994](https://www.service-public.gouv.fr/particuliers/actualites/A17994)\"\
+  \ : \"service-public.gouv.fr\",\n    \"url\" : \"https://www.service-public.gouv.fr/particuliers/actualites/A17994\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"repairability & warranty relevance (durability index structure)\", \"consumer-comparison framing for durability\" ],\n\
   \    \"notes\" : \"Décrit l'indice de durabilité (réparabilité + fiabilité, incluant garantie commerciale) et son affichage\
   \ pour lave-linge.\"\n  }, {\n    \"id\" : \"S5\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Arrêté du 5 avril\
   \ 2024 relatif aux critères, aux sous-critères et au système de notation pour le calcul et l'affichage de l'indice de durabilité\
   \ des lave-linge ménagers\",\n    \"authors_or_org\" : \"Gouvernement français\",\n    \"year\" : 2024,\n    \"publisher\"\
-  \ : \"JORF / Légifrance\",\n    \"url\" : \"[https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249)\"\
+  \ : \"JORF / Légifrance\",\n    \"url\" : \"https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"repairability/durability scoring official basis\", \"warranty/maintenance relevance\" ],\n    \"notes\" : \"Texte réglementaire\
   \ fixant critères/sous-critères et notation de l'indice de durabilité des lave-linge en France.\"\n  }, {\n    \"id\" :\
   \ \"S6\",\n    \"type\" : \"peer_reviewed\",\n    \"title\" : \"Understanding lifetimes and failure modes of defective washing\
   \ machines and dishwashers\",\n    \"authors_or_org\" : \"Tecchio, P.; Ardente, F.; Mathieux, F.\",\n    \"year\" : 2019,\n\
-  \    \"publisher\" : \"Journal of Cleaner Production (via PubMed Central)\",\n    \"url\" : \"[https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/](https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/)\"\
+  \    \"publisher\" : \"Journal of Cleaner Production (via PubMed Central)\",\n    \"url\" : \"https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : true,\n    \"used_for\" : [\
   \ \"lifetime reference triangulation\", \"durability/repair context\" ],\n    \"notes\" : \"Analyse de données de réparateurs\
   \ (~11 000 diagnostics) et estimation d'une durée de service moyenne (~12,6 ans pour lave-linge non réparés).\"\n  }, {\n\
   \    \"id\" : \"S7\",\n    \"type\" : \"regulation\",\n    \"title\" : \"Directive 2009/125/EC establishing a framework\
   \ for the setting of ecodesign requirements for energy-related products\",\n    \"authors_or_org\" : \"European Parliament\
   \ and Council of the European Union\",\n    \"year\" : 2009,\n    \"publisher\" : \"Official Journal of the European Union\
-  \ / EUR-Lex\",\n    \"url\" : \"[https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125](https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125)\"\
+  \ / EUR-Lex\",\n    \"url\" : \"https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"high\",\n    \"used\" : false,\n    \"used_for\" : [\
   \ \"context (not used in weighting)\" ],\n    \"notes\" : \"Cadre général de l'écoconception (consulté pour contexte, non\
   \ mobilisé directement dans les pondérations).\"\n  }, {\n    \"id\" : \"S8\",\n    \"type\" : \"public_agency\",\n    \"\
   title\" : \"Ecodesign and energy label for household washing machines and washer dryers - Preparatory study (final report)\
   \ - Publication metadata\",\n    \"authors_or_org\" : \"Publications Office of the European Union\",\n    \"year\" : 2017,\n\
-  \    \"publisher\" : \"op.europa.eu\",\n    \"url\" : \"[https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en](https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en)\"\
+  \    \"publisher\" : \"op.europa.eu\",\n    \"url\" : \"https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en\"\
   ,\n    \"accessed_date\" : \"2026-03-01\",\n    \"reliability\" : \"medium\",\n    \"used\" : false,\n    \"used_for\" :\
   \ [ \"context (not used in weighting)\" ],\n    \"notes\" : \"Métadonnées du rapport préparatoire (consulté; contenu PDF\
   \ non exploité ici).\"\n  } ],\n  \"search_log\" : [ {\n    \"query\" : \"Regulation (EU) 2019/2014 energy labelling household\
@@ -742,7 +742,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2019
     publisher: Official Journal of the European Union / EUR-Lex
-    url: '[https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014)'
+    url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX%3A32019R2014'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -758,7 +758,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2019
     publisher: Official Journal of the European Union / EUR-Lex
-    url: '[https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023)'
+    url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019R2023'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -774,7 +774,7 @@ aiResult:
     authors_or_org: European Commission
     year: 2021
     publisher: Official Journal of the European Union / EUR-Lex
-    url: '[https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng](https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng)'
+    url: 'https://eur-lex.europa.eu/eli/reco/2021/2279/oj/eng'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -789,7 +789,7 @@ aiResult:
     authors_or_org: Service Public / Direction de l'information légale et administrative (Premier ministre)
     year: 2025
     publisher: service-public.gouv.fr
-    url: '[https://www.service-public.gouv.fr/particuliers/actualites/A17994](https://www.service-public.gouv.fr/particuliers/actualites/A17994)'
+    url: 'https://www.service-public.gouv.fr/particuliers/actualites/A17994'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -804,7 +804,7 @@ aiResult:
     authors_or_org: Gouvernement français
     year: 2024
     publisher: JORF / Légifrance
-    url: '[https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249)'
+    url: 'https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000049376249'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -818,7 +818,7 @@ aiResult:
     authors_or_org: Tecchio, P.; Ardente, F.; Mathieux, F.
     year: 2019
     publisher: Journal of Cleaner Production (via PubMed Central)
-    url: '[https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/](https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/)'
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC6472650/'
     accessed_date: '2026-03-01'
     reliability: high
     used: true
@@ -833,7 +833,7 @@ aiResult:
     authors_or_org: European Parliament and Council of the European Union
     year: 2009
     publisher: Official Journal of the European Union / EUR-Lex
-    url: '[https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125](https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125)'
+    url: 'https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX%3A32009L0125'
     accessed_date: '2026-03-01'
     reliability: high
     used: false
@@ -847,7 +847,7 @@ aiResult:
     authors_or_org: Publications Office of the European Union
     year: 2017
     publisher: op.europa.eu
-    url: '[https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en](https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en)'
+    url: 'https://op.europa.eu/en/publication-detail/-/publication/533fa096-d971-11e7-a506-01aa75ed71a1/language-en'
     accessed_date: '2026-03-01'
     reliability: medium
     used: false

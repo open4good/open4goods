@@ -1,5 +1,5 @@
 ---
-title: "Meilleur climatiseur pour un bureau : le guide juin 2026 de la Team Nudger"
+title: "Meilleur climatiseur pour un bureau : le guide de la Team Nudger"
 description: "Split, mobile ou réversible : comment choisir le climatiseur idéal pour votre bureau en 2026. Silence, impact écologique, réglementation et sélection testée par la Team Nudger."
 type: "guide"
 tags: ["language:fr", "guide-achat", "climatiseurs"]
