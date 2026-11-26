@@ -98,6 +98,12 @@ public class OpenDataService implements HealthIndicator {
      * Columns of the GTIN dataset. Since GOU-2616 the dataset has neither {@code url} (it is
      * {@code https://nudger.fr/{gtin}}) nor {@code categories} (19 % of the zip), and {@code last_updated} is a UTC date,
      * so that the whole publication stays under the free 10 GB-month of R2.
+     * <p>
+     * Version 2 of the dataset (GOU-2745) adds {@code vertical} as the last column: the Nudger vertical identifier
+     * (same value as the {@code vertical} column of the impact datasets), empty outside a vertical. Evolution rule: a
+     * column is only appended at the end of the file, with {@link #GTIN_DATASET_VERSION} + 1 and an entry in the
+     * version log of the {@code /opendata} page. Renaming, removing or moving a column needs a decision of the owner
+     * (a double publication does not fit the R2 budget).
      */
     public static final String[] GTIN_HEADER = {
             "gtin",
@@ -110,8 +116,15 @@ public class OpenDataService implements HealthIndicator {
             "offers_count",
             "min_price",
             "currency",
-            "sources"
+            "sources",
+            "vertical"
     };
+
+    /** {@code datasetVersion} of the GTIN dataset (GOU-2745); the other datasets are at {@link #DEFAULT_DATASET_VERSION}. */
+    public static final int GTIN_DATASET_VERSION = 2;
+
+    /** {@code datasetVersion} of the datasets that never changed their columns. */
+    public static final int DEFAULT_DATASET_VERSION = 1;
 
     public static final String[] ISBN_HEADER = {
             "isbn",
@@ -586,7 +599,7 @@ public class OpenDataService implements HealthIndicator {
                 () -> 0L, List.of(), product -> new String[0]));
         manifests.add(new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, publicFilename, publicUrl(publicFilename),
                 DatasetManifest.FORMAT, OpenDataManifest.LICENSE, Files.size(tmpZip.toPath()),
-                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of()));
+                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of(), DEFAULT_DATASET_VERSION));
         LOGGER.info("{} rows exported in {} ({} datasets).", rows, publicFilename, impacts.size());
     }
 
@@ -832,7 +845,12 @@ public class OpenDataService implements HealthIndicator {
                 rows,
                 indexCount,
                 now(),
-                columns);
+                columns,
+                datasetVersion(definition.id()));
+    }
+
+    private static int datasetVersion(String id) {
+        return "gtin".equals(id) ? GTIN_DATASET_VERSION : DEFAULT_DATASET_VERSION;
     }
 
     private String publicUrl(String publicFilename) {
@@ -988,6 +1006,7 @@ public class OpenDataService implements HealthIndicator {
         }
 
         line[10] = exportSources(data);
+        line[11] = StringUtils.defaultString(data.getVertical());
 
         return line;
     }
