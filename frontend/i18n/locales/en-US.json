@@ -698,13 +698,7 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
-          "jsonUnavailable": "AI response unavailable.",
-          "promptHelper": "Instructions sent to the model to produce the configuration.",
-          "promptTitle": "YAML generation prompt",
-          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
-          "responseTitle": "Model response",
           "title": "Impact Score generation audit",
-          "yamlUnavailable": "Prompt unavailable.",
           "toggle": "AI audit: prompt and raw response",
           "v1History": "This AI audit was used to configure the V1 matrix of the {category} Impact Score. It was not rerun for method v{version}, whose criteria and weights are shown above. The V1 prompt and raw response remain available in the configuration published on GitHub."
         },
