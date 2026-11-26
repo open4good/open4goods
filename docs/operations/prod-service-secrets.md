@@ -236,9 +236,10 @@ render does not check it, and `data.nudger.fr` without a scheme gives a relative
 Rollback: an empty variable is not rendered (the previous render stays). First empty both variables in the `prod`
 environment, otherwise the next release renders them again. Then delete
 `/etc/open4goods/secrets/front-api/open-data-config.public-base-url` and
-`/etc/open4goods/secrets/ui/open-data-config.redirect-base-url` on the host and restart front-api and ui:
-`downloadUrl` and the ui answer go back to the local files. Browsers and Cloudflare may keep the permanent 301
-cached for a while.
+`/etc/open4goods/secrets/ui/open-data-config.redirect-base-url` on the host and restart front-api and ui. Since
+GOU-2290 ui serves no file any more: without these values `downloadUrl` is `null` and ui answers 404, so a rollback
+stops the downloads from nudger.fr (the mirrors data.gouv.fr, Zenodo and Kaggle remain). Browsers and Cloudflare may
+keep the permanent 301 cached for a while.
 
 ### Paired secrets
 

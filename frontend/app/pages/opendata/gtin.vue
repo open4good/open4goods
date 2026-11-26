@@ -126,10 +126,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type {
-  OpenDataDatasetDto,
-  OpenDataOverviewDto,
-} from '~~/shared/api-client'
+import type { OpenDataDatasetDto } from '~~/shared/api-client'
 
 import PageHeader from '~/components/shared/header/PageHeader.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
@@ -150,22 +147,16 @@ const requestHeaders = useRequestHeaders(['host', 'x-forwarded-host'])
 
 interface DatasetPayload {
   dataset: OpenDataDatasetDto
-  overview: OpenDataOverviewDto
 }
 
 const { data, pending, error, refresh } = useAsyncData<DatasetPayload>(
   'opendata-gtin',
   async () => {
-    const [dataset, overview] = await Promise.all([
-      $fetch<OpenDataDatasetDto>('/api/opendata/gtin', {
-        headers: requestHeaders,
-      }),
-      $fetch<OpenDataOverviewDto>('/api/opendata', {
-        headers: requestHeaders,
-      }),
-    ])
+    const dataset = await $fetch<OpenDataDatasetDto>('/api/opendata/gtin', {
+      headers: requestHeaders,
+    })
 
-    return { dataset, overview }
+    return { dataset }
   },
   {
     lazy: true,
@@ -173,7 +164,6 @@ const { data, pending, error, refresh } = useAsyncData<DatasetPayload>(
 )
 
 const dataset = computed(() => data.value?.dataset)
-const overview = computed(() => data.value?.overview)
 
 const placeholder = computed(() =>
   String(t('opendata.datasets.common.placeholder'))
@@ -210,7 +200,7 @@ const formatBullets = computed(() => [
 
 const downloadOptions = computed(() => {
   const directUrl = dataset.value?.downloadUrl
-  const limits = overview.value?.downloadLimits
+  const sha256 = dataset.value?.sha256
 
   return [
     {
@@ -221,10 +211,6 @@ const downloadOptions = computed(() => {
       ),
       badge: String(t('opendata.datasets.common.download.fast.badge')),
       highlights: [
-        {
-          icon: 'mdi-lightning-bolt-outline',
-          text: String(t('opendata.datasets.common.download.fast.speed')),
-        },
         {
           icon: 'mdi-shield-check-outline',
           text: String(t('opendata.datasets.gtin.download.fast.highlight')),
@@ -248,25 +234,21 @@ const downloadOptions = computed(() => {
       ),
       highlights: [
         {
-          icon: 'mdi-account-multiple-outline',
-          text: String(
-            limits?.concurrentDownloads
-              ? t('opendata.datasets.common.download.direct.concurrent', {
-                  value: limits.concurrentDownloads,
-                })
-              : t('opendata.datasets.common.download.direct.concurrentUnknown')
-          ),
+          icon: 'mdi-restart',
+          text: String(t('opendata.datasets.common.download.direct.resume')),
         },
-        {
-          icon: 'mdi-speedometer',
-          text: String(
-            limits?.downloadSpeed
-              ? t('opendata.datasets.common.download.direct.speed', {
-                  value: limits.downloadSpeed,
-                })
-              : t('opendata.datasets.common.download.direct.speedUnknown')
-          ),
-        },
+        ...(sha256
+          ? [
+              {
+                icon: 'mdi-fingerprint',
+                text: String(
+                  t('opendata.datasets.common.download.direct.checksum', {
+                    value: sha256,
+                  })
+                ),
+              },
+            ]
+          : []),
       ],
       cta: {
         label: String(t('opendata.datasets.common.download.direct.cta.label')),

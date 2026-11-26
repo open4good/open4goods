@@ -1,7 +1,6 @@
 package org.open4goods.services.opendata.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -13,8 +12,6 @@ import static org.mockito.Mockito.when;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +45,6 @@ import org.open4goods.model.attribute.IndexedAttribute;
 import org.open4goods.model.attribute.ProductAttribute;
 import org.open4goods.model.attribute.ProductAttributes;
 import org.open4goods.model.attribute.ReferentielKey;
-import org.open4goods.model.exceptions.TechnicalException;
 import org.open4goods.model.price.AggregatedPrice;
 import org.open4goods.model.price.AggregatedPrices;
 import org.open4goods.model.price.Currency;
@@ -99,33 +95,12 @@ class OpenDataServiceTest {
         openDataConfig.setPagePause(Duration.ZERO);
         openDataConfig.setExportPageSize(2);
         openDataConfig.setPublicBaseUrl("https://data.nudger.fr/");
-        openDataConfig.setConcurrentDownloads(2);
 
         lenient().when(productRepository.countItemsByBarcodeType(any(BarcodeType[].class))).thenReturn(1L);
         lenient().when(verticalsConfigService.getConfigsWithoutDefault(true)).thenReturn(List.of());
 
         meterRegistry = new SimpleMeterRegistry();
         service = new OpenDataService(productRepository, openDataConfig, meterRegistry, verticalsConfigService);
-    }
-
-    @Test
-    void limitedRateStreamShouldEnforceConcurrencyLimits() throws Exception {
-        File dataset = tempDir.resolve("dataset.csv").toFile();
-        try (FileOutputStream outputStream = new FileOutputStream(dataset)) {
-            outputStream.write("test".getBytes(StandardCharsets.UTF_8));
-        }
-
-        openDataConfig.setConcurrentDownloads(1);
-
-        InputStream firstDownload = service.limitedRateStream(dataset.getAbsolutePath());
-        assertThatThrownBy(() -> service.limitedRateStream(dataset.getAbsolutePath()))
-                .isInstanceOf(TechnicalException.class);
-        firstDownload.close();
-
-        // Once the stream is closed the counter must be decremented allowing a new download.
-        try (InputStream second = service.limitedRateStream(dataset.getAbsolutePath())) {
-            assertThat(second).isNotNull();
-        }
     }
 
     @Test

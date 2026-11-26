@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.open4goods.verticals.VerticalsConfigService;
+import org.open4goods.ui.config.properties.OpenDataRedirectProperties;
 import org.open4goods.ui.config.yml.UiConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.Banner;
@@ -56,9 +56,10 @@ class RenderedSecretsConfigTreeTest {
             entry(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY,
                     binder -> binder.bind(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY, String.class)
                             .orElse(null)),
-            // 301 of the open data zips to data.nudger.fr, read by OpenDataController through OpenDataConfig (GOU-2247).
+            // 301 of the open data zips to data.nudger.fr, read by OpenDataController through
+            // OpenDataRedirectProperties (GOU-2247, GOU-2290).
             entry("open-data-config.redirect-base-url",
-                    binder -> bind(binder, "open-data-config", OpenDataConfig.class).getRedirectBaseUrl()),
+                    binder -> bind(binder, "open-data-config", OpenDataRedirectProperties.class).getRedirectBaseUrl()),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 
