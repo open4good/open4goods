@@ -1,0 +1,95 @@
+# Search-intent subcategory for the tv vertical.
+# Maintained: 2026-11-26 from the GOU-2715 plan (Growth, SEO lot K).
+# Intent: comparison of 75-inch (190 cm) TVs.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, audit of 2026-11-25, last 28 days):
+#     271 impressions on 75-inch queries.
+#   - Google Autocomplete: not measured.
+# Feasibility:
+#   - Matching products: 552 in the vertical, 236 with an active offer
+#     (Elasticsearch products-moustik, 2026-11-26, DIAGONALE_POUCES.value
+#     term "75" and offersCount >= 1).
+# Rationale:
+#   - Same exact-size filter as tv_55_inches; linked from the blog article
+#     "quelle taille de TV choisir pour son salon".
+id: "tv_75_inches"
+slug:
+  en: "75-inch-tv"
+  fr: "televiseur-75-pouces"
+h1Title:
+  en: "75-inch TVs (190 cm)"
+  fr: "Téléviseurs 75 pouces (190 cm)"
+description:
+  en: |-
+    Compare **75-inch TVs (190 cm)**, a large home-cinema size, with energy use,
+    repairability and Impact Score data to compare models.
+  fr: |-
+    Comparez les **téléviseurs 75 pouces (190 cm)**, un grand format façon home cinéma,
+    avec la consommation, la réparabilité et l'Impact Score pour comparer les
+    modèles.
+metaTitle:
+  en: "75-inch TVs (190 cm): compare models | Nudger"
+  fr: "Téléviseur 75 pouces (190 cm) : comparer | Nudger"
+metaDescription:
+  en: "Compare 75-inch (190 cm) TVs by panel type, energy use, refresh rate and impact before choosing the right model for your room."
+  fr: >-
+    Comparez les téléviseurs 75 pouces (190 cm) selon la dalle, la
+    consommation, la fréquence et l'impact avant de choisir le bon modèle.
+metaOpenGraphTitle:
+  en: "Compare 75-inch TVs"
+  fr: "Comparer les téléviseurs 75 pouces"
+metaOpenGraphDescription:
+  en: "A focused selection of 75-inch (190 cm) TVs with practical comparison data."
+  fr: "Une sélection ciblée de téléviseurs 75 pouces (190 cm) avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-television"
+  title:
+    en: "A home-cinema size"
+    fr: "Le grand format façon cinéma"
+  body:
+    en: |-
+      75 inches equals 190 cm diagonal. For a 4K set, plan a viewing
+      distance of 2.3 to 2.9 m.
+    fr: |-
+      75 pouces correspond à 190 cm de diagonale. Pour un modèle 4K,
+      prévoyez un recul de 2,3 à 2,9 m.
+readMore:
+  title:
+    en: "75 inches: how big is it, and is it the right size for you?"
+    fr: "75 pouces : quelle taille, et est-ce le bon format pour vous ?"
+  shortText:
+    en: |-
+      A 75-inch screen measures 190 cm on the diagonal, about 166 cm wide and
+      93 cm high. As a rule of thumb, sit 2.3 to 2.9 m away for a 4K set.
+      This page lists only 75-inch models so you compare like for like.
+    fr: |-
+      Un écran 75 pouces mesure 190 cm de diagonale, environ 166 cm de large et
+      93 cm de haut. En pratique, prévoyez un recul de 2,3 à 2,9 m pour un
+      modèle 4K. Cette page ne liste que des modèles 75 pouces, pour comparer à
+      format égal.
+  longText:
+    en: |-
+      Once the size is fixed, the real differences are panel technology (OLED,
+      QLED or LED), energy consumption and refresh rate. Check the energy
+      label: yearly running cost varies between an efficient set and a
+      power-hungry one for the same picture. Not sure about the size? Read
+      [which TV size to choose](/blog/quelle-taille-de-tv-choisir-pour-son-salon).
+
+      Nudger keeps this page focused on filterable 75-inch models so each TV
+      stays comparable on price, environmental impact score and key technical
+      attributes, instead of mixing in other sizes.
+    fr: |-
+      Une fois la taille fixée, les vraies différences se jouent sur la
+      technologie de dalle (OLED, QLED ou LED), la consommation et la fréquence
+      d'affichage. Regardez l'étiquette énergie : le coût annuel varie entre un
+      modèle économe et un modèle énergivore, à image équivalente. Un doute sur
+      la taille ? Lisez [quelle taille de TV choisir](/blog/quelle-taille-de-tv-choisir-pour-son-salon).
+
+      Nudger garde cette page centrée sur des modèles 75 pouces filtrables,
+      afin que chaque téléviseur reste comparable sur le prix, le score d'impact
+      environnemental et les caractéristiques techniques, sans mélanger les
+      autres tailles.
+activatedFilters:
+  - field: "attributes.indexed.DIAGONALE_POUCES.value"
+    operator: "EQUALS"
+    value: "75"
