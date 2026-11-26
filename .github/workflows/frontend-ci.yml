@@ -76,6 +76,10 @@ jobs:
         working-directory: frontend
         run: scripts/check-standalone-output.sh 4105
 
+      - name: Check the built bundle renders `/` and a category page (no SSR ReferenceError)
+        working-directory: frontend
+        run: scripts/check-ssr-render.sh 4106
+
       - name: Package SSR output
         # tar keeps the permissions and symlinks of .output (native addons, pnpm links), which artifacts drop.
         run: tar -czf frontend-ssr-output.tgz frontend/.output
