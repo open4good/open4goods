@@ -23,7 +23,9 @@ import org.open4goods.nudgerfrontapi.dto.stats.VerticalStatsDto;
 import org.open4goods.model.localization.DomainLanguage;
 import org.open4goods.nudgerfrontapi.model.stats.ActiveMerchantDomains;
 import org.open4goods.nudgerfrontapi.model.stats.AffiliationPartnersStats;
-import org.open4goods.services.opendata.service.OpenDataService;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestService;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot;
+import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.services.serialisation.exception.SerialisationException;
 import org.open4goods.services.serialisation.service.SerialisationService;
@@ -51,7 +53,7 @@ public class StatsService {
     private final SerialisationService serialisationService;
     private final ResourcePatternResolver resourceResolver;
     private final AffiliationPartnerService affiliationPartnerService;
-    private final OpenDataService openDataService;
+    private final OpenDataManifestService openDataManifestService;
     private final ProductRepository productRepository;
     private final ProductMappingService productMappingService;
     private final MerchantDomainsService merchantDomainsService;
@@ -59,17 +61,24 @@ public class StatsService {
     public StatsService(SerialisationService serialisationService,
                         ResourcePatternResolver resourceResolver,
                         AffiliationPartnerService affiliationPartnerService,
-                        OpenDataService openDataService,
+                        OpenDataManifestService openDataManifestService,
                         ProductRepository productRepository,
                         ProductMappingService productMappingService,
                         MerchantDomainsService merchantDomainsService) {
         this.serialisationService = serialisationService;
         this.resourceResolver = resourceResolver;
         this.affiliationPartnerService = affiliationPartnerService;
-        this.openDataService = openDataService;
+        this.openDataManifestService = openDataManifestService;
         this.productRepository = productRepository;
         this.productMappingService = productMappingService;
         this.merchantDomainsService = merchantDomainsService;
+    }
+
+    /**
+     * Rows of a published open data file, null when the manifest does not give them (never the live index count).
+     */
+    private static Long publishedRows(OpenDataManifestSnapshot manifest, String datasetId) {
+        return manifest.dataset(datasetId).map(DatasetManifest::rows).orElse(null);
     }
 
     /**
@@ -84,8 +93,9 @@ public class StatsService {
     public CategoriesStatsDto categories(DomainLanguage domainLanguage) {
         List<VerticalConfig> enabledVerticals = loadEnabledVerticals();
         AffiliationPartnersStats partnersStats = computeAffiliationPartnersStats();
-        long gtinItemsCount = openDataService.totalItemsGTIN();
-        long isbnItemsCount = openDataService.totalItemsISBN();
+        OpenDataManifestSnapshot manifest = openDataManifestService.snapshot();
+        Long gtinItemsCount = publishedRows(manifest, OpenDataManifestService.GTIN);
+        Long isbnItemsCount = publishedRows(manifest, OpenDataManifestService.ISBN);
         long impactScoreProductsCount = safeCount(productRepository.countMainIndexHavingImpactScore());
         long productsWithoutVerticalCount = safeCount(productRepository.countMainIndexWithoutVertical());
         long totalProductsCount = safeCount(productRepository.countMainIndex());

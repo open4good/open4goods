@@ -53,17 +53,17 @@ export interface CategoriesStatsDto {
    */
   activeMerchantDomains?: ActiveMerchantDomainsDto
   /**
-   * Total number of GTIN items available in the OpenData exports.
+   * Rows of the published GTIN file, read from the OpenData manifest. Null when the manifest is unreadable (no fallback on the index).
    * @type {number}
    * @memberof CategoriesStatsDto
    */
-  gtinOpenDataItemsCount?: number
+  gtinOpenDataItemsCount?: number | null
   /**
-   * Total number of ISBN items available in the OpenData exports.
+   * Rows of the published ISBN file, read from the OpenData manifest. Null when the manifest is unreadable (no fallback on the index).
    * @type {number}
    * @memberof CategoriesStatsDto
    */
-  isbnOpenDataItemsCount?: number
+  isbnOpenDataItemsCount?: number | null
   /**
    * Count of recent products with offers, a valid ImpactScore, and not excluded.
    * @type {number}
