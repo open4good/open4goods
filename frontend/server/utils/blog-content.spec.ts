@@ -149,6 +149,16 @@ describe('blog-content', () => {
       )
     })
 
+    it('renders the tv-size-calculator directive as a validated marker', async () => {
+      const body = await render(
+        'Before\n\n::tv-size-calculator{default-distance="2.5" default-resolution="full-hd"}\n::\n\nAfter'
+      )
+
+      expect(body).toBe(
+        '<p>Before</p>\n<div data-tv-size-calculator="2.5|full-hd"></div>\n<p>After</p>\n'
+      )
+    })
+
     it('renders the three TV widgets of the Black Friday article', async () => {
       const rawbody = readFileSync(
         resolve(
