@@ -246,6 +246,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  hydrateOnVisible,
   ref,
   watch,
 } from 'vue'
@@ -290,7 +291,6 @@ import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigat
 import ProductHero from '~/components/product/ProductHero.vue'
 import ProductSizeGuide from '~/components/product/ProductSizeGuide.vue'
 import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.vue'
-import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'
 import { useCategories } from '~/composables/categories/useCategories'
 import {
@@ -310,24 +310,32 @@ import {
 } from '~/components/product/impact/impact-score-groups'
 import { transformRadarValue } from '~/utils/radar-utils'
 
+const ProductPriceSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductPriceSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
 const ProductStickyPriceBanner = defineAsyncComponent(
   () => import('~/components/product/ProductStickyPriceBanner.vue')
 )
 const ProductAttributesSection = defineAsyncComponent(
   () => import('~/components/product/ProductAttributesSection.vue')
 )
-const ProductImpactSection = defineAsyncComponent(
-  () => import('~/components/product/ProductImpactSection.vue')
-)
-const ProductAlternatives = defineAsyncComponent(
-  () => import('~/components/product/impact/ProductAlternatives.vue')
-)
-const ProductDocumentationSection = defineAsyncComponent(
-  () => import('~/components/product/ProductDocumentationSection.vue')
-)
-const ProductSourcesSection = defineAsyncComponent(
-  () => import('~/components/product/ProductSourcesSection.vue')
-)
+const ProductImpactSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductImpactSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductAlternatives = defineAsyncComponent({
+  loader: () => import('~/components/product/impact/ProductAlternatives.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductDocumentationSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductDocumentationSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
+const ProductSourcesSection = defineAsyncComponent({
+  loader: () => import('~/components/product/ProductSourcesSection.vue'),
+  hydrate: hydrateOnVisible({ rootMargin: '200px' }),
+})
 const ProductAdminSection = defineAsyncComponent(
   () => import('~/components/product/ProductAdminSection.vue')
 )
