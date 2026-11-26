@@ -28,7 +28,7 @@ const stale = computed(() => isDatasetStale(props.generatedAt, now.value))
       class="opendata-freshness__badge"
       :color="stale ? 'warning' : 'success'"
       variant="tonal"
-      prepend-icon="mdi-calendar-check"
+      prepend-icon="mdi-calendar-clock"
       data-testid="opendata-freshness-badge"
     >
       {{
