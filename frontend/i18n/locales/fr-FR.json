@@ -3888,5 +3888,14 @@
       "text": "Une question sur ces règles ?",
       "link": "Contactez-nous"
     }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Quelle taille de TV choisir pour son salon ?",
+      "productTitle": "Quelle taille choisir ?",
+      "productText": "La bonne diagonale dépend de la distance de visionnage et de la pièce.",
+      "productTextWithDiagonal": "Ce téléviseur mesure {cm} cm de diagonale : la bonne taille dépend de la distance de visionnage et de la pièce.",
+      "productLink": "Quelle taille de TV choisir pour son salon ?"
+    }
   }
 }

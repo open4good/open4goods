@@ -35,6 +35,12 @@
     </v-dialog>
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
+      <CategorySizeGuideLink
+        v-if="!isSubCategoryPage"
+        class="mb-4"
+        :vertical-id="category.id"
+      />
+
       <div
         v-if="!isSubCategoryPage && (hasFastFilters || isDesktop)"
         class="category-page__fast-filters mb-6"
@@ -533,6 +539,7 @@ import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategorySizeGuideLink from '~/components/category/CategorySizeGuideLink.vue'
 import CategoryRelatedSubcategoriesCard from '~/components/category/CategoryRelatedSubcategoriesCard.vue'
 import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
