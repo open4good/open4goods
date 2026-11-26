@@ -83,6 +83,11 @@
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Guides and products to explore",
+      "guides": "Buying guides",
+      "products": "Products to compare"
+    },
     "seo": {
       "title": "Nudger - Price and Impact Score comparator",
       "description": "Compare prices and Impact Scores for over 50 million products: a score out of 20, published methodology.",
@@ -659,6 +664,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Product pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Helpful guides",
       "postsTitle": "Related articles",
@@ -2379,6 +2390,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "In the same category",
+      "navLabel": "Product category",
+      "allOfVertical": "All {vertical}",
+      "sameSubCategory": "More products: {subCategory}",
+      "sameVertical": "More {vertical}",
+      "guides": "Buying guides"
+    },
     "verdict": {
       "title": "Nudger Verdict",
       "summary": "Our evaluation across three dimensions.",
@@ -3168,6 +3187,9 @@
     "logoAlt": "Return to home page via Nudger logo",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "All our categories"
+      },
       "accessibleTitle": "Footer information",
       "recordingEnabled": "Recording enabled",
       "blogLink": "Our blog",

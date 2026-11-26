@@ -83,6 +83,11 @@
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Nos guides et produits à découvrir",
+      "guides": "Guides d'achat",
+      "products": "Produits à comparer"
+    },
     "seo": {
       "title": "Nudger {'|'} Comparateur de prix et d'Impact Score",
       "description": "Comparez les prix et l'Impact Score de plus de {count} millions de produits : une note sur 20, méthode publiée.",
@@ -539,6 +544,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Pagination des produits",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Guides utiles",
       "postsTitle": "Articles associés",
@@ -2254,6 +2265,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "Dans la même catégorie",
+      "navLabel": "Catégorie du produit",
+      "allOfVertical": "Tous les {vertical}",
+      "sameSubCategory": "Autres produits : {subCategory}",
+      "sameVertical": "Autres {vertical}",
+      "guides": "Guides d'achat"
+    },
     "verdict": {
       "title": "Verdict Nudger",
       "summary": "Notre évaluation en trois dimensions.",
@@ -3069,6 +3088,9 @@
     "logoAlt": "Retour à l'accueil via le logo Nudger",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "Toutes nos catégories"
+      },
       "accessibleTitle": "Informations du pied de page",
       "recordingEnabled": "Enregistrement activé",
       "blogLink": "Notre blog",

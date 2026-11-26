@@ -674,6 +674,7 @@ const mountHomePage = async () => {
         NuxtLink: NuxtLinkStub,
         HomeBlogCarousel: HomeBlogCarouselStub,
         HomeHeroSection: HomeHeroSectionStub,
+        HomeCrawlLinksSection: true,
       },
     },
   })
