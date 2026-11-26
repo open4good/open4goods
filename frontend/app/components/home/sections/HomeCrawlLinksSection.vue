@@ -35,6 +35,7 @@ import type { ProductDto } from '~~/shared/api-client'
 import { resolveProductTitle } from '~/utils/_product-title-resolver'
 import { humanizeSlug } from '~/utils/_product-title'
 import { pickRelatedProducts } from '~/utils/_related-links'
+import { useVerticalsLinks } from '~/composables/categories/useVerticalsLinks'
 
 const MAX_GUIDES = 8
 const MAX_PRODUCTS = 6
