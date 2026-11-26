@@ -131,11 +131,16 @@ const heroPartnersCount = computed(() => {
 const openDataMillions = computed(() => {
   const gtinCount = categoriesStats.value?.gtinOpenDataItemsCount
   const isbnCount = categoriesStats.value?.isbnOpenDataItemsCount
-  const resolvedGtinCount =
-    typeof gtinCount === 'number' && Number.isFinite(gtinCount) ? gtinCount : 0
-  const resolvedIsbnCount =
-    typeof isbnCount === 'number' && Number.isFinite(isbnCount) ? isbnCount : 0
-  const totalCount = resolvedGtinCount + resolvedIsbnCount
+  // Counts come from the published manifest: a missing one hides the figure.
+  if (
+    typeof gtinCount !== 'number' ||
+    !Number.isFinite(gtinCount) ||
+    typeof isbnCount !== 'number' ||
+    !Number.isFinite(isbnCount)
+  ) {
+    return null
+  }
+  const totalCount = gtinCount + isbnCount
 
   if (totalCount <= 0) {
     return null
