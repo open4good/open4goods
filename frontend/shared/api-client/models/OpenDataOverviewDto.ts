@@ -13,44 +13,30 @@
  */
 
 import { mapValues } from '../runtime'
-import type { OpenDataDownloadLimitsDto } from './OpenDataDownloadLimitsDto'
-import {
-  OpenDataDownloadLimitsDtoFromJSON,
-  OpenDataDownloadLimitsDtoFromJSONTyped,
-  OpenDataDownloadLimitsDtoToJSON,
-  OpenDataDownloadLimitsDtoToJSONTyped,
-} from './OpenDataDownloadLimitsDto'
-
 /**
- * Aggregated information describing the full OpenData catalogue.
+ * Aggregated information describing the GTIN and ISBN datasets, read from the published manifest. Fields are null while the manifest is not configured or not readable.
  * @export
  * @interface OpenDataOverviewDto
  */
 export interface OpenDataOverviewDto {
   /**
-   * Total number of products covered by all datasets, formatted using the requested locale.
+   * Rows of the GTIN and ISBN files (sum of the manifest rows), formatted using the requested locale; null when unknown.
    * @type {string}
    * @memberof OpenDataOverviewDto
    */
-  totalProductCount?: string
+  totalProductCount?: string | null
   /**
-   * Number of datasets available for download, formatted using the requested locale.
+   * Number of GTIN and ISBN datasets listed in the manifest, formatted using the requested locale; null when unknown.
    * @type {string}
    * @memberof OpenDataOverviewDto
    */
-  datasetCount?: string
+  datasetCount?: string | null
   /**
-   * Human readable size of all datasets combined, formatted using the requested locale.
+   * Size of the GTIN and ISBN zips combined (sum of the manifest bytes), formatted using the requested locale; null when unknown.
    * @type {string}
    * @memberof OpenDataOverviewDto
    */
-  totalDatasetSize?: string
-  /**
-   * Download restrictions applied when fetching the datasets.
-   * @type {OpenDataDownloadLimitsDto}
-   * @memberof OpenDataOverviewDto
-   */
-  downloadLimits?: OpenDataDownloadLimitsDto
+  totalDatasetSize?: string | null
 }
 
 /**
@@ -80,10 +66,6 @@ export function OpenDataOverviewDtoFromJSONTyped(
       json['datasetCount'] == null ? undefined : json['datasetCount'],
     totalDatasetSize:
       json['totalDatasetSize'] == null ? undefined : json['totalDatasetSize'],
-    downloadLimits:
-      json['downloadLimits'] == null
-        ? undefined
-        : OpenDataDownloadLimitsDtoFromJSON(json['downloadLimits']),
   }
 }
 
@@ -103,6 +85,5 @@ export function OpenDataOverviewDtoToJSONTyped(
     totalProductCount: value['totalProductCount'],
     datasetCount: value['datasetCount'],
     totalDatasetSize: value['totalDatasetSize'],
-    downloadLimits: OpenDataDownloadLimitsDtoToJSON(value['downloadLimits']),
   }
 }

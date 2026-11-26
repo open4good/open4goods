@@ -31,6 +31,13 @@ This module is part of the open4goods multi-module Maven project.
 
 The `ui` module provides the web user interface built with Thymeleaf and Bootstrap.
 
+## Open data
+
+`ui` neither generates nor serves an open data file and does not depend on `services/opendata` (GOU-2290).
+`OpenDataController` only answers `GET`/`HEAD` on `/opendata/{gtin,isbn}-open-data.zip` with a 301 to
+`{open-data-config.redirect-base-url}/{name}` (`OpenDataRedirectProperties`), or 404 when that property is empty.
+Do not add a file stream back: see [docs/architecture/opendata.md](../docs/architecture/opendata.md).
+
 ## Build and test this module only
 
 From this directory:
