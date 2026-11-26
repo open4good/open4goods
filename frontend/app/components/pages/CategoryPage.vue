@@ -477,6 +477,23 @@
               }}
             </v-btn>
           </section>
+
+          <!--
+            Hub editorial block (GOU-2716), rendered only when the vertical has a
+            published file in content/category-hubs/. Its Top 5 is the SSR listing,
+            which uses the default ImpactScore sort without filters on a hub. Page 1
+            only: on `?page=N` the listing is not the top of the ranking, and the
+            intro and FAQ would be duplicated on every paginated URL.
+          -->
+          <CategoryHubEditorial
+            v-if="!isSubCategoryPage && verticalId && initialPageNumber === 0"
+            :vertical-id="verticalId"
+            :vertical-home-url="category.verticalHomeUrl"
+            :category-name="categoryDisplayName"
+            :sub-categories="relatedSubCategories"
+            :guides="category.guides ?? []"
+            :ranked-products="hubRankedProducts"
+          />
         </section>
       </div>
     </v-container>
@@ -536,6 +553,7 @@ import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryHubEditorial from '~/components/category/CategoryHubEditorial.vue'
 import CategoryPagination from '~/components/category/CategoryPagination.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
@@ -1857,6 +1875,11 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 })
 
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
+// The SSR page of a hub, never the refetched one: the hub Top 5 keeps the
+// default ImpactScore ranking whatever the filters or sort chosen afterwards.
+const hubRankedProducts = computed(
+  () => initialProductsData.value?.products?.data ?? []
+)
 
 const showNotRatedAfterRatedNotice = computed(() =>
   shouldShowNotRatedAfterRatedNotice(sortField.value, currentProducts.value)

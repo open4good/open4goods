@@ -996,6 +996,14 @@
       "itemSubtitle": "Explore this subcategory",
       "fallbackTitle": "Related selection"
     },
+    "hub": {
+      "defaultTitle": "{category}: what matters when choosing",
+      "previewNotice": "Preview: this block is not published. It is only visible on beta or in development.",
+      "topTitle": "Top {count} Impact Score",
+      "rankingDate": "Ranking calculated on {date}",
+      "faqTitle": "Frequently asked questions",
+      "linksTitle": "Learn more"
+    },
     "readMore": {
       "showMore": "Read more",
       "showLess": "Show less"

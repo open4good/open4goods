@@ -1,0 +1,45 @@
+# Hub editorial block of the TV vertical (format: README.md in this folder).
+# DEMONSTRATION TEXT (GOU-2716): Growth writes the final text, then sets `published: true`.
+verticalId: tv
+language: fr
+published: false
+title: "Téléviseurs : l'essentiel pour bien choisir"
+intro: |-
+  Texte de démonstration, à remplacer par Growth. Choisir un téléviseur, c'est d'abord choisir une
+  **taille adaptée à la distance de visionnage** : un écran trop grand fatigue les yeux, un écran trop
+  petit gâche l'image. Vient ensuite la technologie de dalle. Les modèles LED restent les plus
+  sobres à l'achat, les OLED offrent des noirs profonds et les Mini LED montent plus haut en
+  luminosité. La consommation électrique varie beaucoup d'un modèle à l'autre, à taille égale :
+  l'étiquette énergie et la puissance en mode SDR donnent une première indication.
+
+  Nudger classe chaque téléviseur avec son Impact Score, une note sur 20 qui combine la
+  consommation, la réparabilité, la durée de mise à jour logicielle et d'autres critères mesurés.
+  Le classement ci-dessous montre les cinq modèles les mieux notés aujourd'hui. Les sous-catégories
+  par taille vous aident à comparer des écrans équivalents, et le guide d'achat
+  détaille les points à vérifier avant d'acheter, neuf ou reconditionné.
+faq:
+  - question: 'Quelle taille de téléviseur choisir pour mon salon ?'
+    answer: >-
+      Texte de démonstration. Comptez environ 1,2 fois la diagonale en distance de visionnage pour un
+      écran 4K : à 2,5 mètres, un 55 pouces convient à la plupart des salons.
+  - question: "Un téléviseur OLED consomme-t-il plus qu'un téléviseur LED ?"
+    answer: >-
+      Texte de démonstration. Cela dépend du contenu affiché : un OLED consomme peu sur une image
+      sombre et davantage sur une image claire. Comparez la puissance en mode SDR indiquée sur
+      l'étiquette énergie.
+  - question: "Comment est calculé l'Impact Score d'un téléviseur ?"
+    answer: >-
+      Texte de démonstration. L'Impact Score combine des critères mesurés, comme la consommation
+      électrique, la réparabilité ou la durée des mises à jour, pondérés selon la méthode publiée
+      pour la catégorie.
+  - question: 'Vaut-il mieux acheter un téléviseur reconditionné ?'
+    answer: >-
+      Texte de démonstration. Un téléviseur reconditionné évite la fabrication d'un appareil neuf,
+      qui pèse lourd dans son impact. Vérifiez la garantie et l'état de la dalle avant l'achat.
+subCategories:
+  - televiseur-55-pouces
+  - televiseur-65-pouces
+  - televiseur-43-pouces
+guides:
+  - slug: meilleur-televiseur-caravane-camping-car
+    label: 'Téléviseur pour caravane et camping-car'

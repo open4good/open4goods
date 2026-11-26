@@ -596,6 +596,10 @@ export default defineNuxtConfig({
     // but stay out of the listings, sitemap and RSS. Read at runtime: NUXT_BLOG_SHOW_DRAFTS=true
     // in open4goods-config's configs/beta/frontend/.env only, never on prod.
     blogShowDrafts: false,
+    // Category hub editorial blocks with `published: false` (content/category-hubs/) are rendered
+    // for review. Read at runtime: NUXT_CATEGORY_HUBS_PREVIEW=true on beta or in dev only, never
+    // on prod (GOU-2716).
+    categoryHubsPreview: false,
     // Shared secret used by front-api to sign JWTs (front.security.jwt-secret /
     // FRONT_SECURITY_JWT_SECRET, same .env as front-api). Server-only: lets the
     // frontend verify the access token's signature before trusting its roles
