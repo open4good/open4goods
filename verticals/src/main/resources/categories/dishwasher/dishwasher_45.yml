@@ -109,7 +109,7 @@ readMore:
 activatedFilters:
   - field: "attributes.indexed.WIDTH.numericValue"
     operator: "GREATER_THAN_OR_EQUAL"
-    value: "0.43"
+    value: "43"
   - field: "attributes.indexed.WIDTH.numericValue"
     operator: "LOWER_THAN_OR_EQUAL"
-    value: "0.47"
+    value: "47"

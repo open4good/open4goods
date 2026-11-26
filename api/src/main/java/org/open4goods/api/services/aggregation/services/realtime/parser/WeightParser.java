@@ -53,9 +53,9 @@ import org.slf4j.LoggerFactory;
  *       rejects the whole value: "10-12 kg" and "10 - 12 kg" are ranges, not one measured weight,
  *       and "45 kg, 60-85-60 cm" or "45 kg (ref. WM-1234)" give {@code null} too. Another source of
  *       the same attribute may still provide a value.</li>
- *   <li>A range written in words keeps the value that carries the unit, through the explicit unit
- *       rule: "15 à 30 kg" gives 30, "+ de 100 kg" gives 100. This is the common
- *       format of the "TRANCHE DE POIDS" synonym, so it is deliberately not rejected.</li>
+ *   <li>A weight class written in words is rejected too: "15 à 30 kg", "+ de 100 kg" or "moins de
+ *       5 kg" give {@code null}. Rakuten's "TRANCHE DE POIDS" sends such classes, and their upper
+ *       bound was indexed as the weight of the product (100 kg for many washing machines, GOU-2707).</li>
  *   <li>A negative value ("-5 kg") is rejected, and so is any result that is not strictly positive
  *       once rounded to the output scale ("0 kg"), on every parsing path.</li>
  *   <li>Lower plausibility bound: a weight under {@code minKg / 5} of the vertical is rejected,
@@ -232,6 +232,10 @@ public class WeightParser extends AttributeParser {
 
         private static final Pattern RANGE_OR_SIGNED_PATTERN = Pattern.compile("\\d\\s*[\\p{Pd}\\u2212]\\s*\\d|[\\p{Pd}\\u2212]\\d");
 
+        // A weight class written in words: "15 à 30 kg", "3 kg to 5 kg", "+ de 100 kg", "moins de 5 kg", "> 50 kg".
+        private static final Pattern WRITTEN_BRACKET_PATTERN = Pattern.compile(
+                        "(?u)\\d\\s*[\\p{L}.]*\\s*(?:à|to)\\s+\\d|(?:^|\\s)(?:\\+|plus|moins|more|less|over|under|>|<|≥|≤)\\s*(?:de|d'|than)?\\s*\\d");
+
         /**
          * Parses one raw value and keeps the result only when it is a strictly positive weight once
          * rounded to the output scale, so that no parsing path can yield a zero or negative weight.
@@ -264,6 +268,11 @@ public class WeightParser extends AttributeParser {
                 // A range or a negative value is never a single measured weight (see class Javadoc).
                 if (RANGE_OR_SIGNED_PATTERN.matcher(normalized).find()) {
                         LOGGER.debug("Rejected weight '{}' (datasource={}): range or negative value", rawValue, datasource);
+                        return null;
+                }
+                if (WRITTEN_BRACKET_PATTERN.matcher(normalized).find()) {
+                        LOGGER.debug("Rejected weight '{}' (datasource={}): weight class, not a measured weight", rawValue,
+                                        datasource);
                         return null;
                 }
 

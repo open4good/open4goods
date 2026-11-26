@@ -10,8 +10,9 @@ parsers:
     minKg: 0.001
     maxKg: 2000.0
   warranty:
-    minYears: 0.0
-    maxYears: 20.0
+    # Years. A bare number outside the range is read in months ("12" from EPREL gives 1 year); 0 is not a warranty.
+    minYears: 0.5
+    maxYears: 10.0
 
 # If true, product titles and meta are regenerated on each batch. The URL slug is frozen once
 # generated and only changes with the product vertical (GOU-1708).

@@ -13,7 +13,7 @@ name:
   fr: "Durée garantie du support"
 suffix:
   default: "Year(s)"
-  fr: "An(s)"
+  fr: "an(s)"
 filteringType: "NUMERIC"
 asScore: true
 scoring:

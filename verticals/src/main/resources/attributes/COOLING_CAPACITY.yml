@@ -41,6 +41,10 @@ parser:
   clazz: org.open4goods.api.services.aggregation.services.realtime.parser.UnitAwareNumericParser
   dimension: "POWER"
   defaultUnitHint: "kW"
+  # Stored in kW like its suffix and the dataviz of the vertical (GOU-2707: it was stored in W, "2600 kW").
+  # A value without unit is read in kW, else in W when only W fits the vertical bounds.
+  unitlessHints: ["kW", "W"]
+  targetUnit: "kW"
   normalize: true
   trim: true
   lowerCase: false

@@ -23,12 +23,25 @@ referentials:
     - group: "ovens"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 10.0
+    minKg: 5.0
     maxKg: 100.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 5.0
+      max: 100.0
+    WIDTH:
+      min: 35.0
+      max: 100.0
+    HEIGHT:
+      min: 25.0
+      max: 100.0
+    DEPTH:
+      min: 25.0
+      max: 80.0
 
 order: 2
 

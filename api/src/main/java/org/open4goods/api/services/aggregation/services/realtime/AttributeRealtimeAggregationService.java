@@ -40,6 +40,7 @@ import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
 import org.open4goods.model.vertical.AttributesConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig.NumericBoundsConfig;
 import org.slf4j.Logger;
 
 /**
@@ -259,8 +260,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 					indexed.put(attrConfig.getKey(), indexedAttr);
 
 				} catch (ValidationException e) {
-					dedicatedLogger.warn("Attribute parsing fail for matched attribute {}: {}", attrConfig.getKey(),
-							e.getMessage());
+					dedicatedLogger.warn("Attribute parsing fail for matched attribute {} of {}: {}", attrConfig.getKey(),
+							data.getId(), e.getMessage());
 				} catch (Exception e) {
 					dedicatedLogger.error("Unexpected attribute parsing fail for matched attribute {}", attrConfig.getKey(), e);
 				}
@@ -307,7 +308,8 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 				// A source that no longer parses does not vote, neither with its raw value nor with the cleaned value
 				// left by an earlier aggregation (a "0,5 kWh" would otherwise be indexed as 0.5 W).
 				source.setCleanedValue("");
-				dedicatedLogger.warn("Failed to parse source value {} for attribute {}", source.getValue(), attrConf.getKey());
+				dedicatedLogger.warn("Failed to parse source value {} for attribute {} from {}: {}", source.getValue(),
+						attrConf.getKey(), source.getDataSourcename(), e.getMessage());
 			}
 		}
 
@@ -326,12 +328,18 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 			bestValue = indexedAttr.bestValue(attrConf.getPreferredSources());
 		}
 
+		boolean numeric = AttributeType.NUMERIC.equals(attrConf.getFilteringType());
 		if (bestValue == null) {
+			// The value of the first parse stays, still subject to the plausible range of the vertical.
+			if (numeric && indexedAttr.getValue() != null) {
+				checkBounds(indexedAttr.getValue(), attrConf, vConf);
+			}
 			return;
 		}
 
-		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
+		if (numeric) {
 			bestValue = sanitizeNumericValue(bestValue);
+			checkBounds(bestValue, attrConf, vConf);
 		}
 
 		indexedAttr.setValue(bestValue);
@@ -360,6 +368,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	 * ("POIDS", "WEIGHT"), which {@link ProductAttribute#addSourceAttribute}
 	 * rejects.
 	 *
+	 * <p>For a NUMERIC attribute, a source whose own value was rejected (cleaned value left empty, for example
+	 * outside the plausible range of the vertical) is left out: it does not vote.
+	 *
 	 * @param indexedAttr indexed attribute holding the merged sources
 	 * @param attrConf    configuration of the indexed key
 	 * @return a detached attribute named after the key
@@ -367,7 +378,9 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	private static ProductAttribute mergedSources(IndexedAttribute indexedAttr, AttributeConfig attrConf) {
 		ProductAttribute merged = new ProductAttribute();
 		merged.setName(attrConf.getKey());
+		boolean numeric = AttributeType.NUMERIC.equals(attrConf.getFilteringType());
 		merged.setSource(indexedAttr.getSource().stream()
+				.filter(source -> !numeric || !"".equals(source.getCleanedValue()))
 				.sorted(mergedSourceOrder(attrConf.getPreferredSources()))
 				.collect(Collectors.toCollection(LinkedHashSet::new)));
 		return merged;
@@ -769,7 +782,7 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 
 		if (AttributeType.NUMERIC.equals(attrConf.getFilteringType())) {
 			string = sanitizeNumericValue(string);
-			checkBounds(string, attrConf);
+			checkBounds(string, attrConf, vConf);
 		}
 
 		return string;
@@ -800,16 +813,21 @@ public class AttributeRealtimeAggregationService extends AbstractAggregationServ
 	}
 
 	/**
-	 * Rejects a numeric value outside the {@code parser.minValue} / {@code parser.maxValue} of the attribute.
+	 * Rejects a numeric value outside the plausible range of the attribute: the {@code parsers.bounds} of the
+	 * vertical when it bounds the attribute, else the {@code parser.minValue} / {@code parser.maxValue} of the
+	 * attribute.
 	 *
 	 * @throws ValidationException when the value is out of bounds
 	 */
-	private static void checkBounds(String numeric, AttributeConfig attrConf) throws ValidationException {
-		Double min = attrConf.getParser().getMinValue();
-		Double max = attrConf.getParser().getMaxValue();
-		double v = Double.parseDouble(numeric);
-		if ((min != null && v < min) || (max != null && v > max)) {
-			throw new ValidationException("Implausible value " + numeric + " for attribute " + attrConf.getKey());
+	static void checkBounds(String numeric, AttributeConfig attrConf, VerticalConfig vConf) throws ValidationException {
+		NumericBoundsConfig bounds = vConf == null || vConf.getParsers() == null ? null
+				: vConf.getParsers().boundsFor(attrConf.getKey());
+		if (bounds == null) {
+			bounds = new NumericBoundsConfig(attrConf.getParser().getMinValue(), attrConf.getParser().getMaxValue());
+		}
+		if (!bounds.contains(Double.parseDouble(numeric))) {
+			throw new ValidationException("Implausible value " + numeric + " for attribute " + attrConf.getKey()
+					+ ", outside " + bounds);
 		}
 	}
 

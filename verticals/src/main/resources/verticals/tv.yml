@@ -31,12 +31,16 @@ referentials:
     - group: "electronicdisplays"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
     minKg: 1.0
-    maxKg: 100.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+    maxKg: 120.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 1.0
+      max: 120.0
 
 order: 1
 

@@ -1319,6 +1319,14 @@ public class VerticalConfig {
 		@JsonMerge
 		private WarrantyParserConfig warranty = new WarrantyParserConfig();
 
+		/**
+		 * Plausible range of a numeric attribute in this vertical, by attribute key, in the unit of the indexed
+		 * value (cm for WIDTH, kg for WEIGHT, years for WARRANTY). A source outside it does not vote, and an
+		 * elected value outside it is neither indexed (product page, ImpactScore) nor kept: it is logged.
+		 */
+		@JsonMerge
+		private Map<String, NumericBoundsConfig> bounds = new HashMap<>();
+
 		public WeightParserConfig getWeight() {
 			return weight;
 		}
@@ -1333,6 +1341,67 @@ public class VerticalConfig {
 
 		public void setWarranty(WarrantyParserConfig warranty) {
 			this.warranty = warranty;
+		}
+
+		public Map<String, NumericBoundsConfig> getBounds() {
+			return bounds;
+		}
+
+		public void setBounds(Map<String, NumericBoundsConfig> bounds) {
+			this.bounds = bounds == null ? new HashMap<>() : bounds;
+		}
+
+		/**
+		 * @param attributeKey attribute key, e.g. "WIDTH"
+		 * @return the plausible range of the attribute in this vertical, or {@code null} when none is configured
+		 */
+		public NumericBoundsConfig boundsFor(String attributeKey) {
+			return attributeKey == null || bounds == null ? null : bounds.get(attributeKey);
+		}
+	}
+
+	/**
+	 * Plausible range of a numeric attribute, bounds included. A {@code null} bound is open.
+	 */
+	public static class NumericBoundsConfig {
+		private Double min;
+		private Double max;
+
+		public NumericBoundsConfig() {
+		}
+
+		public NumericBoundsConfig(Double min, Double max) {
+			this.min = min;
+			this.max = max;
+		}
+
+		/**
+		 * @param value value in the unit of the indexed attribute
+		 * @return {@code true} when the value is inside the range
+		 */
+		public boolean contains(double value) {
+			return (min == null || value >= min) && (max == null || value <= max);
+		}
+
+		public Double getMin() {
+			return min;
+		}
+
+		public void setMin(Double min) {
+			this.min = min;
+		}
+
+		public Double getMax() {
+			return max;
+		}
+
+		public void setMax(Double max) {
+			this.max = max;
+		}
+
+		@Override
+		public String toString() {
+			return "[" + min + ", " + max + "]";
 		}
 	}
 

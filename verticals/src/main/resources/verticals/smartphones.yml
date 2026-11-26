@@ -46,9 +46,25 @@ eprelGroupNames:
 # Smallest ~100 g (Palm/Jelly), largest ~400 g (gaming/rugged phablet);
 # 0.08–0.6 kg leaves headroom for packaging-included weights.
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
     minKg: 0.08
     maxKg: 0.6
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 0.08
+      max: 0.6
+    WIDTH:
+      min: 4.0
+      max: 20.0
+    HEIGHT:
+      min: 8.0
+      max: 25.0
+    DEPTH:
+      min: 0.4
+      max: 3.0
 
 # Daily active screen time per ARCEP/CREDOC "Baromètre du numérique 2024"
 # (smartphones, French adults). Drives kWh/year cost projection.

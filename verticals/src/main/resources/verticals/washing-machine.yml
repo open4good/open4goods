@@ -36,12 +36,25 @@ order: 5
 averageHoursPerDay: 1.0
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 30.0
-    maxKg: 150.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+    minKg: 20.0
+    maxKg: 130.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 20.0
+      max: 130.0
+    WIDTH:
+      min: 35.0
+      max: 100.0
+    HEIGHT:
+      min: 60.0
+      max: 120.0
+    DEPTH:
+      min: 30.0
+      max: 90.0
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
