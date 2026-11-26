@@ -65,7 +65,8 @@
     "vue-hotjar": "^1.4.0",
     "vue-pdf-embed": "^2.1.5",
     "vue3-picture-swipe": "^3.0.6",
-    "vuetify-nuxt-module": "^0.19.5"
+    "vuetify-nuxt-module": "^0.19.5",
+    "web-vitals": "^6.2.3"
   },
   "devDependencies": {
     "@capacitor/android": "8.5.2",
