@@ -813,7 +813,7 @@
           "title": "Compared products",
           "scope": "Compared products are those of the {category} category in the Nudger catalogue with at least one offer.",
           "rated": "{count} products rated.",
-          "ratedCompared": "{count} {items} rated and compared. | {count} {items} rated and compared.",
+          "ratedCompared": "{count} product rated and compared in the {items} category. | {count} products rated and compared in the {items} category.",
           "notRated": "{count} products not rated (insufficient data: {lowCoverage}; no criterion filled in: {noCriteria}).",
           "outdated": "{count} products waiting to be recalculated with the current method.",
           "excluded": "{count} products excluded from the comparison. Products are excluded when they have no brand, no model, no associated EPREL record (depending on the category) or lack an attribute required by the category.",
@@ -1110,7 +1110,7 @@
           "fair": "Below the median",
           "poor": "Among the lowest ranked"
         },
-        "betterThan": "Ranked better than {percent}% of the {count} {items} rated by Nudger",
+        "betterThan": "Ranked better than {percent}% of the products rated by Nudger in the {items} category",
         "productsFallback": "products",
         "onlyRated": "Only rated product in its category",
         "criteria": "{count} of {total} criterion filled in | {count} of {total} criteria filled in",
@@ -1127,8 +1127,8 @@
       },
       "why": {
         "title": "Why this score?",
-        "headline": "{score}/20: this product ranks above {percent}% of the {count} {items} rated by Nudger.",
-        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the {count} {items} rated by Nudger.",
+        "headline": "{score}/20: this product ranks above {percent}% of the products rated by Nudger in the {items} category.",
+        "headlineBottom": "{score}/20: this product ranks ahead of {percent}% of the products rated by Nudger in the {items} category.",
         "onlyRated": "{score}/20: the only rated product in its category, so no position comparison is possible.",
         "criterion": "{label} ({value})",
         "criterionVsAverage": "{label} ({value}, versus {average} on average in the category)",
@@ -3085,13 +3085,13 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName}: best price, specs and reviews {'|'} ImpactScore {score}/20",
+            "full": "{productName}: best price and specs {'|'} ImpactScore {score}/20",
             "fullVertical": "{verticalTitle} {productName}: best price {'|'} ImpactScore {score}/20",
             "compact": "{productName}: best price {'|'} ImpactScore {score}/20",
             "minimal": "{productName}: ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName}: best price, specs and reviews",
+            "full": "{productName}: best price and specs",
             "fullVertical": "{verticalTitle} {productName}: best price",
             "compact": "{productName}: best price",
             "minimal": "{productName}"
