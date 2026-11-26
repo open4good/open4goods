@@ -1666,6 +1666,19 @@
             "research": "Great for catalogue enrichment, research and cultural analytics"
           },
           "title": "ISBN library"
+        },
+        "impact": {
+          "title": "Impact by category",
+          "description": "One CSV file per product category with the raw criteria Nudger uses to assess impact, their coverage and their source.",
+          "features": {
+            "refresh": "Updated every week",
+            "coverage": "Fill rate published for every column",
+            "sources": "Source of every value: EPREL, merchant, Icecat"
+          },
+          "cta": {
+            "label": "See the impact datasets",
+            "ariaLabel": "See the list of impact datasets by category"
+          }
         }
       },
       "common": {
@@ -1707,7 +1720,8 @@
         }
       },
       "creator": {
-        "name": "Goulven Furet"
+        "name": "Goulven Furet",
+        "organization": "Nudger"
       },
       "gtin": {
         "columns": {
@@ -2064,6 +2078,79 @@
     },
     "summary": {
       "title": "The datasets at a glance"
+    },
+    "freshness": {
+      "badge": "File generated {days} d ago",
+      "today": "File generated today",
+      "stale": "This file is more than {days} days old: the weekly generation run did not complete recently. The data is valid as of its generation date but may not reflect the current catalogue."
+    },
+    "reuse": {
+      "title": "Download, verify and read the file",
+      "subtitle": "The file is served from data.nudger.fr. A download can be resumed after an interruption, and its checksum is published in the manifest.",
+      "unavailable": "The download address is not available right now.",
+      "sha256": "SHA-256 of {file}:",
+      "blocks": {
+        "curl": "Download with resume (curl)",
+        "wget": "Download with resume (wget)",
+        "sha256": "Verify the SHA-256 checksum",
+        "pandas": "Read with pandas (Python)",
+        "duckdb": "Query with DuckDB",
+        "r": "Read with R"
+      }
+    },
+    "dictionary": {
+      "unit": "Unit",
+      "source": "Source",
+      "fillRate": "Fill rate"
+    },
+    "citation": {
+      "title": "How to cite this dataset",
+      "doiIntro": "Persistent identifier (Zenodo DOI):",
+      "text": "Nudger ({year}). {name}. ODbL 1.0 licence. DOI: {doi}. Available at {url}",
+      "noYear": "n.d.",
+      "attributionTitle": "Requested attribution",
+      "attribution": "The ODbL licence requires crediting the source: \"Contains data from Nudger (nudger.fr), ODbL 1.0 licence\". Any derived database must be redistributed under the same licence."
+    },
+    "impact": {
+      "verticalLabel": "Category: {vertical}",
+      "noScore": "The aggregated score (out of 20), normalised sub-scores, percentiles and ranks are not published: only the raw criteria are. The scoring method is under audit, and publishing a score that may change would mean releasing figures we cannot yet guarantee.",
+      "hub": {
+        "eyebrow": "Open data",
+        "title": "Impact datasets by category",
+        "subtitle": "One CSV file per product category, with the raw criteria Nudger uses to assess impact, their coverage and their source.",
+        "description": "Download the raw criteria of each product category for free under the ODbL licence: warranty, repairability, consumption, weight. Fill rate and source of every column.",
+        "seoTitle": "Impact open data by product category (CSV, ODbL) - Nudger",
+        "listTitle": "Datasets by category",
+        "empty": "The datasets are not available right now.",
+        "rows": "Rows",
+        "updated": "Generated",
+        "size": "Compressed size",
+        "open": "See the {vertical} dataset"
+      },
+      "category": {
+        "eyebrow": "Impact open data",
+        "title": "Impact criteria: {vertical}",
+        "subtitle": "CSV file of the raw criteria of the {vertical} category, with their coverage and source.",
+        "description": "Raw criteria of the {vertical} category as open data (CSV, ODbL): {rows} products, fill rate and source of each criterion.",
+        "seoTitle": "{vertical} open data: impact criteria (CSV, ODbL) - Nudger",
+        "dictionaryTitle": "Published criteria",
+        "dictionarySubtitle": "Each criterion is published with its raw value and the source that carries it. An empty cell means the value is missing.",
+        "categoryLink": "See the {vertical} category page",
+        "hubLink": "All impact datasets",
+        "notFound": "This dataset does not exist.",
+        "summaryTitle": "Figures of the published file"
+      },
+      "verticals": {
+        "air-conditioner": "Air conditioners",
+        "dishwasher": "Dishwashers",
+        "freezer": "Freezers",
+        "oven": "Ovens",
+        "refrigerator": "Refrigerators",
+        "smartphones": "Smartphones",
+        "tv": "TVs",
+        "washing-machine": "Washing machines",
+        "wine-cooler": "Wine coolers"
+      }
     }
   },
   "opensource": {

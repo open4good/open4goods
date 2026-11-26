@@ -13,6 +13,11 @@
  */
 
 import { mapValues } from '../runtime'
+import type { OpenDataColumnDto } from './OpenDataColumnDto'
+import {
+  OpenDataColumnDtoFromJSON,
+  OpenDataColumnDtoToJSON,
+} from './OpenDataColumnDto'
 /**
  * Detailed description of a single OpenData dataset. Values read from the published manifest are null while it is not configured or not readable.
  * @export
@@ -67,6 +72,36 @@ export interface OpenDataDatasetDto {
    * @memberof OpenDataDatasetDto
    */
   headers?: Array<string>
+  /**
+   * Identifier of the dataset in the manifest.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  id?: string | null
+  /**
+   * Generation date of the published file, ISO 8601 UTC.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  generatedAt?: string | null
+  /**
+   * Raw size in bytes of the published zip.
+   * @type {number}
+   * @memberof OpenDataDatasetDto
+   */
+  sizeBytes?: number | null
+  /**
+   * Licence of the dataset.
+   * @type {string}
+   * @memberof OpenDataDatasetDto
+   */
+  license?: string | null
+  /**
+   * Columns of the CSV with their fill rate.
+   * @type {Array<OpenDataColumnDto>}
+   * @memberof OpenDataDatasetDto
+   */
+  columns?: Array<OpenDataColumnDto>
 }
 
 /**
@@ -75,6 +110,7 @@ export interface OpenDataDatasetDto {
 export const OpenDataDatasetDtoTypeEnum = {
   Gtin: 'GTIN',
   Isbn: 'ISBN',
+  Impact: 'IMPACT',
 } as const
 export type OpenDataDatasetDtoTypeEnum =
   (typeof OpenDataDatasetDtoTypeEnum)[keyof typeof OpenDataDatasetDtoTypeEnum]
@@ -109,6 +145,14 @@ export function OpenDataDatasetDtoFromJSONTyped(
     sha256: json['sha256'] == null ? undefined : json['sha256'],
     downloadUrl: json['downloadUrl'] == null ? undefined : json['downloadUrl'],
     headers: json['headers'] == null ? undefined : json['headers'],
+    id: json['id'] == null ? undefined : json['id'],
+    generatedAt: json['generatedAt'] == null ? undefined : json['generatedAt'],
+    sizeBytes: json['sizeBytes'] == null ? undefined : json['sizeBytes'],
+    license: json['license'] == null ? undefined : json['license'],
+    columns:
+      json['columns'] == null
+        ? undefined
+        : (json['columns'] as Array<any>).map(OpenDataColumnDtoFromJSON),
   }
 }
 
@@ -133,5 +177,13 @@ export function OpenDataDatasetDtoToJSONTyped(
     sha256: value['sha256'],
     downloadUrl: value['downloadUrl'],
     headers: value['headers'],
+    id: value['id'],
+    generatedAt: value['generatedAt'],
+    sizeBytes: value['sizeBytes'],
+    license: value['license'],
+    columns:
+      value['columns'] == null
+        ? undefined
+        : (value['columns'] as Array<any>).map(OpenDataColumnDtoToJSON),
   }
 }

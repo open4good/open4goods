@@ -27,10 +27,11 @@ const translate = (key: string, params?: Record<string, unknown>) =>
 
 const state = vi.hoisted(() => ({
   dataset: null as OpenDataDatasetDto | null,
+  head: null as null | (() => { script?: { innerHTML?: string }[] }),
 }))
 
 vi.mock('vue-i18n', () => ({
-  useI18n: () => ({ t: translate }),
+  useI18n: () => ({ t: translate, locale: { value: 'fr-FR' } }),
 }))
 vi.mock('~/composables/useAnalytics', () => ({
   useAnalytics: () => ({ trackOpenDataDownload: vi.fn() }),
@@ -40,7 +41,11 @@ mockNuxtImport('useLocalePath', () => () => (path: string) => `/${path}`)
 mockNuxtImport('useRequestURL', () => () => new URL('https://nudger.test/'))
 mockNuxtImport('useRequestHeaders', () => () => ({}))
 mockNuxtImport('useSeoMeta', () => vi.fn())
-mockNuxtImport('useHead', () => vi.fn())
+mockNuxtImport('useHead', () =>
+  vi.fn((factory: typeof state.head) => {
+    state.head = factory
+  })
+)
 mockNuxtImport('useAsyncData', () => () => ({
   data: ref(state.dataset ? { dataset: state.dataset } : null),
   pending: ref(false),
@@ -63,6 +68,7 @@ const mountPage = async (page: 'gtin' | 'isbn') => {
         OpendataExploreProducts: stub('OpendataExploreProducts'),
         OpendataMirrors: stub('OpendataMirrors'),
         OpendataLicenseSection: stub('OpendataLicenseSection'),
+        OpendataCitation: stub('OpendataCitation'),
         OpendataFaqSection: stub('OpendataFaqSection'),
       },
     },
@@ -78,6 +84,7 @@ const nullDataset = (type: 'GTIN' | 'ISBN'): OpenDataDatasetDto => ({
   sha256: null,
   downloadUrl: null,
   headers: [],
+  columns: [],
 })
 
 describe.each(['gtin', 'isbn'] as const)('/opendata/%s page', page => {
@@ -126,6 +133,77 @@ describe.each(['gtin', 'isbn'] as const)('/opendata/%s page', page => {
     ).toBe(true)
   })
 })
+
+describe.each(['gtin', 'isbn'] as const)(
+  '/opendata/%s manifest figures',
+  page => {
+    const manifestDataset = (): OpenDataDatasetDto => ({
+      ...nullDataset(page === 'gtin' ? 'GTIN' : 'ISBN'),
+      id: page,
+      recordCount: '8 703 397',
+      recordCountValue: 8703397,
+      lastUpdated: '22 nov. 2026, 03:55:00',
+      generatedAt: '2026-11-22T02:55:00Z',
+      fileSize: '210 MB',
+      sizeBytes: 210_000_000,
+      sha256: 'abc123',
+      downloadUrl: `https://data.nudger.fr/${page}-open-data.zip`,
+      headers: ['gtin'],
+      columns: [{ name: 'gtin', fillRate: 0.4234 }],
+    })
+
+    it('shows the fill rate of each column from the manifest', async () => {
+      state.dataset = manifestDataset()
+
+      const wrapper = await mountPage(page)
+
+      expect(wrapper.find('[data-testid="opendata-fill-rate"]').text()).toBe(
+        '42.3 %'
+      )
+    })
+
+    it('publishes in the JSON-LD the same figures as the manifest', async () => {
+      state.dataset = manifestDataset()
+
+      await mountPage(page)
+      const jsonLd = JSON.parse(
+        state.head?.().script?.[0]?.innerHTML ?? '{}'
+      ) as {
+        '@type': string
+        dateModified: string
+        contentSize: string
+        license: string
+        creator: { '@type': string }
+        distribution: { contentUrl: string; sha256: string }[]
+      }
+
+      expect(jsonLd['@type']).toBe('Dataset')
+      expect(jsonLd.dateModified).toBe('2026-11-22T02:55:00Z')
+      expect(jsonLd.contentSize).toBe('210 MB')
+      expect(jsonLd.distribution[0]?.contentUrl).toBe(
+        `https://data.nudger.fr/${page}-open-data.zip`
+      )
+      expect(jsonLd.distribution[0]?.sha256).toBe('abc123')
+      expect(jsonLd.creator['@type']).toBe('Organization')
+      expect(jsonLd.license).toContain('odbl')
+    })
+
+    it('renders the resumable download and reading examples', async () => {
+      state.dataset = manifestDataset()
+
+      const text = (await mountPage(page)).text()
+
+      expect(text).toContain(
+        `curl -C - -L -O https://data.nudger.fr/${page}-open-data.zip`
+      )
+      expect(text).toContain(
+        `wget -c https://data.nudger.fr/${page}-open-data.zip`
+      )
+      expect(text).toContain('abc123')
+      expect(text).toContain('pd.read_csv')
+    })
+  }
+)
 
 describe('open data wording', () => {
   it.each([

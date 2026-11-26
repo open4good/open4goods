@@ -64,6 +64,8 @@
       }}</v-btn>
     </v-container>
 
+    <OpendataFreshness :generated-at="data?.gtinDataset?.generatedAt" />
+
     <OpendataDatasetSummary
       :title="t('opendata.summary.title')"
       :items="summaryItems"
@@ -132,6 +134,8 @@ import HeroEducationCard from '~/components/shared/ui/HeroEducationCard.vue'
 import OpendataStatsStrip from '~/components/domains/opendata/OpendataStatsStrip.vue'
 import OpendataDatasetSummary from '~/components/domains/opendata/OpendataDatasetSummary.vue'
 import OpendataDatasetHighlights from '~/components/domains/opendata/OpendataDatasetHighlights.vue'
+import OpendataFreshness from '~/components/domains/opendata/OpendataFreshness.vue'
+import { OPENDATA_DOI, buildDatasetJsonLd } from '~/utils/opendata'
 import OpendataLicenseSection from '~/components/domains/opendata/OpendataLicenseSection.vue'
 import OpendataExploreProducts from '~/components/domains/opendata/OpendataExploreProducts.vue'
 import OpendataMirrors from '~/components/domains/opendata/OpendataMirrors.vue'
@@ -151,22 +155,31 @@ const licenseSectionId = 'opendata-odbl-license'
 interface OverviewPayload {
   overview: OpenDataOverviewDto
   gtinDataset: OpenDataDatasetDto | null
+  isbnDataset: OpenDataDatasetDto | null
+  impactDatasets: OpenDataDatasetDto[]
 }
 
 const { data, pending, error, refresh } = useAsyncData<OverviewPayload>(
   'opendata-overview',
   async () => {
-    const [overview, gtinDataset] = await Promise.all([
-      $fetch<OpenDataOverviewDto>('/api/opendata', {
-        headers: requestHeaders,
-      }),
-      // The update date is optional: do not fail the page without it.
-      $fetch<OpenDataDatasetDto>('/api/opendata/gtin', {
-        headers: requestHeaders,
-      }).catch(() => null),
-    ])
+    const [overview, gtinDataset, isbnDataset, impactDatasets] =
+      await Promise.all([
+        $fetch<OpenDataOverviewDto>('/api/opendata', {
+          headers: requestHeaders,
+        }),
+        // The update date is optional: do not fail the page without it.
+        $fetch<OpenDataDatasetDto>('/api/opendata/gtin', {
+          headers: requestHeaders,
+        }).catch(() => null),
+        $fetch<OpenDataDatasetDto>('/api/opendata/isbn', {
+          headers: requestHeaders,
+        }).catch(() => null),
+        $fetch<OpenDataDatasetDto[]>('/api/opendata/impact', {
+          headers: requestHeaders,
+        }).catch(() => []),
+      ])
 
-    return { overview, gtinDataset }
+    return { overview, gtinDataset, isbnDataset, impactDatasets }
   },
   {
     lazy: true,
@@ -291,6 +304,29 @@ const datasetCards = computed(() => [
     ctaAriaLabel: String(t('opendata.datasets.cards.isbn.cta.ariaLabel')),
     href: localePath('opendata-isbn'),
   },
+  {
+    id: 'impact',
+    icon: 'mdi-leaf-circle-outline',
+    title: String(t('opendata.datasets.cards.impact.title')),
+    description: String(t('opendata.datasets.cards.impact.description')),
+    features: [
+      {
+        icon: 'mdi-refresh',
+        text: String(t('opendata.datasets.cards.impact.features.refresh')),
+      },
+      {
+        icon: 'mdi-chart-box-outline',
+        text: String(t('opendata.datasets.cards.impact.features.coverage')),
+      },
+      {
+        icon: 'mdi-source-branch',
+        text: String(t('opendata.datasets.cards.impact.features.sources')),
+      },
+    ],
+    ctaLabel: String(t('opendata.datasets.cards.impact.cta.label')),
+    ctaAriaLabel: String(t('opendata.datasets.cards.impact.cta.ariaLabel')),
+    href: localePath('opendata-impact'),
+  },
 ])
 
 const faqItems = computed(() => [
@@ -335,6 +371,27 @@ const canonicalUrl = computed(() =>
     requestURL.origin
   ).toString()
 )
+const datasetsJsonLd = computed(() =>
+  datasetCards.value.map(card => {
+    const datasets = {
+      gtin: data.value?.gtinDataset ? [data.value.gtinDataset] : [],
+      isbn: data.value?.isbnDataset ? [data.value.isbnDataset] : [],
+      impact: data.value?.impactDatasets ?? [],
+    }[card.id as 'gtin' | 'isbn' | 'impact']
+    const { '@context': _context, ...dataset } = buildDatasetJsonLd({
+      name: card.title,
+      description: card.description,
+      pageUrl: new URL(card.href, requestURL.origin).toString(),
+      inLanguage: locale.value,
+      organizationName: String(t('opendata.datasets.creator.organization')),
+      organizationUrl: requestURL.origin,
+      doi: card.id === 'impact' ? undefined : OPENDATA_DOI,
+      spatialCoverage: card.id === 'impact' ? 'France' : undefined,
+      datasets,
+    })
+    return dataset
+  })
+)
 const ogImageUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
@@ -360,14 +417,7 @@ useHead(() => ({
         name: t('opendata.seo.title'),
         description: t('opendata.seo.description'),
         url: canonicalUrl.value,
-        dataset: datasetCards.value.map(card => ({
-          '@type': 'Dataset',
-          name: card.title,
-          description: card.description,
-          url: new URL(card.href, requestURL.origin).toString(),
-          isAccessibleForFree: true,
-          license: 'https://opendatacommons.org/licenses/odbl/',
-        })),
+        dataset: datasetsJsonLd.value,
       }),
     },
   ],

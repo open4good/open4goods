@@ -242,3 +242,24 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
 - **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
 - **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
   `impact-*-manifest.json`.
+
+## Pages `/opendata` (GOU-2251, lot 3)
+
+Les pages servent les réutilisateurs et le SEO. Tous les chiffres viennent du manifest (jamais de l'index) via
+front-api :
+
+- `GET /opendata/gtin`, `/opendata/isbn` : `OpenDataDatasetDto` (lignes, `generatedAt` ISO, `sizeBytes`, `sha256`,
+  `license`, `columns` = nom, taux de remplissage, unité, description, source) ;
+- `GET /opendata/impact` (liste des jeux impact du manifest, sans `impact-all`) et
+  `GET /opendata/impact/{vertical}` (404 si le manifest n'a pas ce jeu).
+
+Pages Nuxt : `/opendata`, `/opendata/gtin`, `/opendata/isbn`, `/opendata/impact` (hub) et
+`/opendata/impact/{vertical}`. Chacune porte un JSON-LD `Dataset` construit par `app/utils/opendata.ts`
+(`dateModified`, `contentSize`, `distribution`, `identifier` = DOI Zenodo, `sameAs`, `variableMeasured`, `creator` et
+`publisher` = Organization, ODbL ; `spatialCoverage` France pour l'impact). Une valeur absente du manifest est omise du
+JSON-LD, jamais remplacée. Un bandeau s'affiche quand le fichier a plus de 8 jours. Les pages impact `[vertical]` sont
+ajoutées au sitemap par `server/plugins/sitemap-opendata-impact.ts`. Le score agrégé n'est pas publié (voir le
+dictionnaire impact).
+
+Reste à faire : extrait de 20 lignes rendu en SSR (demande un fichier d'échantillon publié avec le manifest, donc un
+changement du générateur), journal des versions du schéma et format v2 (proposition au CTO), lien Hugging Face (lot 4).
