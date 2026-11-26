@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -77,6 +78,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.opencsv.CSVWriter;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -449,7 +451,8 @@ public class OpenDataService implements HealthIndicator {
                     .orElse(null);
             datasets.add(definition != null
                     ? new OpenDataPublisher.Dataset(manifest, definition.finalZipFile().toPath(),
-                            definition.manifestFile().toPath())
+                            definition.manifestFile().toPath(),
+                            definition.sampleFilename() == null ? null : definition.finalSampleFile().toPath())
                     : new OpenDataPublisher.Dataset(manifest, openDataConfig.impactZipFile("all").toPath(),
                             openDataConfig.impactManifestFile("all").toPath()));
         }
@@ -477,6 +480,7 @@ public class OpenDataService implements HealthIndicator {
         List<DatasetManifest> manifests = new ArrayList<>();
         for (DatasetWriter writer : writers) {
             manifests.add(buildManifest(writer, indexCounts.getOrDefault(writer.definition().id(), 0L)));
+            writeSample(writer);
         }
         for (int i = 0; i < manifests.size(); i++) {
             checkRows(manifests.get(i), datasets.get(i));
@@ -527,7 +531,7 @@ public class OpenDataService implements HealthIndicator {
                 () -> 0L, List.of(), product -> new String[0]));
         manifests.add(new DatasetManifest(OpenDataManifest.SCHEMA_VERSION, id, publicFilename, publicUrl(publicFilename),
                 DatasetManifest.FORMAT, OpenDataManifest.LICENSE, Files.size(tmpZip.toPath()),
-                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of()));
+                HexFormat.of().formatHex(digest.digest()), rows, indexCount, now(), List.of(), null));
         LOGGER.info("{} rows exported in {} ({} datasets).", rows, publicFilename, impacts.size());
     }
 
@@ -731,7 +735,26 @@ public class OpenDataService implements HealthIndicator {
                 rows,
                 indexCount,
                 now(),
-                columns);
+                columns,
+                definition.sampleFilename());
+    }
+
+    /**
+     * Writes the sample of a dataset (header and the first {@link DatasetDefinition#SAMPLE_ROWS} rows) in the temporary
+     * folder, with the columns of the dataset only: it never holds more than the zip does.
+     */
+    private void writeSample(DatasetWriter writer) throws IOException {
+        String name = writer.definition().sampleFilename();
+        if (name == null) {
+            return;
+        }
+        try (CSVWriter csv = new CSVWriter(Files.newBufferedWriter(openDataConfig.tmpDirectory().resolve(name),
+                StandardCharsets.UTF_8))) {
+            csv.writeNext(writer.definition().header());
+            for (String[] row : writer.sampleRows()) {
+                csv.writeNext(row);
+            }
+        }
     }
 
     private String publicUrl(String publicFilename) {
@@ -776,6 +799,10 @@ public class OpenDataService implements HealthIndicator {
 
         for (DatasetDefinition dataset : datasets) {
             OpenDataManifestStore.moveAtomically(dataset.zipFile().toPath(), dataset.finalZipFile().toPath());
+            if (dataset.sampleFilename() != null) {
+                OpenDataManifestStore.moveAtomically(tmpDirectory.resolve(dataset.sampleFilename()),
+                        dataset.finalSampleFile().toPath());
+            }
         }
         for (DatasetDefinition dataset : datasets) {
             OpenDataManifestStore.moveAtomically(tmpDirectory.resolve(dataset.manifestFile().getName()),

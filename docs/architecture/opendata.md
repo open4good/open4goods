@@ -117,7 +117,8 @@ ISO 8601 UTC, à la seconde.
   "rows": 115786654,
   "indexCount": 115790000,
   "generatedAt": "2026-11-22T02:55:00Z",
-  "columns": [ { "name": "gtin", "fillRate": 1.0 } ]
+  "columns": [ { "name": "gtin", "fillRate": 1.0 } ],
+  "sample": "gtin-open-data-sample.csv"
 }
 ```
 
@@ -125,6 +126,7 @@ ISO 8601 UTC, à la seconde.
 - `rows` : lignes de données du CSV, en-tête exclu.
 - `indexCount` : produits du type de code-barres dans l'index au début du passage.
 - `fillRate` : part des lignes dont la cellule n'est pas vide, de 0 à 1, arrondie à 4 décimales.
+- `sample` : nom public du CSV d'échantillon (en-tête et 20 premières lignes, colonnes du jeu seulement), publié à côté du zip avec les manifests ; absent pour `impact-all`.
 - `url` : absent si `open-data-config.public-base-url` est vide.
 
 ## Format des CSV et journal du schéma

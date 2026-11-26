@@ -9,7 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -29,6 +31,7 @@ public class DatasetWriter implements AutoCloseable {
     private final MessageDigest digest;
     private final AtomicLong count = new AtomicLong();
     private final long[] filledCells;
+    private final List<String[]> sample = new ArrayList<>();
     private String sha256;
     private boolean closed;
 
@@ -57,8 +60,18 @@ public class DatasetWriter implements AutoCloseable {
                 filledCells[i]++;
             }
         }
+        if (sample.size() < DatasetDefinition.SAMPLE_ROWS) {
+            sample.add(row.clone());
+        }
         writer.writeNext(row);
         count.incrementAndGet();
+    }
+
+    /**
+     * @return the header then the first {@link DatasetDefinition#SAMPLE_ROWS} rows, as written in the CSV
+     */
+    public List<String[]> sampleRows() {
+        return List.copyOf(sample);
     }
 
     public long count() {

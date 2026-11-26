@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @param indexCount    products of the matching barcode types in the index at the start of the pass
  * @param generatedAt   end of the writing of this dataset, ISO 8601 UTC
  * @param columns       CSV columns, in file order, with their fill rate
+ * @param sample        public object name of the CSV sample (header and the first 20 rows), absent when none
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DatasetManifest(
@@ -34,7 +35,8 @@ public record DatasetManifest(
         long rows,
         long indexCount,
         String generatedAt,
-        List<ColumnManifest> columns) {
+        List<ColumnManifest> columns,
+        String sample) {
 
     /** Media type of a dataset: one UTF-8 CSV in a zip. */
     public static final String FORMAT = "text/csv+zip";
