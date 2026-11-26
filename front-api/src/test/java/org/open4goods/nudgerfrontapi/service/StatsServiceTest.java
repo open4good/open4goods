@@ -110,7 +110,7 @@ class StatsServiceTest {
     }
 
     private static DatasetManifest dataset(String id, long rows) {
-        return new DatasetManifest(1, id, id + ".zip", null, DatasetManifest.FORMAT, "ODbL", 1L, "x", rows, 0L, null, List.of(), null);
+        return new DatasetManifest(1, id, id + ".zip", null, DatasetManifest.FORMAT, "ODbL", 1L, "x", rows, 0L, null, List.of(), null, null);
     }
 
     @Test

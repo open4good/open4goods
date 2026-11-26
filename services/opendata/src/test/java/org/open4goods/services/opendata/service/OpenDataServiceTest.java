@@ -136,6 +136,10 @@ class OpenDataServiceTest {
         assertThat(gtin.columns()).extracting(column -> column.name()).containsExactly(OpenDataService.GTIN_HEADER);
         assertThat(gtin.columns()).filteredOn(column -> !column.name().equals("vertical"))
                 .allSatisfy(column -> assertThat(column.fillRate()).isEqualTo(1.0));
+        assertThat(gtin.sample()).isEqualTo("gtin-open-data-sample.csv");
+        List<String> sample = java.nio.file.Files.readAllLines(
+                openDataConfig.gtinManifestFile().toPath().resolveSibling("gtin-open-data-sample.csv"));
+        assertThat(sample).isEqualTo(gtinLines);
 
         DatasetManifest isbn = manifestStore.readDataset(openDataConfig.isbnManifestFile()).orElseThrow();
         assertThat(isbn.datasetVersion()).isEqualTo(1);

@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Detailed description of a single OpenData dataset. Values read from the published manifest are "
         + "null while it is not configured or not readable.")
 public record OpenDataDatasetDto(
-        @Schema(description = "Identifier of the dataset.", allowableValues = {"GTIN", "ISBN"}, example = "GTIN")
+        @Schema(description = "Identifier of the dataset.", allowableValues = {"GTIN", "ISBN", "IMPACT"}, example = "GTIN")
         String type,
 
         @Schema(description = "Rows of the published file (manifest rows), formatted using the requested locale; null "
@@ -46,6 +46,31 @@ public record OpenDataDatasetDto(
         String downloadUrl,
 
         @ArraySchema(schema = @Schema(description = "Column header available in the dataset.", example = "gtin"))
-        List<String> headers
+        List<String> headers,
+
+        @Schema(description = "Identifier of the dataset in the manifest ({@code gtin}, {@code isbn}, "
+                + "{@code impact-{vertical}}); null when unknown.", example = "impact-dishwasher", nullable = true)
+        String id,
+
+        @Schema(description = "Generation date of the published file, ISO 8601 UTC (manifest generatedAt); null when "
+                + "unknown.", example = "2026-11-22T02:55:00Z", nullable = true)
+        String generatedAt,
+
+        @Schema(description = "Raw size in bytes of the published zip (manifest bytes); null when unknown.",
+                example = "6400000000", nullable = true)
+        Long sizeBytes,
+
+        @Schema(description = "Licence of the dataset (manifest license).", example = "ODbL-1.0", nullable = true)
+        String license,
+
+        @ArraySchema(schema = @Schema(implementation = OpenDataColumnDto.class,
+                description = "Column of the CSV with its fill rate, read from the manifest."))
+        List<OpenDataColumnDto> columns,
+
+        @ArraySchema(arraySchema = @Schema(description = "Extract of the first rows of the published CSV (header "
+                + "excluded, cells in the order of the columns), read from the sample published with the manifest "
+                + "(GOU-2744); empty when the dataset has no sample or it is unreadable."),
+                schema = @Schema(description = "One row of the extract."))
+        List<List<String>> sampleRows
 ) {
 }

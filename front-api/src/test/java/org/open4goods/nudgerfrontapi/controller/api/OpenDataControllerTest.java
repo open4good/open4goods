@@ -31,7 +31,8 @@ class OpenDataControllerTest {
         manifestService = mock(OpenDataManifestService.class);
         OpenDataConfig openDataConfig = new OpenDataConfig();
         openDataConfig.setPublicBaseUrl("https://data.nudger.fr");
-        OpenDataMappingService mappingService = new OpenDataMappingService(manifestService, openDataConfig);
+        OpenDataMappingService mappingService = new OpenDataMappingService(manifestService, openDataConfig,
+                mock(org.open4goods.nudgerfrontapi.service.opendata.OpenDataSampleService.class));
         mockMvc = MockMvcBuilders.standaloneSetup(new OpenDataController(mappingService)).build();
     }
 

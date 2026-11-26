@@ -67,6 +67,7 @@ public class OpenDataPublisher {
 
     private static final Pattern SHA256 = Pattern.compile("^[0-9a-f]{64}$");
     private static final String ZIP_CONTENT_TYPE = "application/zip";
+    private static final String CSV_CONTENT_TYPE = "text/csv; charset=utf-8";
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String OUTCOME_TAG = "outcome";
 
@@ -86,8 +87,13 @@ public class OpenDataPublisher {
      * @param manifest     manifest of the dataset; {@code file} is the public key of the zip
      * @param zipFile      published local zip
      * @param manifestFile published local manifest of the dataset; its file name is its public key
+     * @param sampleFile   published local CSV sample of the dataset (its file name is its public key), null when none
      */
-    public record Dataset(DatasetManifest manifest, Path zipFile, Path manifestFile) {
+    public record Dataset(DatasetManifest manifest, Path zipFile, Path manifestFile, Path sampleFile) {
+
+        public Dataset(DatasetManifest manifest, Path zipFile, Path manifestFile) {
+            this(manifest, zipFile, manifestFile, null);
+        }
     }
 
     @Autowired
@@ -270,6 +276,12 @@ public class OpenDataPublisher {
                 storage.copy(stagingPrefix + manifest.file(), manifest.file(), manifest.bytes(), zipHeaders(manifest));
                 checkPublicZip(storage, manifest);
             }
+            for (Dataset dataset : datasets) {
+                if (dataset.sampleFile() != null) {
+                    storage.put(Files.readAllBytes(dataset.sampleFile()), dataset.sampleFile().getFileName().toString(),
+                            csvHeaders());
+                }
+            }
             for (int i = 0; i < datasets.size(); i++) {
                 storage.put(manifests.get(i), datasets.get(i).manifestFile().getFileName().toString(), jsonHeaders());
             }
@@ -403,6 +415,11 @@ public class OpenDataPublisher {
     private ObjectHeaders zipHeaders(DatasetManifest manifest) {
         return new ObjectHeaders(ZIP_CONTENT_TYPE, "attachment; filename=\"" + manifest.file() + "\"",
                 StringUtils.trimToNull(publication().getZipCacheControl()), manifest.sha256());
+    }
+
+    private ObjectHeaders csvHeaders() {
+        return new ObjectHeaders(CSV_CONTENT_TYPE, null, StringUtils.trimToNull(publication().getManifestCacheControl()),
+                null);
     }
 
     private ObjectHeaders jsonHeaders() {

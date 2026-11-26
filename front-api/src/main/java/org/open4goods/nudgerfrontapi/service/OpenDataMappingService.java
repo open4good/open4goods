@@ -7,15 +7,19 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.open4goods.model.localization.DomainLanguage;
+import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataColumnDto;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataDatasetDto;
 import org.open4goods.nudgerfrontapi.dto.opendata.OpenDataOverviewDto;
 import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestService;
 import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot;
+import org.open4goods.nudgerfrontapi.service.opendata.OpenDataSampleService;
 import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.model.ColumnManifest;
 import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.service.OpenDataService;
 import org.springframework.stereotype.Service;
@@ -35,18 +39,25 @@ public class OpenDataMappingService {
     private static final String[] SIZE_UNITS = {"B", "kB", "MB", "GB", "TB", "PB", "EB"};
 
     /** Zone of the displayed dates, independent of the host's default zone. */
+    private static final String IMPACT_PREFIX = "impact-";
+    private static final String IMPACT_ALL = "impact-all";
+
     static final ZoneId DISPLAY_ZONE = ZoneId.of("Europe/Paris");
 
     private final OpenDataManifestService manifestService;
     private final OpenDataConfig openDataConfig;
+    private final OpenDataSampleService sampleService;
 
     /**
      * @param manifestService reader of the published manifest
      * @param openDataConfig  public base URL and public file names
+     * @param sampleService   reader of the published CSV samples
      */
-    public OpenDataMappingService(OpenDataManifestService manifestService, OpenDataConfig openDataConfig) {
+    public OpenDataMappingService(OpenDataManifestService manifestService, OpenDataConfig openDataConfig,
+                                  OpenDataSampleService sampleService) {
         this.manifestService = manifestService;
         this.openDataConfig = openDataConfig;
+        this.sampleService = sampleService;
     }
 
     /**
@@ -103,6 +114,48 @@ public class OpenDataMappingService {
     }
 
     /**
+     * Build the description of every impact dataset listed in the manifest (GOU-2251), without the global
+     * {@code impact-all} archive.
+     *
+     * @param domainLanguage caller requested language
+     * @return impact datasets in manifest order, empty without a readable manifest
+     */
+    public List<OpenDataDatasetDto> impactDatasets(DomainLanguage domainLanguage) {
+        OpenDataManifestSnapshot snapshot = manifestService.snapshot();
+        if (snapshot.manifest() == null || snapshot.manifest().datasets() == null) {
+            return List.of();
+        }
+        return snapshot.manifest().datasets().stream()
+                .filter(Objects::nonNull)
+                .filter(entry -> isImpactVertical(entry.id()))
+                .map(entry -> impact(domainLanguage, entry))
+                .toList();
+    }
+
+    /**
+     * Build the description of the impact dataset of one vertical.
+     *
+     * @param domainLanguage caller requested language
+     * @param vertical       vertical identifier ({@code dishwasher}), without the {@code impact-} prefix
+     * @return the dataset, empty when the manifest has no such impact dataset
+     */
+    public Optional<OpenDataDatasetDto> impactDataset(DomainLanguage domainLanguage, String vertical) {
+        return manifestService.snapshot().dataset(IMPACT_PREFIX + vertical)
+                .filter(entry -> isImpactVertical(entry.id()))
+                .map(entry -> impact(domainLanguage, entry));
+    }
+
+    private static boolean isImpactVertical(String id) {
+        return id != null && id.startsWith(IMPACT_PREFIX) && !IMPACT_ALL.equals(id);
+    }
+
+    private OpenDataDatasetDto impact(DomainLanguage domainLanguage, DatasetManifest entry) {
+        List<String> headers = entry.columns() == null ? List.of()
+                : entry.columns().stream().map(ColumnManifest::name).toList();
+        return dataset(domainLanguage, "IMPACT", entry.id(), entry.file(), headers);
+    }
+
+    /**
      * Resolve the {@link Locale} matching a {@link DomainLanguage}.
      *
      * @param domainLanguage requested language
@@ -151,7 +204,17 @@ public class OpenDataMappingService {
                         .map(bytes -> formatDataSize(bytes, locale)).orElse(null),
                 entry.map(DatasetManifest::sha256).filter(StringUtils::hasText).orElse(null),
                 buildDownloadUrl(publicFilename),
-                List.copyOf(headers)
+                List.copyOf(headers),
+                entry.map(DatasetManifest::id).orElse(null),
+                entry.flatMap(OpenDataManifestSnapshot::generatedAt).map(Instant::toString).orElse(null),
+                entry.map(DatasetManifest::bytes).filter(bytes -> bytes > 0).orElse(null),
+                entry.map(DatasetManifest::license).filter(StringUtils::hasText).orElse(null),
+                entry.map(DatasetManifest::columns).map(columns -> columns.stream()
+                        .filter(Objects::nonNull)
+                        .map(column -> new OpenDataColumnDto(column.name(), column.fillRate(), column.unit(),
+                                column.description(), column.source()))
+                        .toList()).orElse(List.of()),
+                sampleService.rows(entry)
         );
     }
 

@@ -1539,6 +1539,19 @@
             "research": "Parfait pour l'enrichissement de catalogue, la recherche et les analyses culturelles"
           },
           "title": "Base ISBN"
+        },
+        "impact": {
+          "title": "Impact par catégorie",
+          "description": "Un fichier CSV par catégorie de produits avec les critères bruts utilisés par Nudger pour évaluer l'impact, leur couverture et leur source.",
+          "features": {
+            "refresh": "Mis à jour chaque semaine",
+            "coverage": "Taux de remplissage publié pour chaque colonne",
+            "sources": "Source de chaque valeur : EPREL, marchand, Icecat"
+          },
+          "cta": {
+            "label": "Voir les jeux impact",
+            "ariaLabel": "Voir la liste des jeux de données impact par catégorie"
+          }
         }
       },
       "common": {
@@ -1548,6 +1561,8 @@
         },
         "columnDescription": "Description",
         "columnName": "Colonne",
+        "sampleCaption": "Extrait des {count} premières lignes du fichier",
+        "sampleTitle": "Aperçu des données",
         "download": {
           "direct": {
             "checksum": "SHA-256 : {value}",
@@ -1580,7 +1595,8 @@
         }
       },
       "creator": {
-        "name": "Goulven Furet"
+        "name": "Goulven Furet",
+        "organization": "Nudger"
       },
       "gtin": {
         "columns": {
@@ -1937,6 +1953,79 @@
     },
     "summary": {
       "title": "Les jeux de données en bref"
+    },
+    "freshness": {
+      "badge": "Fichier généré il y a {days} j",
+      "today": "Fichier généré aujourd'hui",
+      "stale": "Ce fichier a plus de {days} jours : le passage hebdomadaire de génération n'a pas abouti récemment. Les données restent valides à leur date de génération, mais elles peuvent ne pas refléter le catalogue actuel."
+    },
+    "reuse": {
+      "title": "Télécharger, vérifier et lire le fichier",
+      "subtitle": "Le fichier est servi par data.nudger.fr. Le téléchargement peut être repris après une interruption, et son empreinte de contrôle est publiée dans le manifest.",
+      "unavailable": "L'adresse de téléchargement n'est pas disponible pour le moment.",
+      "sha256": "SHA-256 de {file} :",
+      "blocks": {
+        "curl": "Télécharger avec reprise (curl)",
+        "wget": "Télécharger avec reprise (wget)",
+        "sha256": "Vérifier l'empreinte SHA-256",
+        "pandas": "Lire avec pandas (Python)",
+        "duckdb": "Interroger avec DuckDB",
+        "r": "Lire avec R"
+      }
+    },
+    "dictionary": {
+      "unit": "Unité",
+      "source": "Origine",
+      "fillRate": "Taux de remplissage"
+    },
+    "citation": {
+      "title": "Comment citer ce jeu de données",
+      "doiIntro": "Identifiant pérenne (DOI Zenodo) :",
+      "text": "Nudger ({year}). {name}. Licence ODbL 1.0. DOI : {doi}. Disponible sur {url}",
+      "noYear": "s.d.",
+      "attributionTitle": "Attribution demandée",
+      "attribution": "La licence ODbL impose de mentionner la source : \"Contient des données de Nudger (nudger.fr), licence ODbL 1.0\". Toute base dérivée doit être redistribuée sous la même licence."
+    },
+    "impact": {
+      "verticalLabel": "Catégorie : {vertical}",
+      "noScore": "Le score agrégé (/20), les sous-scores normalisés, les percentiles et les rangs ne sont pas publiés : seuls les critères bruts le sont. Leur méthode de calcul est en cours d'audit, et publier un score qui pourrait changer reviendrait à diffuser des chiffres que nous ne pouvons pas encore garantir.",
+      "hub": {
+        "eyebrow": "Open data",
+        "title": "Jeux de données impact par catégorie",
+        "subtitle": "Un fichier CSV par catégorie de produits, avec les critères bruts utilisés par Nudger pour évaluer l'impact, leur couverture et leur source.",
+        "description": "Téléchargez gratuitement, sous licence ODbL, les critères bruts de chaque catégorie de produits : garantie, réparabilité, consommation, poids. Taux de remplissage et source de chaque colonne.",
+        "seoTitle": "Open data impact par catégorie de produits (CSV, ODbL) - Nudger",
+        "listTitle": "Les jeux de données par catégorie",
+        "empty": "Les jeux de données ne sont pas disponibles pour le moment.",
+        "rows": "Lignes",
+        "updated": "Génération",
+        "size": "Taille compressée",
+        "open": "Voir le jeu {vertical}"
+      },
+      "category": {
+        "eyebrow": "Open data impact",
+        "title": "Critères d'impact : {vertical}",
+        "subtitle": "Fichier CSV des critères bruts de la catégorie {vertical}, avec leur couverture et leur source.",
+        "description": "Critères bruts de la catégorie {vertical} en open data (CSV, ODbL) : {rows} produits, taux de remplissage et source de chaque critère.",
+        "seoTitle": "Open data {vertical} : critères d'impact (CSV, ODbL) - Nudger",
+        "dictionaryTitle": "Critères publiés",
+        "dictionarySubtitle": "Chaque critère est publié avec la valeur brute et la source qui la porte. Une cellule vide signifie que la valeur est absente.",
+        "categoryLink": "Voir la page de la catégorie {vertical}",
+        "hubLink": "Tous les jeux de données impact",
+        "notFound": "Ce jeu de données n'existe pas.",
+        "summaryTitle": "Chiffres du fichier publié"
+      },
+      "verticals": {
+        "air-conditioner": "Climatiseurs",
+        "dishwasher": "Lave-vaisselle",
+        "freezer": "Congélateurs",
+        "oven": "Fours",
+        "refrigerator": "Réfrigérateurs",
+        "smartphones": "Smartphones",
+        "tv": "Téléviseurs",
+        "washing-machine": "Lave-linge",
+        "wine-cooler": "Caves à vin"
+      }
     }
   },
   "opensource": {

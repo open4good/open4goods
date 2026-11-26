@@ -36,4 +36,26 @@ public record DatasetDefinition(
             LongSupplier indexCount,
             List<ColumnManifest> columnDocs,
             Function<Product, String[]> rowMapper) {
+
+    /** Number of data rows of the sample published with each dataset. */
+    public static final int SAMPLE_ROWS = 20;
+
+    /**
+     * @return public object name of the sample CSV ({@code gtin-open-data-sample.csv}), null for a dataset without CSV
+     *         of its own (the global impact archive)
+     */
+    public String sampleFilename() {
+        if (header.length == 0 || publicFilename == null) {
+            return null;
+        }
+        return publicFilename.replaceFirst("\\.zip$", "") + "-sample.csv";
     }
+
+    /**
+     * @return the sample file next to the published manifest, null when the dataset has no sample
+     */
+    public File finalSampleFile() {
+        String name = sampleFilename();
+        return name == null ? null : new File(manifestFile.getParentFile(), name);
+    }
+}
