@@ -22,6 +22,7 @@ import { useCookie } from '#app'
 
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
+import { useVerticalsLinks } from '~/composables/categories/useVerticalsLinks'
 
 import {
   normalizeLocale,
