@@ -21,6 +21,7 @@ import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestService;
 import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot;
 import org.open4goods.nudgerfrontapi.service.opendata.OpenDataManifestSnapshot.State;
 import org.open4goods.services.opendata.config.OpenDataConfig;
+import org.open4goods.services.opendata.model.ColumnManifest;
 import org.open4goods.services.opendata.model.DatasetManifest;
 import org.open4goods.services.opendata.model.OpenDataManifest;
 import org.open4goods.services.opendata.service.OpenDataService;
@@ -92,7 +93,7 @@ class OpenDataMappingServiceTest {
                 .containsExactly("totalProductCount", "datasetCount", "totalDatasetSize");
         assertThat(Arrays.stream(OpenDataDatasetDto.class.getRecordComponents()).map(component -> component.getName()))
                 .containsExactly("type", "recordCount", "recordCountValue", "lastUpdated", "fileSize", "sha256",
-                        "downloadUrl", "headers");
+                        "downloadUrl", "headers", "id", "generatedAt", "sizeBytes", "license", "columns");
     }
 
     @Test
@@ -140,6 +141,54 @@ class OpenDataMappingServiceTest {
         assertThat(gtin.sha256()).isNull();
         assertThat(gtin.recordCountValue()).isEqualTo(10L);
         assertThat(service.overview(DomainLanguage.fr).totalDatasetSize()).isNull();
+    }
+
+    @Test
+    void datasetExposesIsoDateSizeLicenseAndColumnsFromTheManifest() {
+        DatasetManifest withColumns = new DatasetManifest(1, "gtin", "gtin-open-data.zip", null,
+                DatasetManifest.FORMAT, "ODbL-1.0", 6_400_000_000L, SHA256, 10, 10, GENERATED_AT,
+                List.of(new ColumnManifest("gtin", 1.0),
+                        new ColumnManifest("brand", 0.42, null, "Marque", "EPREL")));
+        given(manifestService.snapshot()).willReturn(available(withColumns));
+
+        OpenDataDatasetDto gtin = service.gtin(DomainLanguage.fr);
+
+        assertThat(gtin.id()).isEqualTo("gtin");
+        assertThat(gtin.generatedAt()).isEqualTo(GENERATED_AT);
+        assertThat(gtin.sizeBytes()).isEqualTo(6_400_000_000L);
+        assertThat(gtin.license()).isEqualTo("ODbL-1.0");
+        assertThat(gtin.columns()).extracting(column -> column.name() + "=" + column.fillRate())
+                .containsExactly("gtin=1.0", "brand=0.42");
+        assertThat(gtin.columns().get(1).description()).isEqualTo("Marque");
+        assertThat(gtin.columns().get(1).source()).isEqualTo("EPREL");
+    }
+
+    @Test
+    void impactDatasetsListEveryVerticalButNotTheGlobalArchive() {
+        given(manifestService.snapshot()).willReturn(available(
+                dataset("gtin", 10, 100, SHA256, GENERATED_AT),
+                dataset("impact-dishwasher", 5, 50, "d1", GENERATED_AT),
+                dataset("impact-oven", 7, 70, "d2", GENERATED_AT),
+                dataset("impact-all", 12, 120, "d3", GENERATED_AT)));
+
+        List<OpenDataDatasetDto> impact = service.impactDatasets(DomainLanguage.fr);
+
+        assertThat(impact).extracting(OpenDataDatasetDto::id).containsExactly("impact-dishwasher", "impact-oven");
+        assertThat(impact).allSatisfy(dataset -> assertThat(dataset.type()).isEqualTo("IMPACT"));
+        assertThat(impact.get(0).downloadUrl()).isEqualTo("https://data.nudger.fr/impact-dishwasher-open-data.zip");
+        assertThat(impact.get(0).sha256()).isEqualTo("d1");
+        assertThat(service.impactDataset(DomainLanguage.fr, "oven")).map(OpenDataDatasetDto::recordCountValue)
+                .contains(7L);
+        assertThat(service.impactDataset(DomainLanguage.fr, "all")).isEmpty();
+        assertThat(service.impactDataset(DomainLanguage.fr, "unknown")).isEmpty();
+    }
+
+    @Test
+    void impactDatasetsAreEmptyWithoutManifest() {
+        given(manifestService.snapshot()).willReturn(OpenDataManifestSnapshot.NOT_CONFIGURED);
+
+        assertThat(service.impactDatasets(DomainLanguage.fr)).isEmpty();
+        assertThat(service.impactDataset(DomainLanguage.fr, "oven")).isEmpty();
     }
 
     private static OpenDataManifestSnapshot available(DatasetManifest... datasets) {
