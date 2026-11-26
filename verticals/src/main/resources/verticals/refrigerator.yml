@@ -134,6 +134,8 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "frigos"
     verticalHomeTitle: "Réfrigérateurs"
+    verticalMetaTitle: "Comparatif réfrigérateurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les réfrigérateurs par prix, classe énergie, kWh par an et Impact Score noté sur 20 : le modèle sobre qui tient dans votre budget."
     verticalHomeDescription: "Comparez les réfrigérateurs selon leur impact environnemental, leur volume utile, leur classe énergétique et leur prix. Repérez les modèles les moins énergivores (kWh/an, étiquette énergie) pour conserver vos aliments."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
@@ -161,6 +163,8 @@ i18n:
 
     verticalHomeUrl: "refrigerators"
     verticalHomeTitle: "Refrigerators"
+    verticalMetaTitle: "Refrigerators comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare refrigerators by price, energy class, kWh per year and Impact Score out of 20: a low-impact model that fits your budget."
     verticalHomeDescription: "Compare refrigerators by environmental impact, useful capacity, energy class, and price. Find efficient models that keep food fresh while using less electricity every day."
 
 #####################################################################################################################################

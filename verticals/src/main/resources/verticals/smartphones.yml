@@ -89,6 +89,8 @@ i18n:
 
     verticalHomeUrl: "smartphones"
     verticalHomeTitle: "Smartphones"
+    verticalMetaTitle: "Comparatif smartphones : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les smartphones par prix, réparabilité, durabilité et Impact Score noté sur 20 pour choisir un téléphone qui dure."
     verticalHomeDescription: "Découvrez notre sélection de smartphones. Fabrication, métaux critiques, durée de vie et réparabilité font du smartphone l'un des appareils électroniques au plus fort impact environnemental. Nudger affiche leur Impact Score pour comparer les modèles, sans renoncer à vos usages."
 
   en:
@@ -108,6 +110,8 @@ i18n:
 
     verticalHomeUrl: "smartphones"
     verticalHomeTitle: "Smartphones"
+    verticalMetaTitle: "Smartphones comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare smartphones by price, repairability, durability and Impact Score out of 20 to choose a phone that lasts."
     verticalHomeDescription: "Explore our selection of smartphones. Manufacturing, critical metals, lifespan and repairability make the smartphone one of the most environmentally impactful electronic devices. Nudger shows their Impact Score so you can compare models without giving up the features you need."
 
 availableImpactScoreCriterias:

@@ -8,7 +8,7 @@ export const CATEGORY_VIEW_MODES: CategoryViewMode[] = [
 
 export const CATEGORY_PAGE_SIZES: Record<CategoryViewMode, number> = {
   cards: 30,
-  list: 15,
+  list: 24,
   table: 60,
 }
 

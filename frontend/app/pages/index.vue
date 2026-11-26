@@ -13,6 +13,7 @@ import type {
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
+import HomeCrawlLinksSection from '~/components/home/sections/HomeCrawlLinksSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import HomeHeroFallback from '~/components/home/sections/HomeHeroFallback.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
@@ -844,6 +845,8 @@ useHead(() => ({
             </SectionReveal>
           </section>
         </ParallaxWidget>
+
+        <HomeCrawlLinksSection />
 
         <ParallaxWidget
           class="home-page__parallax home-page__parallax--centered"

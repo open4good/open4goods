@@ -256,6 +256,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Téléviseurs"
+    verticalMetaTitle: "Comparatif téléviseurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les téléviseurs par prix, consommation en watts et Impact Score noté sur 20 : trouvez le modèle le moins énergivore pour votre budget."
     # Text displaid as title for the vertical
     verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires, nos téléviseurs ne sont malheureusement pas neutres pour l'environnement. Heureusement, Nudger est là pour vous informer et vous aider à comparer les téléviseurs : le mieux classé à l'Impact Score parmi ceux qui répondent à votre besoin."
     # The image used as a logo
@@ -299,6 +301,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "TVs"
+    verticalMetaTitle: "TVs comparison 2026: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare TVs by price, power draw in watts and Impact Score out of 20: find the least energy-hungry model for your budget."
     # Text displaid as title for the vertical
     verticalHomeDescription: "Welcome to our Television section. Televisions have become essential, but they have an environmental cost. Nudger is here to help you compare them: the best ranked on the Impact Score among those that fit your needs."
     # The image used as a logo

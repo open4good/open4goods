@@ -34,6 +34,33 @@ class ProductSeoMetaServiceTest {
             new OfferFreshnessService(new OfferFreshnessProperties()));
 
     @Test
+    void appleRegulatoryModelIsReplacedByCommercialNameAndCapacity() {
+        Product product = product("Apple", "A3090");
+        index(product, "STORAGE_CAPACITY", "128");
+        product.getAttributes().getIndexed().get("STORAGE_CAPACITY").setNumericValue(128.0);
+
+        String label = service.resolveProductLabel(product, "Apple iPhone 15 Pro 128 Go noir");
+
+        assertThat(label).isEqualTo("Apple iPhone 15 Pro 128 Go");
+        assertThat(label).doesNotContain("A3090");
+    }
+
+    @Test
+    void appleLabelsOfDifferentCapacitiesAreDistinct() {
+        Product small = product("Apple", "A3090");
+        small.getAttributes().getIndexed().put("STORAGE_CAPACITY", new IndexedAttribute("STORAGE_CAPACITY", "128"));
+        small.getAttributes().getIndexed().get("STORAGE_CAPACITY").setNumericValue(128.0);
+        Product large = product("Apple", "A3090");
+        large.getAttributes().getIndexed().put("STORAGE_CAPACITY", new IndexedAttribute("STORAGE_CAPACITY", "256"));
+        large.getAttributes().getIndexed().get("STORAGE_CAPACITY").setNumericValue(256.0);
+
+        assertThat(service.resolveProductLabel(small, "iPhone 15")).isEqualTo("Apple iPhone 15 128 Go");
+        assertThat(service.resolveProductLabel(large, "iPhone 15")).isEqualTo("Apple iPhone 15 256 Go");
+        assertThat(service.buildMetaTitle(small, "iPhone 15", null, DomainLanguage.fr))
+                .startsWith("Apple iPhone 15 128 Go");
+    }
+
+    @Test
     void dishwasherTitleDropsReferenceAndFitsSixtyCharacters() {
         Product product = product("ELECTROLUX", "E62LB200S 911572124");
         index(product, "PLACE_SETTINGS", "14");

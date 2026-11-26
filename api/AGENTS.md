@@ -49,6 +49,15 @@ mvn --offline -pl api -am clean install
   (`metriks-key`, secret `API_METRIKS_KEY`, GOU-1412) → `ROLE_METRIKS` seul, et seulement sur un chemin
   `/api/metriks/<segment>` (hors context path, segments littéraux) : ailleurs elle n'authentifie rien (401).
   `MetriksController` accepte `XWIKIADMINGROUP` ou `ROLE_METRIKS`. Sans `metriks-key`, aucune clé Metriks.
+- Metriks SEO par gabarit et PSI (GOU-2703) : `GET /api/metriks/seo-templates` classe les pages Search Console par
+  motif d'URL (`SeoTemplate` : fiche, categorie, sous-categorie, blog, guide, opendata, pdf, autre ; sous-categorie et
+  guide par categorie partagent la forme `/<categorie>/<slug>`), sur 35 jours. Alerte `seo.gsc.template.alerts` (valeur =
+  nombre de gabarits dont les impressions des 7 derniers jours sont a moins de 50 % de la moyenne des 28 jours
+  precedents ramenee a 7 jours ; 0 = pas d'alerte) et KPI site hors billet "taille de TV"
+  (`SeoTemplateAnalyzer.DEFAULT_EXCLUDED_PATHS`). `GET /api/metriks/psi` sert le dernier releve PageSpeed Insights
+  mobile de 10 URL (`metriks.psi.paths`), calcule chaque lundi 04:15 (`metriks.psi.cron`) ou par
+  `POST /api/metriks/psi/refresh` (cle admin seulement) ; cle `API_METRIKS_PSI_API_KEY` (`METRIKS_PSI_API_KEY`), sans cle
+  l'evenement est en erreur. Les deux endpoints sont a ajouter au provider `open4goods-api` de open4goods-config.
 - Personnes : `oauth2Login` Google, câblé seulement si la registration `google` existe
   (`spring.security.oauth2.client.registration.google.*`, rendue depuis `GOOGLE_SSO_CLIENT_ID/SECRET`). E-mail
   vérifié et présent dans `api.security.google-sso.role-allowlist` (`ApiOidcUserService`), sinon 403. Pas de

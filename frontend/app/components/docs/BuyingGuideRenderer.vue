@@ -373,6 +373,8 @@ onBeforeUnmount(() => {
   }
 })
 
+// The page already renders the guide title as its single <h1>: the Markdown
+// body's own leading <h1> is dropped, any later one becomes an <h2>.
 let h1RenderCount = 0
 
 const MarkdownH1 = defineComponent({
@@ -381,21 +383,7 @@ const MarkdownH1 = defineComponent({
     const isDuplicateTitle = h1RenderCount === 0
     h1RenderCount += 1
 
-    return () =>
-      h(
-        'h1',
-        {
-          ...attrs,
-          class: [
-            attrs.class,
-            isDuplicateTitle
-              ? 'buying-guide__markdown-title--duplicate'
-              : undefined,
-          ],
-          'aria-hidden': isDuplicateTitle ? 'true' : undefined,
-        },
-        slots.default?.()
-      )
+    return () => (isDuplicateTitle ? null : h('h2', attrs, slots.default?.()))
   },
 })
 

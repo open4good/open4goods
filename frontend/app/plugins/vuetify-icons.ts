@@ -1,5 +1,5 @@
-import * as mdiPaths from '@mdi/js'
 import { h } from 'vue'
+import { mdiIconPaths } from '~/utils/mdi-icons'
 
 type VuetifyIconProps = {
   icon?: unknown
@@ -13,21 +13,12 @@ type VuetifyOptionsWithIcons = {
   }
 }
 
-const mdiIconPaths = mdiPaths as Record<string, string>
-
-const toMdiExportName = (iconName: string) =>
-  `mdi${iconName
-    .slice('mdi-'.length)
-    .split('-')
-    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('')}`
-
 const resolveMdiIconPath = (icon: unknown) => {
   if (typeof icon !== 'string' || !icon.startsWith('mdi-')) {
     return icon
   }
 
-  return mdiIconPaths[toMdiExportName(icon)] ?? ''
+  return mdiIconPaths[icon] ?? ''
 }
 
 const mdiSvgIconSet = {

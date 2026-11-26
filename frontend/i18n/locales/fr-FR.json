@@ -80,9 +80,32 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Parcourez les articles {tag} du blog Nudger.",
       "tagTitle": "Articles {tag} - Blog Nudger"
+    },
+    "tvSizeCalculator": {
+      "title": "Calculateur : quelle taille de TV pour votre recul ?",
+      "distanceLabel": "Distance de recul (en mètres)",
+      "distanceHint": "Entre {min} et {max} m",
+      "resolutionLabel": "Résolution de la TV",
+      "resolution": {
+        "4k": "4K (Ultra HD)",
+        "full-hd": "Full HD"
+      },
+      "range": "Diagonale conseillée : de {minInches} à {maxInches} pouces ({minCm} à {maxCm} cm)",
+      "recommended": "Taille conseillée : {inches} pouces",
+      "beyond": {
+        "above": "(votre recul permet un écran plus grand que les tailles courantes)",
+        "below": "(votre recul est court pour les tailles courantes : choisissez la plus petite)"
+      },
+      "dimensions": "Largeur x hauteur : {width} x {height} cm (écran 16:9)",
+      "link": "Voir les TV de cette taille"
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Nos guides et produits à découvrir",
+      "guides": "Guides d'achat",
+      "products": "Produits à comparer"
+    },
     "seo": {
       "title": "Nudger {'|'} Comparateur de prix et d'Impact Score",
       "description": "Comparez les prix et l'Impact Score de plus de {count} millions de produits : une note sur 20, méthode publiée.",
@@ -539,6 +562,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Pagination des produits",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Guides utiles",
       "postsTitle": "Articles associés",
@@ -567,14 +596,8 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit des prompts et réponses qui ont servi à configurer l'Impact Score des {category}.",
-          "jsonUnavailable": "Réponse IA indisponible.",
-          "promptHelper": "Instructions envoyées au modèle pour produire la configuration.",
-          "promptTitle": "Prompt YAML générateur",
-          "responseHelper": "Résultat JSON de l'IA ayant servi de base à la configuration.",
-          "responseTitle": "Réponse du modèle",
           "title": "Audit de génération IA",
           "auditTitle": "Données structurées",
-          "yamlUnavailable": "Prompt indisponible.",
           "toggle": "Audit IA : prompt et réponse brute",
           "v1History": "Cet audit IA a servi à configurer la matrice V1 de l'Impact Score {category}. Il n'a pas été refait pour la méthode v{version}, dont les critères et les poids sont présentés plus haut. Le prompt et la réponse brute de la V1 restent consultables dans la configuration publiée sur GitHub."
         },
@@ -658,8 +681,8 @@
         "USE": "Usage du produit"
       },
       "seo": {
-        "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
-        "title": "{category} - Impact Score détaillé"
+        "description": "Comment Nudger note les {category} sur 20 : critères, pondérations et sources de l'Impact Score. Méthode publiée et versionnée.",
+        "title": "Impact Score {category} : critères, pondérations et méthode"
       },
       "title": "{category} - {label}",
       "method": {
@@ -2254,6 +2277,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "Dans la même catégorie",
+      "navLabel": "Catégorie du produit",
+      "allOfVertical": "Tous les {vertical}",
+      "sameSubCategory": "Autres produits : {subCategory}",
+      "sameVertical": "Autres {vertical}",
+      "guides": "Guides d'achat"
+    },
     "verdict": {
       "title": "Verdict Nudger",
       "summary": "Notre évaluation en trois dimensions.",
@@ -3069,6 +3100,9 @@
     "logoAlt": "Retour à l'accueil via le logo Nudger",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "Toutes nos catégories"
+      },
       "accessibleTitle": "Informations du pied de page",
       "recordingEnabled": "Enregistrement activé",
       "blogLink": "Notre blog",
@@ -3887,6 +3921,15 @@
     "contact": {
       "text": "Une question sur ces règles ?",
       "link": "Contactez-nous"
+    }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Quelle taille de TV choisir pour son salon ?",
+      "productTitle": "Quelle taille choisir ?",
+      "productText": "La bonne diagonale dépend de la distance de visionnage et de la pièce.",
+      "productTextWithDiagonal": "Ce téléviseur mesure {cm} cm de diagonale : la bonne taille dépend de la distance de visionnage et de la pièce.",
+      "productLink": "Quelle taille de TV choisir pour son salon ?"
     }
   }
 }

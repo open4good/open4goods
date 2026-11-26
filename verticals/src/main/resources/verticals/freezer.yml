@@ -101,6 +101,8 @@ i18n:
     productMetaOpenGraphType: "product"
     verticalHomeUrl: "congelateurs"
     verticalHomeTitle: "Congélateurs"
+    verticalMetaTitle: "Comparatif congélateurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les congélateurs par prix, volume, kWh par an et Impact Score noté sur 20 pour choisir un modèle sobre et durable."
     verticalHomeDescription: "Comparez les congélateurs armoire, coffre et tiroir selon leur impact environnemental, leur capacité, leur classe énergétique et leur prix. Repérez les modèles les moins énergivores (kWh/an) pour conserver vos aliments."
   en:
     url:
@@ -116,6 +118,8 @@ i18n:
     productMetaOpenGraphType: "product"
     verticalHomeUrl: "freezers"
     verticalHomeTitle: "Freezers"
+    verticalMetaTitle: "Freezers comparison 2026: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare freezers by price, volume, kWh per year and Impact Score out of 20 to choose an efficient, durable model."
     verticalHomeDescription: "Compare upright, chest and drawer freezers by environmental impact, net capacity, energy class, noise and price. Find the models using the least electricity (kWh per year) to keep your food frozen for years."
 
 # Provisoire, recalcul en PR 2 (buckets and filters, after the first batch measurement).

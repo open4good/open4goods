@@ -162,6 +162,13 @@ feed:
     cache-ttl-days: 1
 
 metriks:
+  # Weekly PageSpeed Insights snapshot (GOU-2703). The API key comes from METRIKS_PSI_API_KEY (secret
+  # API_METRIKS_PSI_API_KEY); without it GET /api/metriks/psi answers an error event. Paths are relative to base-url.
+  psi:
+    base-url: https://nudger.fr
+    # Monday 04:15 Europe/Paris; "-" disables the schedule (POST /api/metriks/psi/refresh stays available).
+    cron: 0 15 4 * * MON
+    snapshot-path: ${METRIKS_PSI_SNAPSHOT_PATH:}
   affiliation:
     kwanko:
       # No dedicated secret: reuses the Kwanko feed token (API_KWANKO_TOKEN, GOU-1379).

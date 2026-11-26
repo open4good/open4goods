@@ -317,12 +317,12 @@ if [[ ${status} -eq 0 ]] && [[ "${api_env}" == "${expected_env}" ]] \
 else
   ko "render Metriks only (status ${status}): ${out} / ${api_env}"
 fi
-for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON; do
+for missing in API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_METRIKS_PSI_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON; do
   [[ "${out}" == *"::warning::${missing} is not set in the beta GitHub Environment"* ]] \
     && pass "render: missing ${missing} is a warning" || ko "render: no warning for missing ${missing}: ${out}"
 done
 if [[ "${out}" != *"::error::"* ]] \
-  && grep -q "Not set in beta, not rendered: API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON" "${GITHUB_STEP_SUMMARY}"; then
+  && grep -q "Not set in beta, not rendered: API_GOOGLE_API_JSON API_METRIKS_EFFILIATION_API_KEY API_METRIKS_PSI_API_KEY API_EFFILIATION_API_KEY API_VERTEX_API_JSON" "${GITHUB_STEP_SUMMARY}"; then
   pass "render: summary lists the secrets not rendered"
 else
   ko "render summary of missing secrets: $(cat "${GITHUB_STEP_SUMMARY}")"

@@ -59,6 +59,9 @@ jobs:
       - name: Verify production build
         run: pnpm build
         working-directory: frontend
+      - name: Check the client entry chunk budget (gzip)
+        run: node scripts/check-entry-chunk-size.mjs
+        working-directory: frontend
 
       - name: Check better-sqlite3 ABI matches Node 24 (frontend-ssr container)
         working-directory: frontend

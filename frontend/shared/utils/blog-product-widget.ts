@@ -70,13 +70,72 @@ export function renderProductWidgetMarker(widget: BlogProductWidget): string {
   return `<div data-product-widget="${widget.vertical}|${widget.subcategory ?? ''}|${widget.top}"></div>`
 }
 
+/**
+ * TV size calculator written in a blog article body (GOU-2713):
+ *
+ * ```md
+ * ::tv-size-calculator{default-distance="3" default-resolution="4k"}
+ * ::
+ * ```
+ *
+ * Same mechanism as the product widget: an empty marker with validated values, replaced by
+ * TvSizeCalculator.vue during SSR. Both attributes are optional (3 m, 4K by default).
+ */
+export interface BlogTvSizeCalculator {
+  /** Viewing distance in meters, 1 to 6, one decimal at most. */
+  distance: number
+  resolution: '4k' | 'full-hd'
+}
+
+export const TV_CALCULATOR_DIRECTIVE = /^::tv-size-calculator\{([^}]*)\}\s*$/
+
+const DEFAULT_DISTANCE = 3
+
+export function toBlogTvSizeCalculator(raw: {
+  distance?: string
+  resolution?: string
+}): BlogTvSizeCalculator {
+  const text = (raw.distance ?? '').trim().replace(',', '.')
+  const distance = Number(text)
+  return {
+    distance:
+      /^\d(\.\d)?$/.test(text) && distance >= 1 && distance <= 6
+        ? distance
+        : DEFAULT_DISTANCE,
+    resolution: raw.resolution?.trim() === 'full-hd' ? 'full-hd' : '4k',
+  }
+}
+
+/** Parses the `{…}` attribute list of the directive (unknown keys ignored). */
+export function parseTvSizeCalculatorAttributes(
+  attributes: string
+): BlogTvSizeCalculator {
+  const values: Record<string, string> = {}
+  for (const [, key, value] of attributes.matchAll(/([a-z-]+)="([^"]*)"/g)) {
+    if (key && value !== undefined) {
+      values[key] = value
+    }
+  }
+  return toBlogTvSizeCalculator({
+    distance: values['default-distance'],
+    resolution: values['default-resolution'],
+  })
+}
+
+export function renderTvSizeCalculatorMarker(
+  calculator: BlogTvSizeCalculator
+): string {
+  return `<div data-tv-size-calculator="${calculator.distance}|${calculator.resolution}"></div>`
+}
+
 export type BlogBodyPart =
   | { type: 'html'; content: string }
   | { type: 'assistant' }
   | { type: 'product-widget'; widget: BlogProductWidget }
+  | { type: 'tv-size-calculator'; calculator: BlogTvSizeCalculator }
 
 const BODY_MARKERS =
-  /\[assistant\]|<div data-product-widget="([a-z0-9_-]+)\|([a-z0-9_-]*)\|(\d{1,2})"><\/div>/g
+  /\[assistant\]|<div data-product-widget="([a-z0-9_-]+)\|([a-z0-9_-]*)\|(\d{1,2})"><\/div>|<div data-tv-size-calculator="([\d.]+)\|(4k|full-hd)"><\/div>/g
 
 /**
  * Splits a sanitized blog body on its `[assistant]` and product widget markers. A body without
@@ -93,6 +152,16 @@ export function splitBlogBody(html: string): BlogBodyPart[] {
     cursor = match.index + match[0].length
     if (match[0] === '[assistant]') {
       parts.push({ type: 'assistant' })
+      continue
+    }
+    if (match[4] !== undefined) {
+      parts.push({
+        type: 'tv-size-calculator',
+        calculator: toBlogTvSizeCalculator({
+          distance: match[4],
+          resolution: match[5],
+        }),
+      })
       continue
     }
     const widget = toBlogProductWidget({

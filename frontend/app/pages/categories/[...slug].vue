@@ -100,6 +100,14 @@ if (error.value && import.meta.server) {
 
 const navigationData = computed(() => data.value ?? null)
 
+// Taxonomy pages are thin: a node backed by a vertical goes to that vertical (301),
+// the others stay reachable for visitors but are kept out of the index.
+const verticalHomeUrl =
+  navigationData.value?.category?.vertical?.verticalHomeUrl?.trim() ?? ''
+if (verticalHomeUrl.startsWith('/')) {
+  await navigateTo(verticalHomeUrl, { redirectCode: 301, replace: true })
+}
+
 const heroTitle = computed(() => {
   const category = navigationData.value?.category
 
@@ -261,6 +269,7 @@ const ogImageUrl = computed(() =>
 )
 
 useSeoMeta({
+  robots: 'noindex, follow',
   title: () => String(heroTitle.value),
   description: () => String(heroDescription.value),
   ogTitle: () => String(heroTitle.value),

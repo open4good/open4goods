@@ -78,6 +78,8 @@ i18n:
     productMetaOpenGraphType: "product"
     verticalHomeUrl: "caves-a-vin"
     verticalHomeTitle: "Caves à vin"
+    verticalMetaTitle: "Comparatif caves à vin : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les caves à vin par prix, capacité, consommation annuelle et Impact Score noté sur 20 pour conserver vos bouteilles sobrement."
     verticalHomeDescription: "Comparez les caves à vin selon leur impact environnemental, leur capacité en bouteilles, leur classe énergétique et leur prix."
   en:
     url:
@@ -93,6 +95,8 @@ i18n:
     productMetaOpenGraphType: "product"
     verticalHomeUrl: "wine-coolers"
     verticalHomeTitle: "Wine coolers"
+    verticalMetaTitle: "Wine coolers comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare wine coolers by price, capacity, yearly consumption and Impact Score out of 20 to store your bottles efficiently."
     verticalHomeDescription: "Compare wine coolers by environmental impact, bottle capacity, energy class, and price."
 
 ecoFilters:

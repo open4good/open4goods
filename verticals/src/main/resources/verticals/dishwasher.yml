@@ -122,6 +122,8 @@ i18n:
     # Vertical page elements
     verticalHomeUrl: "lave-vaisselles"
     verticalHomeTitle: "Lave-vaisselles"
+    verticalMetaTitle: "Comparatif lave-vaisselle : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les lave-vaisselle par prix, litres d'eau et kWh par cycle et Impact Score noté sur 20 pour choisir un modèle économe."
     verticalHomeDescription: "Comparez les lave-vaisselles (pose libre, encastrables, 45/60 cm, nombre de couverts, niveau sonore…) selon l’Impact Score et le prix."
 
     # A mapping beetween custom page names behind this vertical and wiki pages (sample)
@@ -150,6 +152,8 @@ i18n:
 
     verticalHomeUrl: "dishwashers"
     verticalHomeTitle: "Dishwashers"
+    verticalMetaTitle: "Dishwashers comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare dishwashers by price, litres of water and kWh per cycle and Impact Score out of 20 to pick an efficient model."
     verticalHomeDescription: "Compare dishwashers (built-in or freestanding, 45/60 cm, capacity, noise level) by Impact Score and price."
 
 #####################################################################################################################################

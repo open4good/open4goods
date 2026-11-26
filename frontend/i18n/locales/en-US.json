@@ -80,9 +80,32 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
       "tagTitle": "{tag} articles - Nudger Blog"
+    },
+    "tvSizeCalculator": {
+      "title": "Calculator: which TV size for your viewing distance?",
+      "distanceLabel": "Viewing distance (in meters)",
+      "distanceHint": "Between {min} and {max} m",
+      "resolutionLabel": "TV resolution",
+      "resolution": {
+        "4k": "4K (Ultra HD)",
+        "full-hd": "Full HD"
+      },
+      "range": "Recommended diagonal: {minInches} to {maxInches} inches ({minCm} to {maxCm} cm)",
+      "recommended": "Recommended size: {inches} inches",
+      "beyond": {
+        "above": "(your distance allows a screen larger than the usual sizes)",
+        "below": "(your distance is short for the usual sizes: pick the smallest one)"
+      },
+      "dimensions": "Width x height: {width} x {height} cm (16:9 screen)",
+      "link": "See TVs of this size"
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Guides and products to explore",
+      "guides": "Buying guides",
+      "products": "Products to compare"
+    },
     "seo": {
       "title": "Nudger - Price and Impact Score comparator",
       "description": "Compare prices and Impact Scores for over 50 million products: a score out of 20, published methodology.",
@@ -166,7 +189,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {
@@ -659,6 +684,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Product pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Helpful guides",
       "postsTitle": "Related articles",
@@ -687,13 +718,7 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit the prompts and responses used to configure the {category} Impact Score.",
-          "jsonUnavailable": "AI response unavailable.",
-          "promptHelper": "Instructions sent to the model to produce the configuration.",
-          "promptTitle": "YAML generation prompt",
-          "responseHelper": "JSON output from the AI used as the basis of the configuration.",
-          "responseTitle": "Model response",
           "title": "Impact Score generation audit",
-          "yamlUnavailable": "Prompt unavailable.",
           "toggle": "AI audit: prompt and raw response",
           "v1History": "This AI audit was used to configure the V1 matrix of the {category} Impact Score. It was not rerun for method v{version}, whose criteria and weights are shown above. The V1 prompt and raw response remain available in the configuration published on GitHub."
         },
@@ -780,8 +805,8 @@
         "USE": "Product use"
       },
       "seo": {
-        "description": "Explore how Nudger computes the Impact Score for {category}: criteria, weights and AI generation audit.",
-        "title": "{category} - Impact Score breakdown"
+        "description": "How Nudger scores {category} out of 20: Impact Score criteria, weights and sources. Published, versioned method.",
+        "title": "{category} Impact Score: criteria, weights and method"
       },
       "title": "{category} - {label}",
       "method": {
@@ -2379,6 +2404,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "In the same category",
+      "navLabel": "Product category",
+      "allOfVertical": "All {vertical}",
+      "sameSubCategory": "More products: {subCategory}",
+      "sameVertical": "More {vertical}",
+      "guides": "Buying guides"
+    },
     "verdict": {
       "title": "Nudger Verdict",
       "summary": "Our evaluation across three dimensions.",
@@ -3168,6 +3201,9 @@
     "logoAlt": "Return to home page via Nudger logo",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "All our categories"
+      },
       "accessibleTitle": "Footer information",
       "recordingEnabled": "Recording enabled",
       "blogLink": "Our blog",
@@ -3980,6 +4016,15 @@
     "contact": {
       "text": "A question about these rules?",
       "link": "Contact us"
+    }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Which TV size to choose for your living room?",
+      "productTitle": "Which size to choose?",
+      "productText": "The right screen size depends on your viewing distance and the room.",
+      "productTextWithDiagonal": "This TV has a {cm} cm diagonal: the right size depends on your viewing distance and the room.",
+      "productLink": "Which TV size to choose for your living room?"
     }
   }
 }

@@ -207,14 +207,11 @@ describe('BuyingGuideRenderer', () => {
     expect(wrapper.text()).toContain('Approx. 2 min read')
   })
 
-  it('marks the first markdown H1 as the duplicate title and keeps embeds', async () => {
+  it('renders a single H1 (the page title) and keeps embeds', async () => {
     const wrapper = await mountRenderer()
-    const markdownTitle = wrapper.get('h1#markdown-title')
 
-    expect(markdownTitle.classes()).toContain(
-      'buying-guide__markdown-title--duplicate'
-    )
-    expect(markdownTitle.attributes('aria-hidden')).toBe('true')
+    expect(wrapper.findAll('h1')).toHaveLength(1)
+    expect(wrapper.find('h1#markdown-title').exists()).toBe(false)
     expect(wrapper.find('[data-test="guide-product-grid"]').exists()).toBe(true)
   })
 
