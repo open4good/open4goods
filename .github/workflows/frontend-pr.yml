@@ -51,3 +51,7 @@ jobs:
       - name: Check the standalone .output bundle serves the blog (no content/ next to it)
         working-directory: frontend
         run: scripts/check-standalone-output.sh 4105
+
+      - name: Check the built bundle renders `/` and a category page (no SSR ReferenceError)
+        working-directory: frontend
+        run: scripts/check-ssr-render.sh 4106
