@@ -75,7 +75,7 @@ describe('ImpactScore V2 rendering', () => {
     const text = wrapper.text()
     expect(text).toContain('Among the best ranked')
     expect(text).not.toContain('Excellent')
-    expect(text).toContain('97% of the 412 products rated by Nudger')
+    expect(text).toContain('97% of the products rated by Nudger')
     expect(text).toContain('11 of 13 criteria filled in')
     expect(text).toContain('computed on Nov 8, 2026')
     expect(text).toContain('method v2')
@@ -114,12 +114,12 @@ describe('ImpactScore V2 rendering', () => {
       props: { score: 14.2, v2: rated, verticalPluralName: 'téléviseurs' },
       global,
     })
-    expect(named.text()).toContain('of the 412 téléviseurs rated by Nudger')
+    expect(named.text()).toContain('of the products rated by Nudger in the téléviseurs category')
     const fallback = mount(ImpactScore, {
       props: { score: 14.2, v2: rated },
       global,
     })
-    expect(fallback.text()).toContain('of the 412 products rated by Nudger')
+    expect(fallback.text()).toContain('of the products rated by Nudger in the products category')
   })
 
   it('keeps the V1 rendering without v2 block', () => {

@@ -300,6 +300,51 @@ const formatRawValue = (
   return String(value)
 }
 
+const PLAIN_NUMBER_PATTERN = /^-?\d+(?:[.,]\d+)?$/
+
+/**
+ * Appends the unit of an attribute to a formatted value, after a no-break space ("60\u00a0cm"). A number
+ * written as plain text ("0.6", as indexed) is formatted with the locale ("0,6" in French). A value that
+ * already ends with the unit, or an attribute without unit, is returned unchanged.
+ *
+ * @param value formatted or raw value of the attribute
+ * @param unit unit or suffix configured for the attribute, if any
+ * @param n locale number formatter
+ */
+export const appendAttributeUnit = (
+  value: string,
+  unit: string | null | undefined,
+  n: NumberFormatFn
+): string => {
+  const trimmedUnit = unit?.trim()
+  if (!trimmedUnit) {
+    return value
+  }
+
+  const trimmedValue = value.trim()
+  const text = PLAIN_NUMBER_PATTERN.test(trimmedValue)
+    ? n(Number(trimmedValue.replace(',', '.')))
+    : trimmedValue
+
+  if (text.toLocaleLowerCase().endsWith(trimmedUnit.toLocaleLowerCase())) {
+    return text
+  }
+
+  return `${text}\u00a0${trimmedUnit}`
+}
+
+/**
+ * Unit shown after the values of an attribute: its unit, else its suffix.
+ *
+ * @param config attribute configuration, if known
+ */
+export const resolveAttributeUnit = (
+  config: Pick<AttributeConfigDto, 'unit' | 'suffix'> | null | undefined
+): string | null => {
+  const unit = config?.unit?.trim() || config?.suffix?.trim()
+  return unit || null
+}
+
 export const formatAttributeValue = (
   attribute: ResolvedProductAttribute,
   t: TranslateFn,
@@ -312,15 +357,5 @@ export const formatAttributeValue = (
     return null
   }
 
-  let formatted = base
-
-  if (attribute.unit) {
-    formatted = `${formatted}\u00a0${attribute.unit}`
-  }
-
-  if (attribute.suffix) {
-    formatted = `${formatted} ${attribute.suffix}`
-  }
-
-  return formatted
+  return appendAttributeUnit(base, resolveAttributeUnit(attribute), n)
 }

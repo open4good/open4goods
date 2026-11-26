@@ -45,6 +45,12 @@ public class IndexationConfig {
 	 * Duration of pause when no elements in the queue
 	 */
 	int pauseDuration = 4000;
+
+	/**
+	 * Number of retries Elasticsearch performs on a version conflict (409) of a scripted update.
+	 * Several writers (partial and full workers, score cleanup) touch the same document.
+	 */
+	int updateRetryOnConflict = 3;
 	
 	
 	public int getDataFragmentBulkPageSize() {
@@ -58,6 +64,12 @@ public class IndexationConfig {
 	}
 	public void setProductWorkers(int workers) {
 		this.productWorkers = workers;
+	}
+	public int getUpdateRetryOnConflict() {
+		return updateRetryOnConflict;
+	}
+	public void setUpdateRetryOnConflict(int updateRetryOnConflict) {
+		this.updateRetryOnConflict = updateRetryOnConflict;
 	}
 	public int getPauseDuration() {
 		return pauseDuration;

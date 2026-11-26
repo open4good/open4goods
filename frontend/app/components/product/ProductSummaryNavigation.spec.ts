@@ -98,6 +98,55 @@ describe('ProductSummaryNavigation', () => {
     await wrapper.unmount()
   })
 
+  it('lets CSS media queries drive the layout by default', async () => {
+    const wrapper = await mountComponent({ orientation: undefined })
+
+    const classes = wrapper.find('.product-summary-navigation').classes()
+    expect(classes).toContain('product-summary-navigation--responsive')
+    expect(classes).not.toContain('product-summary-navigation--horizontal')
+    expect(classes).not.toContain('product-summary-navigation--vertical')
+
+    await wrapper.unmount()
+  })
+
+  it('only opens submenus on user action in the horizontal bar', async () => {
+    const impactSection = {
+      id: 'impact',
+      label: 'Impact',
+      icon: 'mdi-leaf',
+      subsections: [{ id: 'impact-energy', label: 'Energy' }],
+    }
+    const isSubmenuShown = (
+      wrapper: Awaited<ReturnType<typeof mountComponent>>
+    ) =>
+      (wrapper.find('#submenu-impact').element as HTMLElement).style.display !==
+      'none'
+
+    const vertical = await mountComponent({
+      sections: [impactSection],
+      activeSection: 'impact-energy',
+    })
+    expect(isSubmenuShown(vertical)).toBe(true)
+    await vertical.unmount()
+
+    const horizontal = await mountComponent({
+      sections: [impactSection],
+      activeSection: 'impact-energy',
+      orientation: 'horizontal',
+    })
+    expect(isSubmenuShown(horizontal)).toBe(false)
+
+    await horizontal.setProps({ activeSection: 'impact' })
+    expect(isSubmenuShown(horizontal)).toBe(false)
+
+    await horizontal
+      .find('button.product-summary-navigation__toggle')
+      .trigger('click')
+    expect(isSubmenuShown(horizontal)).toBe(true)
+
+    await horizontal.unmount()
+  })
+
   it('emits collapse-change when toggling collapse state', async () => {
     const wrapper = await mountComponent()
 

@@ -122,6 +122,7 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_METRIKS_PSI_API_KEY: ${{ secrets.API_METRIKS_PSI_API_KEY }}
           API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
           API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
           API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
@@ -147,6 +148,8 @@ jobs:
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
           GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
+          OPEN_DATA_PUBLIC_BASE_URL: ${{ vars.OPEN_DATA_PUBLIC_BASE_URL }}
+          OPEN_DATA_REDIRECT_BASE_URL: ${{ vars.OPEN_DATA_REDIRECT_BASE_URL }}
         run: |
           set -eu
           for svc in admin api front-api ui frontend; do
@@ -171,7 +174,7 @@ jobs:
       - name: 📝 Build Release Notes (tag)
         id: build_changelog
         if: steps.meta.outputs.is_tag == 'true'
-        uses: mikepenz/release-changelog-builder-action@aa013739bbc8e7067dbbecd4525ff11aeb51a84b # v6.4.0
+        uses: mikepenz/release-changelog-builder-action@b0db9d18b53447ef9f940a46c8f31653c4d9f621 # v6.5.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -253,9 +256,9 @@ jobs:
           node-version: "24"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
         with:
-          version: 10.34.6
+          version: 10.34.9
 
       - name: Configure frontend pnpm store
         shell: bash
@@ -393,7 +396,7 @@ jobs:
       # 📦 Always upload reports artifact (even in MODE=test)
       ############################################
       - name: 📦 Upload reports artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: reports-${{ steps.meta.outputs.safe_version }}
           path: frontend/app/public/reports
@@ -508,6 +511,7 @@ jobs:
           API_METRIKS_AWIN_PUBLISHER_ID: ${{ secrets.API_METRIKS_AWIN_PUBLISHER_ID }}
           API_METRIKS_AWIN_API_TOKEN: ${{ secrets.API_METRIKS_AWIN_API_TOKEN }}
           API_METRIKS_EFFILIATION_API_KEY: ${{ secrets.API_METRIKS_EFFILIATION_API_KEY }}
+          API_METRIKS_PSI_API_KEY: ${{ secrets.API_METRIKS_PSI_API_KEY }}
           API_EFFILIATION_API_KEY: ${{ secrets.API_EFFILIATION_API_KEY }}
           API_VERTEX_API_JSON: ${{ secrets.API_VERTEX_API_JSON }}
           API_VERTEX_BATCH_JSON: ${{ secrets.API_VERTEX_BATCH_JSON }}
@@ -533,6 +537,8 @@ jobs:
           GOOGLE_SSO_CLIENT_ID: ${{ secrets.GOOGLE_SSO_CLIENT_ID }}
           GOOGLE_SSO_CLIENT_SECRET: ${{ secrets.GOOGLE_SSO_CLIENT_SECRET }}
           IMPACTSCORE_METHODOLOGY_OVERRIDES: ${{ vars.IMPACTSCORE_METHODOLOGY_OVERRIDES }}
+          OPEN_DATA_PUBLIC_BASE_URL: ${{ vars.OPEN_DATA_PUBLIC_BASE_URL }}
+          OPEN_DATA_REDIRECT_BASE_URL: ${{ vars.OPEN_DATA_REDIRECT_BASE_URL }}
         run: |
           set -eu
           for svc in admin api front-api ui; do

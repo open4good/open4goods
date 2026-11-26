@@ -72,6 +72,22 @@ describe('resolveOfferHref', () => {
       'https://merchant.example'
     )
   })
+
+  it('adds ?from= to a /contrib/ url served without affiliationToken', () => {
+    expect(
+      resolveOfferHref(
+        { affiliationToken: null, url: '/contrib/x' },
+        '/blog/quelle-taille'
+      )
+    ).toBe('/contrib/x?from=%2Fblog%2Fquelle-taille')
+  })
+
+  it('leaves direct merchant urls and empty content state untouched', () => {
+    expect(
+      resolveOfferHref({ url: 'https://merchant.example' }, '/blog/a')
+    ).toBe('https://merchant.example')
+    expect(resolveOfferHref({ url: '/contrib/x' }, null)).toBe('/contrib/x')
+  })
 })
 
 describe('affiliate link referrer handling (GOU-1184)', () => {

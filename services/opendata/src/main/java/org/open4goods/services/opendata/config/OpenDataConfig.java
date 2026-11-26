@@ -23,31 +23,17 @@ import jakarta.validation.constraints.NotNull;
 public class OpenDataConfig {
 
     /**
-     * Maximum download speed per client in kilobytes.
-     */
-    private int downloadSpeedKb = 256;
-
-    /**
-     * Maximum concurrent downloads allowed.
-     */
-    private int concurrentDownloads = 4;
-
-    /**
      * Flag indicating whether scheduled generation is allowed.
      */
     private Boolean generationEnabled = false;
 
     /**
-     * Public base URL (for example {@code https://data.nudger.fr}) used by front-api to build dataset download
-     * links. Empty keeps the legacy {@code api.resource-root-path} based links.
+     * Public base URL of the published files (for example {@code https://data.nudger.fr}). front-api builds the
+     * download links and reads {@code {public-base-url}/manifest.json} from it (GOU-2290); empty: no link and no
+     * manifest read. The api writes it in the {@code url} of the manifests.
      */
     private String publicBaseUrl = "";
 
-    /**
-     * Base URL the ui application redirects (HTTP 301) dataset downloads to. Empty keeps the throttled local
-     * stream.
-     */
-    private String redirectBaseUrl = "";
 
     /**
      * Root folder where OpenData assets are stored.
@@ -108,10 +94,24 @@ public class OpenDataConfig {
     private int exportPageSize = 2000;
 
     /**
+     * Products per Elasticsearch page of the impact pass, which reads only the products of the impact verticals after
+     * the GTIN and ISBN pass (GOU-2556). The impact projection carries the sources of every criterion, a few tens of KB
+     * per product, so the page stays smaller than {@link #exportPageSize} (GOU-2327: 2000 per page reached 104.86 MB).
+     * Never raise the buffer instead.
+     */
+    private int impactExportPageSize = 500;
+
+    /**
      * Pause after each page, to leave Elasticsearch to the site search. Zero disables it. Must stay well below the
      * scroll keep-alive.
      */
     private Duration pagePause = Duration.ofMillis(50);
+
+    /**
+     * Shortest delay between two progress lines of a pass (products read, expected total, percentage, rate, elapsed
+     * time), logged at INFO (GOU-2556). Zero logs one line per page.
+     */
+    private Duration progressLogInterval = Duration.ofMinutes(5);
 
     /**
      * Free space required before a pass, as a multiple of the size of the files currently published (GOU-823).
@@ -139,24 +139,6 @@ public class OpenDataConfig {
      */
     private Localisable<String, String> baseUrls = new Localisable<>();
 
-    public int getDownloadSpeedKb() {
-        return downloadSpeedKb;
-    }
-
-    public void setDownloadSpeedKb(int downloadSpeedKb) {
-        this.downloadSpeedKb = downloadSpeedKb;
-    }
-
-    public int getConcurrentDownloads() {
-        return concurrentDownloads;
-    }
-
-    public void setConcurrentDownloads(int concurrentDownloads) {
-        this.concurrentDownloads = concurrentDownloads;
-    }
-
-
-
     public Boolean getGenerationEnabled() {
 		return generationEnabled;
 	}
@@ -175,14 +157,6 @@ public class OpenDataConfig {
 
     public void setPublicBaseUrl(String publicBaseUrl) {
         this.publicBaseUrl = publicBaseUrl;
-    }
-
-    public String getRedirectBaseUrl() {
-        return redirectBaseUrl;
-    }
-
-    public void setRedirectBaseUrl(String redirectBaseUrl) {
-        this.redirectBaseUrl = redirectBaseUrl;
     }
 
     public String getRootFolder() {
@@ -313,12 +287,28 @@ public class OpenDataConfig {
         this.exportPageSize = exportPageSize;
     }
 
+    public int getImpactExportPageSize() {
+        return impactExportPageSize;
+    }
+
+    public void setImpactExportPageSize(int impactExportPageSize) {
+        this.impactExportPageSize = impactExportPageSize;
+    }
+
     public Duration getPagePause() {
         return pagePause;
     }
 
     public void setPagePause(Duration pagePause) {
         this.pagePause = pagePause;
+    }
+
+    public Duration getProgressLogInterval() {
+        return progressLogInterval;
+    }
+
+    public void setProgressLogInterval(Duration progressLogInterval) {
+        this.progressLogInterval = progressLogInterval;
     }
 
     public double getMinFreeSpaceRatio() {
@@ -527,7 +517,7 @@ public class OpenDataConfig {
         /**
          * {@code Cache-Control} of the zips.
          */
-        private String zipCacheControl = "public, max-age=86400";
+        private String zipCacheControl = "public, max-age=300";
 
         /**
          * {@code Cache-Control} of the manifests, short so that a new manifest is seen soon after the new zips.

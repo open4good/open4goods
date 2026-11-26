@@ -1,0 +1,87 @@
+{
+  "8712581774455": {
+    "categoriesByDatasources": {
+      "Référentiel Produits": "AFFICHAGE DYNAMIQUE",
+      "Darty FR": "INFORMATIQUE / ECRAN / MONITEUR SEMI PRO | INFORMATIQUE>ECRAN>MONITEUR SEMI PRO | ECRAN | MONITEUR SEMI PRO",
+      "Fnac FR": "INFORMATIQUE - ECRAN | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS",
+      "R&eacute;f&eacute;rentiel produits INMAC WSTORE -  Comparateur": "IT | MONITEURS | MONITEUR AFFICHAGE DYNAMIQUE",
+      "Cdiscount FR": "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LCD | TELEVISEUR | TELEVISEUR LCD",
+      "RueDuCommerce FR": "TV",
+      "GrosBill FR": "AFFICHAGE DYNAMIQUE > PHILIPS",
+      "rakuten.com-csv.yml": "HIFI | TELEVISION",
+      "Carrefour": "IMAGE ET SON > TELEVISEURS"
+    },
+    "eprelGroup": null
+  },
+  "4948570121823": {
+    "categoriesByDatasources": {
+      "Fnac FR": "INFORMATIQUE - ECRAN | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS",
+      "rakuten.com-csv.yml": "HIFI | TELEVISION",
+      "Darty FR": "INFORMATIQUE / ECRAN / MONITEUR SEMI PRO | INFORMATIQUE>ECRAN>MONITEUR SEMI PRO | ECRAN | MONITEUR SEMI PRO",
+      "Cdiscount FR": "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED"
+    },
+    "eprelGroup": null
+  },
+  "8806094916119": {
+    "categoriesByDatasources": {
+      "fnac.com": "INFORMATIQUE - ECRAN | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS",
+      "rueducommerce.fr": "ECRAN PC",
+      "icecat.biz.yml": "ECRANS PLATS DE PC",
+      "rakuten.com-csv.yml": "INFORMATIQUE | ECRAN",
+      "darty.com": "INFORMATIQUE / ECRAN / ECRAN PC | INFORMATIQUE>ECRAN>ECRAN PC | ECRAN | ECRAN PC",
+      "cdiscount.com": "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED",
+      "grosbill.com": "ECRAN PC > SAMSUNG",
+      "Fnac FR": "INFORMATIQUE - ECRAN | APPAREILS ELECTRONIQUES > VIDEO > ACCESSOIRES VIDEO > ACCESSOIRES POUR TELEVISEURS",
+      "Cdiscount FR": "TV - VIDEO - SON | TV - VIDEO - SON > TELEVISEUR > TELEVISEUR LED | TELEVISEUR | TELEVISEUR LED",
+      "RueDuCommerce FR": "ECRAN PC",
+      "Darty FR": "INFORMATIQUE / ECRAN / ECRAN PC | INFORMATIQUE>ECRAN>ECRAN PC | ECRAN | ECRAN PC",
+      "ManoMano FR": "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > TV, IMAGE, SON > TELEVISION > TV LED | TV LED",
+      "GrosBill FR": "ECRAN PC > SAMSUNG",
+      "Carrefour": "INFORMATIQUE ET BUREAU"
+    },
+    "eprelGroup": null
+  },
+  "8720249803386": {
+    "categoriesByDatasources": {
+      "darty.com": "TELEPHONIE ET MOBILITE | TELEPHONIE ET MOBILITE>TELEPHONE MOBILE>BATTERIE EXTERNE | TELEPHONE MOBILE | TELEPHONIE ET MOBILITE",
+      "fnac.com": "GPS & EBOOK & TELEPHONES ACCESSOIRE TELEPHONIE",
+      "Darty Pro - Cashback": "TELEPHONIE ET MOBILITE | TELEPHONE MOBILE",
+      "R&eacute;f&eacute;rentiel produits - Darty Pro": "TELEPHONIE ET MOBILITE | TELEPHONE MOBILE"
+    },
+    "eprelGroup": null
+  },
+  "3601600010610": {
+    "categoriesByDatasources": {
+      "fnac.com": "TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS",
+      "darty.com": "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED",
+      "rueducommerce.fr": "ECRAN PC",
+      "Fnac FR": "TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS",
+      "Darty FR": "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV LED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV LED | TELEVISEUR | TV LED"
+    },
+    "eprelGroup": null
+  },
+  "8806087971811": {
+    "categoriesByDatasources": {
+      "rueducommerce.fr": "TV",
+      "icecat.biz.yml": "AFFICHAGES DE MESSAGES",
+      "fnac.com": "TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS",
+      "rakuten.com-csv.yml": "HIFI | TELEVISION",
+      "darty.com": "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED",
+      "cdiscount.com": "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > ECRAN - ENCEINTE > ECRAN ORDINATEUR | ECRAN - ENCEINTE | ECRAN ORDINATEUR",
+      "Darty FR": "TV, VIDEO, HOME CINEMA / TELEVISEUR / TV OLED | TV, VIDEO, HOME CINEMA>TELEVISEUR>TV OLED | TELEVISEUR | TV OLED",
+      "Fnac FR": "TV & VIDEO & HOME CINEMA TELEVISEUR | APPAREILS ELECTRONIQUES > VIDEO > TELEVISEURS",
+      "Cdiscount FR": "65 | INPUT DEVICES | INFORMATIQUE | INFORMATIQUE > ECRAN - ENCEINTE > ECRAN ORDINATEUR | ECRAN - ENCEINTE | ECRAN ORDINATEUR",
+      "RueDuCommerce FR": "TV",
+      "Joom FR": "ELECTRONICS > AUDIO & VIDEO > TV & EQUIPMENT > TV",
+      "Référentiel Produits": "AFFICHAGE DYNAMIQUE"
+    },
+    "eprelGroup": null
+  },
+  "8806094859423": {
+    "categoriesByDatasources": {
+      "alternate FR": "9 | TELEVISIONS | TV & MONITEUR > TV",
+      "icecat.biz.yml": "TV"
+    },
+    "eprelGroup": null
+  }
+}

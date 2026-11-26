@@ -109,7 +109,7 @@ export const resolveOfferHref = (
 ): string | undefined =>
   offer.affiliationToken
     ? withAffiliationContent(`/contrib/${offer.affiliationToken}`, contentPath)
-    : (offer.url ?? undefined)
+    : withAffiliationContent(offer.url ?? undefined, contentPath)
 
 /** Single-sourced condition color grammar, used everywhere a "new" vs
  * "occasion" offer badge/chip renders. */

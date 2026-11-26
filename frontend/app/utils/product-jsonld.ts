@@ -266,7 +266,8 @@ const normalizeMetricDimension = (
       return undefined
     }
 
-    return value > 0 && value < 10 ? Number((value * 100).toFixed(2)) : value
+    // Indexed lengths are stored in cm (GOU-2707): emitted as is, with the CMT unit code.
+    return value
   }
 
   return normalizeString(value)
@@ -454,24 +455,25 @@ export const buildOfferList = (
       const url = normalizeString(offer.url)
       const currency = normalizeString(offer.currency)
 
-      // The DTO only exposes stock as a quantity, not a boolean/enum: derive
-      // availability from it when present, otherwise assume InStock (offers
-      // without stock data are still live/purchasable on the merchant site).
+      // The DTO only exposes stock as a quantity: an unknown stock must not be
+      // advertised as InStock, so the availability is simply omitted.
       const availability =
         typeof offer.quantityInStock === 'number'
           ? offer.quantityInStock > 0
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock'
-          : 'https://schema.org/InStock'
+          : undefined
 
-      const priceValidUntil = (() => {
-        const validFrom =
-          typeof offer.timeStamp === 'number' && offer.timeStamp > 0
-            ? new Date(offer.timeStamp)
-            : new Date()
-        validFrom.setDate(validFrom.getDate() + DEFAULT_VALID_DAYS)
-        return validFrom.toISOString().split('T')[0]
-      })()
+      // Aligned on the real freshness of the offer; without a timestamp we
+      // cannot claim any validity, so the property is omitted.
+      const priceValidUntil =
+        typeof offer.timeStamp === 'number' && offer.timeStamp > 0
+          ? (() => {
+              const validUntil = new Date(offer.timeStamp)
+              validUntil.setDate(validUntil.getDate() + DEFAULT_VALID_DAYS)
+              return validUntil.toISOString().split('T')[0]
+            })()
+          : undefined
 
       const shippingDetails =
         typeof offer.shippingCost === 'number' && currency
@@ -548,13 +550,19 @@ export const buildProductJsonLdGraph = (
 
   const offersByCondition = product.offers?.offersByCondition ?? {}
   const offers = buildOfferList(input.site.url, offersByCondition)
-  const offerPrices = offers
+  // lowPrice/highPrice/offerCount only describe the new, available offers:
+  // used offers (kept in the list with UsedCondition) and out-of-stock or
+  // unknown-stock offers would otherwise skew the advertised price range.
+  const aggregatedOffers = offers.filter(
+    offer =>
+      offer.itemCondition === 'https://schema.org/NewCondition' &&
+      offer.availability === 'https://schema.org/InStock'
+  )
+  const offerPrices = aggregatedOffers
     .map(offer => offer.price)
     .filter((price): price is number => typeof price === 'number')
 
-  const offerCurrency = offers.find(offer =>
-    isNonEmptyString(offer.priceCurrency)
-  )?.priceCurrency
+  const offerCurrency = (aggregatedOffers[0] ?? offers[0])?.priceCurrency
 
   const rawAdditionalProperty = compactJsonLd([
     input.impactScore != null
@@ -562,6 +570,7 @@ export const buildProductJsonLdGraph = (
           '@type': 'PropertyValue',
           name: labels.impactScore,
           value: input.impactScore,
+          maxValue: 20,
         }
       : undefined,
 
@@ -811,28 +820,6 @@ export const buildProductJsonLdGraph = (
     ['WEIGHT', 'POIDS (SANS SUPPORT)', 'POIDS (AVEC SUPPORT)']
   )
 
-  const countryName = normalizeString(product.base?.gtinInfo?.countryName)
-
-  const reviewEntry =
-    typeof input.impactScore === 'number'
-      ? {
-          '@type': 'Review',
-          author: {
-            '@type': 'Organization',
-            name: input.site.name,
-            url: input.site.url,
-          },
-          reviewRating: {
-            '@type': 'Rating',
-            ratingValue: Number((input.impactScore / 4).toFixed(1)),
-            bestRating: 5,
-            worstRating: 0,
-          },
-          name: labels.impactScore,
-          reviewBody: normalizeString(input.punchline),
-        }
-      : undefined
-
   const productEntry = {
     '@type': 'Product',
     '@id': productId,
@@ -865,9 +852,6 @@ export const buildProductJsonLdGraph = (
       'COULEUR GENERIQUE',
       'NOM DE LA COULEUR',
     ]),
-    countryOfOrigin: countryName
-      ? { '@type': 'Country', name: countryName }
-      : undefined,
     additionalProperty,
     weight: weightValue
       ? {
@@ -880,34 +864,30 @@ export const buildProductJsonLdGraph = (
       ? {
           '@type': 'QuantitativeValue',
           value: widthValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     height: heightValue
       ? {
           '@type': 'QuantitativeValue',
           value: heightValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     depth: depthValue
       ? {
           '@type': 'QuantitativeValue',
           value: depthValue,
-          unitCode: 'MMT',
+          unitCode: 'CMT',
         }
       : undefined,
     hasEnergyConsumptionDetails: energyDetails,
-    review: reviewEntry,
     offers:
       offers.length > 0
         ? {
             '@type': 'AggregateOffer',
             priceCurrency: offerCurrency,
-            offerCount: Math.max(
-              product.offers?.offersCount ?? 0,
-              offers.length
-            ),
+            offerCount: aggregatedOffers.length || undefined,
             lowPrice:
               offerPrices.length > 0 ? Math.min(...offerPrices) : undefined,
             highPrice:

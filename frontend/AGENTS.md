@@ -43,7 +43,7 @@
 - Type everything: rely on interfaces/types; avoid `any`. Use discriminated unions or type guards when needed.
 - Keep code SSR-friendly (guard against `window`/`document`).
 - Format dates rendered during SSR with an explicit `timeZone` (`Intl.DateTimeFormat`, `getUTC*`): the server runs in UTC and the browser in the user's zone, so an implicit zone causes hydration mismatches.
-- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226).
+- Unsafe calls (`POST`, etc.) to `/api` that may run during SSR go through the CSRF-aware client of the request, captured at setup (`const { $fetch: csrfFetch } = useNuxtApp()`), not `globalThis.$fetch`, which is swapped on every SSR request. The client (`app/plugins/csrf-fetch.ts`) keeps working after an `await`, when the ambient Nuxt context is gone (GOU-1226). The server never sets the `csrf_token` cookie: SSR calls use a per-render token kept in `event.context`, and the browser client creates the cookie right before its first unsafe call (GOU-2700). Never set a cookie on a page response.
 - Keep composables thin; delegate heavy logic to server routes or shared utilities.
 - All static texts must be internationalised
 - Also write or update tests (component-level tests) if pertinent
@@ -122,11 +122,30 @@ Every code that is produced MUST me validated using :
 
 - Every page must declare SEO metadata (title, description, Open Graph fields) and those strings have to be internationalised through the i18n resources. Twitter-specific tags are not allowed.
 
+## Server-rendered HTML caching
+
+- `server/plugins/html-cache-control.ts` sets `Cache-Control` on every rendered page: public (`s-maxage`) for anonymous visitors, `private, no-store` with an auth cookie, a dark theme cookie, a `Set-Cookie` or a page opt-out, `no-store` for errors and renders where an internal call failed (GOU-2700). See `docs/operations/html-edge-cache.md`.
+- Anything that varies per visitor in the SSR of a public page must render client-side (`onMounted`, `<ClientOnly>`), or be covered by that policy and the Cloudflare rule. A page whose whole HTML is per visitor declares `definePageMeta({ htmlCache: false })`.
+- Server-side device detection reads `CF-Device-Type` first (`shared/utils/ssr-device.ts`), the device class of the edge cache key.
+
 ## Backend API authentication and caching guidelines
 
 - Instantiate backend OpenAPI clients through `createBackendApiConfig()` from the shared API client utilities. The helper injects the `X-Shared-Token` header and fails fast when `MACHINE_TOKEN` is absent-never call `new Configuration()` directly.
 - Keep the `MACHINE_TOKEN` runtime value synchronised with the backend's `front.security.shared-token` property; drift breaks machine-to-machine authentication. On beta and prod both come from the `O4G_MACHINE_TOKEN` GitHub Environment secret once it is set (`NUXT_MACHINE_TOKEN` and `MACHINE_TOKEN` lines of `/etc/open4goods/frontend.env`, rendered by `scripts/deploy/render-service-secrets.sh`, GOU-1041, GOU-1694); see `docs/operations/prod-service-secrets.md`.
 - Every server route that returns backend data is domain-sensitive. Apply caching headers through `setDomainLanguageCacheHeaders(event, cacheControl)` from `server/utils/cache-headers` so both `Cache-Control` and the host-aware `Vary` header are set together. Do **not** set either header manually.
+
+## Listing cards
+
+- Product listings (category grids, list and table views, guides, nudge tool,
+  product alternatives) fetch `POST /api/products/cards`, which returns
+  `ProductCardDto` items (about 4 KB each) instead of the full `ProductDto`
+  (about 50 KB) of `/api/products/search` (GOU-2710).
+- `ProductCardDto` keeps the field names of `ProductDto`, so listing
+  components keep their `ProductDto` props. A listing component must only read
+  the fields listed in front-api `README.md` ("Listing cards"); a new need adds
+  the field to the front-api card DTO.
+- `ListingCardPayload.spec.ts` renders the card, list and table views from the
+  front-api fixtures (full DTO and its card) and requires identical HTML.
 
 ## DomainLanguage injection
 

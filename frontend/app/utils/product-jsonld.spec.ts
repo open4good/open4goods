@@ -17,6 +17,8 @@ describe('product-jsonld', () => {
             currency: 'EUR',
             condition: 'NEW',
             datasourceName: 'Shop',
+            quantityInStock: 5,
+            timeStamp: Date.UTC(2026, 0, 1),
           },
         ],
       },
@@ -106,7 +108,7 @@ describe('product-jsonld', () => {
     expect(JSON.stringify(graph)).not.toContain(affiliationToken)
   })
 
-  it('sets priceValidUntil to 10 days in the future', () => {
+  it('aligns priceValidUntil on the offer timestamp', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
     )
@@ -114,13 +116,7 @@ describe('product-jsonld', () => {
       graph?.['@graph'] as unknown as TestProductNode[]
     )?.find(n => n['@type'] === 'Product')
 
-    const offer = productNode!.offers.offers[0]
-
-    const expectedDate = new Date()
-    expectedDate.setDate(expectedDate.getDate() + 10)
-    const expectedDateString = expectedDate.toISOString().split('T')[0]
-
-    expect(offer.priceValidUntil).toBe(expectedDateString)
+    expect(productNode!.offers.offers[0].priceValidUntil).toBe('2026-01-11')
   })
 
   it('sets correct itemCondition for NEW products', () => {
@@ -284,16 +280,16 @@ describe('product-jsonld', () => {
     ).toBe(true)
   })
 
-  it('normalizes compact metric dimensions before emitting schema units', () => {
+  it('emits indexed dimensions in centimetres', () => {
     const graph = buildProductJsonLdGraph({
       ...(mockInput as unknown as ProductJsonLdInput),
       product: {
         ...mockProduct,
         attributes: {
           indexedAttributes: {
-            WIDTH: { numericValue: 0.751 },
-            HEIGHT: { numericValue: 1.62 },
-            DEPTH: { numericValue: 0.0865 },
+            WIDTH: { numericValue: 7.51 },
+            HEIGHT: { numericValue: 16.2 },
+            DEPTH: { numericValue: 0.865 },
           },
         },
       } as unknown as ProductJsonLdInput['product'],
@@ -304,18 +300,18 @@ describe('product-jsonld', () => {
 
     expect(productNode?.width).toEqual({
       '@type': 'QuantitativeValue',
-      value: 75.1,
-      unitCode: 'MMT',
+      value: 7.51,
+      unitCode: 'CMT',
     })
     expect(productNode?.height).toEqual({
       '@type': 'QuantitativeValue',
-      value: 162,
-      unitCode: 'MMT',
+      value: 16.2,
+      unitCode: 'CMT',
     })
     expect(productNode?.depth).toEqual({
       '@type': 'QuantitativeValue',
-      value: 8.65,
-      unitCode: 'MMT',
+      value: 0.865,
+      unitCode: 'CMT',
     })
   })
 
@@ -377,7 +373,7 @@ describe('product-jsonld', () => {
     expect(productNode!.offers.offers[0].shippingDetails).toBeUndefined()
   })
 
-  it('emits countryOfOrigin when gtinInfo.countryName is present', () => {
+  it('never emits countryOfOrigin, even with a GS1 country', () => {
     const graph = buildProductJsonLdGraph({
       ...(mockInput as unknown as ProductJsonLdInput),
       product: {
@@ -385,31 +381,7 @@ describe('product-jsonld', () => {
         base: { gtinInfo: { countryCode: 'CN', countryName: 'Chine' } },
       } as unknown as ProductJsonLdInput['product'],
     })
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        countryOfOrigin?: { '@type': string; name: string }
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.countryOfOrigin).toEqual({
-      '@type': 'Country',
-      name: 'Chine',
-    })
-  })
-
-  it('omits countryOfOrigin when gtinInfo.countryName is absent', () => {
-    const graph = buildProductJsonLdGraph(
-      mockInput as unknown as ProductJsonLdInput
-    )
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        countryOfOrigin?: unknown
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.countryOfOrigin).toBeUndefined()
+    expect(JSON.stringify(graph)).not.toContain('countryOfOrigin')
   })
 
   it('filters out breadcrumbs with empty titles', () => {
@@ -484,20 +456,92 @@ describe('product-jsonld', () => {
     )
   })
 
-  it('defaults to InStock when quantityInStock is not provided', () => {
-    const graph = buildProductJsonLdGraph(
-      mockInput as unknown as ProductJsonLdInput
-    )
+  it('omits availability and priceValidUntil when stock and timestamp are unknown', () => {
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        offers: {
+          offersByCondition: {
+            NEW: [
+              {
+                url: '/offer/1',
+                price: 100,
+                currency: 'EUR',
+                condition: 'NEW',
+              },
+            ],
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
     const productNode = (
       graph?.['@graph'] as unknown as Array<{
         '@type': string
-        offers: { offers: Array<{ availability: string }> }
+        offers: {
+          offerCount?: number
+          lowPrice?: number
+          offers: Array<{ availability?: string; priceValidUntil?: string }>
+        }
       }>
     )?.find(n => n['@type'] === 'Product')
 
-    expect(productNode!.offers.offers[0].availability).toBe(
-      'https://schema.org/InStock'
-    )
+    expect(productNode!.offers.offers[0].availability).toBeUndefined()
+    expect(productNode!.offers.offers[0].priceValidUntil).toBeUndefined()
+    expect(productNode!.offers.lowPrice).toBeUndefined()
+    expect(productNode!.offers.offerCount).toBeUndefined()
+  })
+
+  it('computes lowPrice, highPrice and offerCount on new in-stock offers only', () => {
+    const offer = (
+      price: number,
+      condition: string,
+      quantityInStock?: number
+    ) => ({
+      url: `/offer/${price}`,
+      price,
+      currency: 'EUR',
+      condition,
+      datasourceName: 'Shop',
+      quantityInStock,
+    })
+    const graph = buildProductJsonLdGraph({
+      ...(mockInput as unknown as ProductJsonLdInput),
+      product: {
+        ...mockProduct,
+        offers: {
+          offersCount: 4,
+          offersByCondition: {
+            OCCASION: [offer(364.99, 'OCCASION', 0)],
+            NEW: [
+              offer(499.99, 'NEW', 2),
+              offer(450, 'NEW', 0),
+              offer(529.99, 'NEW', 1),
+            ],
+          },
+        },
+      } as unknown as ProductJsonLdInput['product'],
+    })
+    const productNode = (
+      graph?.['@graph'] as unknown as Array<{
+        '@type': string
+        offers: {
+          offerCount: number
+          lowPrice: number
+          highPrice: number
+          offers: Array<{ itemCondition: string }>
+        }
+      }>
+    )?.find(n => n['@type'] === 'Product')
+
+    expect(productNode!.offers.lowPrice).toBe(499.99)
+    expect(productNode!.offers.highPrice).toBe(529.99)
+    expect(productNode!.offers.offerCount).toBe(2)
+    expect(
+      productNode!.offers.offers.some(
+        o => o.itemCondition === 'https://schema.org/UsedCondition'
+      )
+    ).toBe(true)
   })
 
   it('derives priceValidUntil from the offer timeStamp when present', () => {
@@ -530,58 +574,26 @@ describe('product-jsonld', () => {
     expect(productNode!.offers.offers[0].priceValidUntil).toBe('2026-01-11')
   })
 
-  it('emits a Review node with a normalized rating when impactScore is present', () => {
+  it('never emits Review or Rating, and keeps the ImpactScore as additionalProperty', () => {
     const graph = buildProductJsonLdGraph(
       mockInput as unknown as ProductJsonLdInput
     )
+    const serialized = JSON.stringify(graph)
+    expect(serialized).not.toContain('"Review"')
+    expect(serialized).not.toContain('"Rating"')
+    expect(serialized).not.toContain('reviewBody')
+
     const productNode = (
       graph?.['@graph'] as unknown as Array<{
         '@type': string
-        review?: {
-          '@type': string
-          reviewRating: {
-            '@type': string
-            ratingValue: number
-            bestRating: number
-            worstRating: number
-          }
-          author: { '@type': string; name: string; url: string }
-          reviewBody?: string
-        }
+        additionalProperty?: Array<Record<string, unknown>>
       }>
     )?.find(n => n['@type'] === 'Product')
-
-    // mockInput.impactScore is 18.5 (on a /20 scale) -> 18.5 / 4 = 4.6
-    expect(productNode?.review).toMatchObject({
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: 4.6,
-        bestRating: 5,
-        worstRating: 0,
-      },
-      author: {
-        '@type': 'Organization',
-        name: 'Nudger',
-        url: 'https://nudger.fr',
-      },
-      reviewBody: 'Best product ever',
+    expect(productNode?.additionalProperty?.[0]).toMatchObject({
+      '@type': 'PropertyValue',
+      value: 18.5,
+      maxValue: 20,
     })
-  })
-
-  it('omits the Review node when impactScore is missing', () => {
-    const graph = buildProductJsonLdGraph({
-      ...(mockInput as unknown as ProductJsonLdInput),
-      impactScore: null,
-    })
-    const productNode = (
-      graph?.['@graph'] as unknown as Array<{
-        '@type': string
-        review?: unknown
-      }>
-    )?.find(n => n['@type'] === 'Product')
-
-    expect(productNode?.review).toBeUndefined()
   })
 
   it('never emits aggregateRating, with or without impactScore', () => {
@@ -592,14 +604,6 @@ describe('product-jsonld', () => {
       })
       expect(JSON.stringify(graph)).not.toContain('aggregateRating')
     }
-  })
-
-  it('omits review when impactScore is not a number', () => {
-    const graph = buildProductJsonLdGraph({
-      ...(mockInput as unknown as ProductJsonLdInput),
-      impactScore: undefined,
-    })
-    expect(JSON.stringify(graph)).not.toContain('"review"')
   })
 
   it('never derives sku from the model', () => {

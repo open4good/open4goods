@@ -1,7 +1,9 @@
 package org.open4goods.model.vertical;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Attribute parsing configuration
@@ -62,6 +64,47 @@ public class AttributeParserConfig {
 	 * "kg" for MASS). Used by {@code UnitAwareNumericParser} as a last-resort hint.
 	 */
 	private String defaultUnitHint;
+
+	/**
+	 * Unit in which {@code UnitAwareNumericParser} stores the value (e.g. "cm" for LENGTH), so that the indexed value
+	 * is in the unit shown on the product page. {@code null} keeps the dimension's base unit.
+	 */
+	private String targetUnit;
+
+	/**
+	 * Units tried in order by {@code UnitAwareNumericParser} for a value sent without a unit, when the vertical bounds
+	 * the attribute ({@code parsers.bounds}): the first reading inside the bounds wins. Icecat sends a width as "600"
+	 * (mm) and EPREL as "60" (cm); with {@code [cm, mm]} both give 60 cm on a washing machine. Empty means
+	 * {@link #defaultUnitHint} only.
+	 */
+	private List<String> unitlessHints = new ArrayList<>();
+
+	/**
+	 * Unit of the values that a raw attribute sends without a unit, by raw attribute name (compared after
+	 * {@code IdHelper.normalizeAttributeName}). For example, EPREL sends the hourly consumption of an air conditioner
+	 * as "1.1", in kWh/h. Only the watt conversion of the generic parser uses it. Remove an entry to go back to
+	 * reading these values as they are.
+	 */
+	private Map<String, String> sourceUnits = new HashMap<>();
+
+	/**
+	 * Lower bound of a plausible numeric value, in the unit of the attribute. A source whose parsed value is below it
+	 * does not vote. {@code null} means no bound. A bound of the vertical ({@code parsers.bounds}) takes precedence.
+	 */
+	private Double minValue;
+
+	/**
+	 * Upper bound of a plausible numeric value, in the unit of the attribute (an identifier read as a screen size
+	 * is far above any diagonal). A source whose parsed value is above it does not vote. {@code null} means no bound. A bound of the vertical
+	 * ({@code parsers.bounds}) takes precedence.
+	 */
+	private Double maxValue;
+
+	/**
+	 * Conversion factors of a value written with an explicit unit, by unit token (case-insensitive): with
+	 * {@code cm: 0.3937}, "165 cm" is read as 64.96. A value without unit, or with an unlisted unit, is unchanged.
+	 */
+	private Map<String, Double> unitFactors = new HashMap<>();
 
 
 
@@ -153,6 +196,54 @@ public class AttributeParserConfig {
 	public void setDefaultUnitHint(String defaultUnitHint)
 	{
 		this.defaultUnitHint = defaultUnitHint;
+	}
+
+	public String getTargetUnit() {
+		return targetUnit;
+	}
+
+	public void setTargetUnit(String targetUnit) {
+		this.targetUnit = targetUnit;
+	}
+
+	public List<String> getUnitlessHints() {
+		return unitlessHints;
+	}
+
+	public void setUnitlessHints(List<String> unitlessHints) {
+		this.unitlessHints = unitlessHints == null ? new ArrayList<>() : unitlessHints;
+	}
+
+	public Double getMinValue() {
+		return minValue;
+	}
+
+	public void setMinValue(Double minValue) {
+		this.minValue = minValue;
+	}
+
+	public Double getMaxValue() {
+		return maxValue;
+	}
+
+	public void setMaxValue(Double maxValue) {
+		this.maxValue = maxValue;
+	}
+
+	public Map<String, Double> getUnitFactors() {
+		return unitFactors;
+	}
+
+	public void setUnitFactors(Map<String, Double> unitFactors) {
+		this.unitFactors = unitFactors == null ? new HashMap<>() : unitFactors;
+	}
+
+	public Map<String, String> getSourceUnits() {
+		return sourceUnits;
+	}
+
+	public void setSourceUnits(Map<String, String> sourceUnits) {
+		this.sourceUnits = sourceUnits == null ? new HashMap<>() : sourceUnits;
 	}
 
 

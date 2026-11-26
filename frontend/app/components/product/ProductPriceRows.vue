@@ -379,7 +379,12 @@ const offerBadges = computed<Badge[]>(() => {
     const fallbackOffer = props.product.offers?.bestPrice
     const formatted =
       formatOfferPrice(fallbackOffer) ?? formatBestPrice(props.product, t, n)
-    if (formatted && formatted !== '—') {
+    // An out-of-stock offer is never labelled as the best price.
+    if (
+      formatted &&
+      formatted !== '—' &&
+      fallbackOffer?.quantityInStock !== 0
+    ) {
       // Only show if valid price
       const url = resolveUrl(fallbackOffer)
       entries.push({

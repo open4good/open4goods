@@ -179,6 +179,30 @@ describe('TheArticle.vue', () => {
     )
   })
 
+  test('shows no draft banner and no robots directive on a published article', async () => {
+    const wrapper = await mountComponent()
+
+    expect(wrapper.find('[data-test="article-draft-banner"]').exists()).toBe(
+      false
+    )
+    const seoMetaCall = seoMetaSpy.mock.calls[0]?.[0] as {
+      robots: { value: string | undefined }
+    }
+    expect(seoMetaCall.robots.value).toBeUndefined()
+  })
+
+  test('flags a draft served for review with a banner and noindex', async () => {
+    const wrapper = await mountComponent({ draft: true })
+
+    expect(wrapper.get('[data-test="article-draft-banner"]').text()).toBe(
+      'blog.article.draftBanner'
+    )
+    const seoMetaCall = seoMetaSpy.mock.calls[0]?.[0] as {
+      robots: { value: string | undefined }
+    }
+    expect(seoMetaCall.robots.value).toBe('noindex, nofollow')
+  })
+
   test('renders product widgets in place of their body markers', async () => {
     const wrapper = await mountComponent({
       body: '<p>Intro</p><div data-product-widget="tv|tv_55_inches|3"></div><p>Middle</p><div data-product-widget="oven||4"></div><p>End</p>',

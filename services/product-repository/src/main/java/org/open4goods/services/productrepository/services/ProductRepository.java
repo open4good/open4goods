@@ -264,6 +264,9 @@ public class ProductRepository {
 
 //	private @Autowired RedisOperations<String, Product> redisRepo;
 
+	/** Retries done by Elasticsearch on a version conflict of a scripted update (see {@link IndexationConfig}) */
+	private int updateRetryOnConflict = 3;
+
 	public ProductRepository() {
 
 
@@ -284,6 +287,7 @@ public class ProductRepository {
 	public ProductRepository(IndexationConfig indexationConfig, ElasticsearchOperations elasticsearchOperations) {
 
 		this.elasticsearchOperations = elasticsearchOperations;
+		this.updateRetryOnConflict = indexationConfig.getUpdateRetryOnConflict();
 
 		this.fullProductQueue = new LinkedBlockingQueue<>(indexationConfig.getProductsQueueMaxSize());
 		this.partialProductQueue = new LinkedBlockingQueue<>(indexationConfig.getPartialProductsQueueMaxSize());
@@ -425,6 +429,34 @@ public class ProductRepository {
         public Stream<Product> exportAll( String[] includeFields, int pageSize) {
 
                 NativeQueryBuilder queryBuilder = new NativeQueryBuilder().withQuery(Query.findAll());
+                if (includeFields != null && includeFields.length > 0) {
+                        queryBuilder = queryBuilder.withSourceFilter(customSourceFilter(includeFields, null));
+                }
+
+                NativeQuery query = queryBuilder
+                		.withPageable(PageRequest.of(0, pageSize))
+                		.build();
+
+                var iterator = elasticsearchOperations.searchForStream(query, Product.class, CURRENT_INDEX);
+                return iterator.stream().onClose(iterator::close)
+                                .map(SearchHit::getContent);
+        }
+
+        /**
+         * Export the products of the given verticals ({@code terms} on {@code vertical}), restricted to the given source
+         * fields, with a configurable page size (open data impact pass, GOU-2556).
+         *
+         * @param verticals     vertical identifiers; none gives an empty stream, without any request
+         * @param includeFields source fields to fetch (all fields when null or empty)
+         * @param pageSize      the page size to use when streaming products
+         * @return stream of (partial) products whose {@code vertical} is one of {@code verticals}
+         */
+        public Stream<Product> exportAllInVerticals(Collection<String> verticals, String[] includeFields, int pageSize) {
+                if (verticals == null || verticals.isEmpty()) {
+                        return Stream.empty();
+                }
+                NativeQueryBuilder queryBuilder = new NativeQueryBuilder()
+                                .withQuery(new CriteriaQuery(new Criteria("vertical").in(verticals)));
                 if (includeFields != null && includeFields.length > 0) {
                         queryBuilder = queryBuilder.withSourceFilter(customSourceFilter(includeFields, null));
                 }
@@ -1227,6 +1259,7 @@ public class ProductRepository {
 	public void store(Collection<Product> data) {
 	    logger.info("Indexing {} products", data.size());
 
+	    data.forEach(Product::refreshSources);
 	    List<IndexQuery> indexQueries = data.stream()
 	        .map(p -> new IndexQueryBuilder()
 	            .withId(String.valueOf(p.getId()))
@@ -1246,6 +1279,7 @@ public class ProductRepository {
 	public void store(Collection<Product> data, String indexName) {
 	    logger.info("Indexing {} products into {}", data.size(), indexName);
 
+	    data.forEach(Product::refreshSources);
 	    List<IndexQuery> indexQueries = data.stream()
 	        .map(p -> new IndexQueryBuilder()
 	            .withId(String.valueOf(p.getId()))
@@ -1285,6 +1319,7 @@ public class ProductRepository {
 
 	public void forceIndex(Product data) {
 		logger.info("Indexing  product {}", data.gtin());
+		data.refreshSources();
 
 //		executor.submit(() -> {
 			elasticsearchOperations.save(data, CURRENT_INDEX);
@@ -1952,6 +1987,7 @@ public class ProductRepository {
 						.withScript(CLEAR_SCORES_SCRIPT)
 						.withLang("painless")
 						.withParams(params)
+						.withRetryOnConflict(updateRetryOnConflict)
 						.withIndex(CURRENT_INDEX.getIndexName())
 						.build())
 				.toList();
@@ -1977,6 +2013,7 @@ public class ProductRepository {
 	                .withScript(PARTIAL_UPDATE_SCRIPT)
 	                .withLang("painless")
 	                .withParams(Map.of("changes", product.getChanges()))
+	                .withRetryOnConflict(updateRetryOnConflict)
 	                .withIndex(CURRENT_INDEX.getIndexName())
 	                .build())
 	        .collect(Collectors.toList());

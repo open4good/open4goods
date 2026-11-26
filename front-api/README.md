@@ -58,6 +58,41 @@ The category page server-renders its listing with the default sort
 still applied. A failed search shows an error with a retry action instead of
 the previous listing.
 
+## Listing cards
+
+`POST /products/cards` (GOU-2710) runs the same search as `POST /products`
+(pagination, sort, filters, aggregations, result window, unknown vertical 404)
+but returns `ProductCardSearchResponseDto`: each product is a
+`ProductCardDto`, about 4 KB instead of about 50 KB for the full `ProductDto`
+of a listing. Category grids, guides, the nudge tool and product alternatives
+use it; the product page keeps `GET /products/{gtin}` and `POST /products`
+stays unchanged for its other consumers (search page, open data, related
+links, BrandShareChart).
+
+`ProductCardMappingService` projects the full DTO, so card values follow the
+same rules (fresh offers, localised names, ImpactScore exposure). A card keeps
+the field names and nesting of `ProductDto` and only carries:
+
+- `gtin`, `slug`, `fullSlug`; `base.{gtin, vertical, bestName,
+  coverImagePath}`; `identity.{brand, model, bestName}`; `names.{displayName,
+  cardName}`;
+- `attributes.referentialAttributes` and the `indexedAttributes` (name, value,
+  numeric value, no sourcing) of the vertical `popularAttributes`,
+  `technicalFilters` and `ecoFilters`, plus the attribute of the active sort;
+- `resources.{coverImagePath, externalCover}` and the first image (`url`,
+  `originalUrl`);
+- `scores.scores.ECOSCORE.{id, value}` and `scores.impactScore` (status and
+  methodology version);
+- `offers.{offersCount, bestPrice, bestNewOffer, bestOccasionOffer,
+  offersByCondition, newTrend, occasionTrend}`, each offer reduced to merchant,
+  favicon, `/contrib/` URL, condition, price and stock.
+
+Absent values are omitted from the JSON, never replaced by zero. A frontend
+listing that needs another field adds it to the card DTO (and to the golden
+file `src/test/resources/fixtures/product-card-tv-listing.json`, regenerated
+with `-Dgolden.update=true` in `ProductCardMappingServiceTest`), not back to
+the full DTO.
+
 ## Global search relevance
 
 `SearchService.globalSearch` (`POST /products/search/global`, page
@@ -95,6 +130,31 @@ configured under `front.global-search` (GOU-2029). They never reach
   demoted because of `nature`. Otherwise accessories are demoted in the category groups
   (`boosting`, `accessory-negative-boost`) and leave the long tail for the
   additive `accessoryResults` field (at most `accessory-results-limit`).
+- **Foreign head names** (GOU-2474, long tail only): spare parts sold without
+  merchant category name the object after the part ("Ressort Lave-linge -
+  Twinstar", "Roue Panier Lave-vaisselle Bosch"), with neither `pour` nor
+  `de`. The object of the query is the query without its leading and trailing
+  brands (product `BRAND` and `known-brands`), articles, `head-modifiers`
+  (`mini`, `compact`, `machine`, `série`, `lot`...) and words holding a digit
+  (`lave-vaisselle bosch` gives `lave vaisselle`); the head of a name is its
+  first word once the same words and the parenthesised parts are skipped
+  ("Bosch Série 4 Lave-vaisselle ..." and "WW10T654DLH Lave-linge Samsung"
+  start with their object). A long tail candidate is set apart when one of its
+  offer names holds the object after another head and none starts with it, so
+  "xiaomi poco m5 smartphone" does not set apart a product also named
+  "Smartphone C21". The check runs in Java on the candidates read (the index
+  cannot express it). Every long tail candidate is checked, with or without
+  `datasourceCategories` (GOU-2497: "Kit de superposition lave-linge" in
+  `KIT DE SUPERPOSITION`, "Wewoo Connecteur TV" in `ANTENNE` carry no
+  accessory marker); `foreign-head-uncategorized-only: true` restores the
+  GOU-2474 scope (products without category only). A query naming the part
+  (`ressort lave-linge`) has that part as object, so nothing is set apart; a
+  query naming an accessory term disables the rule as above. The products set
+  apart join `accessoryResults`, merged by score with the Elasticsearch
+  accessories. `foreign-head-enabled: false` turns the rule off. Vertical
+  groups and `nature` are not affected. Known limit: a name that starts with
+  the object ("Téléviseur Intelligent Lg, Téléviseur Infrarouge" for a remote)
+  is kept.
 - **Long tail** (`missingVerticalResults`, products without a vertical): only
   products with a fresh offer (`OfferFreshnessService`), an image and a
   readable title. The index holds neither `coverImagePath` nor an indexed
@@ -182,6 +242,38 @@ networks, merchants without an active offer and duplicate domains.
   feature (`trackedSince`); until `front.offers.max-age` has elapsed, merchants
   whose last offer predates it are missing and a warning is logged.
 
+## Source attribution
+
+`datasources.sources` of a product (GOU-2302) lists each source once: `name`,
+`portalUrl`, `license`, `licenseUrl` and `attribution`, sorted by name. The
+attribute sourcing (`ProductSourcedAttributeDto.datasourceName`) references it
+by name; the frontend sourcing tooltip and the "Sources" block of the product
+page read it.
+
+- **Sources**: the keys of `datasourceCodes` without
+  `Product.TECHNICAL_DATASOURCE_CODES`, read on the product itself
+  (`Product.sources` is only written on full indexation).
+- **Licence fields**: stated in the datasource configurations
+  (`DataSourceProperties`, open4goods-config `datasources/*.yml`), which only the
+  api loads. `DatasourceAttributionService` reads `GET /datasources` with the
+  `front.affiliation-partners` base URL and API key, keeps these five fields,
+  re-keys them by `name` (the api keys them by file name) and never logs the
+  response body.
+- **Credited sources only**: a source whose datasource file declares a
+  `license` or an `attribution` gets its declared `portalUrl`, `license`,
+  `licenseUrl` and `attribution`. Any other source gets its name only, every
+  other field `null`, whatever its file holds: no link without a declared licence
+  or attribution (`amazon.fr.yml` holds an affiliation `portalUrl` and declares
+  neither, so it gets its name only), and no link is taken from the affiliation
+  partners. The rule is enforced here, not left to the frontend. Do not declare an
+  `attribution` in a merchant file: its `portalUrl` would then be shown as is.
+- **Never guessed**: a blank or missing field is `null` and only absolute
+  `http(s)` URLs are exposed. The frontend shows a source's link and licence only
+  for credited sources (no "unknown licence", no merchant link).
+- **When**: at startup then hourly, never in a user request. On failure the
+  previous snapshot is kept; until the first success the sources are listed
+  without licence.
+
 ## Google CSS dry run
 
 `front.css.*` (`CssProperties`, disabled by default) prepares the product pages sent to Google by the CSS API
@@ -262,6 +354,17 @@ retries; neither the startup nor the redirects are affected. See
 
 - `front.affiliation-clicks-mapping.enabled` - toggle (default `true`,
   `FRONT_AFFILIATION_CLICKS_MAPPING_ENABLED`; `false` in the `local` profile).
+
+## Affiliation click reference
+
+`/contrib/` redirects can carry the `AffiliationClick` id in the network's
+reference parameter (Awin `clickref`, TradeTracker `r`, Effiliation `effi_id`,
+Kwanko `argsite` on `mclic` links), so that sales can be joined to clicks
+(GOU-2522). Awin is on by default since 2026-11-21 (GOU-2526), the other networks are off by default: the redirect is then the token URL. See
+[docs/architecture/affiliation-clicks.md](../docs/architecture/affiliation-clicks.md).
+
+- `front.affiliation-click-ref.<awin|tradetracker|effiliation|kwanko>-enabled` -
+  per network (default `true` for Awin, `false` for the others, `FRONT_AFFILIATION_CLICK_REF_<NETWORK>_ENABLED`).
 
 ## Google Indexation
 

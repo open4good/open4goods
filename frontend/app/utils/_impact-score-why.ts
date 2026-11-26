@@ -44,11 +44,27 @@ const formatValue = (
   return unit && !text.endsWith(unit) ? `${text} ${unit}` : text
 }
 
-const formatAverage = (score: ScoreView): string | null => {
+/** True when the displayed value is a plain number (not a class such as "A"). */
+const isNumericValue = (value: string | number | null | undefined): boolean => {
+  if (typeof value === 'number') return Number.isFinite(value)
+  if (typeof value !== 'string') return false
+  const text = value.trim().replace(',', '.')
+  return text.length > 0 && Number.isFinite(Number(text))
+}
+
+/**
+ * Category average, formatted for the locale with the unit of the value. Null
+ * unless the product value is numeric: a class or a text is never compared to
+ * an average.
+ */
+const formatAverage = (score: ScoreView, locale: string): string | null => {
   const avg = score.absolute?.avg
-  if (!isFiniteNumber(avg)) return null
-  const rounded = Math.round(avg * 10) / 10
-  return formatValue(rounded, score.attributeSuffix ?? score.unit)
+  if (!isFiniteNumber(avg) || !isNumericValue(score.attributeValue)) return null
+  const text = new Intl.NumberFormat(locale, {
+    maximumFractionDigits: 1,
+  }).format(avg)
+  const unit = score.attributeSuffix?.trim()
+  return unit ? `${text} ${unit}` : text
 }
 
 const compareByDeviation =
@@ -69,7 +85,8 @@ const compareByDeviation =
  */
 export const computeWhyHighlights = (
   scores: readonly ScoreView[],
-  limit: number = WHY_CITED_CRITERIA
+  limit: number = WHY_CITED_CRITERIA,
+  locale: string = 'fr-FR'
 ): WhyHighlights => {
   const filled = scores
     .filter(
@@ -83,7 +100,7 @@ export const computeWhyHighlights = (
       id: String(score.id),
       label: score.label,
       value: formatValue(score.attributeValue, score.attributeSuffix),
-      categoryAverage: formatAverage(score),
+      categoryAverage: formatAverage(score, locale),
       deviation: (score.relativeValue as number) - RELATIVE_SCALE_MIDPOINT,
       weight: isFiniteNumber(score.coefficient) ? score.coefficient : 0,
     }))

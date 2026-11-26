@@ -4,10 +4,10 @@
  * holds the structure (order, status, date, number of changes). To add a version,
  * add an entry here and its texts in both locale files.
  *
- * `date` is an ISO day, left out when the date was not recorded. A `planned` version
- * is announced but not yet in force on any vertical.
+ * `date` is an ISO day, left out when the date was not recorded. A `partial` version
+ * is in force on some verticals only (the previous version stays in force on the others).
  */
-export type ImpactScoreVersionStatus = 'current' | 'planned' | 'past'
+export type ImpactScoreVersionStatus = 'current' | 'partial' | 'past'
 
 export interface ImpactScoreVersionEntry {
   id: string
@@ -18,7 +18,7 @@ export interface ImpactScoreVersionEntry {
 }
 
 export const IMPACT_SCORE_VERSIONS: readonly ImpactScoreVersionEntry[] = [
-  { id: 'v2', status: 'planned', changeCount: 4 },
+  { id: 'v2', status: 'partial', date: '2026-11-16', changeCount: 4 },
   { id: 'v1Fixes', status: 'current', date: '2026-11-09', changeCount: 3 },
   { id: 'v1', status: 'current', changeCount: 1 },
 ]
@@ -29,6 +29,3 @@ export const IMPACT_SCORE_VERSIONS_LAST_MODIFIED: string | undefined =
     .filter((date): date is string => Boolean(date))
     .sort()
     .at(-1)
-
-/** Method version in force today; bump together with the `planned` -> `current` switch. */
-export const IMPACT_SCORE_CURRENT_METHOD_VERSION = '1'

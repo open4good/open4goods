@@ -36,15 +36,16 @@ lang: fr
 |---|---|
 | Plan 05 (EPREL smartphones) | avancé par le programme ImpactScore : hypothèse `productGroup` infirmée (GOU-2042), champs EPREL mappés dont les cycles de batterie x100 (GOU-1891, #3596), table Apple (#3606). Appariement au 2026-11-12 : 939 smartphones sur 14 589 (6,4 %), Apple 27 sur 1 689, Samsung 382 sur 3 668 ; mesure complète après le batch du 2026-11-17 (GOU-2048). Restent : règle Samsung `/DS`, filtre `deviceType`, attribution (P0-4), colonnes d'export. |
 | Plan 01 (indice de durabilité) | lecture marchande seulement : attribut `DURABILITY_INDEX` (GOU-1892), critère V2 `REPAIRABILITY_OR_DURABILITY_INDEX` (GOU-2041). L'import du fichier data.gouv n'est pas commencé. |
-| P0-1 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
+| P0-1 | livré (GOU-2296) : `BatchService.clean()` supprimé ; `POST /batch/tweak` et `cleanAiData()` supprimés ensuite. |
+| P0-4 | livré (GOU-2301, GOU-2302) : champ `sources`, licence des datasources, source des scores, licence et attribution affichées sur la fiche produit. Rien n'est affiché tant qu'aucune source ne déclare `license` ou `attribution` dans son YAML, ce qui est le cas aujourd'hui : l'affichage apparaîtra avec les sources de référence (EPREL, RappelConso...) qui les déclareront. `sourceAttributions` (lien et date de l'enregistrement) reporté à P0-5. |
+| P0-2, P0-3, P0-5 à P0-11 | aucun prérequis livré. P0-9 confirmé en exécutant le code (section 4). |
 | Plans 02 à 04, 06 à 15 | non démarrés ; 09 et 10 en attente (Q2). |
 
 Recouvrements avec les lots d'agrégation en cours (GOU-2272) :
 
 | Prérequis | Lot qui touche les mêmes fichiers | Ordre |
 |---|---|---|
-| P0-1 (`BatchService`) | lot A (GOU-2273, #3665, fusionné le 2026-11-15) | possible dès maintenant |
-| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | possible dès maintenant |
+| P0-2, P0-3 (`AttributesConfig`, `AttributeConfig`) | lot G (GOU-2279, #3666, fusionné le 2026-11-15 ; réécrit l'index des synonymes sans les normaliser) | **livrés** par GOU-2295 (PR en revue) ; aucun attribut YAML n'utilise encore `preferredSources` |
 | P0-5, projection (chaîne d'agrégation) | S1 (GOU-2280) | après S1 |
 
 ## 1. Sommaire des plans
@@ -108,7 +109,7 @@ est donc accepté par cette voie. Le socle ci-dessous s'appuie sur ce fait.
 - Lecture par lots des produits : `ProductRepository.multiGetForAggregation(Collection<Long>)`.
   Réindexation : `ProductRepository.addToFullindexationQueue(Collection<Product>)`.
   Export projeté : `ProductRepository.exportAll(String[] includeFields)`.
-- Agrégation : `AggregationFacadeService.getStandardAggregator(String name)`, qui enchaîne
+- Agrégation : `AggregationFacadeService.getStandardAggregator()`, la chaîne partagée (sans état) qui enchaîne
   Identity, Taxonomy, Attribute, UsageCost, Names, Price et Media.
 - Provenance des attributs : `SourcableAttribute` et `SourcedAttribute` (`model/.../attribute/`).
   `AttributeRealtimeAggregationService` enregistre le `datasourceName` du fragment comme source.
@@ -322,7 +323,31 @@ Deux constats du 2026-11-15, à confirmer sur le `_mapping` réel :
 
 Détail :
 
-- **Produit** (à créer) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par
+- **Livré par GOU-2301 (P0-4, 1/2)** : confirmé le 2026-11-15 sur `products-moustik`, `datasourceCodes`
+  est `disabled` (lisible dans `_source` seulement) : le filtre "datasource" et les agrégations de
+  `DatavizStatsService` ne renvoyaient rien. Le champ `Product.sources` (`keyword`, liste) en
+  est la correction : clés de `datasourceCodes` moins `Product.TECHNICAL_DATASOURCE_CODES`, recalculé par
+  `ProductRepository` avant toute écriture complète (`store`, `forceIndex`). Le filtre, `DatavizStatsService`
+  et la colonne `sources` de l'export ouvert (`|`) le lisent. `DataSourceProperties` porte `license`,
+  `licenseUrl`, `attribution` (vides tant que la source ne les renseigne pas) ; `Score.metadatas.source`
+  nomme les datasources de la valeur retenue.
+- **Livré par GOU-2302 (P0-4, 2/2)** : `ProductDatasourcesDto.sources` décrit une fois chaque source
+  du produit (`name`, `portalUrl`, `license`, `licenseUrl`, `attribution`, `null` quand la source ne
+  le dit pas). front-api lit ces champs par `GET /datasources` de l'api (`DatasourceAttributionService`,
+  rafraîchi toutes les heures). Seules les sources dont le YAML déclare une `license` ou une
+  `attribution` sont créditées, et la règle est appliquée par front-api : les autres, marchands
+  compris (le `portalUrl` d'`amazon.fr.yml` est un lien d'affiliation), sortent avec leur nom seul,
+  et aucun lien n'est pris chez un partenaire d'affiliation. L'infobulle
+  `ProductAttributeSourcingLabel` (retrouvée par `datasourceName`) montre leur lien et leur
+  licence, et la fiche produit les liste en bas de page (rendu SSR). Les autres gardent leur nom
+  seul dans l'infobulle et le bloc n'est pas rendu sans source créditée.
+  Aucune source n'en déclare aujourd'hui (`amazon.fr.yml`, `icecat.biz.yml`) : l'affichage
+  apparaîtra quand les YAML des sources de référence (EPREL, RappelConso...) déclareront
+  `license`/`attribution`. `icecat.biz.miss` rejoint `Product.TECHNICAL_DATASOURCE_CODES`. Le lien
+  vers l'enregistrement et sa date attendent `sourceAttributions` (P0-5).
+- **`sourceAttributions` est reporté à P0-5** : la projection est la seule à l'écrire, et il n'y a pas de
+  champ sans écrivain. La description ci-dessous reste la cible.
+- **Produit** (à créer, P0-5) : `Map<String, SourceAttribution> Product.sourceAttributions`, indexé par
   identifiant de source.
 
   ```java
@@ -337,10 +362,10 @@ Détail :
   seuls sous-champs filtrables mappés explicitement (`recalls.active`, `recalls.source`).
   À confirmer sur l'index réel avec `GET products-moustik/_mapping` avant le premier
   déploiement.
-- **Source** (à créer, dans `DataSourceProperties`) : `license`, `licenseUrl`, `attribution`
-  (texte affiché, par exemple "Producteurs, via data.gouv.fr"), `dataPortalUrl`.
+- **Source** (`DataSourceProperties`, livré) : `license`, `licenseUrl`, `attribution`
+  (texte affiché, par exemple "Producteurs, via data.gouv.fr").
 - **Scores** : `Attribute2ScoreAggregationService` recopie la source gagnante de l'attribut dans
-  `Score.metadatas` (`source`, `sourceUpdatedAt`).
+  `Score.metadatas` (`source` livré ; `sourceUpdatedAt` reporté à P0-5 avec `sourceAttributions`).
 - **Front** : front-api expose déjà `ProductDatasourcesDto` et `ProductSourcedAttributeDto`
   (`ProductMappingService`). On y ajoute l'attribution. L'infobulle existante par attribut
   montre la licence et le lien ; la fiche produit liste les sources : nom, lien vers
@@ -448,6 +473,10 @@ Correctif, dans `BarcodeValidationService` :
    attrape 9 sur 10. Ils restent au provider, avec un log.
 5. Test qui échoue d'abord : `"0"`, `"00000000"`, `"17"`, `1234567890128`, un code 2xx, un
    GTIN-8 valide ; garder les tests UPC-A et ISBN-10 existants.
+
+**Livré (GOU-2294).** Seuil N = 8 chiffres significatifs, retenu d'après la mesure GOU-2293 :
+seuls 1 514 produits ont moins de 8 chiffres significatifs, alors que les codes à 8-10 chiffres
+sont presque tous des codes à offres actives. Les produits existants ne sont pas touchés.
 
 Hors de ce lot : front-api a deux autres contrôles de somme (`CssEligibilityService.isValidGtin`,
 `AmazonSearchLinkService.hasValidCheckDigit`), faute de dépendre de `commons`. À unifier plus
@@ -644,8 +673,8 @@ Trouvées en préparant ces plans, et indépendantes des nouvelles sources :
   juste : `"0"` donne `0L`, `"17"` donne `17L` (vérifié en exécutant le service le 2026-11-15,
   P0-9).
 - `gtinInfos.gs1Class` est calculé et indexé, mais jamais utilisé pour décider (P0-9).
-- `datasourceCodes` est mappé `"enabled": false`, alors qu'un filtre de recherche et
-  `DatavizStatsService` l'interrogent (P0-4, à confirmer sur le `_mapping` réel).
+- ~~`datasourceCodes` est mappé `"enabled": false`~~ : confirmé le 2026-11-15, corrigé par le champ
+  `sources` (GOU-2301).
 - Le drapeau `referentiel` des datasources est recopié dans `DataFragment` mais jamais lu
   (P0-10).
 - `ProductEprelDto.from` met à `null` `categorySpecificAttributes`, que lisent

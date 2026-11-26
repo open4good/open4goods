@@ -65,7 +65,7 @@ vi.stubGlobal(
   '$fetch',
   vi.fn(url => {
     const normalizedUrl = url.split('?')[0]
-    if (normalizedUrl === '/api/products/search') {
+    if (normalizedUrl === '/api/products/cards') {
       return Promise.resolve({
         products: {
           data: [],

@@ -370,14 +370,13 @@ const scrollToNext = () => {
                     />
                   </div>
 
-                  <div class="d-flex flex-column ga-4">
+                  <div class="home-hero__wizard-slot d-flex flex-column ga-4">
                     <ClientOnly>
                       <NudgeToolWizard :verticals="wizardVerticals" />
                       <template #fallback>
                         <v-skeleton-loader
                           class="home-hero__wizard-fallback"
                           type="card"
-                          height="320"
                         />
                       </template>
                     </ClientOnly>
@@ -606,6 +605,15 @@ const scrollToNext = () => {
 .home-hero__panel-bottom
   margin-top: auto
 
+// Reserves the wizard height (506-534 px measured from 840 px up to Vuetify's `lg`
+// breakpoint at 1145 px, 300 px beyond), shared by the fallback and the hydrated
+// wizard, to avoid CLS on hydration. 1145 px matches `useDisplay().mobile`.
+.home-hero__wizard-slot
+  min-height: 320px
+
+.home-hero__wizard-fallback
+  flex: 1
+
 @media (max-width: 959px)
   .home-hero
     min-height: auto
@@ -636,6 +644,15 @@ const scrollToNext = () => {
 
   .home-hero__inner
     height: 100%
+
+@media (min-width: 840px) and (max-width: 1144.98px)
+  .home-hero__wizard-slot
+    // the wizard is capped at the viewport height minus 32 px
+    min-height: min(540px, calc(100vh - 32px))
+
+@media (min-width: 1145px)
+  .home-hero__wizard-slot
+    min-height: 300px
 
 @media (min-width: 1280px)
   .home-hero__panel-grid

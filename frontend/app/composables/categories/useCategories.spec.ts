@@ -1,9 +1,15 @@
 import { ref } from 'vue'
 import type { VerticalConfigDto } from '~~/shared/api-client'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const fetchMock = vi.fn()
 let stateStore: Map<string, ReturnType<typeof ref>>
+const headersState = vi.hoisted(() => ({
+  current: undefined as Record<string, string> | undefined,
+}))
+
+mockNuxtImport('useRequestHeaders', () => () => headersState.current)
 
 vi.mock('#imports', () => ({
   useState: (key: string, init: () => unknown) => {
@@ -13,7 +19,7 @@ vi.mock('#imports', () => ({
 
     return stateStore.get(key)
   },
-  useRequestHeaders: () => undefined,
+  useRequestHeaders: () => headersState.current,
 }))
 
 vi.mock('#app', () => ({
@@ -24,7 +30,7 @@ vi.mock('#app', () => ({
 
     return stateStore.get(key)
   },
-  useRequestHeaders: () => undefined,
+  useRequestHeaders: () => headersState.current,
 }))
 
 describe('useCategories composable', () => {
@@ -32,9 +38,7 @@ describe('useCategories composable', () => {
     vi.resetModules()
     fetchMock.mockReset()
     stateStore = new Map()
-    const globalObject = globalThis as Record<string, unknown>
-    globalObject['categories-list-cache'] = {}
-    globalObject['category-detail-cache'] = {}
+    headersState.current = undefined
     vi.stubGlobal('$fetch', fetchMock)
   })
 
@@ -163,5 +167,48 @@ describe('useCategories composable', () => {
     expect(error.value).toBe('Category not found')
     expect(currentCategory.value).toBeNull()
     expect(activeCategoryId.value).toBeNull()
+  })
+
+  it('keeps the caches out of the serialized state (GOU-2698)', async () => {
+    fetchMock.mockImplementation((request: string) =>
+      Promise.resolve(
+        request === '/api/categories'
+          ? [{ id: 'category-1', verticalHomeUrl: '/dish-washers' }]
+          : { id: 'category-1', impactScoreConfig: { audit: {} } }
+      )
+    )
+
+    const { useCategories } = await import('./useCategories')
+    await useCategories().selectCategoryBySlug('dish-washers')
+
+    expect([...stateStore.keys()]).not.toContain('category-detail-cache')
+    expect([...stateStore.keys()]).not.toContain('categories-list-cache')
+    expect(
+      (globalThis as Record<string, unknown>)['category-detail-cache']
+    ).toBe(undefined)
+
+    // A second composable instance is served by the module cache.
+    fetchMock.mockClear()
+    await useCategories().fetchCategoryById('category-1')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('keys the caches by domain language, not by raw host (GOU-2698)', async () => {
+    fetchMock.mockResolvedValue([{ id: 'category-1' }])
+    const { useCategories } = await import('./useCategories')
+
+    headersState.current = { host: 'unknown-1.example' }
+    await useCategories().fetchCategories()
+    headersState.current = { host: 'unknown-2.example' }
+    await useCategories().fetchCategories()
+    headersState.current = { 'x-forwarded-host': 'nudger.fr' }
+    await useCategories().fetchCategories()
+
+    // Two unknown hosts and the French host share a single entry.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    headersState.current = { host: 'nudger.com' }
+    await useCategories().fetchCategories()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 })

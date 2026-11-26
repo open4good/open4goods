@@ -430,8 +430,7 @@ public class CategoryMappingService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         return new AttributesConfigDto(configs,
-                defaultSet(attributesConfig.getFeaturedValues()),
-                defaultSet(attributesConfig.getExclusions()));
+                defaultSet(attributesConfig.getFeaturedValues()));
     }
 
     /**
@@ -517,7 +516,7 @@ public class CategoryMappingService {
 
     /**
      * Map the impact score configuration of the vertical's current methodology (weights, threshold, position
-     * labels) and the generation prompts.
+     * labels). The generation prompt and raw AI response are internal and never exposed.
      */
     private ImpactScoreConfigDto mapImpactScoreConfig(ImpactScoreConfig impactScoreConfig, DomainLanguage domainLanguage) {
         if (impactScoreConfig == null) {
@@ -533,9 +532,7 @@ public class CategoryMappingService {
                 impactScoreConfig.minRealWeightCoverage(),
                 positionLabels,
                 impactScoreConfig.getMethodologyRevision(),
-                mapImpactScoreAudit(impactScoreConfig.getAiResult()),
-                impactScoreConfig.getYamlPrompt(),
-                impactScoreConfig.getAiJsonResponse());
+                mapImpactScoreAudit(impactScoreConfig.getAiResult()));
     }
 
 

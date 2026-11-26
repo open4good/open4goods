@@ -274,6 +274,29 @@ class DataFragmentStoreServiceTest {
 		assertThat(queuedFullProducts()).isEmpty();
 	}
 
+	@Test
+	void restrictedBarcodeNeverCreatesAProduct() throws Exception {
+		elasticStores();
+
+		service.aggregateAndstore(List.of(offer("2001234567893")));
+
+		verify(generationService, never()).updateOne(any(), any());
+		assertThat(queuedFullProducts()).isEmpty();
+	}
+
+	@Test
+	void restrictedBarcodeOfAnExistingProductIsStillAggregated() throws Exception {
+		Product existing = existingProduct();
+		existing.setId(Long.valueOf("2001234567893"));
+		elasticStores(existing);
+
+		service.aggregateAndstore(List.of(offer("2001234567893")));
+
+		ArgumentCaptor<Product> aggregated = ArgumentCaptor.forClass(Product.class);
+		verify(generationService).updateOne(any(), aggregated.capture());
+		assertThat(aggregated.getValue()).isSameAs(existing);
+	}
+
 	private static DataFragment pricedOffer(String gtin, long indexedAt) {
 		DataFragment fragment = offer(gtin);
 		fragment.setPrice(new Price(199.99, Currency.EUR));

@@ -15,9 +15,13 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,9 +58,12 @@ public class AwinReportClient extends AbstractAffiliationReportClient {
     static final String PUBLISHER_ID_PROPERTY = "metriks.affiliation.awin.publisher-id";
     static final String API_TOKEN_PROPERTY = "metriks.affiliation.awin.api-token";
     static final String TRANSACTIONS_URL = "https://api.awin.com/publishers/%s/transactions/";
+    static final String PROGRAMMES_URL = "https://api.awin.com/publishers/%s/programmes";
     /** Maximum span of one transactions request, imposed by the Awin API. */
     static final int MAX_DAYS_PER_REQUEST = 31;
     private static final DateTimeFormatter AWIN_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwinReportClient.class);
 
     private final String publisherId;
     private final String apiToken;
@@ -111,7 +118,52 @@ public class AwinReportClient extends AbstractAffiliationReportClient {
             }
             transactions.addAll(fetchChunk(chunkStart, chunkEnd, zone));
         }
-        return transactions;
+        return withAdvertiserNames(transactions);
+    }
+
+    /**
+     * Fills the advertiser name from the publisher's programmes ({@code GET /publishers/{id}/programmes}, the
+     * transaction carries the advertiser id only). A programmes failure leaves the names empty (the advertiser id
+     * still identifies the merchant) and is logged without any detail that could carry a credential.
+     */
+    private List<AffiliationReportTransaction> withAdvertiserNames(List<AffiliationReportTransaction> transactions) {
+        if (transactions.stream().noneMatch(t -> t.advertiserId() != null)) {
+            return transactions;
+        }
+        Map<String, String> names;
+        try {
+            names = fetchProgrammeNames();
+        } catch (AffiliationReportException e) {
+            LOGGER.warn("Awin : noms des annonceurs indisponibles ({})", e.getMessage());
+            return transactions;
+        }
+        return transactions.stream().map(t -> new AffiliationReportTransaction(t.transactionDate(), t.status(),
+                t.commission(), t.currency(), t.advertiserId(), names.get(t.advertiserId()), t.clickRef())).toList();
+    }
+
+    /**
+     * @return programme name per advertiser id
+     */
+    private Map<String, String> fetchProgrammeNames() throws AffiliationReportException {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(String.format(PROGRAMMES_URL, publisherId)))
+                .timeout(REQUEST_TIMEOUT)
+                .header("Authorization", "Bearer " + apiToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+        JsonNode root = readJson(send(request, "programmes"), "programmes");
+        if (!root.isArray()) {
+            throw failure("réponse inattendue (tableau de programmes attendu)");
+        }
+        Map<String, String> names = new HashMap<>();
+        for (JsonNode node : root) {
+            String id = textOrNull(node.path("id"));
+            String name = textOrNull(node.path("name"));
+            if (id != null && name != null) {
+                names.put(id, name);
+            }
+        }
+        return names;
     }
 
     /**
@@ -154,7 +206,8 @@ public class AwinReportClient extends AbstractAffiliationReportClient {
             if (status != AffiliationReportStatus.DECLINED && (amount == null || currency == null)) {
                 throw failure("commissionAmount incomplet (montant ou devise absent)");
             }
-            transactions.add(new AffiliationReportTransaction(date, status, amount, currency));
+            transactions.add(new AffiliationReportTransaction(date, status, amount, currency,
+                    textOrNull(node.path("advertiserId")), null, textOrNull(node.path("clickRefs").path("clickRef"))));
         }
         return transactions;
     }

@@ -13,6 +13,7 @@ import type {
 import HomeSolutionSection from '~/components/home/sections/HomeSolutionSection.vue'
 import HomeBlogSection from '~/components/home/sections/HomeBlogSection.vue'
 import HomeFaqSection from '~/components/home/sections/HomeFaqSection.vue'
+import HomeCrawlLinksSection from '~/components/home/sections/HomeCrawlLinksSection.vue'
 import HomeCtaSection from '~/components/home/sections/HomeCtaSection.vue'
 import HomeHeroFallback from '~/components/home/sections/HomeHeroFallback.vue'
 import ParallaxWidget from '~/components/shared/ui/ParallaxWidget.vue'
@@ -64,45 +65,23 @@ const searchQuery = ref('')
 
 const MIN_SUGGESTION_QUERY_LENGTH = 2
 
-const MOBILE_USER_AGENT_PATTERN =
-  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
-
-const resolveUserAgentFromHeader = (
-  headerValue: string | string[] | undefined
-): string | null => {
-  if (!headerValue) {
-    return null
-  }
-
-  if (Array.isArray(headerValue)) {
-    return headerValue[0] ?? null
-  }
-
-  return headerValue
-}
-
-const initialIsMobileLayout = useState<boolean>(
-  'home-page-initial-is-mobile-layout',
-  () => {
-    if (import.meta.server) {
-      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
-      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
-
-      return userAgent ? MOBILE_USER_AGENT_PATTERN.test(userAgent) : false
-    }
-
-    return display.smAndDown.value
-  }
-)
-
+// The mobile landing and the desktop hero are both server-rendered and
+// switched by the Vuetify display classes (`d-md-none`, `d-none d-md-block`),
+// whose breakpoint matches `smAndDown`. Choosing the layout from the
+// User-Agent swapped the structure at hydration whenever the viewport
+// disagreed with it (desktop UA at 390 px: CLS 1.77, GOU-2458).
 const isHydrated = ref(false)
 
 onMounted(() => {
   isHydrated.value = true
 })
 
-const isMobileLayout = computed(() =>
-  isHydrated.value ? display.smAndDown.value : initialIsMobileLayout.value
+const isMobileLayout = computed(() => display.smAndDown.value)
+
+// Hidden by CSS until hydration, then dropped on desktop: the swap moves
+// nothing, as the landing is already `display: none` there.
+const shouldRenderMobileLanding = computed(
+  () => !isHydrated.value || isMobileLayout.value
 )
 
 type HomeBlogItem = BlogPostDto & { formattedDate?: string; slug?: string }
@@ -422,23 +401,6 @@ const faqPanels = computed(() =>
   }))
 )
 
-const faqJsonLd = computed(() => {
-  const validItems = faqItems.value.filter(item => item.answer?.trim())
-
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: validItems.map(item => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  }
-})
-
 const canonicalUrl = computed(() =>
   new URL(
     resolveLocalizedRoutePath('index', locale.value),
@@ -462,49 +424,34 @@ const logoUrl = computed(() =>
   new URL('/nudger-icon-512x512.png', requestURL.origin).toString()
 )
 
-const localizedHomeUrls = computed(() =>
-  Array.from(
-    new Set([
-      canonicalUrl.value,
-      ...alternateLinks.value.map(link => link.href),
-    ])
-  )
-)
+const GITHUB_URL = 'https://github.com/open4good'
 
 const linkedinUrl = computed(() =>
   toTrimmedString(t('siteIdentity.links.linkedin'))
 )
 
+const siteOrigin = computed(() => requestURL.origin)
+const organizationId = computed(() => `${siteOrigin.value}/#organization`)
+const websiteId = computed(() => `${siteOrigin.value}/#website`)
+
 const organizationJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': organizationId.value,
   name: siteName.value,
-  url: canonicalUrl.value,
+  url: `${siteOrigin.value}/`,
   logo: logoUrl.value,
-  sameAs: Array.from(
-    new Set([linkedinUrl.value, ...localizedHomeUrls.value].filter(Boolean))
-  ),
+  sameAs: [linkedinUrl.value, GITHUB_URL].filter(Boolean),
 }))
-
-const searchPageUrl = computed(() =>
-  new URL(
-    resolveLocalizedRoutePath('search', locale.value),
-    requestURL.origin
-  ).toString()
-)
 
 const websiteJsonLd = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': websiteId.value,
   name: siteName.value,
-  url: canonicalUrl.value,
+  url: `${siteOrigin.value}/`,
   inLanguage: locale.value,
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: `${searchPageUrl.value}?q={search_term_string}`,
-    'query-input': 'required name=q',
-  },
-  sameAs: localizedHomeUrls.value,
+  publisher: { '@id': organizationId.value },
 }))
 
 const categoriesLandingUrl = computed(() => localePath({ name: 'categories' }))
@@ -530,7 +477,8 @@ const normalizeVerticalHomeUrl = (
 }
 
 const blogDateFormatter = computed(
-  () => new Intl.DateTimeFormat(locale.value, {
+  () =>
+    new Intl.DateTimeFormat(locale.value, {
       dateStyle: 'medium',
       timeZone: 'UTC',
     })
@@ -716,28 +664,11 @@ const webPageJsonLd = computed(() => ({
   description: seoDescription.value,
   url: canonicalUrl.value,
   inLanguage: locale.value,
-  isPartOf: {
-    '@type': 'WebSite',
-    name: siteName.value,
-    url: canonicalUrl.value,
-  },
+  isPartOf: { '@id': websiteId.value },
   primaryImageOfPage: {
     '@type': 'ImageObject',
     url: ogImageUrl.value,
   },
-}))
-
-const breadcrumbJsonLd = computed(() => ({
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    {
-      '@type': 'ListItem',
-      position: 1,
-      name: String(t('navigation.home')),
-      item: canonicalUrl.value,
-    },
-  ],
 }))
 
 useSeoMeta({
@@ -760,11 +691,6 @@ useHead(() => ({
   ],
   script: [
     {
-      key: 'home-faq-jsonld',
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(faqJsonLd.value),
-    },
-    {
       key: 'home-organization-jsonld',
       type: 'application/ld+json',
       innerHTML: JSON.stringify(organizationJsonLd.value),
@@ -779,11 +705,6 @@ useHead(() => ({
       type: 'application/ld+json',
       innerHTML: JSON.stringify(webPageJsonLd.value),
     },
-    {
-      key: 'home-breadcrumb-jsonld',
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify(breadcrumbJsonLd.value),
-    },
   ],
 }))
 </script>
@@ -791,8 +712,9 @@ useHead(() => ({
 <template>
   <div>
     <PwaMobileLanding
-      v-if="isMobileLayout"
+      v-if="shouldRenderMobileLanding"
       v-model:search-query="searchQuery"
+      class="d-md-none"
       :verticals="rawCategories"
       :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
       @submit="handleSearchSubmit"
@@ -800,31 +722,33 @@ useHead(() => ({
       @select-product="handleProductSuggestion"
     />
     <div class="home-page">
-      <ClientOnly>
-        <HomeHeroSection
-          v-if="!isMobileLayout"
-          v-model:search-query="searchQuery"
-          :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
-          :verticals="rawCategories"
-          :partners-count="heroPartnersCount"
-          :open-data-millions="openDataMillions"
-          :products-count="productsCount"
-          :categories-count="categoriesCount"
-          :impact-score-products-count="impactScoreProductsCount"
-          :impact-score-categories-count="impactScoreCategoriesCount"
-          :products-without-vertical-count="productsWithoutVerticalCount"
-          :reviewed-products-count="reviewedProductsCount"
-          :ai-summary-remaining-credits="aiSummaryRemainingCredits"
-          :should-reduce-motion="shouldReduceMotion"
-          hero-background-i18n-key="hero.background"
-          @submit="handleSearchSubmit"
-          @select-category="handleCategorySuggestion"
-          @select-product="handleProductSuggestion"
-        />
-        <template #fallback>
-          <HomeHeroFallback v-if="!isMobileLayout" />
-        </template>
-      </ClientOnly>
+      <div class="home-page__desktop-hero d-none d-md-block">
+        <ClientOnly>
+          <HomeHeroSection
+            v-if="!isMobileLayout"
+            v-model:search-query="searchQuery"
+            :min-suggestion-query-length="MIN_SUGGESTION_QUERY_LENGTH"
+            :verticals="rawCategories"
+            :partners-count="heroPartnersCount"
+            :open-data-millions="openDataMillions"
+            :products-count="productsCount"
+            :categories-count="categoriesCount"
+            :impact-score-products-count="impactScoreProductsCount"
+            :impact-score-categories-count="impactScoreCategoriesCount"
+            :products-without-vertical-count="productsWithoutVerticalCount"
+            :reviewed-products-count="reviewedProductsCount"
+            :ai-summary-remaining-credits="aiSummaryRemainingCredits"
+            :should-reduce-motion="shouldReduceMotion"
+            hero-background-i18n-key="hero.background"
+            @submit="handleSearchSubmit"
+            @select-category="handleCategorySuggestion"
+            @select-product="handleProductSuggestion"
+          />
+          <template #fallback>
+            <HomeHeroFallback />
+          </template>
+        </ClientOnly>
+      </div>
       <div class="home-page__sections">
         <ParallaxWidget
           class="home-page__parallax"
@@ -921,6 +845,8 @@ useHead(() => ({
             </SectionReveal>
           </section>
         </ParallaxWidget>
+
+        <HomeCrawlLinksSection />
 
         <ParallaxWidget
           class="home-page__parallax home-page__parallax--centered"

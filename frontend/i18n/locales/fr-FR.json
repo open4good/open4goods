@@ -45,6 +45,7 @@
   "blog": {
     "article": {
       "back": "Retour",
+      "draftBanner": "Brouillon : cet article n'est pas publié. Il n'est visible que sur la bêta, pour relecture.",
       "empty": "Le contenu de cet article sera disponible bientôt.",
       "featuredImageAlt": "Image mise en avant pour {title}",
       "readingTime": "Env. {minutes} min de lecture",
@@ -79,9 +80,32 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Parcourez les articles {tag} du blog Nudger.",
       "tagTitle": "Articles {tag} - Blog Nudger"
+    },
+    "tvSizeCalculator": {
+      "title": "Calculateur : quelle taille de TV pour votre recul ?",
+      "distanceLabel": "Distance de recul (en mètres)",
+      "distanceHint": "Entre {min} et {max} m",
+      "resolutionLabel": "Résolution de la TV",
+      "resolution": {
+        "4k": "4K (Ultra HD)",
+        "full-hd": "Full HD"
+      },
+      "range": "Diagonale conseillée : de {minInches} à {maxInches} pouces ({minCm} à {maxCm} cm)",
+      "recommended": "Taille conseillée : {inches} pouces",
+      "beyond": {
+        "above": "(votre recul permet un écran plus grand que les tailles courantes)",
+        "below": "(votre recul est court pour les tailles courantes : choisissez la plus petite)"
+      },
+      "dimensions": "Largeur x hauteur : {width} x {height} cm (écran 16:9)",
+      "link": "Voir les TV de cette taille"
     }
   },
   "home": {
+    "crawlLinks": {
+      "title": "Nos guides et produits à découvrir",
+      "guides": "Guides d'achat",
+      "products": "Produits à comparer"
+    },
     "seo": {
       "title": "Nudger {'|'} Comparateur de prix et d'Impact Score",
       "description": "Comparez les prix et l'Impact Score de plus de {count} millions de produits : une note sur 20, méthode publiée.",
@@ -538,6 +562,12 @@
     }
   },
   "category": {
+    "pagination": {
+      "ariaLabel": "Pagination des produits",
+      "previous": "Page précédente",
+      "next": "Page suivante",
+      "page": "Page {page}"
+    },
     "documentation": {
       "guidesTitle": "Guides utiles",
       "postsTitle": "Articles associés",
@@ -566,14 +596,8 @@
       "sections": {
         "aiAudit": {
           "intro": "Audit des prompts et réponses qui ont servi à configurer l'Impact Score des {category}.",
-          "jsonUnavailable": "Réponse IA indisponible.",
-          "promptHelper": "Instructions envoyées au modèle pour produire la configuration.",
-          "promptTitle": "Prompt YAML générateur",
-          "responseHelper": "Résultat JSON de l'IA ayant servi de base à la configuration.",
-          "responseTitle": "Réponse du modèle",
           "title": "Audit de génération IA",
           "auditTitle": "Données structurées",
-          "yamlUnavailable": "Prompt indisponible.",
           "toggle": "Audit IA : prompt et réponse brute",
           "v1History": "Cet audit IA a servi à configurer la matrice V1 de l'Impact Score {category}. Il n'a pas été refait pour la méthode v{version}, dont les critères et les poids sont présentés plus haut. Le prompt et la réponse brute de la V1 restent consultables dans la configuration publiée sur GitHub."
         },
@@ -657,8 +681,8 @@
         "USE": "Usage du produit"
       },
       "seo": {
-        "description": "Découvre comment Nudger calcule l'Impact Score des {category} : critères, pondérations et audit de génération IA.",
-        "title": "{category} - Impact Score détaillé"
+        "description": "Comment Nudger note les {category} sur 20 : critères, pondérations et sources de l'Impact Score. Méthode publiée et versionnée.",
+        "title": "Impact Score {category} : critères, pondérations et méthode"
       },
       "title": "{category} - {label}",
       "method": {
@@ -690,7 +714,7 @@
           "title": "Produits comparés",
           "scope": "Sont comparés les produits de la catégorie {category} présents dans le catalogue Nudger avec au moins une offre.",
           "rated": "{count} produits notés.",
-          "ratedCompared": "{count} {items} noté et comparé. | {count} {items} notés et comparés.",
+          "ratedCompared": "{count} produit noté et comparé dans la catégorie {items}. | {count} produits notés et comparés dans la catégorie {items}.",
           "notRated": "{count} produits non notés (données insuffisantes : {lowCoverage} ; aucun critère renseigné : {noCriteria}).",
           "outdated": "{count} produits en attente de recalcul avec la méthode actuelle.",
           "excluded": "{count} produits exclus de la comparaison. Sont exclus les produits sans marque, sans modèle, sans fiche EPREL associée (selon la catégorie) ou auxquels il manque un attribut requis par la catégorie.",
@@ -742,7 +766,9 @@
       },
       "operator": {
         "greaterThan": "≥ {value}",
-        "lowerThan": "≤ {value}"
+        "lowerThan": "≤ {value}",
+        "strictlyGreaterThan": "> {value}",
+        "strictlyLowerThan": "< {value}"
       },
       "reset": "Réinitialiser les filtres rapides"
     },
@@ -846,6 +872,14 @@
       "subtitle": "Autres sélections ciblées",
       "itemSubtitle": "Explorer cette sous-catégorie",
       "fallbackTitle": "Sélection associée"
+    },
+    "hub": {
+      "defaultTitle": "{category} : l'essentiel pour bien choisir",
+      "previewNotice": "Aperçu : ce bloc n'est pas publié. Il n'est visible qu'en bêta ou en développement.",
+      "topTitle": "Top {count} Impact Score",
+      "rankingDate": "Classement calculé le {date}",
+      "faqTitle": "Questions fréquentes",
+      "linksTitle": "Pour aller plus loin"
     },
     "readMore": {
       "showMore": "Lire plus",
@@ -985,7 +1019,7 @@
           "fair": "En dessous de la médiane",
           "poor": "Parmi les moins bien classés"
         },
-        "betterThan": "Mieux classé que {percent} % des {count} {items} notés par Nudger",
+        "betterThan": "Mieux classé que {percent} % des produits notés par Nudger dans la catégorie {items}",
         "productsFallback": "produits",
         "onlyRated": "Seul produit noté de sa catégorie",
         "criteria": "{count} critère sur {total} renseigné | {count} critères sur {total} renseignés",
@@ -1002,8 +1036,8 @@
       },
       "why": {
         "title": "Pourquoi cette note ?",
-        "headline": "{score}/20 : ce produit est mieux classé que {percent} % des {count} {items} notés par Nudger.",
-        "headlineBottom": "{score}/20 : ce produit est classé devant {percent} % des {count} {items} notés par Nudger.",
+        "headline": "{score}/20 : ce produit est mieux classé que {percent} % des produits notés par Nudger dans la catégorie {items}.",
+        "headlineBottom": "{score}/20 : ce produit est classé devant {percent} % des produits notés par Nudger dans la catégorie {items}.",
         "onlyRated": "{score}/20 : seul produit noté de sa catégorie, aucune comparaison de position n'est possible.",
         "criterion": "{label} ({value})",
         "criterionVsAverage": "{label} ({value}, contre {average} en moyenne dans la catégorie)",
@@ -1330,7 +1364,7 @@
     "intro": "L'Impact Score évolue. Chaque version de la méthode est datée ; une note n'est comparée qu'à des notes de la même version.",
     "backLink": "← L'Impact Score",
     "noDate": "Depuis l'origine",
-    "planned": "Annoncée, pas encore en vigueur",
+    "partial": "En vigueur par catégorie ; la version 1 reste en vigueur pour les autres",
     "scopeLabel": "Catégories concernées :",
     "changeLabel": "Changement :",
     "reasonLabel": "Raison :",
@@ -1341,7 +1375,7 @@
     "entries": {
       "v2": {
         "title": "Version 2",
-        "scope": "Catégories basculées une à une ; aucune n'est concernée tant que la version 2 n'est pas annoncée comme en vigueur.",
+        "scope": "Réfrigérateurs et lave-vaisselle (depuis le 16 novembre 2026), lave-linge, fours et smartphones (depuis le 25 novembre 2026). Les autres catégories restent en version 1 ; les deux versions coexistent, catégorie par catégorie.",
         "changes": [
           {
             "change": "Une note n'est calculée qu'à partir des critères réellement renseignés ; le poids des critères absents est réparti sur les critères renseignés.",
@@ -1381,7 +1415,7 @@
       },
       "v1": {
         "title": "Version 1",
-        "scope": "Toutes les catégories notées.",
+        "scope": "Toutes les catégories notées à l'origine. Elle reste en vigueur pour les catégories pas encore passées en version 2.",
         "changes": [
           {
             "change": "Première méthode : note sur 20, moyenne pondérée de critères par catégorie, normalisés par rapport aux produits de la catégorie ; une valeur moyenne est attribuée aux critères absents.",
@@ -1516,15 +1550,13 @@
         "columnName": "Colonne",
         "download": {
           "direct": {
-            "concurrent": "Jusqu'à {value} téléchargements simultanés",
-            "concurrentUnknown": "Limite de téléchargements simultanés",
+            "checksum": "SHA-256 : {value}",
             "cta": {
               "ariaLabel": "Lancer le téléchargement direct depuis Nudger",
               "label": "Télécharger depuis nudger.fr"
             },
             "description": "Récupérez le fichier ZIP directement sur l'infrastructure de Nudger.",
-            "speed": "Débit limité à {value} par client",
-            "speedUnknown": "Débit limité par client",
+            "resume": "Reprise possible si le téléchargement est interrompu",
             "title": "Téléchargement direct depuis Nudger"
           },
           "fast": {
@@ -1535,7 +1567,6 @@
               "label": "Télécharger sur data.gouv.fr"
             },
             "description": "Téléchargement via le portail open data officiel de l'État français.",
-            "speed": "Infrastructure haut débit",
             "title": "Téléchargement depuis data.gouv.fr"
           }
         },
@@ -1557,10 +1588,6 @@
             "description": "Marque déclarée ou déduite pour le produit.",
             "label": "brand"
           },
-          "categories": {
-            "description": "Catégories du produit.",
-            "label": "categories"
-          },
           "currency": {
             "description": "Devise du prix le plus bas.",
             "label": "currency"
@@ -1578,7 +1605,7 @@
             "label": "gtinType"
           },
           "last_updated": {
-            "description": "Horodatage (EPOCH ms) de la dernière mise à jour de l'article.",
+            "description": "Date UTC (AAAA-MM-JJ) de la dernière mise à jour du produit.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1601,9 +1628,9 @@
             "description": "Nombre d'offres commerciales disponibles pour le produit.",
             "label": "offers_count"
           },
-          "url": {
-            "description": "URL de la fiche produit lorsque des offres sont disponibles.",
-            "label": "url"
+          "sources": {
+            "description": "Sources qui ont contribué au produit, séparées par {'|'}.",
+            "label": "sources"
           }
         },
         "columnsSubtitle": "Chaque ligne correspond à un produit unique, identifié par son code-barre.",
@@ -1612,7 +1639,7 @@
           "fast": {
             "highlight": "Pensé pour la distribution, l'économie circulaire et les usages grand public"
           },
-          "subtitle": "Choisissez le site adapté à votre bande passante.",
+          "subtitle": "Choisissez le site de téléchargement qui vous convient.",
           "title": "Options de téléchargement"
         },
         "faq": {
@@ -1690,7 +1717,7 @@
             "label": "isbn"
           },
           "last_updated": {
-            "description": "Horodatage (ms) de la dernière mise à jour.",
+            "description": "Date UTC (AAAA-MM-JJ) de la dernière mise à jour du livre.",
             "label": "last_updated"
           },
           "min_price": {
@@ -1709,6 +1736,10 @@
             "description": "Nombre d'offres commerciales disponibles pour ce livre.",
             "label": "offers_count"
           },
+          "sources": {
+            "description": "Sources qui ont contribué au produit, séparées par {'|'}.",
+            "label": "sources"
+          },
           "souscategorie": {
             "description": "Sous-catégorie principale attribuée au livre.",
             "label": "souscategorie"
@@ -1720,10 +1751,6 @@
           "title": {
             "description": "Titre de l'ouvrage tel que fourni par les sources.",
             "label": "title"
-          },
-          "url": {
-            "description": "URL de la fiche du livre lorsque disponible.",
-            "label": "url"
           }
         },
         "columnsSubtitle": "Chaque ligne correspond à un livre identifié par son ISBN.",
@@ -1732,7 +1759,7 @@
           "fast": {
             "highlight": "Pensé pour les usages culturels, bibliothèques et acteurs du livre"
           },
-          "subtitle": "Sélectionnez le site adapté à votre bande passante.",
+          "subtitle": "Sélectionnez le site de téléchargement qui vous convient.",
           "title": "Options de téléchargement"
         },
         "faq": {
@@ -2255,6 +2282,14 @@
     }
   },
   "product": {
+    "relatedLinks": {
+      "title": "Dans la même catégorie",
+      "navLabel": "Catégorie du produit",
+      "allOfVertical": "Tous les {vertical}",
+      "sameSubCategory": "Autres produits : {subCategory}",
+      "sameVertical": "Autres {vertical}",
+      "guides": "Guides d'achat"
+    },
     "verdict": {
       "title": "Verdict Nudger",
       "summary": "Notre évaluation en trois dimensions.",
@@ -2503,7 +2538,8 @@
           "conflicts": "Conflits détectés",
           "noConflicts": "Aucun conflit détecté"
         },
-        "tooltipAriaLabel": "Afficher les détails de sourcing"
+        "tooltipAriaLabel": "Afficher les détails de sourcing",
+        "license": "Licence : {license}"
       },
       "audit": {
         "title": "Audit des attributs indexés",
@@ -2548,6 +2584,11 @@
         "scrollRight": "Faire défiler vers la droite"
       }
     },
+    "sources": {
+      "title": "Sources des données",
+      "subtitle": "Les informations de cette fiche proviennent de ces sources. Leur licence et leur mention d'attribution sont indiquées quand elles les précisent.",
+      "license": "Licence : {license}"
+    },
     "hero": {
       "aiSummary": {
         "community": "Les experts",
@@ -2555,6 +2596,7 @@
         "technical": "Techniquement"
       },
       "bestPriceTitle": "Meilleur prix",
+      "outOfStockPriceTitle": "Offre en rupture de stock",
       "breadcrumbAriaLabel": "Fil d'Ariane du produit",
       "compare": {
         "add": "Comparaison",
@@ -2972,13 +3014,13 @@
       "serp": {
         "title": {
           "withImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis {'|'} ImpactScore {score}/20",
+            "full": "{productName} : meilleur prix et caractéristiques {'|'} ImpactScore {score}/20",
             "fullVertical": "{verticalTitle} {productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "compact": "{productName} : meilleur prix {'|'} ImpactScore {score}/20",
             "minimal": "{productName} : ImpactScore {score}/20"
           },
           "withoutImpact": {
-            "full": "{productName} : meilleur prix, caractéristiques et avis",
+            "full": "{productName} : meilleur prix et caractéristiques",
             "fullVertical": "{verticalTitle} {productName} : meilleur prix",
             "compact": "{productName} : meilleur prix",
             "minimal": "{productName}"
@@ -3063,6 +3105,9 @@
     "logoAlt": "Retour à l'accueil via le logo Nudger",
     "title": "Nudger",
     "footer": {
+      "verticals": {
+        "title": "Toutes nos catégories"
+      },
       "accessibleTitle": "Informations du pied de page",
       "recordingEnabled": "Enregistrement activé",
       "blogLink": "Notre blog",
@@ -3881,6 +3926,15 @@
     "contact": {
       "text": "Une question sur ces règles ?",
       "link": "Contactez-nous"
+    }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Quelle taille de TV choisir pour son salon ?",
+      "productTitle": "Quelle taille choisir ?",
+      "productText": "La bonne diagonale dépend de la distance de visionnage et de la pièce.",
+      "productTextWithDiagonal": "Ce téléviseur mesure {cm} cm de diagonale : la bonne taille dépend de la distance de visionnage et de la pièce.",
+      "productLink": "Quelle taille de TV choisir pour son salon ?"
     }
   }
 }

@@ -67,7 +67,8 @@ const props = withDefaults(
 const { t } = useI18n()
 
 const joinUrl = (baseUrl: string, slug: string) => {
-  const normalizedBase = baseUrl.replace(/\/+$/, '')
+  // Toujours depuis la racine du site : verticalHomeUrl n'a pas de « / » initial.
+  const normalizedBase = `/${baseUrl.replace(/^\/+/, '').replace(/\/+$/, '')}`
   const normalizedSlug = slug.replace(/^\/+/, '')
 
   return `${normalizedBase}/${normalizedSlug}`

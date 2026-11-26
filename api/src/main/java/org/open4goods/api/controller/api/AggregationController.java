@@ -7,6 +7,7 @@ import org.open4goods.commons.exceptions.AggregationSkipException;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.model.exceptions.InvalidParameterException;
 import org.open4goods.model.exceptions.ResourceNotFoundException;
+import org.open4goods.model.vertical.VerticalConfig;
 import org.open4goods.services.productrepository.services.ProductRepository;
 import org.open4goods.verticals.VerticalsConfigService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,8 +46,9 @@ public class AggregationController {
     @Operation(
             summary = "Aggregate all verticals",
             description = "Runs /aggregate/verticals/{vertical} for every active vertical, one after the other. "
-                    + "Same behaviour and same precautions as the single-vertical run.")
-    @ApiResponse(responseCode = "200", description = "Products of every vertical aggregated and queued for indexation")
+                    + "Same behaviour and same precautions as the single-vertical run. A vertical that fails is "
+                    + "logged (ERROR) and the next ones still run.")
+    @ApiResponse(responseCode = "200", description = "Run finished; products of the verticals that succeeded are queued for indexation (a failed vertical is only logged)")
     public void aggregateAllVerticals() throws InvalidParameterException, IOException {
         aggregationFacadeService.sanitizeAllVerticals();
     }
@@ -68,8 +70,8 @@ public class AggregationController {
     })
     public void aggregateVertical(
             @Parameter(description = "Vertical identifier (e.g. 'tv', 'laptop', 'air-conditioner')", required = true)
-            @PathVariable String vertical) throws InvalidParameterException, IOException {
-        aggregationFacadeService.sanitizeVertical(verticalConfigService.getConfigById(vertical));
+            @PathVariable String vertical) throws InvalidParameterException, IOException, ResourceNotFoundException {
+        aggregationFacadeService.sanitizeVertical(KnownVertical.of(verticalConfigService, vertical));
     }
 
     @PostMapping("/aggregate/gtin/{gtin}")

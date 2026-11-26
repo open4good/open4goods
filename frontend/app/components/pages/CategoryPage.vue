@@ -35,6 +35,12 @@
     </v-dialog>
 
     <v-container v-if="category" fluid class="py-6 category-page__container">
+      <CategorySizeGuideLink
+        v-if="!isSubCategoryPage"
+        class="mb-4"
+        :vertical-id="category.id"
+      />
+
       <div
         v-if="!isSubCategoryPage && (hasFastFilters || isDesktop)"
         class="category-page__fast-filters mb-6"
@@ -308,7 +314,7 @@
               <v-btn
                 variant="text"
                 prepend-icon="mdi-refresh"
-                @click="fetchProducts"
+                @click="fetchProducts()"
               >
                 {{ $t('common.actions.retry') }}
               </v-btn>
@@ -404,13 +410,12 @@
               </v-btn>
             </div>
 
-            <v-pagination
+            <CategoryPagination
               v-if="pageCount > 1"
               :length="pageCount"
-              :model-value="pageNumber + 1"
+              :current="pageNumber + 1"
+              :build-to="buildPageLocation"
               class="category-page__pagination"
-              density="comfortable"
-              @update:model-value="onPageChange"
             />
           </template>
 
@@ -472,6 +477,23 @@
               }}
             </v-btn>
           </section>
+
+          <!--
+            Hub editorial block (GOU-2716), rendered only when the vertical has a
+            published file in content/category-hubs/. Its Top 5 is the SSR listing,
+            which uses the default ImpactScore sort without filters on a hub. Page 1
+            only: on `?page=N` the listing is not the top of the ranking, and the
+            intro and FAQ would be duplicated on every paginated URL.
+          -->
+          <CategoryHubEditorial
+            v-if="!isSubCategoryPage && verticalId && initialPageNumber === 0"
+            :vertical-id="verticalId"
+            :vertical-home-url="category.verticalHomeUrl"
+            :category-name="categoryDisplayName"
+            :sub-categories="relatedSubCategories"
+            :guides="category.guides ?? []"
+            :ranked-products="hubRankedProducts"
+          />
         </section>
       </div>
     </v-container>
@@ -520,8 +542,8 @@ import type {
   FieldMetadataDto,
   Filter,
   FilterRequestDto,
+  ProductCardSearchResponseDto,
   ProductFieldOptionsResponse,
-  ProductSearchResponseDto,
   SortRequestDto,
   VerticalConfigFullDto,
   VerticalSubsetDto,
@@ -531,8 +553,11 @@ import { AggTypeEnum } from '~~/shared/api-client/models/Agg'
 import CategoryActiveFilters from '~/components/category/CategoryActiveFilters.vue'
 import CategoryFastFilters from '~/components/category/CategoryFastFilters.vue'
 import CategoryHero from '~/components/category/CategoryHero.vue'
+import CategoryHubEditorial from '~/components/category/CategoryHubEditorial.vue'
+import CategoryPagination from '~/components/category/CategoryPagination.vue'
 import CategoryEcoscoreCard from '~/components/category/CategoryEcoscoreCard.vue'
 import CategoryFiltersSidebar from '~/components/category/CategoryFiltersSidebar.vue'
+import CategorySizeGuideLink from '~/components/category/CategorySizeGuideLink.vue'
 import CategoryRelatedSubcategoriesCard from '~/components/category/CategoryRelatedSubcategoriesCard.vue'
 import CategoryResultsToolbar from '~/components/category/CategoryResultsToolbar.vue'
 import CategoryProductCardGrid from '~/components/category/products/CategoryProductCardGrid.vue'
@@ -579,6 +604,7 @@ import {
   matchesCategoryInitialSort,
 } from '~/utils/_category-initial-sort'
 import { hasAdminAccess } from '~~/shared/utils/_roles'
+import { isDesktopRequest } from '~~/shared/utils/ssr-device'
 import { resolveCategorySeoMeta } from '~/utils/seo/category-meta'
 
 const route = useRoute()
@@ -588,16 +614,6 @@ const { locale, t } = useI18n()
 const requestURL = useRequestURL()
 const { isLoggedIn, roles } = useAuth()
 const { trackFilterChange, trackSortUsage } = useAnalytics()
-const listComponents = [
-  'base',
-  'identity',
-  'names',
-  'attributes',
-  'resources',
-  'scores',
-  'offers',
-]
-const LISTING_COMPONENTS = listComponents.join(',')
 
 type FilterChangeOverrides = Partial<Parameters<typeof trackFilterChange>[0]>
 
@@ -621,37 +637,18 @@ const adminFilterFields = computed<FieldMetadataDto[]>(() => {
 
 const showAdminFilters = computed(() => adminFilterFields.value.length > 0)
 
-const MOBILE_USER_AGENT_PATTERN =
-  /(Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Kindle|Silk|Opera Mini)/i
-
-const resolveUserAgentFromHeader = (
-  headerValue: string | string[] | undefined
-): string | null => {
-  if (!headerValue) {
-    return null
-  }
-
-  if (Array.isArray(headerValue)) {
-    return headerValue[0] ?? null
-  }
-
-  return headerValue
-}
-
 const display = useDisplay()
 
 const initialIsDesktop = useState<boolean>(
   'category-page-initial-is-desktop',
   () => {
     if (import.meta.server) {
-      const userAgentHeader = useRequestHeaders(['user-agent'])['user-agent']
-      const userAgent = resolveUserAgentFromHeader(userAgentHeader)
+      const headers = useRequestHeaders(['user-agent', 'cf-device-type'])
 
-      if (!userAgent) {
-        return true
-      }
-
-      return !MOBILE_USER_AGENT_PATTERN.test(userAgent)
+      return isDesktopRequest({
+        cfDeviceType: headers['cf-device-type'],
+        userAgent: headers['user-agent'],
+      })
     }
 
     return display.lgAndUp.value
@@ -803,8 +800,23 @@ const hasReadMore = computed(
 const pageEyebrow = computed(
   () => category.value?.verticalMetaTitle ?? category.value?.verticalHomeTitle
 )
+// Home → vertical → sub-category. The taxonomy `/categories/**` is left out: those pages are
+// thin and not indexed.
 const pageBreadcrumbs = computed(() => {
-  const breadcrumbs = [...(category.value?.breadCrumb ?? [])]
+  const breadcrumbs: Array<{ title?: string; link?: string }> = [
+    { title: t('navigation.home'), link: '/' },
+  ]
+
+  const verticalUrl = category.value?.verticalHomeUrl?.trim()
+  if (verticalUrl) {
+    breadcrumbs.push({
+      title:
+        category.value?.verticalHomeTitle ??
+        category.value?.verticalMetaTitle ??
+        verticalUrl,
+      link: verticalUrl.startsWith('/') ? verticalUrl : `/${verticalUrl}`,
+    })
+  }
 
   if (activeSubCategory.value) {
     breadcrumbs.push({
@@ -839,9 +851,20 @@ const subCategoryBaseFilters = computed<FilterRequestDto | undefined>(() => {
 const shouldRestrictCategoryProducts = computed(
   () => category.value?.enabled === false && !isLoggedIn.value
 )
-const canonicalUrl = computed(() =>
+const parsePageParam = (value: unknown): number => {
+  const raw = Array.isArray(value) ? value[0] : value
+  const parsed = Number.parseInt(String(raw ?? ''), 10)
+  return Number.isFinite(parsed) && parsed > 1 ? parsed : 1
+}
+// 1-based page requested through `?page=N` (crawlable pagination, rendered in SSR).
+const queryPage = computed(() => parsePageParam(route.query.page))
+const basePageUrl = computed(() =>
   new URL(route.path, requestURL.origin).toString()
 )
+// Self-referencing canonical per page: page 1 carries no parameter.
+const buildPageUrl = (page: number) =>
+  page > 1 ? `${basePageUrl.value}?page=${page}` : basePageUrl.value
+const canonicalUrl = computed(() => buildPageUrl(queryPage.value))
 const categorySeoMeta = computed(() =>
   resolveCategorySeoMeta({
     category: category.value,
@@ -906,7 +929,7 @@ const breadcrumbJsonLd = computed(() => {
   const elements = pageBreadcrumbs.value.map((item, index) => {
     const href = item.link
       ? new URL(item.link, requestURL.origin).toString()
-      : canonicalUrl.value
+      : basePageUrl.value
 
     return {
       '@type': 'ListItem',
@@ -945,33 +968,35 @@ type StructuredDataScript = {
   children: string
 }
 
-useHead(() => ({
-  link: [{ rel: 'canonical', href: canonicalUrl.value }],
-}))
-
 const verticalId = computed(() => category.value?.id ?? null)
 
 const productError = ref<string | null>(null)
 
+const initialPageNumber = queryPage.value - 1
+
 const { data: initialProductsData, error: initialProductsError } =
   await useAsyncData(
-    `category-products-${slug}-${subCategorySlug ?? 'base'}`,
+    `category-products-${slug}-${subCategorySlug ?? 'base'}-${initialPageNumber}`,
     async () => {
       if (!verticalId.value) {
         return null
       }
 
-      return await csrfFetch<ProductSearchResponseDto>('/api/products/search', {
-        method: 'POST',
-        query: { include: LISTING_COMPONENTS },
-        body: {
-          verticalId: verticalId.value,
-          pageNumber: 0,
-          pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
-          sort: CATEGORY_INITIAL_SORT,
-          filters: subCategoryBaseFilters.value,
-        },
-      })
+      // Listing cards (GOU-2710): about 4 KB per product instead of the
+      // ~50 KB full DTO, which weighed most of the page payload.
+      return await csrfFetch<ProductCardSearchResponseDto>(
+        '/api/products/cards',
+        {
+          method: 'POST',
+          body: {
+            verticalId: verticalId.value,
+            pageNumber: initialPageNumber,
+            pageSize: CATEGORY_PAGE_SIZES[CATEGORY_DEFAULT_VIEW_MODE],
+            sort: CATEGORY_INITIAL_SORT,
+            filters: subCategoryBaseFilters.value,
+          },
+        }
+      )
     },
     { server: true, immediate: true }
   )
@@ -989,7 +1014,7 @@ if (initialProductsError.value) {
   productError.value = t('category.products.fetchError')
 }
 
-const productsData = ref<ProductSearchResponseDto | null>(
+const productsData = ref<ProductCardSearchResponseDto | null>(
   initialProductsData.value ?? null
 )
 watch(initialProductsData, value => {
@@ -1309,7 +1334,7 @@ const onToggleFiltersVisibility = () => {
 }
 
 const viewMode = ref<CategoryViewMode>(CATEGORY_DEFAULT_VIEW_MODE)
-const pageNumber = ref(0)
+const pageNumber = ref(initialPageNumber)
 const searchTerm = ref('')
 const MIN_QUERY_LENGTH = 3
 const normalizedSearchTerm = computed(() => (searchTerm.value ?? '').trim())
@@ -1421,11 +1446,6 @@ const applyHashPayload = (payload: CategoryHashState | null) => {
     viewMode.value = nextViewMode
   }
 
-  const nextPageNumber = payload?.pageNumber ?? 0
-  if (pageNumber.value !== nextPageNumber) {
-    pageNumber.value = nextPageNumber
-  }
-
   const nextSearchTerm = payload?.search ?? ''
   if (searchTerm.value !== nextSearchTerm) {
     searchTerm.value = nextSearchTerm
@@ -1513,13 +1533,23 @@ const buildSubsetClauseLabel = (filter: Filter): string => {
 
   if (typeof filter.min === 'number') {
     bounds.push(
-      t('category.fastFilters.operator.greaterThan', { value: filter.min })
+      t(
+        filter.minExclusive
+          ? 'category.fastFilters.operator.strictlyGreaterThan'
+          : 'category.fastFilters.operator.greaterThan',
+        { value: filter.min }
+      )
     )
   }
 
   if (typeof filter.max === 'number') {
     bounds.push(
-      t('category.fastFilters.operator.lowerThan', { value: filter.max })
+      t(
+        filter.maxExclusive
+          ? 'category.fastFilters.operator.strictlyLowerThan'
+          : 'category.fastFilters.operator.lowerThan',
+        { value: filter.max }
+      )
     )
   }
 
@@ -1821,6 +1851,11 @@ const sortRequest = computed<SortRequestDto | undefined>(() => {
 })
 
 const currentProducts = computed(() => productsData.value?.products?.data ?? [])
+// The SSR page of a hub, never the refetched one: the hub Top 5 keeps the
+// default ImpactScore ranking whatever the filters or sort chosen afterwards.
+const hubRankedProducts = computed(
+  () => initialProductsData.value?.products?.data ?? []
+)
 
 const showNotRatedAfterRatedNotice = computed(() =>
   shouldShowNotRatedAfterRatedNotice(sortField.value, currentProducts.value)
@@ -1884,6 +1919,18 @@ watch(
 const pageCount = computed(
   () => productsData.value?.products?.page?.totalPages ?? 1
 )
+
+useHead(() => ({
+  link: [
+    { rel: 'canonical', href: canonicalUrl.value },
+    ...(queryPage.value > 1
+      ? [{ rel: 'prev', href: buildPageUrl(queryPage.value - 1) }]
+      : []),
+    ...(queryPage.value < pageCount.value
+      ? [{ rel: 'next', href: buildPageUrl(queryPage.value + 1) }]
+      : []),
+  ],
+}))
 const currentAggregations = computed<AggregationResponseDto[]>(
   () => productsData.value?.aggregations ?? []
 )
@@ -2070,7 +2117,8 @@ const isDefaultQueryState = computed(() => {
   const hasDefaultSubsets = activeSubsetIds.value.length === 0
   const hasDefaultSearch = searchTerm.value === ''
   const hasDefaultPaging =
-    pageNumber.value === 0 && viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
+    pageNumber.value === initialPageNumber &&
+    viewMode.value === CATEGORY_DEFAULT_VIEW_MODE
   const hasDefaultSort =
     (sortField.value === null ||
       sortField.value === lastAppliedDefaultSort.value) &&
@@ -2091,7 +2139,9 @@ const isUsingInitialProductsData = computed(() => {
   }
 
   return (
-    productsData.value === initialProductsData.value &&
+    // `productsData` is a deep `ref` (reactive proxy) while `initialProductsData` keeps the raw
+    // object: compare raw values, otherwise the SSR list is always considered stale.
+    toRaw(productsData.value) === toRaw(initialProductsData.value) &&
     isDefaultQueryState.value &&
     matchesCategoryInitialSort(sortField.value, sortOrder.value)
   )
@@ -2164,20 +2214,27 @@ const buildAggregationRequest = (
   return aggs.length ? { aggs } : undefined
 }
 
-const fetchProducts = async () => {
+// `silent` refreshes the data (aggregations) without showing skeletons nor surfacing errors,
+// so the SSR-rendered list stays visible.
+let productsRequestId = 0
+
+const fetchProducts = async ({ silent = false }: { silent?: boolean } = {}) => {
   if (!verticalId.value || !hasHydrated.value) {
     return
   }
 
-  loadingProducts.value = true
-  productError.value = null
+  const requestId = ++productsRequestId
+
+  if (!silent) {
+    loadingProducts.value = true
+    productError.value = null
+  }
 
   try {
-    const response = await csrfFetch<ProductSearchResponseDto>(
-      '/api/products/search',
+    const response = await csrfFetch<ProductCardSearchResponseDto>(
+      '/api/products/cards',
       {
         method: 'POST',
-        query: { include: LISTING_COMPONENTS },
         body: {
           verticalId: verticalId.value,
           pageNumber: pageNumber.value,
@@ -2195,16 +2252,24 @@ const fetchProducts = async () => {
       }
     )
 
+    // A newer request (user action during the silent refresh) wins.
+    if (requestId !== productsRequestId) {
+      return
+    }
     productsData.value = response
   } catch (error) {
     console.error(
       `[CategoryPage] Failed to search products for vertical "${verticalId.value}":`,
       error
     )
-    productsData.value = null
-    productError.value = t('category.products.fetchError')
+    if (!silent && requestId === productsRequestId) {
+      productsData.value = null
+      productError.value = t('category.products.fetchError')
+    }
   } finally {
-    loadingProducts.value = false
+    if (!silent && requestId === productsRequestId) {
+      loadingProducts.value = false
+    }
   }
 }
 
@@ -2308,7 +2373,6 @@ const hashState = computed<CategoryHashState>(() => ({
   filters: manualFilters.value.filters?.length ? manualFilters.value : {},
   activeSubsets: activeSubsetIds.value,
   view: viewMode.value,
-  pageNumber: pageNumber.value,
   search: searchTerm.value || undefined,
   sort: sortRequest.value,
   impactExpanded: impactExpanded.value || undefined,
@@ -2429,9 +2493,11 @@ onMounted(async () => {
 
   hasHydrated.value = true
 
-  if (verticalId.value && !isUsingInitialProductsData.value) {
+  if (verticalId.value) {
     try {
-      await fetchProducts()
+      // Default state: keep the SSR list and fetch once, silently, to get the aggregations
+      // (the SSR request is sent without `aggs`).
+      await fetchProducts({ silent: isUsingInitialProductsData.value })
     } catch (err) {
       console.error('Failed to fetch initial products:', err)
     }
@@ -2565,9 +2631,39 @@ const onFiltersChange = (filters: FilterRequestDto) => {
   })
 }
 
-const onPageChange = (page: number) => {
-  pageNumber.value = page - 1
+const buildPageLocation = (page: number) => {
+  const query = { ...route.query }
+  if (page > 1) {
+    query.page = String(page)
+  } else {
+    delete query.page
+  }
+  return { path: route.path, query }
 }
+
+// The URL is the source of truth for the page: links, back/forward and filter resets all go
+// through the query string, and the list follows.
+watch(queryPage, page => {
+  if (pageNumber.value !== page - 1) {
+    pageNumber.value = page - 1
+  }
+})
+
+watch(pageNumber, value => {
+  if (
+    !import.meta.client ||
+    !hasHydrated.value ||
+    queryPage.value === value + 1
+  ) {
+    return
+  }
+
+  void router.push(buildPageLocation(value + 1)).catch(error => {
+    if (!isNavigationFailure(error)) {
+      console.error('Failed to update category page query.', error)
+    }
+  })
+})
 
 const applyMobileFilters = () => {
   filtersDrawer.value = false

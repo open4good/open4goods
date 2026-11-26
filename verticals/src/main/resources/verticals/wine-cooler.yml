@@ -1,0 +1,181 @@
+# Wine coolers (caves à vin). Launched hidden (enabled: false), GOU-2632 / GOU-2629. Inherits _default.yml.
+id: wine-cooler
+
+referentials:
+  googleTaxonomy: []
+  icecat: []
+  eprel:
+    # Source: qualification-wine-cooler (GOU-2629): 74 702 documents in eprel-products, no eprelCategory.
+    - group: "refrigeratingappliances2019"
+
+parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
+  weight:
+    minKg: 5.0
+    maxKg: 200.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 5.0
+      max: 200.0
+
+order: 9
+averageHoursPerDay: 24.0
+
+icecatTaxonomyId: -1
+
+eprelGroupNames:
+  - refrigeratingappliances2019
+
+# Not published yet: the default image is kept until the image is ready.
+mdiIcon: mdi-glass-wine
+
+# Hidden launch: the batch ranks the products, the sitemap and Google CSS do not publish them.
+enabled: false
+
+popularAttributes:
+  - WINE_STORAGE
+  - TOTAL_VOLUME
+  - CLASSE_ENERGY
+
+commonAttributes:
+  - CLASSE_ENERGY
+  - ENERGY_CONSUMPTION_ANNUAL
+  - WINE_STORAGE
+  - TOTAL_VOLUME
+  - NOISE_LEVEL
+  - NOISE_CLASS
+  - CLIMATE_CLASS
+  - INSTALLATION_TYPE
+
+availableImpactScoreCriterias:
+  - CLASSE_ENERGY
+  - ENERGY_CONSUMPTION_ANNUAL
+  - NOISE_LEVEL
+  - WARRANTY
+  - WEIGHT
+  - DATA_QUALITY
+
+# Accessories filed in a wine cooler category by merchants (support, LED plate) are not removed by a token:
+# eprelRequired removes them (no EPREL record).
+excludingTokensFromCategoriesMatching:
+  - CLAYETTE
+  - FILTRE
+
+i18n:
+  fr:
+    url:
+      prefix: "|| cave à vin | cave a vin ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    designation:
+      - "de la cave à vin"
+      - "de cette cave à vin"
+      - "de cet appareil"
+    productMetaOpenGraphType: "product"
+    verticalHomeUrl: "caves-a-vin"
+    verticalHomeTitle: "Caves à vin"
+    verticalMetaTitle: "Comparatif caves à vin : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les caves à vin par prix, capacité, consommation annuelle et Impact Score noté sur 20 pour conserver vos bouteilles sobrement."
+    verticalHomeDescription: "Comparez les caves à vin selon leur impact environnemental, leur capacité en bouteilles, leur classe énergétique et leur prix."
+  en:
+    url:
+      prefix: "|| wine cooler | wine cellar ||"
+      attrs:
+        - BRAND
+        - MODEL
+        - YEAR
+    designation:
+      - "of the wine cooler"
+      - "of this wine cooler"
+      - "of the appliance"
+    productMetaOpenGraphType: "product"
+    verticalHomeUrl: "wine-coolers"
+    verticalHomeTitle: "Wine coolers"
+    verticalMetaTitle: "Wine coolers comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare wine coolers by price, capacity, yearly consumption and Impact Score out of 20 to store your bottles efficiently."
+    verticalHomeDescription: "Compare wine coolers by environmental impact, bottle capacity, energy class, and price."
+
+ecoFilters:
+  - "CLASSE_ENERGY"
+
+technicalFilters:
+  - "WINE_STORAGE"
+  - "TOTAL_VOLUME"
+  - "ENERGY_CONSUMPTION_ANNUAL"
+  - "NOISE_LEVEL"
+  - "NOISE_CLASS"
+  - "CLIMATE_CLASS"
+  - "INSTALLATION_TYPE"
+
+aggregationConfiguration:
+  "scores.CLASSE_ENERGY.value":
+    interval: 1
+    buckets: 5
+  "price.minPrice.price":
+    interval: 100
+    buckets: 20
+  "attributes.indexed.TOTAL_VOLUME":
+    interval: 25
+    buckets: 20
+  "attributes.indexed.ENERGY_CONSUMPTION_ANNUAL":
+    interval: 25
+    buckets: 20
+  "attributes.indexed.NOISE_LEVEL":
+    interval: 1
+    buckets: 15
+
+attributesConfig:
+  configs:
+    - key: "CLASSE_ENERGY"
+    - key: "ENERGY_CONSUMPTION_ANNUAL"
+    - key: "WINE_STORAGE"
+    - key: "TOTAL_VOLUME"
+    - key: "NOISE_LEVEL"
+    - key: "NOISE_CLASS"
+    - key: "CLIMATE_CLASS"
+    - key: "INSTALLATION_TYPE"
+
+# Merchant categories measured on 24/11/2026 (mesure-purete, GOU-2630), not classified: accessory categories left out.
+# The categories under the first 100 of the measure (219 products) are not listed: to add after the first batch.
+matchingCategories:
+  all:
+    - "ELECTROMENAGER | ELECTROMENAGER > FROID > CAVE A VIN | FROID | CAVE A VIN"
+    - "ELECTROMENAGER > FROID > CAVE A VIN"
+    - "ELECTROMENAGER > FROID > CAVE A VIN ENCASTRABLE"
+    - "ELECTROMENAGER | CAVE-A-VIN"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE SERVICE | CAVE A VIN DE SERVICE"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE VIEILLISSEMENT | CAVE A VIN DE VIEILLISSEMENT"
+    - "ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN MULTI-TEMPERATURE | CAVE A VIN MULTI-TEMPERATURE"
+    - "ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE SERVICE"
+    - "ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE VIEILLISSEMENT"
+    - "ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN MULTI-TEMPERATURE"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE SERVICE | CAVE A VIN DE SERVICE"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN DE VIEILLISSEMENT | CAVE A VIN DE VIEILLISSEMENT"
+    - "426 | GENERAL HOUSEHOLD | ELECTROMENAGER | ELECTROMENAGER > GROS ELECTROMENAGER > CAVE A VIN > CAVE A VIN MULTI-TEMPERATURE | CAVE A VIN MULTI-TEMPERATURE"
+    - "381 | FRIDGES | CAVE A VIN"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE SERVICE | CAVE A VIN | CAVE DE SERVICE"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE SERVICE | GROS ELECTROMENAGER / CAVE A VIN / CAVE DE SERVICE"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE SERVICE | GROS ELECTROMENAGER>CAVE A VIN>CAVE DE SERVICE | CAVE A VIN | CAVE DE SERVICE"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE VIEILLISSEMENT | CAVE A VIN | CAVE DE VIEILLISSEMENT"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE VIEILLISSEMENT | GROS ELECTROMENAGER / CAVE A VIN / CAVE DE VIEILLISSEMENT"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE DE VIEILLISSEMENT | GROS ELECTROMENAGER>CAVE A VIN>CAVE DE VIEILLISSEMENT | CAVE A VIN | CAVE DE VIEILLISSEMENT"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE MULTI-TEMPERATURES | CAVE A VIN | CAVE MULTI-TEMPERATURES"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE MULTI-TEMPERATURES | GROS ELECTROMENAGER / CAVE A VIN / CAVE MULTI-TEMPERATURES"
+    - "GROS ELECTROMENAGER / CAVE A VIN / CAVE MULTI-TEMPERATURES | GROS ELECTROMENAGER>CAVE A VIN>CAVE MULTI-TEMPERATURES | CAVE A VIN | CAVE MULTI-TEMPERATURES"
+    - "GROS ELECTROMENAGER/CAVE A VIN/CAVE A VIN"
+    - "GROS ELECTROMENAGER/CAVE A VIN/CAVE A VIN ENCASTRABLE"
+    - "GROS ELECTROMENAGER > CAVE A VINS > CAVE A VIN DE SERVICE"
+    - "GROS ELECTROMENAGER > CAVE A VINS > CAVE A VIN DE VIEILLISSEMENT"
+    - "GROS ELECTROMENAGER > CAVE A VINS > CAVE A VIN POLYVALENTE"
+    - "GROS ELECTROMENAGER | CAVE A VIN"
+    - "GROS ELECTROMENAGER | CAVE A VIN | CAVE DE SERVICE | CAVE DE SERVICE"
+    - "GROS ELECTROMENAGER | CAVE A VIN | CAVE DE VIEILLISSEMENT | CAVE DE VIEILLISSEMENT"
+    - "GROS ELECTROMENAGER | CAVE A VIN | CAVE MULTI-TEMPERATURE | CAVE MULTI-TEMPERATURE"
+    - "GROS ELECTROMENAGER | GROS ELECTROMENAGER>CAVE A VIN>CAVE MULTI-TEMPERATURES | CAVE A VIN | GROS ELECTROMENAGER"
+    - "CAVE A VIN"
+    - "CAVE A VIN ENCASTRABLE"
+    - "CAVE A VIN | MAGASIN CASTORAMA > CUISINE > GROS ELECTROMENAGER > CAVE A VIN | CUISINE | GROS ELECTROMENAGER"

@@ -20,7 +20,9 @@ import org.open4goods.model.exceptions.ParseException;
 import org.open4goods.model.helper.IdHelper;
 import org.open4goods.model.vertical.AttributeConfig;
 import org.open4goods.model.vertical.AttributeParser;
+import org.open4goods.model.vertical.AttributeParserConfig;
 import org.open4goods.model.vertical.VerticalConfig;
+import org.open4goods.model.vertical.VerticalConfig.NumericBoundsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +36,8 @@ import org.slf4j.LoggerFactory;
  *   clazz: org.open4goods.api.services.aggregation.services.realtime.parser.UnitAwareNumericParser
  *   dimension: "LENGTH"       # required: physical dimension name
  *   defaultUnitHint: "cm"    # applied when the raw value carries no unit
+ *   unitlessHints: ["cm", "mm"]  # optional: units tried, in order, for a value without unit
+ *   targetUnit: "cm"         # optional: unit of the stored value (base unit otherwise)
  *   normalize: true
  * </pre>
  * <p>
@@ -41,9 +45,11 @@ import org.slf4j.LoggerFactory;
  * <ol>
  *   <li>Normalize whitespace and Unicode.</li>
  *   <li>Extract numeric part and optional unit token using a regex.</li>
- *   <li>Resolve the unit token via {@link UUDCRegistry}; fall back to
- *       {@code defaultUnitHint} when absent.</li>
- *   <li>Convert to the base unit.</li>
+ *   <li>Resolve the unit token via {@link UUDCRegistry}. A value without a unit is read
+ *       with the first of {@code unitlessHints} that gives a value inside the vertical
+ *       bounds of the attribute ({@code parsers.bounds}), and with {@code defaultUnitHint}
+ *       otherwise: Icecat sends "600" (mm) and EPREL "60" (cm) for the same width.</li>
+ *   <li>Convert to the base unit, then to {@code targetUnit} when set.</li>
  *   <li>Elect one valid conversion by legacy trusted-source rank, then datasource
  *       name, then value, and return it as a {@link String}. Conflicting sources are
  *       logged rather than blended: averaging two sources produced a value neither
@@ -100,9 +106,6 @@ public class UnitAwareNumericParser extends AttributeParser
                     attributeConfig.getKey());
             return null;
         }
-        dimension = dimension.toUpperCase(Locale.ROOT);
-        String defaultHint = attributeConfig.getParser().getDefaultUnitHint();
-
         List<Candidate> candidates = new ArrayList<>();
         for (SourcedAttribute src : attr.getSource())
         {
@@ -113,7 +116,7 @@ public class UnitAwareNumericParser extends AttributeParser
             }
             try
             {
-                Double baseValue = parseToBase(raw, dimension, defaultHint);
+                Double baseValue = parseToTarget(raw, attributeConfig, verticalConfig);
                 if (baseValue != null && Double.isFinite(baseValue) && baseValue >= 0)
                 {
                     candidates.add(new Candidate(src.getDataSourcename(), baseValue));
@@ -131,23 +134,24 @@ public class UnitAwareNumericParser extends AttributeParser
             return null;
         }
 
-        Candidate elected = candidates.stream().min(CANDIDATE_ORDER).orElseThrow();
+        Candidate elected = candidates.stream().min(candidateOrder(attributeConfig.getPreferredSources())).orElseThrow();
 
         long distinctValues = candidates.stream().map(candidate -> candidate.baseValue).distinct().count();
         if (distinctValues > 1)
         {
             LOGGER.warn("Conflicting values for attribute '{}' in dimension {}: {}; electing {} from source '{}'",
-                    attributeConfig.getKey(), dimension, candidates, elected.baseValue, elected.datasource);
+                    attributeConfig.getKey(), dimension.toUpperCase(Locale.ROOT), candidates, elected.baseValue,
+                    elected.datasource);
         }
 
         return formatValue(elected.baseValue);
     }
 
     /**
-     * One source's value already converted to the dimension's base unit.
+     * One source's value already converted to the stored unit.
      *
      * @param datasource contributing datasource name, possibly {@code null}
-     * @param baseValue  value expressed in the dimension's base unit
+     * @param baseValue  value expressed in the stored unit ({@code targetUnit}, else the dimension's base unit)
      */
     private record Candidate(String datasource, double baseValue)
     {
@@ -159,23 +163,26 @@ public class UnitAwareNumericParser extends AttributeParser
     }
 
     /**
-     * Election order between conflicting sources: the legacy trusted-source rank
-     * decides first, then the datasource name and finally the value itself, so that
+     * Election order between conflicting sources: the trusted-source rank (the attribute's
+     * {@code preferredSources}, else the legacy order) decides first, then the datasource name and finally the value itself, so that
      * the same set of contributions always elects the same value whatever order the
      * sources arrived in.
      */
-    private static final Comparator<Candidate> CANDIDATE_ORDER = Comparator
-            .comparingInt((Candidate candidate) -> SourcableAttribute.trustedSourcePriority(candidate.datasource))
-            .thenComparing(candidate -> candidate.datasource, Comparator.nullsLast(Comparator.naturalOrder()))
-            .thenComparingDouble(candidate -> candidate.baseValue);
+    private static Comparator<Candidate> candidateOrder(List<String> priority)
+    {
+        return Comparator
+                .comparingInt((Candidate candidate) -> SourcableAttribute.trustedSourcePriority(candidate.datasource, priority))
+                .thenComparing(candidate -> candidate.datasource, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparingDouble(candidate -> candidate.baseValue);
+    }
 
     /**
      * Single-value entry point used by tests and direct callers.
      *
      * @param value          raw string value (e.g. "42 cm", "420mm", "0.42")
-     * @param attributeConfig attribute configuration carrying dimension and defaultUnitHint
-     * @param verticalConfig  vertical configuration (currently unused; reserved for bounds)
-     * @return value in base unit as a String, or {@code null} when unparseable
+     * @param attributeConfig attribute configuration carrying dimension, unit hints and target unit
+     * @param verticalConfig  vertical configuration, whose bounds select the unit of a unitless value
+     * @return value in the stored unit as a String, or {@code null} when unparseable
      */
     @Override
     public String parse(String value, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
@@ -190,53 +197,86 @@ public class UnitAwareNumericParser extends AttributeParser
         {
             return null;
         }
-        String defaultHint = attributeConfig.getParser().getDefaultUnitHint();
-        Double baseValue = parseToBase(value, dimension.toUpperCase(Locale.ROOT), defaultHint);
-        return baseValue == null ? null : formatValue(baseValue);
+        Double storedValue = parseToTarget(value, attributeConfig, verticalConfig);
+        return storedValue == null ? null : formatValue(storedValue);
     }
 
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
 
-    private Double parseToBase(String raw, String dimension, String defaultUnitHint)
+    /**
+     * Reads one raw value in the stored unit of the attribute.
+     *
+     * @return the value in {@code targetUnit} (base unit when unset), or {@code null} when unparseable
+     */
+    private Double parseToTarget(String raw, AttributeConfig attributeConfig, VerticalConfig verticalConfig)
     {
+        AttributeParserConfig parserConfig = attributeConfig.getParser();
+        String dimension = parserConfig.getDimension().toUpperCase(Locale.ROOT);
         String normalized = normalize(raw);
-        if (normalized.isBlank())
-        {
-            return null;
-        }
-
         Matcher m = VALUE_UNIT_PATTERN.matcher(normalized);
-        if (!m.matches())
+        if (normalized.isBlank() || !m.matches())
         {
             return null;
         }
-
         String numStr = m.group(1).replace(',', '.');
-        String unitToken = m.group(2);
-
-        double numericVal;
         if (!IdHelper.isPureDouble(numStr))
         {
             return null;
         }
-        numericVal = Double.parseDouble(numStr);
+        double numericVal = Double.parseDouble(numStr);
+        String unitToken = m.group(2);
+        if (unitToken != null && !unitToken.isBlank())
+        {
+            return convert(numericVal, unitToken, dimension, parserConfig.getTargetUnit());
+        }
 
-        String effectiveUnit = (unitToken != null && !unitToken.isBlank()) ? unitToken : defaultUnitHint;
-        if (effectiveUnit == null || effectiveUnit.isBlank())
+        String defaultHint = parserConfig.getDefaultUnitHint();
+        NumericBoundsConfig bounds = verticalConfig == null || verticalConfig.getParsers() == null ? null
+                : verticalConfig.getParsers().boundsFor(attributeConfig.getKey());
+        if (bounds != null)
+        {
+            for (String hint : parserConfig.getUnitlessHints())
+            {
+                Double candidate = convert(numericVal, hint, dimension, parserConfig.getTargetUnit());
+                if (candidate != null && bounds.contains(candidate))
+                {
+                    return candidate;
+                }
+            }
+        }
+        if (defaultHint == null || defaultHint.isBlank())
         {
             LOGGER.debug("No unit found and no defaultUnitHint for dimension '{}', raw='{}'", dimension, raw);
             return null;
         }
+        return convert(numericVal, defaultHint, dimension, parserConfig.getTargetUnit());
+    }
 
-        UnitDefinition def = uudcRegistry.resolveUnit(effectiveUnit, dimension);
-        if (def == null)
+    /**
+     * Converts a value from {@code unit} to {@code targetUnit}, through the dimension's base unit.
+     *
+     * @return the converted value, or {@code null} when a unit is unknown in the dimension
+     */
+    private Double convert(double value, String unit, String dimension, String targetUnit)
+    {
+        UnitDefinition from = uudcRegistry.resolveUnit(unit, dimension);
+        if (from == null)
         {
             return null;
         }
-
-        return numericVal * def.getMultiplier() + def.getOffset();
+        double base = value * from.getMultiplier() + from.getOffset();
+        if (targetUnit == null || targetUnit.isBlank())
+        {
+            return base;
+        }
+        UnitDefinition to = uudcRegistry.resolveUnit(targetUnit, dimension);
+        if (to == null || to.getMultiplier() == 0)
+        {
+            return null;
+        }
+        return (base - to.getOffset()) / to.getMultiplier();
     }
 
     private static String normalize(String raw)

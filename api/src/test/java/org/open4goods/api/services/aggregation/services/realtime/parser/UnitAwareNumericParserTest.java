@@ -228,4 +228,56 @@ class UnitAwareNumericParserTest
 
         assertThat(parser.parse(raw, powerConfig, verticalConfig)).isEqualTo(expected);
     }
+    /**
+     * GOU-2707: lengths are stored in cm, and a value without unit is read in cm, else in mm when only mm fits the
+     * bounds of the vertical. Icecat sends a washing machine width as "600" (mm), EPREL as "60" (cm).
+     */
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource(delimiter = '|', value = {
+            "60|60", "600|60", "59,5|59.5", "595|59.5", "600 mm|60", "0.6 m|60", "60 cm|60",
+            // Out of the bounds in cm and in mm: read with the default hint, the aggregation rejects it.
+            "10|10" })
+    void parseLengthInCentimetersWithinTheVerticalBounds(String raw, String expected) throws ParseException
+    {
+        AttributeConfig width = centimeterLength("WIDTH");
+        VerticalConfig washingMachine = new VerticalConfig();
+        washingMachine.getParsers().getBounds().put("WIDTH", new VerticalConfig.NumericBoundsConfig(35.0, 100.0));
+
+        assertThat(parser.parse(raw, width, washingMachine)).isEqualTo(expected);
+    }
+
+    /** GOU-2707: a smartphone is 7.5 cm wide and 0.8 cm thick; its sources send "75" and "8" (mm). */
+    @Test
+    void parseSmartphoneDimensionsSentInMillimeters() throws ParseException
+    {
+        VerticalConfig smartphones = new VerticalConfig();
+        smartphones.getParsers().getBounds().put("WIDTH", new VerticalConfig.NumericBoundsConfig(4.0, 20.0));
+        smartphones.getParsers().getBounds().put("DEPTH", new VerticalConfig.NumericBoundsConfig(0.4, 3.0));
+
+        assertThat(parser.parse("75", centimeterLength("WIDTH"), smartphones)).isEqualTo("7.5");
+        assertThat(parser.parse("7.5", centimeterLength("WIDTH"), smartphones)).isEqualTo("7.5");
+        assertThat(parser.parse("8", centimeterLength("DEPTH"), smartphones)).isEqualTo("0.8");
+    }
+
+    /** GOU-2707: without bounds, a unitless value keeps the default hint, converted to the target unit. */
+    @Test
+    void parseLengthWithoutBoundsUsesTheDefaultHint() throws ParseException
+    {
+        assertThat(parser.parse("600", centimeterLength("WIDTH"), verticalConfig)).isEqualTo("600");
+        assertThat(parser.parse(attributeWith("icecat.biz", "600 mm", "eprel", "60"), centimeterLength("WIDTH"),
+                verticalConfig)).isEqualTo("60");
+    }
+
+    private static AttributeConfig centimeterLength(String key)
+    {
+        AttributeParserConfig parserCfg = new AttributeParserConfig();
+        parserCfg.setDimension("LENGTH");
+        parserCfg.setDefaultUnitHint("cm");
+        parserCfg.setUnitlessHints(List.of("cm", "mm"));
+        parserCfg.setTargetUnit("cm");
+        AttributeConfig config = new AttributeConfig();
+        config.setKey(key);
+        config.setParser(parserCfg);
+        return config;
+    }
 }

@@ -21,6 +21,7 @@ import org.open4goods.nudgerfrontapi.config.properties.AffiliationPartnersProper
 import org.open4goods.nudgerfrontapi.config.properties.SecurityProperties;
 import org.open4goods.services.captcha.config.HcaptchaProperties;
 import org.open4goods.services.feedback.config.FeedbackConfiguration;
+import org.open4goods.services.opendata.config.OpenDataConfig;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
@@ -73,6 +74,9 @@ class RenderedSecretsConfigTreeTest {
             entry(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY,
                     binder -> binder.bind(VerticalsConfigService.METHODOLOGY_VERSION_OVERRIDES_PROPERTY, String.class)
                             .orElse(null)),
+            // downloadUrl of the open data files on data.nudger.fr, read through OpenDataConfig (GOU-2247).
+            entry("open-data-config.public-base-url",
+                    binder -> bind(binder, "open-data-config", OpenDataConfig.class).getPublicBaseUrl()),
             entry("spring.elasticsearch.password",
                     binder -> bind(binder, "spring.elasticsearch", ElasticsearchProperties.class).getPassword()));
 

@@ -31,12 +31,16 @@ referentials:
     - group: "electronicdisplays"
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
     minKg: 1.0
-    maxKg: 100.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+    maxKg: 120.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 1.0
+      max: 120.0
 
 order: 1
 
@@ -252,6 +256,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Téléviseurs"
+    verticalMetaTitle: "Comparatif téléviseurs : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les téléviseurs par prix, consommation en watts et Impact Score noté sur 20 : trouvez le modèle le moins énergivore pour votre budget."
     # Text displaid as title for the vertical
     verticalHomeDescription: "Bienvenue dans notre rubrique téléviseurs. Devenus des objets quasi nécessaires, nos téléviseurs ne sont malheureusement pas neutres pour l'environnement. Heureusement, Nudger est là pour vous informer et vous aider à comparer les téléviseurs : le mieux classé à l'Impact Score parmi ceux qui répondent à votre besoin."
     # The image used as a logo
@@ -295,6 +301,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "TVs"
+    verticalMetaTitle: "TVs comparison 2026: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare TVs by price, power draw in watts and Impact Score out of 20: find the least energy-hungry model for your budget."
     # Text displaid as title for the vertical
     verticalHomeDescription: "Welcome to our Television section. Televisions have become essential, but they have an environmental cost. Nudger is here to help you compare them: the best ranked on the Impact Score among those that fit your needs."
     # The image used as a logo
@@ -419,7 +427,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "500"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -442,7 +450,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "1000"
       image: "example-image.png"
       url:
@@ -450,13 +458,13 @@ nudgeToolConfig:
         fr: "haut-de-gamme"
       caption:
         en: "Premium TVs"
-        fr: "Les TV dont le prix est supérieur à 1000€."
+        fr: "Les TV dont le prix est supérieur ou égal à 1000€."
       title:
-        en: "> 1000 €"
-        fr: "> 1000 €"
+        en: "≥ 1000 €"
+        fr: "≥ 1000 €"
       description:
-        en: "TVs priced over €1000."
-        fr: "Les TV dont le prix est supérieur à 1000€."
+        en: "TVs priced at €1000 or more."
+        fr: "Les TV dont le prix est supérieur ou égal à 1000€."
 
     ################
     # Screen Size
@@ -485,7 +493,7 @@ nudgeToolConfig:
       group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "32"
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
           operator: "LOWER_THAN"
@@ -508,21 +516,21 @@ nudgeToolConfig:
       group: "screen_size"
       criterias:
         - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "55"
       image: "large-screen.png"
       url:
         en: "large-screens"
         fr: "grands-ecrans"
       caption:
-        en: 'Large screens (> 55")'
-        fr: "Diagonale > 55 pouces"
+        en: 'Large screens (≥ 55")'
+        fr: "Diagonale ≥ 55 pouces"
       title:
         en: "Large Screen TVs"
         fr: "Grands écrans"
       description:
-        en: "TVs with a screen size greater than 55 inches."
-        fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+        en: "TVs with a screen size of 55 inches or more."
+        fr: "Les TV avec une taille d'écran supérieure ou égale à 55 pouces."
 
 # Fast filters; with classical attributes range values for the product category page
 subsets:
@@ -619,7 +627,7 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "500"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
@@ -642,21 +650,21 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "1000"
     image: "example-image.png"
     url:
       en: "premium-price"
       fr: "haut-de-gamme"
     caption:
-      en: "> 1000 €"
-      fr: "> 1000 €"
+      en: "≥ 1000 €"
+      fr: "≥ 1000 €"
     title:
       en: "Premium TVs"
-      fr: "> 1000 €"
+      fr: "≥ 1000 €"
     description:
-      en: "TVs priced over €1000."
-      fr: "Les TV dont le prix est supérieur à 1000€."
+      en: "TVs priced at €1000 or more."
+      fr: "Les TV dont le prix est supérieur ou égal à 1000€."
 
   ################
   # Screen Size
@@ -685,7 +693,7 @@ subsets:
     group: "screen_size"
     criterias:
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "32"
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
         operator: "LOWER_THAN"
@@ -708,21 +716,21 @@ subsets:
     group: "screen_size"
     criterias:
       - field: "attributes.indexed.DIAGONALE_POUCES.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "55"
     image: "large-screen.png"
     url:
       en: "large-screens"
       fr: "grands-ecrans"
     caption:
-      en: 'Large screens (> 55")'
-      fr: 'Grands écrans (> 55")'
+      en: 'Large screens (≥ 55")'
+      fr: 'Grands écrans (≥ 55")'
     title:
       en: "Large Screen TVs"
       fr: "Grands écrans"
     description:
-      en: "TVs with a screen size larger than 55 inches."
-      fr: "Les TV avec une taille d'écran supérieure à 55 pouces."
+      en: "TVs with a screen size of 55 inches or more."
+      fr: "Les TV avec une taille d'écran supérieure ou égale à 55 pouces."
 
 ##############################################################################
 # Custom search filters : the following filters
@@ -34751,6 +34759,19 @@ attributesConfig:
 # If product categories contains one of this token, this will be unmatched
 excludingTokensFromCategoriesMatching:
   - MEUBLE
+  # PC monitors and signage displays that merchants also list as TVs (Cdiscount "TELEVISEUR LCD",
+  # Rakuten "HIFI | TELEVISION"), measured in GOU-2317. Only the merchant forms that name a monitor:
+  # no bare MONITEUR (alternate "TV & MONITEUR > TV", Inmac "IT | MONITEURS | TV HOTEL"), no bare
+  # ECRAN PC (RueDuCommerce files real TVs there), no Cdiscount "ECRAN ORDINATEUR" (hotel TVs), no
+  # icecat or Rakuten "INFORMATIQUE | ECRAN" form (business TVs, a Silver TV). See verticals/README.md.
+  - MONITEUR SEMI PRO
+  - INFORMATIQUE / ECRAN / ECRAN PC
+  - "ECRAN PC >"
+  - "> ECRAN PC"
+  - "IT | MONITEURS | MONITEUR "
+  - "AFFICHAGE DYNAMIQUE >"
+  - "AFFICHAGE COLLABORATIF >"
+  - MONITORS
 
 matchingCategories:
   all: []

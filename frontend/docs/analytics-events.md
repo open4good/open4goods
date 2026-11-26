@@ -24,8 +24,22 @@ le DNT et le référent local) quand `isLikelyAutomatedBrowser`
    de l'UA. Edge, Opera, Brave, Vivaldi exposent `Chromium` et restent comptés ;
    les marques GREASE sont ignorées.
 
+4. **Langue (GOU-2573)** : Chrome de bureau **Windows ou Linux** (hors Mac,
+   Android, ChromeOS, Edge, Opera et dérivés), `navigator.languages` valant
+   exactement `['en-US', 'en']` ou dont la première valeur commence par `zh-CN`
+   (insensible à la casse), et aucune langue commençant par `fr`. `languages`
+   absent, vide ou non tableau : règle ignorée. Pas de condition de version ni de
+   contexte sécurisé.
+
 Tout le reste (Android/WebView, iOS `CriOS`, Firefox, Safari, contexte non
 sécurisé) est compté : pas d'extension de la règle 3, risque de faux positifs.
+
+Raison de la règle 4 : du 16 au 22/11, une ferme de vrais Chrome (Windows 154 /
+Linux 152, `userAgentData` cohérent, `webdriver` faux, proxys résidentiels,
+≈ 2 250 visiteurs Plausible) passait les règles 1 à 3 ; seule sa langue la
+distingue. Faux positifs acceptés : ≈ 1 visiteur FR par jour en Chrome de bureau
+`en-US` sans langue française (simulation GOU-2573). Pas de condition de fuseau
+horaire (non vérifiable sur la vague).
 
 Raison (GOU-1973) : un robot Tencent (AS132203) et une vague de proxys
 résidentiels exécutent le JS avec un UA " Chrome Windows " ancien sans
@@ -35,7 +49,7 @@ cookie `nudger_nav` ne changent pas.
 
 ## Event catalog
 
-> **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
+> **Filtrage robots sur `/contrib/` (GOU-1175)** : `/contrib/<jeton>` et `/api/contrib/<jeton>` refusent (403 `text/plain`, sans appel à front-api) les UA vides ou reconnus comme robots par `isbot`, plus les motifs de `NUXT_AFFILIATION_BLOCKED_USER_AGENTS` (sous-chaînes séparées par des virgules, insensibles à la casse, vide par défaut). Les IP clientes listées dans `NUXT_AFFILIATION_BLOCKED_IPS` (IP exactes ou préfixes CIDR IPv4/IPv6, séparés par des virgules, vide par défaut ; IP cliente = `CF-Connecting-IP`, sinon IP de la requête) sont refusées de la même façon, sans appel à front-api donc sans `AffiliationClick` (GOU-2577). Aucune page HTML n'est jamais rendue sous `/contrib/**` (erreurs en `text/plain`) et Plausible est désactivé côté client sur ce chemin.
 
 > **Signal de navigation sur `/contrib/` (GOU-1184, durci par GOU-1520)** : après les règles de GOU-1175, `/contrib/<jeton>` et `/api/contrib/<jeton>` ne redirigent que si la requête porte le **cookie de navigation** `nudger_nav=1` ; sinon 403 `text/plain` "Ouvrez ce lien depuis la fiche produit sur nudger.fr" (`Cache-Control: no-store`, `X-Robots-Tag`), sans appel à front-api, donc sans `ContributionVote` ni clic transmis au réseau. Le visiteur réel sans cookie (JS désactivé, cookies bloqués) reçoit ce même message ; aucune redirection n'est faite sans cookie.
 >
@@ -116,6 +130,18 @@ Props:
 - `selectedField`, `selectedGroup`, `sortOrder`
 - `defaultField`, `primaryOptions`, `advancedOptions`, `totalOptions`
 
+### `calculateur_tv`
+
+Tracks the viewing distance → TV size calculator of the blog article
+(`TvSizeCalculator.vue`, GOU-2713). Not sent at render: `calcul` is sent 800 ms
+after the user changes the distance or the resolution.
+
+Props:
+
+- `action` (`calcul`, `clic_sous_categorie`)
+- `taille` (recommended size, in inches)
+- `resolution` (`4k`, `full-hd`)
+
 ### `search`
 
 Tracks search submissions.
@@ -170,6 +196,30 @@ Props:
 
 - `sectionId`, `page`, `label`
 
+### `web-vitals` (GOU-2703)
+
+Real-user Core Web Vitals, sent by `app/plugins/web-vitals.client.ts` with the
+`web-vitals` library (loaded after mount). One event per metric (LCP, INP, CLS,
+TTFB), reported once per page load by about 10 % of the loads: the decision is
+taken once per load with `runtimeConfig.public.webVitalsSampleRate`
+(`WEB_VITALS_SAMPLE_RATE`, 0 to 1, default 0.1; invalid values fall back to
+0.1). The events go through `trackEvent`, so the Plausible guard applies
+unchanged (Do Not Track, `/contrib/`, local referrer, automated browsers,
+`enabled`). Hard navigations only: the template is the landing page's.
+
+Props:
+
+- `metric`: `LCP`, `INP`, `CLS` or `TTFB`
+- `template`: `fiche`, `categorie`, `sous-categorie`, `blog`, `guide`,
+  `opendata` or `autre` (same rules as the Metriks Search Console templates,
+  `resolvePageTemplate` in `app/utils/web-vitals.ts`)
+- `rating`: `good`, `needs-improvement` or `poor` (web-vitals thresholds)
+- `value`: integer, milliseconds, or CLS x 1000
+
+Plausible setup: add the goal `web-vitals` and the custom properties `metric`,
+`template`, `rating`, `value`. Read the share of `poor` per `metric` and
+`template`; the median needs the `value` breakdown.
+
 ### `share-resolution-*`
 
 Tracks the web-share product resolution flow.
@@ -220,6 +270,7 @@ goal useful in the self-hosted UI:
 - `currency`
 - `condition`
 - `destinationHost`
+- `metric`, `template`, `rating`, `value` (`web-vitals` goal)
 
 Use `affiliate-click` as the canonical affiliation conversion goal. Keep
 `product-redirect` only for historical comparisons while dashboards migrate.

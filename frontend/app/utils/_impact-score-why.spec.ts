@@ -93,3 +93,26 @@ describe('resolveWhyVariant', () => {
     expect(resolveWhyVariant({ status: 'NOT_RATED' })).toBe('notRated')
   })
 })
+
+describe('computeWhyHighlights category average', () => {
+  const pick = (extra: Partial<ScoreView>) =>
+    computeWhyHighlights([criterion('A', 5, extra)]).strengths[0]
+
+  it('drops the average when the value is a class, not a number', () => {
+    const item = pick({
+      attributeValue: 'A',
+      absolute: { avg: 85.1 } as ScoreView['absolute'],
+    })
+    expect(item?.value).toBe('A')
+    expect(item?.categoryAverage).toBeNull()
+  })
+
+  it('formats a numeric average with the French separator and the unit', () => {
+    const item = pick({
+      attributeValue: '41',
+      attributeSuffix: 'W',
+      absolute: { avg: 1234.56 } as ScoreView['absolute'],
+    })
+    expect(item?.categoryAverage?.replace(/\s/g, ' ')).toBe('1 234,6 W')
+  })
+})

@@ -102,7 +102,7 @@ public class CategoriesController {
                             description = "Language driving localisation of textual fields (future use).",
                             schema = @Schema(implementation = DomainLanguage.class)),
                     @Parameter(name = "onlyEnabled", in = ParameterIn.QUERY, required = false,
-                            description = "Deprecated: retained for backward compatibility. All verticals are returned regardless of this flag.",
+                            description = "When true, disabled verticals are excluded.",
                             schema = @Schema(type = "boolean", defaultValue = "false"))
             },
             responses = {
@@ -117,7 +117,7 @@ public class CategoriesController {
     public ResponseEntity<List<VerticalConfigDto>> categories(
             @RequestParam(name = "domainLanguage") DomainLanguage domainLanguage,
             @RequestParam(name = "onlyEnabled", defaultValue = "false") boolean onlyEnabled) {
-        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault().stream()
+        List<VerticalConfigDto> body = verticalsConfigService.getConfigsWithoutDefault(onlyEnabled).stream()
                 .map(config -> categoryMappingService.toVerticalConfigDto(config, domainLanguage))
                 .filter(Objects::nonNull)
                 .toList();
@@ -255,9 +255,9 @@ public class CategoriesController {
         }
 
         Filter conditionFilter = new Filter(FilterField.condition.fieldPath(), FilterOperator.term,
-                List.of(condition), null, null);
+                List.of(condition), null, null, null, null);
         Filter taxonomyFilter = new Filter(FilterField.vertical.fieldPath(), FilterOperator.term,
-                verticalIds, null, null);
+                verticalIds, null, null, null, null);
         FilterRequestDto filters = new FilterRequestDto(List.of(conditionFilter, taxonomyFilter), List.of());
 
         Pageable pageable = PageRequest.of(0, TOP_PRODUCTS_LIMIT,

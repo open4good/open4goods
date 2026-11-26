@@ -57,14 +57,22 @@ class SparePartsCategoriesTest {
     }
 
     @Test
-    void singularSparePartCategoryKeepsTheVertical() {
+    void singularSparePartCategoryVotesAgainstTheVertical() {
         // Merchants also file real appliances under the singular form (30 products measured, about ten of them
-        // phones and TVs, GOU-2236): only the plural "PIECES DETACHEE" is an excluding token.
+        // phones and TVs, GOU-2236): only the plural "PIECES DETACHEE" is an excluding token. Since the vote
+        // (GOU-2317) the singular is one vote against, as a spare part marker of the nature: one row against one
+        // loses. The historical rule keeps the vertical.
         Map<String, String> categories = new LinkedHashMap<>();
         categories.put("Cdiscount FR",
                 "ELECTROMENAGER | ELECTROMENAGER > LAVAGE-SECHAGE > LAVE-VAISSELLE | LAVAGE-SECHAGE | LAVE-VAISSELLE");
         categories.put("ManoMano FR", "ELECTROMENAGER > PIECE DETACHEE LAVE-VAISSELLE > PANIER");
-        assertThat(classify(categories, null)).isEqualTo("dishwasher");
+        assertThat(classify(categories, null)).isNull();
+        service.getDefaultConfig().setCategoryVoteEnabled(false);
+        try {
+            assertThat(classify(categories, null)).isEqualTo("dishwasher");
+        } finally {
+            service.getDefaultConfig().setCategoryVoteEnabled(true);
+        }
     }
 
     @Test

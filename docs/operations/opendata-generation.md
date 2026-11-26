@@ -12,6 +12,21 @@ Exploitation du passage hebdomadaire qui produit `gtin.zip`, `isbn.zip` et leurs
   `local` et `dev`) coupe toute génération.
 - Un seul passage à la fois ; il tourne sur le thread `opendata-generation`, hors du planificateur.
 
+## Suivre un passage en cours
+
+Deux lectures successives (GOU-2556) : la passe principale (GTIN, ISBN, tout le catalogue), puis la passe impact
+(verticales impact seulement). Chacune écrit dans `nohup-api.log`, au niveau INFO (logger
+`org.open4goods.services.opendata`, gardé en INFO par `application.yml` malgré le WARN de `org.open4goods`), une ligne
+au plus toutes les 5 minutes (`progress-log-interval`) :
+
+```text
+Open data main pass: 1200000 / 4800000 products read (25.0 %), 40000 products/min, 0h30m00s elapsed, about 1h30m00s left
+```
+
+```bash
+grep "Open data .* pass:" /opt/open4goods/logs/nohup-api.log | tail -n 3
+```
+
 ## Relance manuelle
 
 Clé `admin-key` (secret `O4G_INTERNAL_API_KEY`), brute dans l'en-tête `Authorization`, hors de la fenêtre batch :
@@ -27,29 +42,67 @@ renvoie `state` (`IDLE`, `RUNNING`, `SUCCEEDED`, `FAILED`), `startedAt`, `finish
 
 L'ancien `GET /opendata/generate` de `ui` est retiré.
 
+## Redéploiement bêta différé (GOU-2298)
+
+Un passage (~3 h) pose le même marqueur que le batch, `api-batch.marker` (propriété `batch-running-marker`), du
+début à la fin du passage, publication R2 comprise, échec ou interruption compris. Tant qu'il désigne une api vivante,
+le Beta Build ne redémarre pas l'api (`DEFERRED: api restart deferred`). Le marqueur est partagé avec le batch : le
+fichier ne disparaît qu'à la fin du dernier des deux. Voir `ci-workflows-status.md`.
+
+## Jeu impact refusé (GOU-2308)
+
+Le garde-fou de lignes (`min-rows-ratio`, 0,9) s'applique jeu par jeu. Un jeu **impact** sous le seuil est isolé : son
+zip et son manifest publiés restent ceux du passage précédent (le manifest précédent reste listé dans `manifest.json`),
+et GTIN, ISBN et les autres jeux impact sont rafraîchis et publiés. `impact-all.zip` est reconstruit avec le CSV du
+zip encore publié pour chaque jeu refusé, et ses lignes comptent celles du manifest reporté (GOU-2314) : il reste
+cohérent avec les zips par verticale. Si tous les jeux impact sont refusés, `impact-all.zip` et son manifest restent
+ceux du passage précédent, toujours listés dans `manifest.json`. Le log `ERROR` `Open data impact dataset not published, the previous version stays` donne la cause, le passage
+est en `FAILED` (`error` : `Datasets not published: <jeux et causes>`), la health `openDataService` passe DOWN et la métrique
+`outcome="partial"` est incrémentée. Un jeu GTIN ou ISBN sous le seuil fait toujours échouer tout le passage.
+
+Sur R2, la publication du passage compare chaque jeu reporté au zip public (taille et métadonnée `sha256`). Si R2 sert
+une autre version (une publication précédente a échoué), la version locale reportée est renvoyée avec les nouveaux
+jeux : `manifest.json` sur R2 n'annonce jamais un zip que R2 ne sert pas. Sinon seul son manifest est réécrit.
+
 ## Surveillance
 
 - Log `ERROR` `Open data generation failed, the published files and manifests are unchanged`, avec la cause.
-- Health `openData` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`),
-  UNKNOWN si un zip publié manque, UP sinon.
+- Health `openDataService` de `api` : DOWN après un passage en échec (détails `state`, `error`, `lastSuccessAt`) ou une
+  publication R2 en échec (`publicationError`, affiché aussi quand le passage a échoué), UNKNOWN si un zip publié
+  manque, UP sinon.
 - Métriques Micrometer (noms Prometheus) :
-  - `opendata_generation_runs_total{outcome="success|failure"}` ;
+  - `opendata_generation_runs_total{outcome="success|partial|failure"}` (`partial` : jeux impact refusés, les autres
+    publiés) ;
   - `opendata_generation_duration_seconds{outcome}` ;
   - `opendata_generation_failed` (1 si le dernier passage du processus a échoué) ;
   - `opendata_generation_running` ;
   - `opendata_generation_last_success_timestamp_seconds` (NaN sans succès depuis le démarrage) ;
-  - `opendata_dataset_rows{dataset="gtin|isbn"}`.
+  - `opendata_dataset_rows{dataset}` (`gtin`, `isbn`, `impact-{verticale}`, `impact-all` ; un jeu refusé garde la
+    valeur de son dernier passage publié par le processus).
 - Publication sur R2 (GOU-2289, si `open-data-config.publication.enabled`) :
   - `opendata_publication_runs_total{outcome="success|failure"}` ;
   - `opendata_publication_duration_seconds{outcome}` ;
   - `opendata_publication_failed` (1 si la dernière publication du processus a échoué) ;
   - `opendata_publication_last_success_timestamp_seconds` ;
   - `opendata_publication_bucket_size_bytes` (taille du bucket après la dernière publication réussie) ;
+  - `opendata_publication_bucket_projected_ratio` (taille prévue par le garde-fou budgétaire à la dernière publication,
+    acceptée ou refusée, rapportée à `max-bucket-size` ; log `WARN` au-delà de 0,8, GOU-2616) ;
   - `opendata_publication_enabled`.
-  La health `openData` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
+  La health `openDataService` passe en DOWN après une publication en échec (détails `publication`, `publicationError`). Log
   `ERROR` `Open data publication on R2 failed`, avec la cause.
-- Âge des fichiers publiés (`opendata_dataset_age_seconds`, seuil de 8 jours) : front-api, lecture du manifest (lot 1,
-  PR suivante).
+- Âge des fichiers publiés, côté front-api (lecture de `https://data.nudger.fr/manifest.json`, GOU-2290, détail dans
+  l'[architecture](../architecture/opendata.md#lecture-du-manifest-par-front-api-gou-2290)) :
+  - `opendata_dataset_age_seconds{dataset="gtin|isbn|impact-..."}` (Micrometer `opendata.dataset.age`) : maintenant
+    moins le `generatedAt` du jeu, NaN si inconnu. **Alerte Ops : au-delà de 691 200 s (8 jours).**
+  - Health `openDataManifest` de front-api : `DEGRADED` si le manifest est illisible (404, réseau, JSON invalide), si
+    `gtin` ou `isbn` manque, ou si un jeu (`impact-*` compris) n'a pas de date valide ou a plus de 8 jours
+    (`front.opendata.max-age`), par exemple un jeu impact refusé et reporté ; lire `problems` ; détails `state`,
+    `datasetAgeSeconds`, `problems`. `UNKNOWN` tant que `open-data-config.public-base-url` est vide (bêta). Ce statut
+    ne change pas la santé globale de front-api, et `/actuator/health/openDataManifest` répond **200** même en
+    `DEGRADED` : une alerte sur ce point doit lire le champ JSON `status`, pas le code HTTP.
+  - Sans registre Prometheus dans le dépôt, la jauge se lit sur
+    `/actuator/metrics/opendata.dataset.age?tag=dataset:gtin` (idem `isbn`), valeur en secondes.
+  - Log WARN `Open data manifest ... unavailable (...)` au changement de cause, INFO `... is readable again` au retour.
 
 ## Échecs et reprise
 
@@ -65,8 +118,7 @@ par un arrêt brutal de `api` est supprimé au passage suivant.
 ## Publication sur R2
 
 Ordre et garanties : [architecture](../architecture/opendata.md#publication-sur-r2-gou-2289). Désactivée par défaut
-et en bêta ; l'activation en prod est une PR dédiée (`open-data-config.publication.enabled: true` pour le profil de
-prod). Prérequis : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` dans l'environnement `prod`, rendus par
+et en bêta ; activée en prod par `application-prod.yml` (`open-data-config.publication.enabled: true`, GOU-2300). Prérequis : `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` dans l'environnement `prod`, rendus par
 un déploiement ou par `serviceSecrets.yml` (`service=api`) ; la publication lit les identifiants au moment de l'envoi.
 
 Durée : environ 55 min pour 6,4 Go à 2 Mo/s (`upload-bandwidth`), plus la relecture sans limite de débit. Le passage
@@ -76,12 +128,25 @@ garde le verrou de génération pendant la publication : `POST /opendata/generat
 |---|---|---|
 | Identifiants | `no endpoint and no account id (R2_ACCOUNT_ID)`, `access key id or secret access key missing` | rendre les secrets `R2_*` pour `api`, redémarrer `api` hors fenêtre batch |
 | Budget | `Budget guard: the bucket would hold ... bytes after the publication` | regarder les objets du bucket (tableau de bord Cloudflare) ; ne relever `max-bucket-size` qu'en restant sous 10 Go-mois |
+| Budget à plus de 80 % (`WARN`, publication faite) | `the bucket will hold ... bytes after the publication, ... % of open-data-config.publication.max-bucket-size` | ouvrir une issue de réduction des jeux avant le refus (GOU-2616 : colonnes, compression) ; pas de filtrage de lignes sans décision |
 | Envoi, relecture | `Upload or read back failed, public objects untouched` ou `read back has sha256 ...` | objets publics intacts ; vérifier le réseau et R2, attendre le passage suivant ou relancer la génération |
 | Bascule | `Switch to the new version failed: manifest.json not written` | un zip peut déjà être le nouveau ; relancer la génération dès que possible |
 | Nettoyage | `New version published, but the temporary objects ... were not all deleted` | version publiée ; le passage suivant supprime les objets `.staging/` restants |
 
-L'envoi manuel `opendataR2Upload.yml` ([opendata-r2-upload.md](opendata-r2-upload.md)) reste un secours : il ne
-publie que les zips, pas les manifests.
+### Bascule en échec (étape 4 ou 5)
+
+Un zip peut être le nouveau alors que `manifest.json` décrit encore l'ancien : le sha256 annoncé ne correspond plus au
+zip téléchargé. Réponse retenue pour le lot 1, sans déclencheur "publier seulement" :
+
+1. Le health `openData` passe DOWN (`publication: FAILED`) et un log ERROR `Switch to the new version failed` est écrit.
+2. Relancer un passage de génération à la main (`POST /opendata/generate`, 409 si un passage tourne) : il régénère,
+   renvoie `.staging/`, rebascule et écrit `manifest.json` en dernier.
+3. Vérifier ensuite : health UP avec `publication: SUCCEEDED`, plus rien sous `.staging/`, sha256 d'un zip téléchargé
+   depuis `https://data.nudger.fr` égal à celui de `manifest.json`.
+
+Le cache des zips et des manifests est de 5 min : l'écart visible côté public dure au plus ce délai après la reprise.
+
+L'envoi manuel `opendataR2Upload.yml` ([opendata-r2-upload.md](opendata-r2-upload.md)) reste un secours : il publie les zips et aussi les manifests impact (`impact-*-manifest.json`), mais pas `manifest.json`.
 
 ## Mesures en bêta (critère d'acceptation)
 
@@ -89,6 +154,9 @@ Pour le compte rendu d'un passage complet :
 
 - durée : `finishedAt - startedAt` du `GET /opendata/generation`, ou `opendata_generation_duration_seconds` ;
 - lignes : `rows` du statut et des manifests ;
-- taille maximale d'une réponse ES : `export-page-size` fois le poids du plus gros document projeté. Le mesurer sur un
+- durée de chaque passe : dernière ligne `Open data main pass: ... done` et `Open data impact pass: ... done` de
+  `nohup-api.log` ;
+- taille maximale d'une réponse ES : `export-page-size` (passe principale) ou `impact-export-page-size` (passe impact)
+  fois le poids du plus gros document projeté. Le mesurer sur un
   échantillon (`_source` limité à `EXPORT_SOURCE_FIELDS`, tri par taille d'`offerNames`) ;
 - latence p95 de la recherche du site pendant le passage, comparée à une nuit sans passage (métriques de front-api).

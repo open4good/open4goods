@@ -247,6 +247,7 @@ class ProductRepositoryTest
         assertThat(updates.getFirst().getDocument()).isNull();
         assertThat(updates.getFirst().getScript()).isEqualTo(ProductRepository.PARTIAL_UPDATE_SCRIPT);
         assertThat(updates.getFirst().getLang()).isEqualTo("painless");
+        assertThat(updates.getFirst().getRetryOnConflict()).isEqualTo(3);
         assertThat(updates.getFirst().getParams().get("changes"))
                 .isEqualTo(Map.of("lastChange", 1L, "offersCount", 2, "price", "updated"));
     }
@@ -331,6 +332,36 @@ class ProductRepositoryTest
         }
         criteria.getCriteriaChain().forEach(child -> collectCriteriaFields(child, fields, visited));
         criteria.getSubCriteria().forEach(child -> collectCriteriaFields(child, fields, visited));
+    }
+
+    @Test
+    void exportAllInVerticalsShouldFilterOnTheVerticalsWithTheGivenProjectionAndPage()
+    {
+        org.springframework.data.elasticsearch.core.SearchHitsIterator<Product> it =
+                org.mockito.Mockito.mock(org.springframework.data.elasticsearch.core.SearchHitsIterator.class);
+        when(elasticsearchOperations.searchForStream(any(NativeQuery.class), eq(Product.class), eq(ProductRepository.CURRENT_INDEX)))
+                .thenReturn(it);
+
+        repository.exportAllInVerticals(List.of("tv", "oven"), new String[] {"id", "attributes.indexed.WARRANTY.value"}, 500);
+
+        ArgumentCaptor<NativeQuery> captor = ArgumentCaptor.forClass(NativeQuery.class);
+        verify(elasticsearchOperations).searchForStream(captor.capture(), eq(Product.class), eq(ProductRepository.CURRENT_INDEX));
+        NativeQuery submitted = captor.getValue();
+        Criteria criteria = ((CriteriaQuery) submitted.getSpringDataQuery()).getCriteria();
+        assertThat(criteria.getField().getName()).isEqualTo("vertical");
+        assertThat(criteria.getQueryCriteriaEntries()).singleElement().satisfies(entry -> {
+            assertThat(entry.getKey()).isEqualTo(Criteria.OperationKey.IN);
+            assertThat((Collection<Object>) entry.getValue()).containsExactly("tv", "oven");
+        });
+        assertThat(submitted.getPageable().getPageSize()).isEqualTo(500);
+        assertThat(submitted.getSourceFilter().getIncludes()).containsExactly("id", "attributes.indexed.WARRANTY.value");
+    }
+
+    @Test
+    void exportAllInNoVerticalShouldNotQueryTheIndex()
+    {
+        assertThat(repository.exportAllInVerticals(List.of(), new String[] {"id"}, 500)).isEmpty();
+        org.mockito.Mockito.verifyNoInteractions(elasticsearchOperations);
     }
 
     @Test

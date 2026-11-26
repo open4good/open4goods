@@ -2,6 +2,7 @@ key: "HEIGHT"
 filteringType: "NUMERIC"
 unit:
   default: "cm"
+  fr: "cm"
 asScore: false
 faIcon: "mdi-arrow-expand-vertical"
 
@@ -27,5 +28,9 @@ parser:
   clazz: org.open4goods.api.services.aggregation.services.realtime.parser.UnitAwareNumericParser
   dimension: "LENGTH"
   defaultUnitHint: "cm"
+  # Stored in cm, the unit shown on the product page (GOU-2707). A value without unit is read in cm, else in mm
+  # when only mm fits the vertical bounds (parsers.bounds): Icecat sends "600" (mm), EPREL "60" (cm).
+  unitlessHints: ["cm", "mm"]
+  targetUnit: "cm"
   normalize: true
   trim: true

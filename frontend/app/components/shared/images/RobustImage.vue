@@ -10,6 +10,12 @@ interface Props {
   placeholderText?: string
   cover?: boolean
   loading?: 'lazy' | 'eager'
+  /** Responsive `sizes` (Nuxt Image syntax); enables a resized `srcset`. */
+  sizes?: string
+  format?: string
+  quality?: number | string
+  /** Above-the-fold image (LCP): eager, high fetch priority, matching preload. */
+  priority?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,6 +25,10 @@ const props = withDefaults(defineProps<Props>(), {
   placeholderText: 'Image non disponible',
   cover: true,
   loading: 'lazy',
+  sizes: undefined,
+  format: undefined,
+  quality: undefined,
+  priority: false,
 })
 
 const imageError = ref(false)
@@ -62,7 +72,12 @@ const imageStyle = computed(() => ({
       :alt="alt"
       :style="imageStyle"
       class="robust-image"
-      :loading="loading"
+      :loading="priority ? 'eager' : loading"
+      :fetchpriority="priority ? 'high' : undefined"
+      :preload="priority ? { fetchPriority: 'high' } : undefined"
+      :sizes="sizes"
+      :format="format"
+      :quality="quality"
       @error="handleError"
     />
   </div>

@@ -10,8 +10,9 @@ parsers:
     minKg: 0.001
     maxKg: 2000.0
   warranty:
-    minYears: 0.0
-    maxYears: 20.0
+    # Years. A bare number outside the range is read in months ("12" from EPREL gives 1 year); 0 is not a warranty.
+    minYears: 0.5
+    maxYears: 10.0
 
 # If true, product titles and meta are regenerated on each batch. The URL slug is frozen once
 # generated and only changes with the product vertical (GOU-1708).
@@ -72,6 +73,14 @@ excludingTokensFromCategoriesMatching:
 sparePartCategoryMarkers:
   - PIECES DETACHEE
   - PIECE DETACHEE
+  # PC components, for the vote only (GOU-2317): they are also natureNeutralCategoryFragments below, so the
+  # nature does not change. A PC case filed by one marketplace as a fridge has rows such as "BOITIER PC" or
+  # "INFORMATIQUE | COMPOSANTS | BOITIER" that must vote against. No generic COMPOSANT token: it would reach
+  # categories that are not PC components.
+  - BOITIER PC
+  - COMPOSANT PC
+  - COMPOSANTS PC
+  - "INFORMATIQUE | COMPOSANTS |"
 
 accessoryCategoryMarkers:
   - ACCESSOIRE
@@ -90,10 +99,30 @@ natureNeutralCategoryFragments:
   - PIECES DETACHEES POUR VEHICULES > SECURITE DES VEHICULES
   # Shoes (about 224 K products), not accessories
   - CHAUSSURES - ACCESSOIRES
+  # Beds filed by Fnac under this accessory category (about 33 K products, GOU-2431): not accessories.
+  # The accessory rows of the other merchants (pillows, mattress protectors, bed feet) keep their marker.
+  - PETIT MENAGER & CUISINE - ACCESSOIRES LITERIE
+  # The PC component markers of the vote (GOU-2317): a PC component is neither a spare part nor an accessory.
+  # Each one is written exactly as in sparePartCategoryMarkers (PcComponentMarkersTest).
+  - BOITIER PC
+  - COMPOSANT PC
+  - COMPOSANTS PC
+  - "INFORMATIQUE | COMPOSANTS |"
 
 # Minimum share (0 to 1) of a product's distinct categories that must carry a marker for the nature
-# to be set. 0: one marked category is enough. Set after the dry-run of the recovery (GOU-2234).
-natureMinMarkedCategoryShare: 0
+# to be set. 0.5: at least half of them. Chosen after the production dry-run of the recovery (GOU-2284):
+# 0 marked 380 806 more products (5.8 %), nearly all false positives.
+natureMinMarkedCategoryShare: 0.5
+
+# Vertical of a product decided by a vote between its datasources (GOU-2256), instead of the first
+# matching category with a single excluding token as veto. On a vertical, each datasource votes against
+# when its category carries one of the vertical's excludingTokensFromCategoriesMatching or a
+# sparePartCategoryMarkers / accessoryCategoryMarkers marker (natureNeutralCategoryFragments are not
+# removed), for when its category matches the vertical, against when it matches another vertical, and
+# abstains otherwise. A vertical needs strictly more votes for than against; its EPREL group keeps it.
+# A tie opposed only by other verticals goes to the historical rule; a tie with a marker or an excluding
+# token against loses (GOU-2317). Rule, choices and measure: verticals/README.md. false: historical rule.
+categoryVoteEnabled: true
 
 # The global scores that are available to build the impact score
 availableImpactScoreCriterias:

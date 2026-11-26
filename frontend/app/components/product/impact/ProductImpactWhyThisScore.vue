@@ -78,7 +78,9 @@ const titleId = `impact-why-${useId()}`
 const variant = computed(() =>
   props.status ? resolveWhyVariant(props.status) : null
 )
-const highlights = computed(() => computeWhyHighlights(props.scores))
+const highlights = computed(() =>
+  computeWhyHighlights(props.scores, undefined, locale.value)
+)
 
 const listFormat = (items: string[]): string =>
   new Intl.ListFormat(locale.value, {

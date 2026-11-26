@@ -36,12 +36,25 @@ order: 5
 averageHoursPerDay: 1.0
 
 parsers:
+  # Unit inference range of the weight parser, kept equal to bounds.WEIGHT.
   weight:
-    minKg: 30.0
-    maxKg: 150.0
-  warranty:
-    minYears: 0.0
-    maxYears: 10.0
+    minKg: 20.0
+    maxKg: 130.0
+  # Plausible ranges (GOU-2707), in the unit of the indexed value: cm, kg. A source outside its range does not
+  # vote; an elected value outside it is neither shown nor used by the ImpactScore, and is logged.
+  bounds:
+    WEIGHT:
+      min: 20.0
+      max: 130.0
+    WIDTH:
+      min: 35.0
+      max: 100.0
+    HEIGHT:
+      min: 60.0
+      max: 120.0
+    DEPTH:
+      min: 30.0
+      max: 90.0
 
 # The associated google taxonomyID. (Ex : FR - https://www.google.com/basepages/producttype/taxonomy-with-ids.fr-FR.txt)
 # SHOULD be set, it will then force this taxonomy for all products in this vertical
@@ -143,6 +156,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Machines à laver"
+    verticalMetaTitle: "Comparatif lave-linge : prix, consommation et Impact Score | Nudger"
+    verticalMetaDescription: "Comparez les lave-linge par prix, consommation d'eau et d'énergie par cycle et Impact Score noté sur 20 pour choisir une machine sobre."
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Découvrez notre sélection de machines à laver. Entre consommation d’eau, d’énergie et durabilité, ces appareils ont un vrai impact sur l’environnement. Nudger vous accompagne pour trouver le modèle le mieux classé à l’Impact Score, tout en répondant à vos besoins du quotidien."
 
@@ -188,6 +203,8 @@ i18n:
     # Text displaid as title for the vertical
     # TODO : Make verticalHomeTitle/ verticalHomeDescription templatable
     verticalHomeTitle: "Washing machines"
+    verticalMetaTitle: "Washing machines comparison: price, consumption and Impact Score | Nudger"
+    verticalMetaDescription: "Compare washing machines by price, water and energy use per cycle and Impact Score out of 20 to pick a low-impact machine."
     # Text displaid as jumbotron for the vertical
     verticalHomeDescription: "Explore our selection of washing machines. Water and energy use, noise levels, and durability all matter for environmental impact. Nudger helps you find the model best ranked on the Impact Score that still matches your daily needs."
 
@@ -408,7 +425,7 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "400"
         - field: "price.minPrice.price"
           operator: "LOWER_THAN"
@@ -431,15 +448,15 @@ nudgeToolConfig:
       group: "price"
       criterias:
         - field: "price.minPrice.price"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "550"
       image: "example-image.png"
       url:
         en: "premium"
         fr: "premium"
       caption:
-        en: "> 550 €"
-        fr: "> 550 €"
+        en: "≥ 550 €"
+        fr: "≥ 550 €"
       title:
         en: "Premium"
         fr: "Haut de gamme"
@@ -474,7 +491,7 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "8"
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
           operator: "LOWER_THAN"
@@ -497,15 +514,15 @@ nudgeToolConfig:
       group: "capacity"
       criterias:
         - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-          operator: "GREATER_THAN"
+          operator: "GREATER_THAN_OR_EQUAL"
           value: "10"
       image: "large-capacity.png"
       url:
         en: "large-capacity"
         fr: "grande-capacite"
       caption:
-        en: "> 10 kg"
-        fr: "> 10 kg"
+        en: "≥ 10 kg"
+        fr: "≥ 10 kg"
       title:
         en: "Large Capacity"
         fr: "Grande Capacité"
@@ -607,7 +624,7 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "400"
       - field: "price.minPrice.price"
         operator: "LOWER_THAN"
@@ -630,15 +647,15 @@ subsets:
     group: "price"
     criterias:
       - field: "price.minPrice.price"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "550"
     image: "example-image.png"
     url:
       en: "premium"
       fr: "premium"
     caption:
-      en: "> 550 €"
-      fr: "> 550 €"
+      en: "≥ 550 €"
+      fr: "≥ 550 €"
     title:
       en: "Premium"
       fr: "Haut de gamme"
@@ -673,7 +690,7 @@ subsets:
     group: "capacity"
     criterias:
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "8"
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
         operator: "LOWER_THAN"
@@ -696,15 +713,15 @@ subsets:
     group: "capacity"
     criterias:
       - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
-        operator: "GREATER_THAN"
+        operator: "GREATER_THAN_OR_EQUAL"
         value: "10"
     image: "large-capacity.png"
     url:
       en: "large-capacity"
       fr: "grande-capacite"
     caption:
-      en: "> 10 kg"
-      fr: "> 10 kg"
+      en: "≥ 10 kg"
+      fr: "≥ 10 kg"
     title:
       en: "Large Capacity"
       fr: "Grande Capacité"

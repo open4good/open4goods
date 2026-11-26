@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.open4goods.commons.config.yml.datasource.CsvDataSourceProperties;
@@ -315,6 +316,58 @@ class KwankoFeedServiceTest
         assertThat(volatileDatasource.getCsvDatasource().getCsvEscapeChar()).isEqualTo('\\');
         assertThat(volatileDatasource.getCsvDatasource().getDatasourceUrls()).containsExactly("https://new.example/feed.csv");
         assertThat(volatileDatasource.getFeedKey()).isEqualTo("Merchant Products");
+    }
+
+    @Test
+    void trackedUrlPatternShouldAcceptKwankoLinksAndRejectDirectMerchantLinks()
+    {
+        Pattern tracked = Pattern.compile(KwankoFeedService.KWANKO_TRACKED_URL_PATTERN);
+
+        assertThat(tracked.matcher("https://action.metaffiliation.com/trk.php?mclic=P51378758B41F21DS1UF413a8b014024980V4").find()).isTrue();
+        assertThat(tracked.matcher("https://track.kwanko.com/click?x=1").find()).isTrue();
+        assertThat(tracked.matcher("https://qby.mda-electromenager.com/?P5122F758B41F15S1UC41363f080465V4").find()).isTrue();
+        assertThat(tracked.matcher("https://www.carrefour.fr/p/tcl-c80-50c805-tv-127-cm-(50\")-4k-ultra-hd-smart-tv-5901292521486?s=3093").find()).isFalse();
+        assertThat(tracked.matcher("https://www.carrefour.fr/p/samsung-galaxy-a57-5g-8806099028282?s=3103").find()).isFalse();
+        assertThat(tracked.matcher("https://metaffiliation.com.example.org/p/1").find()).isFalse();
+    }
+
+    @Test
+    void clickTemplatesByCampaignShouldKeepFirstTemplateWithPlaceholder() throws Exception
+    {
+        KwankoFeedService service = buildService();
+        String json = """
+                {"ads":[
+                  {"id":"1","campaign":{"id":"c1"},"tracked_material_per_websites":[{"urls":{"click":"https://action.metaffiliation.com/trk.php?mclic=A"}}]},
+                  {"id":"2","campaign":{"id":"c1"},"tracked_material_per_websites":[{"urls":{"click":"https://action.metaffiliation.com/trk.php?mclic=B&redir={XXX}"}}]},
+                  {"id":"3","campaign":{"id":"c1"},"tracked_material_per_websites":[{"urls":{"click":"https://action.metaffiliation.com/trk.php?mclic=C&redir={XXX}"}}]},
+                  {"id":"4","tracked_material_per_websites":[{"urls":{"click":"https://action.metaffiliation.com/trk.php?mclic=D&redir={XXX}"}}]}
+                ]}
+                """;
+
+        Map<String, String> templates = service.clickTemplatesByCampaign(objectMapper.readTree(json));
+
+        assertThat(templates).containsExactly(Map.entry("c1", "https://action.metaffiliation.com/trk.php?mclic=B&redir={XXX}"));
+    }
+
+    @Test
+    void applyTrackingDefaultsShouldRequireTrackedUrlsAndKeepYamlOverrides() throws Exception
+    {
+        KwankoFeedService service = buildService();
+        DataSourceProperties datasource = new DataSourceProperties();
+        datasource.setCsvDatasource(new CsvDataSourceProperties());
+
+        assertThat(service.applyTrackingDefaults(datasource, null)).isFalse();
+        assertThat(datasource.getCsvDatasource().getTrackedUrlPattern()).isEqualTo(KwankoFeedService.KWANKO_TRACKED_URL_PATTERN);
+        assertThat(datasource.getCsvDatasource().getTrackingLinkTemplate()).isNull();
+
+        DataSourceProperties overridden = new DataSourceProperties();
+        overridden.setCsvDatasource(new CsvDataSourceProperties());
+        overridden.getCsvDatasource().setTrackedUrlPattern("^https://yaml\\.example/");
+        overridden.getCsvDatasource().setTrackingLinkTemplate("https://yaml.example/?u={XXX}");
+
+        assertThat(service.applyTrackingDefaults(overridden, "https://api.example/?u={XXX}")).isTrue();
+        assertThat(overridden.getCsvDatasource().getTrackedUrlPattern()).isEqualTo("^https://yaml\\.example/");
+        assertThat(overridden.getCsvDatasource().getTrackingLinkTemplate()).isEqualTo("https://yaml.example/?u={XXX}");
     }
 
     private KwankoFeedService buildService()

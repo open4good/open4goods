@@ -52,13 +52,19 @@ final class GlobalSearchRelevance {
 	private static final Pattern DIACRITICS = Pattern.compile("\\p{M}+");
 	/** Placeholder images served by some feeds instead of a product picture. */
 	private static final List<String> PLACEHOLDER_IMAGE_MARKERS = List.of("noimage", "no-image", "no_image");
+	/** Articles and prepositions skipped before the head of a name and around the object of the query. */
+	private static final Set<String> HEAD_FILLER_WORDS = Set.of("a", "au", "aux", "de", "d", "du", "des", "le", "la",
+			"les", "l", "un", "une", "et", "the");
+	/** Parenthesised parts of a name ({@code (92212687)}), left out of the head detection. */
+	private static final Pattern PARENTHESES = Pattern.compile("\\([^)]*\\)");
 
 	/**
 	 * Source fields read to decide whether a long tail candidate is displayable: offer names, brand, images and
 	 * offers. The complete product is fetched afterwards for the displayed slice only.
 	 */
 	private static final String[] CANDIDATE_SOURCE_FIELDS = { "id", OFFER_NAMES_FIELD, "coverImagePath",
-			"resources.url", "attributes.referentielAttributes.BRAND", "price.offers", OFFERS_COUNT_FIELD, "vertical" };
+			"resources.url", "attributes.referentielAttributes.BRAND", "price.offers", OFFERS_COUNT_FIELD, "vertical",
+			"datasourceCategories" };
 
 	private final GlobalSearchProperties properties;
 	private final OfferFreshnessService offerFreshnessService;
@@ -68,6 +74,8 @@ final class GlobalSearchRelevance {
 	private final List<String> accessoryVariants;
 	/** Accessory expressions searched anywhere in the offer names, folded, each as its list of words. */
 	private final List<List<String>> accessoryPhrases;
+	/** Folded words skipped before the head of a name: modifiers and known brands (GOU-2474). */
+	private final Set<String> headSkippedWords;
 
 	GlobalSearchRelevance(GlobalSearchProperties properties, OfferFreshnessService offerFreshnessService) {
 		this.properties = properties == null ? new GlobalSearchProperties() : properties;
@@ -93,6 +101,10 @@ final class GlobalSearchRelevance {
 			}
 		}
 		this.accessoryPhrases = List.copyOf(phrases);
+		Set<String> skipped = new LinkedHashSet<>();
+		Stream.concat(this.properties.getHeadModifiers().stream(), this.properties.getKnownBrands().stream())
+				.map(GlobalSearchRelevance::words).forEach(skipped::addAll);
+		this.headSkippedWords = Set.copyOf(skipped);
 	}
 
 	/**
@@ -230,6 +242,112 @@ final class GlobalSearchRelevance {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Long tail rule relative to the query (GOU-2474): the product is set apart when one of its offer names holds the
+	 * object of the query after its head ({@code Ressort Lave-linge - Twinstar} for {@code lave-linge}) and none
+	 * starts with it. See {@link #isForeignHeadName(String, String, String)}. Categorized products are checked too
+	 * (GOU-2497) unless {@link GlobalSearchProperties#isForeignHeadUncategorizedOnly()} is on; nothing is set apart
+	 * when the query asks for an accessory.
+	 *
+	 * @param query   sanitized user query
+	 * @param product long tail candidate read with {@link #candidateSourceFilter()}
+	 * @return {@code true} when the product reads as a part or an accessory of the requested object
+	 */
+	boolean isForeignHeadProduct(String query, Product product) {
+		if (product == null || product.getOfferNames() == null || !properties.isForeignHeadEnabled()
+				|| (properties.isForeignHeadUncategorizedOnly() && product.getDatasourceCategories() != null
+						&& !product.getDatasourceCategories().isEmpty())
+				|| queryMentionsAccessory(query)) {
+			return false;
+		}
+		Set<String> brandWords = new LinkedHashSet<>(words(brand(product)));
+		List<String> object = queryObject(words(query), brandWords);
+		if (object.isEmpty()) {
+			return false;
+		}
+		boolean foreign = false;
+		for (String name : product.getOfferNames()) {
+			ObjectPosition position = objectPosition(object, name, brandWords);
+			if (position == ObjectPosition.HEAD) {
+				return false;
+			}
+			foreign |= position == ObjectPosition.AFTER_HEAD;
+		}
+		return foreign;
+	}
+
+	/**
+	 * Foreign head rule applied to one offer name: the name holds the object of the query, but the object is not the
+	 * head of the name. The object is the query without its leading and trailing brands, articles, modifiers and words
+	 * holding a digit ({@code lave-vaisselle bosch} gives {@code lave vaisselle}); the head is the first word of the
+	 * name once the same words and the parenthesised parts are skipped ({@code Bosch Série 4 Lave-vaisselle} starts
+	 * with {@code lave vaisselle}). Plurals, accents, case and hyphens are ignored. A query naming the part itself
+	 * ({@code ressort lave-linge}) has that part as object, so its names are kept.
+	 *
+	 * @param query     sanitized user query
+	 * @param offerName offer name of the product
+	 * @param brand     brand of the product, may be {@code null}
+	 * @return {@code true} when the object of the query follows another head noun
+	 */
+	boolean isForeignHeadName(String query, String offerName, String brand) {
+		if (!properties.isForeignHeadEnabled() || queryMentionsAccessory(query)) {
+			return false;
+		}
+		Set<String> brandWords = new LinkedHashSet<>(words(brand));
+		List<String> object = queryObject(words(query), brandWords);
+		return !object.isEmpty() && objectPosition(object, offerName, brandWords) == ObjectPosition.AFTER_HEAD;
+	}
+
+	private List<String> queryObject(List<String> queryWords, Set<String> brandWords) {
+		int start = 0;
+		int end = queryWords.size();
+		while (start < end && isHeadSkipped(queryWords.get(start), brandWords)) {
+			start++;
+		}
+		while (end > start && isHeadSkipped(queryWords.get(end - 1), brandWords)) {
+			end--;
+		}
+		return queryWords.subList(start, end);
+	}
+
+	private ObjectPosition objectPosition(List<String> object, String offerName, Set<String> brandWords) {
+		if (!StringUtils.hasText(offerName)) {
+			return ObjectPosition.ABSENT;
+		}
+		List<String> name = words(PARENTHESES.matcher(offerName).replaceAll(" "));
+		int head = 0;
+		while (head < name.size() && isHeadSkipped(name.get(head), brandWords)) {
+			head++;
+		}
+		for (int start = head; start + object.size() <= name.size(); start++) {
+			if (sameWords(name, start, object)) {
+				return start == head ? ObjectPosition.HEAD : ObjectPosition.AFTER_HEAD;
+			}
+		}
+		return ObjectPosition.ABSENT;
+	}
+
+	private boolean isHeadSkipped(String word, Set<String> brandWords) {
+		return HEAD_FILLER_WORDS.contains(word) || headSkippedWords.contains(word) || brandWords.contains(word)
+				|| word.chars().anyMatch(Character::isDigit);
+	}
+
+	private static boolean sameWords(List<String> name, int start, List<String> object) {
+		for (int i = 0; i < object.size(); i++) {
+			String word = name.get(start + i);
+			String term = object.get(i);
+			if (!sameWordOrPlural(word, term) && !sameWordOrPlural(term, word)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Where the object of the query stands in an offer name. */
+	private enum ObjectPosition {
+		ABSENT, HEAD, AFTER_HEAD
 	}
 
 	private boolean partNameOfObject(List<String> name, List<String> object) {

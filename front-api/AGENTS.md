@@ -79,6 +79,14 @@ synchronisation"), never in CI/beta: use `SimulatedCssProductsClient`). The elig
 through `OfferFreshnessService` and merchant domains through `MerchantDomainsService.domainResolver()` (see README
 "Google CSS dry run"); never send `rating`/`reviewCount`.
 
+Open data metadata (`/opendata/*`) is read from the published `manifest.json`
+(`{open-data-config.public-base-url}/manifest.json`) by `OpenDataManifestService`, configured via
+`front.opendata.*` mapped by `OpenDataManifestProperties` (cache TTL, timeouts, `max-age` of the
+`openDataManifest` health component, GOU-2290). Never use the live index counts for these endpoints, never
+throw: an empty base URL means no HTTP call and null values; an unreadable manifest gives null values or the last
+manifest read, and a `DEGRADED` health that never turns the aggregate DOWN (see
+`docs/architecture/opendata.md`).
+
 Global search relevance is configured via `front.global-search.*` mapped by
 `GlobalSearchProperties` (accessory terms, ranking weights, long tail filter).
 It only applies to `SearchService.globalSearch`; never route `search()` through

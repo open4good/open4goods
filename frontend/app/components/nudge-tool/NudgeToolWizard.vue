@@ -284,7 +284,7 @@ import type {
   NudgeToolSubsetGroupDto,
   ProductConditionSelection,
   ProductDto,
-  ProductSearchResponseDto,
+  ProductCardSearchResponseDto,
   VerticalCategoryDto,
   VerticalConfigDto,
   VerticalSubsetDto,
@@ -791,14 +791,10 @@ const fetchRecommendations = async () => {
       (filterRequest.value.filters?.length ?? 0) > 0 ||
       (filterRequest.value.filterGroups?.length ?? 0) > 0
 
-    const response = await $fetch<ProductSearchResponseDto>(
-      '/api/products/search',
+    const response = await $fetch<ProductCardSearchResponseDto>(
+      '/api/products/cards',
       {
         method: 'POST',
-        query: {
-          include:
-            'base,identity,names,attributes,resources,scores,offers,vertical',
-        },
         body: {
           verticalId: selectedCategoryId.value,
           pageNumber: 0,

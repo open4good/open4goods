@@ -1,0 +1,77 @@
+# Search-intent subcategory for the washing-machine vertical.
+# Maintained: 2026-11-20 by Growth (GOU-2485).
+# Intent: choosing a washing machine of 8 to 9 kg for a household of three or four people.
+# Evidence:
+#   - GSC (sc-domain:nudger.fr, 90 days to 2026-11-19): no impression on the exact
+#     question; neighbouring query "comment bien choisir sa machine a laver" 3 impr.
+#     (position 9.7). Capacity by household is a new query (non mesure).
+#   - Google Autocomplete: non mesure (no direct access); web search (2026-11-20)
+#     shows UFC-Que Choisir: 8 to 9 kg generally enough for 3-4 people, 10 to 12 kg
+#     when laundry is frequent, 12 to 15 kg for bulky textiles.
+# Feasibility:
+#   - Matching products: 691 (Elasticsearch products-moustik, vertical washing-machine,
+#     offersCount >= 1 and excluded = false, checked 2026-11-23). The listing applies
+#     excluded = false: a count without it (2026-11-20 draft) overstates the page.
+#   - Filter on attributes.indexed.WASHING_CAPACITY.numericValue (8 kg included, 10 kg excluded);
+#     products without a capacity value (1 180 of 2 834 with offers) are not counted.
+# Rationale:
+#   - Lets the refreshed article /blog/comment-bien-choisir-sa-machine-a-laver link each
+#     household size to a matching listing and a guide-product-grid widget.
+id: "washing_machine_8_9_kg"
+slug:
+  en: "8-9-kg-washing-machine"
+  fr: "lave-linge-8-9-kg"
+h1Title:
+  en: "8 to 9 kg washing machines"
+  fr: "Lave-linges de 8 à 9 kg"
+description:
+  en: |-
+    Compare **8 to 9 kg washing machines** for a household of three or four people, with energy use, noise and Impact Score data to compare models.
+  fr: |-
+    Comparez les **lave-linges de 8 à 9 kg** pour un foyer de trois ou quatre personnes, avec la consommation, le bruit et l'Impact Score pour comparer les modèles.
+metaTitle:
+  en: "8 to 9 kg washing machines: compare models | Nudger"
+  fr: "Lave-linges 8 à 9 kg : comparer | Nudger"
+metaDescription:
+  en: "Compare 8 to 9 kg washing machines by energy use, noise, warranty and Impact Score before choosing the right capacity."
+  fr: "Comparez les lave-linges de 8 à 9 kg selon la consommation, le bruit, la garantie et l'Impact Score avant de choisir la bonne capacité."
+metaOpenGraphTitle:
+  en: "8 to 9 kg washing machines: compare models"
+  fr: "Lave-linges de 8 à 9 kg : comparer les modèles"
+metaOpenGraphDescription:
+  en: "A focused selection of washing machines with the data you need to compare them."
+  fr: "Une sélection ciblée de lave-linges avec les données utiles pour comparer."
+heroBlock:
+  mdiIcon: "mdi-washing-machine"
+  title:
+    en: "Capacity for three or four people"
+    fr: "Capacité pour trois ou quatre personnes"
+  body:
+    en: |-
+      This page lists 8 to 9 kg washing machines (rated dry-laundry capacity).
+    fr: |-
+      Cette page liste les lave-linges de 8 à 9 kg (capacité nominale en linge sec).
+readMore:
+  title:
+    en: "Which washing machine capacity for three or four people?"
+    fr: "Quelle capacité de lave-linge choisir pour trois ou quatre personnes ?"
+  shortText:
+    en: |-
+      UFC-Que Choisir considers 8 to 9 kg generally enough for three or four people. This page lists only 8 to 9 kg models.
+    fr: |-
+      UFC-Que Choisir juge qu'un modèle de 8 à 9 kg suffit généralement à un foyer de trois ou quatre personnes. Cette page ne liste que des modèles de 8 à 9 kg.
+  longText:
+    en: |-
+      Once the capacity is set, compare water use, energy class, noise and warranty.
+      A drum larger than needed uses more water per cycle, so do not over-size.
+    fr: |-
+      Une fois la capacité fixée, comparez la consommation d'eau, la classe énergie,
+      le bruit et la garantie. Un tambour plus grand que nécessaire consomme plus
+      d'eau par cycle : mieux vaut ne pas surdimensionner.
+activatedFilters:
+  - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
+    operator: "GREATER_THAN_OR_EQUAL"
+    value: "8"
+  - field: "attributes.indexed.WASHING_CAPACITY.numericValue"
+    operator: "LOWER_THAN"
+    value: "10"

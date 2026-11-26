@@ -12,25 +12,40 @@ flowchart LR
   API -- zips + manifests, manifest.json en dernier --> DISK[/opt/open4goods/opendata]
   API -- après le passage, S3 multipart, si publication.enabled --> R2[(R2 nudger-opendata, data.nudger.fr)]
   DISK -. lot 0, envoi manuel opendataR2Upload.yml .-> R2
-  UI[ui : /opendata/*.zip] -- 301 si redirect-base-url --> R2
-  FAPI[front-api /api/opendata/*] --> FE[pages /opendata]
+  UI[ui : /opendata/*.zip] -- 301 si redirect-base-url, sinon 404 --> R2
+  R2 -- manifest.json, cache 5 min --> FAPI[front-api /api/opendata/*]
+  FAPI --> FE[pages /opendata]
 ```
 
 - **Génération dans `api` uniquement** (GOU-2248) : `OpenDataGenerationScheduler` (cron
-  `open-data-config.generation-cron`, par défaut dimanche 01:30 Europe/Paris) et `POST /opendata/generate`. `ui` et
-  `front-api` ont `generation-enabled: false` et `OpenDataService` n'a plus de `@Scheduled` : seul `api` génère.
+  `open-data-config.generation-cron`, par défaut dimanche 01:30 Europe/Paris) et `POST /opendata/generate`.
+  `front-api` a `generation-enabled: false`, `ui` n'a plus la dépendance `opendata` (GOU-2290) et `OpenDataService`
+  n'a plus de `@Scheduled` : seul `api` génère.
   Avant, la génération tournait dans `ui` 8 h après chaque démarrage et échouait depuis juin sur la limite de 100 Mo
   du buffer de réponse Elasticsearch (GOU-2249).
-- **Lecture** : `ProductRepository.exportAll(fields, pageSize)` (scroll), `_source` limité à
-  `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un échantillon de prod de
-  200 produits, contre environ 21 Ko complet). Pages de `export-page-size` (2000, environ 1,5 Mo par réponse) et pause
-  `page-pause` (50 ms) après chaque page. Aucune clé d'attribut autre que les 5 clés ISBN n'est lue (pas de clé
-  Decitre, GOU-2262). Ne relève jamais le buffer du client.
+- **Lecture** en deux passes (GOU-2556), pause `page-pause` (50 ms) après chaque page :
+  1. passe principale (GTIN, ISBN) : `ProductRepository.exportAll(fields, pageSize)` (scroll de tout le catalogue),
+     `_source` limité à `OpenDataService.EXPORT_SOURCE_FIELDS` (environ 0,7 Ko par produit, 1,6 Ko au plus sur un
+     échantillon de prod de 200 produits, contre environ 21 Ko complet), pages de `export-page-size` (2000, environ
+     1,5 Mo par réponse). Aucun critère impact n'y est lu ;
+  2. passe impact, après elle : `ProductRepository.exportAllInVerticals(verticals, fields, pageSize)` (`terms` sur
+     `vertical`, seulement les verticales des jeux impact), `_source` limité aux colonnes communes
+     (`ImpactDataset.COMMON_SOURCE_FIELDS`) et à `value` et `source.{dataSourcename,value,cleanedValue}` de chaque
+     critère (GOU-2327), pages de `impact-export-page-size` (500).
+
+  Avant GOU-2556, un seul scroll lisait les critères de toutes les verticales sur tout le catalogue, par pages de 500 :
+  plus de 17 h 30 le 22/11. Les seules clés d'attribut lues sont les 5 clés ISBN et les critères des jeux impact
+  (`attributes.indexed.{CRITERE}`, GOU-2250) ; pas de clé Decitre (GOU-2262). Ne relève jamais le buffer du client.
+- **Progression** : une ligne INFO par passe au plus toutes les `progress-log-interval` (5 min), puis une ligne finale
+  (`..., done`) : produits lus, total attendu (compte de l'index au début du passage), %, débit en produits/min, durée
+  écoulée et estimation du reste.
 - **Écriture** : un passage écrit dans `opendata/tmp/`, sur le même disque. Il échoue avant toute lecture si l'espace
   libre est inférieur à `min-free-space-ratio` (1,5) fois la taille des zips publiés. Le sha256, les lignes et le
   remplissage des colonnes sont calculés pendant l'écriture.
 - **Garde-fou de lignes** : un jeu refusé si ses lignes sont inférieures à `min-rows-ratio` (0,9) fois celles du
-  manifest publié, ou fois le compte de l'index pris au début du passage (export arrêté en route).
+  manifest publié, ou fois le compte de l'index pris au début du passage (export arrêté en route). Un jeu *impact*
+  refusé est isolé (GOU-2308) : il n'est pas publié, GTIN, ISBN et les autres jeux le sont ; voir
+  `operations/opendata-generation.md`.
 - **Publication locale** : renommages atomiques dans l'ordre zips, `gtin-manifest.json` et `isbn-manifest.json`,
   puis `manifest.json` en dernier (point de validation). `opendata/tmp/` est supprimé après chaque passage.
 - **Échec visible** : toute exception termine le passage en `FAILED`, sans toucher aux fichiers publiés : log
@@ -41,20 +56,23 @@ flowchart LR
 
 `OpenDataPublisher`, appelé par `api` après un passage réussi, publie les fichiers locaux sur le bucket R2 par son API
 S3 (`S3OpenDataStorage`, AWS SDK for Java v2, client synchrone Apache). Désactivée par défaut et en bêta
-(`open-data-config.publication.enabled: false`) ; l'activation en prod passe par une PR dédiée. Un passage en échec
+(`open-data-config.publication.enabled: false`) ; activée en prod par `application-prod.yml` (GOU-2300). Un passage en échec
 ne publie rien.
 
 Les clés publiques sont les mêmes à chaque passage. Un zip n'est donc jamais écrit sur sa clé publique : il passe
 par une clé temporaire, comme dans l'envoi manuel de GOU-2285. Ordre :
 
-1. **Contrôles locaux** : chaque zip a la taille et un sha256 valide de son manifest.
+1. **Contrôles locaux** : chaque zip a la taille et un sha256 valide de son manifest. Un jeu reporté (jeu impact
+   refusé) n'est renvoyé que si le zip public n'a pas le sha256 de son manifest local (publication précédente en
+   échec, GOU-2314) ; son manifest est toujours réécrit.
 2. **Garde-fou budgétaire** : la taille du bucket après la publication (objets conservés, hors clés remplacées et
    temporaires, plus les nouveaux zips et manifests) ne doit pas dépasser `max-bucket-size` (9 Go, unités binaires de
-   Spring). Sinon refus, rien n'est envoyé. Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
+   Spring). Sinon refus, rien n'est envoyé. Au-delà de 80 % de ce plafond, la publication se fait mais un log `WARN`
+   l'annonce et la gauge `opendata.publication.bucket.projected.ratio` le montre (GOU-2616). Pendant l'envoi, la copie temporaire s'ajoute à l'ancienne version
    pendant quelques heures : l'effet sur les Go-mois facturés est négligeable.
 3. **Envoi multipart** de chaque zip vers `staging-prefix` + clé (`.staging/gtin-open-data.zip`), en parts de
    `part-size` (64 Mo), débit limité à `upload-bandwidth` (2 Mo/s). En-têtes : `Content-Type: application/zip`,
-   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control`, métadonnée `sha256`. Un envoi en échec est
+   `Content-Disposition: attachment`, `Cache-Control` de `zip-cache-control` (`public, max-age=300`, comme les manifests : avec des clés fixes, un cache long ferait servir l'ancien zip alors que `manifest.json` annonce déjà le nouveau sha256), métadonnée `sha256`. Un envoi en échec est
    abandonné (`AbortMultipartUpload`).
 4. **Relecture** : chaque objet temporaire est relu en entier ; son sha256 et sa taille sont comparés au manifest.
    L'ETag d'un envoi multipart n'est pas un condensé du fichier : seule la relecture prouve le contenu.
@@ -74,6 +92,49 @@ Identifiants : `R2_ACCOUNT_ID` (variable), `R2_ACCESS_KEY_ID` et `R2_SECRET_ACCE
 GitHub `prod`, rendus pour `api` par `scripts/deploy/render-service-secrets.sh` dans son config tree
 (`open-data-config.publication.*`). Ils ne sont ni dans le code ni dans `open4goods-config`. L'environnement `beta` ne
 les a pas.
+
+## Lecture du manifest par front-api (GOU-2290)
+
+`/api/opendata/*` lit `{open-data-config.public-base-url}/manifest.json` (`OpenDataManifestService`), jamais les
+comptes live de l'index : l'index et le fichier divergent (ISBN au 15/11 : 10,1 M dans l'index, 8,7 M dans le fichier).
+Seul `manifest.json` est lu (écrit en dernier, ses entrées sont cohérentes entre elles) ; chaque jeu y est cherché par
+son `id`. Les champs inconnus sont ignorés (ajout compatible du contrat).
+
+| Champ de l'API | Source dans le manifest |
+|---|---|
+| `recordCount`, `recordCountValue` | `rows` de l'entrée du jeu |
+| `lastUpdated` | `generatedAt` de l'entrée, formaté dans la langue demandée, fuseau Europe/Paris |
+| `fileSize` | `bytes` |
+| `sha256` | `sha256` |
+| `downloadUrl` | `{public-base-url}/{gtin,isbn}-open-data.zip` (configuration, pas le manifest) |
+| overview `totalProductCount`, `datasetCount`, `totalDatasetSize` | sommes des entrées `gtin` et `isbn` seulement : les jeux impact décrivent les mêmes produits |
+
+- **Base vide** (bêta, local) : aucun appel HTTP. Les champs issus du manifest valent `null`, `downloadUrl` aussi (`ui`
+  ne sert plus les fichiers) ; `headers` reste rempli. Les endpoints répondent 200.
+- **Manifest absent (404), illisible ou réseau en échec** : jamais de 500. Les champs valent `null`, ou les valeurs du
+  dernier manifest lu avec succès par le processus. Un WARN est écrit quand la cause change, pas à chaque lecture ;
+  un INFO au retour.
+- **Cache** : une lecture, réussie ou non, sert `front.opendata.manifest-cache-ttl` (5 min, comme le `max-age=300` des
+  manifests sur R2). Un seul appelant relit ; les autres reçoivent la lecture précédente pendant ce temps. Délais :
+  `connect-timeout` 2 s, `read-timeout` 3 s.
+- **Santé** `openDataManifest` : `UNKNOWN` si la base est vide ; `DEGRADED` si le manifest est illisible, si `gtin` ou
+  `isbn` manque, ou si un jeu quelconque du manifest (`impact-*` compris) n'a pas de date valide ou a plus de
+  `front.opendata.max-age` (8 jours) ; `UP` sinon. Un jeu impact refusé par le contrôle de lignes garde son ancien
+  `generatedAt` (isolation GOU-2308) : il passe la santé en `DEGRADED` au bout de 8 jours même si `gtin` et `isbn`
+  sont frais. Le détail `problems` dit quel jeu est en cause.
+  `DEGRADED` est un statut personnalisé hors de l'ordre d'agrégation : comme `ALERT` et `WARN` de `impactScoreGuard`
+  (api), il ne passe jamais la santé globale de front-api en DOWN, ce qui bloquerait ses redémarrages pour un
+  fichier en retard. Écart voulu avec le "DOWN" de GOU-2239 point 6.
+- **Métrique** `opendata.dataset.age{dataset}` (Prometheus `opendata_dataset_age_seconds`) : maintenant moins le
+  `generatedAt` de chaque jeu du manifest (`gtin`, `isbn`, `impact-*`), calculé à la lecture, donc croissant entre
+  deux lectures ; NaN si inconnu. Ops branche l'alerte au-delà de 691 200 s (8 jours), sur
+  `/actuator/metrics/opendata.dataset.age?tag=dataset:gtin` ou sur le `status` JSON de la santé (le code HTTP reste
+  200 en `DEGRADED`).
+
+`ui` ne génère ni ne sert aucun fichier (plus de dépendance `opendata`) : `GET`/`HEAD` sur
+`/opendata/{gtin,isbn}-open-data.zip` répondent 301 vers `{open-data-config.redirect-base-url}/{nom}`, ou 404 si la
+base est vide (`OpenDataRedirectProperties`). Le flux bridé (`ThrottlingInputStream`, `limitedRateStream`,
+`download-speed-kb`, `concurrent-downloads`) et `downloadLimits` de l'overview sont retirés.
 
 ## Fichiers publiés
 
@@ -131,8 +192,28 @@ ISO 8601 UTC, à la seconde.
 
 Colonnes et formats inchangés au lot 1, pour les réutilisateurs actuels. Les corrections (`last_updated` en ISO 8601,
 URL canonique, colonne de catégorie Nudger, `souscategorie` vide) forment une version 2 du format, décidée au lot 3.
+GOU-2616 en avance une partie pour tenir le budget R2.
+
+Colonnes publiées (GOU-2616) :
+
+- GTIN : `gtin`, `brand`, `model`, `name`, `last_updated`, `gs1_country`, `gtinType`, `offers_count`, `min_price`,
+  `currency`, `sources` ;
+- ISBN : `isbn`, `title`, `last_updated`, `offers_count`, `min_price`, `currency`, `editeur`, `format`, `nb_page`,
+  `souscategorie`, `souscategorie2`, `sources`.
+
+`last_updated` est une date UTC `AAAA-MM-JJ`, vide si inconnue. `sources` : identifiants des sources séparés par `|`
+(GOU-2301). La fiche produit se déduit du code : `https://nudger.fr/{gtin}`. CSV RFC 4180 en UTF-8, une cellule n'est
+entre guillemets que si elle contient une virgule, un guillemet ou un saut de ligne ; zip en compression Deflate
+maximale.
 
 Journal des modifications du schéma (à compléter par la version 2) :
+
+- **GOU-2616** (budget R2, décision de Goulven du 23/11 sur GOU-2544 : rester sous 10 Go-mois, plafond 9 GiB
+  inchangé) : `gtin.zip` atteignait 9,19 Go et la publication 9,68 Go. Retrait de `url` (GTIN et ISBN, déductible
+  du code) et de `categories` (GTIN : 19 % du zip, catégories brutes des marchands, redondantes entre elles) ;
+  `last_updated` passe d'epoch millisecondes à la date UTC ; guillemets seulement au besoin, y compris dans les
+  jeux impact ; compression maximale. Mesure sur 210 000 lignes contiguës du zip publié : 68 % de la taille
+  actuelle, soit environ 6,3 Go pour GTIN et 6,8 Go publiés au catalogue du 22/11.
 
 - **Lot 1 (GOU-2248)**, par rapport à l'ancien fichier encore diffusé par Kaggle (GTIN : 59,7 M lignes, ISBN :
   7,76 M) : les colonnes `min_price_compensation` (héritée, à ne pas utiliser) et `classification_decitre_1`,
@@ -155,8 +236,9 @@ exclu ; une verticale sans autre critère n'a pas de jeu.
   `attributes.indexed.{CRITERE}` par critère ; aucune clé Decitre (GOU-2262).
 - **Manifest** : les colonnes d'un jeu impact portent en plus `unit`, `description` et `source` (ajout compatible).
 - Colonnes et définitions : [opendata-impact-dictionary.md](opendata-impact-dictionary.md).
-- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact du passage, avec son manifest
-  (`impact-all`, lignes = somme des jeux).
+- **ZIP global** : `impact-all.zip` contient les CSV de tous les jeux impact, avec son manifest (`impact-all`, lignes =
+  somme des jeux). Un jeu refusé par le garde-fou y figure par son zip encore publié (GOU-2314) ; si tous le sont,
+  `impact-all` reste celui du passage précédent.
 - **Date de la source** : non disponible dans l'index par critère, voir `last_updated` (colonne du jeu).
 - **Publication R2** : l'envoi depuis `api` (GOU-2289) publie tous les jeux du passage, `impact-all` compris ; le workflow `opendataR2Upload.yml` (jeu `impact`) envoie `impact-*.zip` et
   `impact-*-manifest.json`.

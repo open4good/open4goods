@@ -1,10 +1,13 @@
-import { getRequestHeader } from 'h3'
+import { getRequestHeader, setResponseHeader } from 'h3'
 
-import type { BlogPostDto } from '~~/shared/api-client'
 import { resolveDomainLanguage } from '~~/shared/utils/domain-language'
 
 import { setDomainLanguageCacheHeaders } from '../../../utils/cache-headers'
-import { findBlogDocBySlug, toBlogPostDto } from '../../../utils/blog-content'
+import {
+  findBlogDocBySlug,
+  toBlogPostDto,
+  type BlogArticleDto,
+} from '../../../utils/blog-content'
 
 /**
  * Blog article by slug, served from the `blog` Nuxt Content collection. See articles.ts for why
@@ -13,8 +16,12 @@ import { findBlogDocBySlug, toBlogPostDto } from '../../../utils/blog-content'
  * No extractBackendErrorDetails here (unlike the old front-api-proxying version): that helper is
  * shaped around the generated client's ResponseError and would turn this route's own 404 into a
  * 500. There is no backend call left to translate errors from.
+ *
+ * Drafts: with the `blogShowDrafts` runtime config (NUXT_BLOG_SHOW_DRAFTS=true, beta only), a
+ * `draft: true` post is also served here, flagged `draft: true` and never cached, so that it can be
+ * reviewed at its URL. It stays out of every listing, the sitemap and the RSS feed.
  */
-export default defineEventHandler(async (event): Promise<BlogPostDto> => {
+export default defineEventHandler(async (event): Promise<BlogArticleDto> => {
   setDomainLanguageCacheHeaders(event, 'public, max-age=3600, s-maxage=3600')
 
   const slug = getRouterParam(event, 'slug')
@@ -29,9 +36,16 @@ export default defineEventHandler(async (event): Promise<BlogPostDto> => {
     getRequestHeader(event, 'x-forwarded-host') ?? getRequestHeader(event, 'host')
   resolveDomainLanguage(rawHost)
 
-  const doc = await findBlogDocBySlug(event, slug)
+  const { blogShowDrafts } = useRuntimeConfig(event)
+  const doc = await findBlogDocBySlug(event, slug, {
+    includeDrafts: blogShowDrafts === true || blogShowDrafts === 'true',
+  })
   if (!doc) {
     throw createError({ statusCode: 404, statusMessage: 'Article not found' })
+  }
+  if (doc.draft) {
+    setResponseHeader(event, 'Cache-Control', 'private, no-store')
+    return { ...(await toBlogPostDto(doc)), draft: true }
   }
   return await toBlogPostDto(doc)
 })

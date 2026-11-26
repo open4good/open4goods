@@ -14,6 +14,6 @@ describe('IMPACT_SCORE_VERSIONS', () => {
   })
 
   it('exposes the latest recorded date', () => {
-    expect(IMPACT_SCORE_VERSIONS_LAST_MODIFIED).toBe('2026-11-09')
+    expect(IMPACT_SCORE_VERSIONS_LAST_MODIFIED).toBe('2026-11-16')
   })
 })

@@ -1,131 +1,103 @@
 ---
-title: "Comment bien choisir sa machine à laver ?"
-description: "Nudger vous révèle dans ce nouvel comment bien choisir votre machine à laver en 2026. Vous saurez tout !"
+title: "Quelle capacité de machine à laver selon le foyer ? Tableau en kg"
+description: "6 à 7 kg pour 1 ou 2 personnes, 8 à 9 kg pour 3 ou 4, 10 kg et plus pour les grosses lessives : la capacité à viser, avec les modèles les mieux notés."
 author: Thomas
 language: fr
 tags:
   - "lave-linges"
+  - "washing-machine"
 date: 2026-05-07T07:31:44Z
-updatedAt: 2026-05-07T07:32:21Z
+updatedAt: 2026-11-20T09:00:00Z
 draft: false
 published: true
 image: /images/blog/comment-bien-choisir-sa-machine-a-laver/Articles-67-.png
 ---
 
-Choisir une machine à laver peut sembler simple, jusqu'au moment où l'on se retrouve face à des dizaines de modèles, de capacités, de programmes et de classes énergétiques différentes. Entre les promesses marketing et les options parfois inutiles, difficile de savoir ce qui compte vraiment. Pourtant, une machine à laver est un appareil que l'on garde facilement pendant **10 ans ou plus**. Son choix a donc un impact direct sur votre confort au quotidien, votre consommation d'eau et d'électricité et votre empreinte environnementale.
+Pour **1 ou 2 personnes, visez 6 à 7 kg ; pour 3 ou 4 personnes, 8 à 9 kg ; au-delà, ou pour des couettes et plaids réguliers, 10 kg et plus.** UFC-Que Choisir juge qu'un modèle de 8 à 9 kg suffit généralement à un foyer de 3 ou 4 personnes.
 
-Alors, **comment bien choisir sa machine à laver sans se tromper ?** Voici les critères essentiels à connaître avant d'acheter.
+| Foyer | Capacité à viser | Modèles avec offres suivis par Nudger |
+|---|---|---|
+| 1 ou 2 personnes | 5 à 7 kg | 390 (moins de 8 kg) |
+| 3 ou 4 personnes | 8 à 9 kg | 816 |
+| 5 personnes et plus, grosses lessives | 10 kg et plus | 448 |
 
+Ce sont des repères : une capacité s'entend en linge sec, pour le programme coton, et la même machine n'accueille que 3,5 kg de synthétiques ou 2 kg de laine. Pour chaque foyer, la suite vous montre les modèles les mieux notés à l'Impact Score, la note sur 20 de Nudger. Elle repose surtout sur la consommation d'énergie, puis sur la durabilité, le bruit et la qualité des données.
 
-## Cet article en bref
+## Quelle machine à laver pour 1 ou 2 personnes : moins de 8 kg
 
-Pour bien choisir une machine à laver, il faut surtout regarder la **capacité adaptée à votre foyer**, la **classe énergétique**, la **consommation d'eau**, le **niveau sonore** et la **durabilité de l'appareil**.
+Une capacité de 5 à 7 kg suffit à une personne seule ou à un couple. L'appareil est plus compact et son tambour reste bien rempli.
 
-Dans les faits, voici les formats qu'on vous recommande :
+::guide-product-grid{vertical="washing-machine" subcategory="washing_machine_under_8_kg" top="3"}
+::
 
-- 5 à 7 kg → 1 à 2 personnes
-- 7 à 9 kg → famille de 3 à 4 personnes
-- 9 kg et plus → usage intensif ou grande famille
+[Voir tous les lave-linges de moins de 8 kg](/lave-linges/lave-linge-moins-de-8-kg)
 
-Le meilleur choix n'est pas forcément le modèle le plus grand ou le plus connecté, mais celui qui correspond réellement à vos besoins.
+## Quelle machine à laver pour 3 ou 4 personnes : 8 à 9 kg
 
+C'est la tranche la plus fournie du catalogue (816 modèles avec offres au 20/11/2026) : la comparaison entre modèles y est la plus utile.
 
-## 📏 Choisir la bonne capacité
+::guide-product-grid{vertical="washing-machine" subcategory="washing_machine_8_9_kg" top="3"}
+::
 
-La capacité correspond au poids maximal de linge que la machine peut laver en un cycle. Elle s'exprime en kilogrammes. C'est le critère le plus important, car une machine mal dimensionnée entraîne soit des cycles trop fréquents, soit des lavages à moitié vides, donc du gaspillage.
+[Voir tous les lave-linges de 8 à 9 kg](/lave-linges/lave-linge-8-9-kg)
 
-### Pour 1 à 2 personnes
+## Quelle machine à laver pour 5 personnes et plus : 10 kg et plus
 
-Une capacité de **5 à 7 kg** est généralement suffisante. Avantage : appareil plus compact, consommation plus faible et taille idéale pour petits espaces.
+Au-delà de 10 kg, le tambour ne se justifie que si les lessives s'enchaînent ou si des textiles volumineux (plaids, couettes épaisses) reviennent régulièrement.
 
-### Pour 3 à 4 personnes
+::guide-product-grid{vertical="washing-machine" subcategory="washing_machine_10_kg_and_more" top="3"}
+::
 
-Un modèle de **7 à 9 kg** représente le meilleur équilibre. Il permet de laver les draps ou serviettes facilement et de limiter le nombre de cycles, sans surdimensionner la machine.
+[Voir tous les lave-linges de 10 kg et plus](/lave-linges/lave-linge-10-kg-et-plus)
 
-### Pour une grande famille
+Pour comparer sans tenir compte de la capacité, parcourez [tous les lave-linges](/lave-linges).
 
-À partir de **9 kg**, la machine devient intéressante pour les grandes quantités de linge, les familles nombreuses ou les usages intensifs. Attention cependant : une grande capacité n'est responsable que si elle est réellement utilisée.
+## Les critères qui changent le choix
 
+### 1. Ne pas surdimensionner
 
-## ⚡ La classe énergétique : un critère clé
+Une machine de 10 kg qui lave 3 kg de linge est moins efficace qu'un modèle au tambour plus petit (UFC-Que Choisir). La consommation d'eau annoncée le montre : parmi les modèles avec offres qui l'indiquent, elle est en moyenne de 43 litres par cycle sous 8 kg, 48 litres de 8 à 9 kg et 52 litres à partir de 10 kg. Un tambour trop grand pour votre foyer ajoute de l'eau sans ajouter de lessives.
 
-Une machine à laver fonctionne souvent plusieurs fois par semaine. Sa consommation d'électricité a donc un impact important sur votre facture et sur l'environnement. Depuis la nouvelle étiquette énergétique européenne, les classes vont de **A à G**.
+### 2. La classe énergétique
 
-Plus la machine est proche de A, moins elle consomme d'électricité, moins elle émet indirectement de CO₂, et plus elle est économique sur le long terme. Un modèle plus performant peut coûter un peu plus cher à l'achat, mais il permet d'économiser pendant toute sa durée de vie.
+Depuis la nouvelle étiquette européenne, les classes vont de A à G. Sur les 2 834 lave-linges avec offres suivis par Nudger au 20/11/2026, 1 018 sont en classe A et 107 portent encore l'ancienne mention A+++ ; comparez à capacité égale, sur la consommation annoncée.
 
+### 3. La consommation d'eau
 
-## 💧 Regarder aussi la consommation d'eau
+Elle est indiquée par cycle sur la plupart des fiches : vérifiez-la, ainsi que les programmes éco et la gestion automatique de charge.
 
-On parle beaucoup de l'électricité, mais l'eau est tout aussi importante. Certaines machines consomment presque deux fois plus d'eau que d'autres pour une capacité similaire. Dans cette optique, on vous conseille de vérifier la consommation d'eau par cycle, les programmes éco disponibles et la gestion automatique de charge.
+### 4. Le niveau sonore
 
-Les modèles récents adaptent bien souvent la quantité d'eau au poids réel du linge, ce qui limite le gaspillage.
+Moins de 72 dB en essorage reste confortable ; au-delà, le bruit devient nettement plus présent, surtout en appartement.
 
+### 5. Durabilité et réparabilité
 
-## Le niveau sonore : souvent sous-estimé
+La meilleure machine d'un point de vue écologique est celle qui dure longtemps et se répare. Regardez l'indice de réparabilité (voir [comment décrypter l'indice de réparabilité](/blog/comment-decrypter-l-indice-de-reparabilite)), la disponibilité des pièces détachées et la garantie. Pour l'impact d'un lave-linge sur toute sa vie, lisez [l'impact écologique d'une machine à laver](/blog/l-impact-ecologique-d-une-machine-a-laver-au-dela-de-l-eau).
 
-Une machine bruyante peut vite devenir pénible, surtout dans un appartement, une cuisine ouverte ou un logement sans buanderie. Le bruit est exprimé en décibels (dB).
+### 6. Les programmes : utiles ou gadget ?
 
-En général :
-
-- moins de 72 dB en essorage = confortable,
-- au-delà, le bruit devient nettement plus présent.
-
-
-
-## Penser durabilité et réparabilité
-
-Une machine à laver induit forcément une quantité importante de matériaux, d'énergie et de ressources à la fabrication. La meilleure machine d'un point de vue écologique est donc celle qui dure longtemps, qui se répare facilement et qui évite un remplacement prématuré.
-
-Avant d'acheter, regardez :
-
-- L'indice de réparabilité,
-- La disponibilité des pièces détachées,
-- La réputation de fiabilité de la marque.
-
-Une machine durable compense largement un prix d'achat un peu plus élevé.
-
-
-## Les programmes : utiles ou gadget ?
-
-De nombreux modèles proposent des dizaines de programmes : vapeur, anti-allergie, ultra-rapide...  Mais en réalité, la majorité des utilisateurs utilisent toujours les mêmes cycles, à savoir coton, synthétique, éco et rapide.
-
-Mieux vaut donc privilégier des programmes simples et efficaces, un bon mode éco et une machine intuitive.  Pourquoi ? Car les options complexes augmentent parfois le prix sans réel bénéfice au quotidien.
-
-
-## 🔎 Bien choisir, c'est aussi éviter la surconsommation
-
-Beaucoup d'appareils sont aujourd'hui surdimensionnés par rapport aux besoins réels. Une machine énorme pour un petit foyer consomme plus, prend plus de place et coûte plus cher. Comme souvent en consommation responsable : le meilleur choix est celui qui correspond exactement à votre usage.
-
-
-En résume, pour bien choisir sa machine à laver :
-
-- Adaptez la capacité à votre foyer,
-- Privilégiez une bonne classe énergétique,
-- Surveillez la consommation d'eau,
-- Pensez au bruit et à la réparabilité,
-- Évitez les options inutiles.
-
-Le meilleur modèle n'est pas forcément le plus technologique, mais celui qui sera efficace, durable et réellement adapté à votre quotidien.
-
+La majorité des utilisateurs reprennent toujours les mêmes cycles : coton, synthétique, éco et rapide. Un bon mode éco et une machine simple valent mieux que des dizaines de programmes.
 
 ## FAQ
 
 ### Quelle capacité de machine à laver pour 2 personnes ?
 
-Une capacité de 5 à 7 kg est généralement suffisante pour un couple.
+6 à 7 kg suffisent généralement à un couple ; les guides d'achat donnent 5 à 7 kg pour 1 ou 2 personnes.
 
-### Quelle est la meilleure classe énergétique ?
+### Quelle capacité pour 4 personnes ?
 
-La classe A est la plus performante sur la nouvelle échelle énergétique européenne.
+8 à 9 kg, selon UFC-Que Choisir. Passez à 10 kg et plus si les lessives s'enchaînent.
+
+### 8 kg ou 9 kg ?
+
+Les deux conviennent à un foyer de 3 ou 4 personnes. Comparez surtout la consommation et la garantie, pas le kilo supplémentaire.
 
 ### Une grande machine consomme-t-elle plus ?
 
-Oui, surtout si elle est utilisée à moitié vide. Il vaut mieux choisir une capacité adaptée.
+Oui, surtout utilisée à moitié vide : dans le catalogue Nudger, la consommation d'eau annoncée passe de 43 litres par cycle sous 8 kg à 52 litres à partir de 10 kg.
 
 ### Quelle durée de vie pour une machine à laver ?
 
 En moyenne entre 10 et 15 ans, selon l'entretien et la qualité de fabrication.
 
-### Faut-il privilégier les modèles connectés ?
-
-Pas forcément. Les fonctionnalités connectées sont souvent secondaires par rapport à la durabilité et à l'efficacité énergétique.
+Rédigé avec l'aide d'une IA à partir des données Nudger, relu par l'équipe.

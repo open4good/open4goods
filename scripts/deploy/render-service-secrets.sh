@@ -65,6 +65,7 @@
 # | api       | API_METRIKS_AWIN_PUBLISHER_ID   | digits  | METRIKS_AFFILIATION_AWIN_PUBLISHER_ID                                          | optional |
 # | api       | API_METRIKS_AWIN_API_TOKEN      | env     | METRIKS_AFFILIATION_AWIN_API_TOKEN                                             | optional |
 # | api       | API_METRIKS_EFFILIATION_API_KEY | env     | METRIKS_AFFILIATION_EFFILIATION_API_KEY                                        | optional |
+# | api       | API_METRIKS_PSI_API_KEY         | env     | METRIKS_PSI_API_KEY                                                            | optional |
 # | api       | API_EFFILIATION_API_KEY         | env     | AFFILIATIONCONFIG_EFFILIATIONAPIKEY (affiliation-config.effiliation-api-key)   | optional |
 # | api       | API_VERTEX_API_JSON             | tree-sa | gen-ai-config.google-api-json                                                  | optional |
 # | api       | API_VERTEX_BATCH_JSON           | tree-sa | vertex.batch.credentials-json                                                  | optional |
@@ -92,6 +93,7 @@
 # | ui        | O4G_CAPTCHA_SECRET              | tree    | captcha-secret                                                                 | optional |
 # | ui        | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | ui        | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
+# | ui        | OPEN_DATA_REDIRECT_BASE_URL     | tree    | open-data-config.redirect-base-url (GitHub variable, not a secret)             | optional |
 # | front-api | GOOGLE_SSO_CLIENT_ID            | env     | FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID (front.security.google-sso.client-id)      | required |
 # | front-api | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.client.password                                              | optional |
 # | front-api | O4G_SBA_PASSWORD                | tree    | o4g.actuator.monitor.password                                                  | optional |
@@ -104,6 +106,7 @@
 # | front-api | FRONT_API_GITHUB_TOKEN          | tree    | feedback.github.access-token                                                   | optional |
 # | front-api | O4G_ELASTICSEARCH_PASSWORD      | tree    | spring.elasticsearch.password                                                  | source   |
 # | front-api | IMPACTSCORE_METHODOLOGY_OVERRIDES | tree  | impactscore.methodology-version-overrides (GitHub variable, not a secret)      | optional |
+# | front-api | OPEN_DATA_PUBLIC_BASE_URL       | tree    | open-data-config.public-base-url (GitHub variable, not a secret)               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | spring.boot.admin.instance-auth.default-password                               | optional |
 # | admin     | O4G_SBA_PASSWORD                | tree    | o4g.sba.registration.password                                                  | optional |
 # | admin     | O4G_MAIL_PASSWORD               | tree    | spring.mail.password                                                           | optional |
@@ -166,6 +169,7 @@ api API_GOOGLE_API_JSON path-sa GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open
 api API_METRIKS_AWIN_PUBLISHER_ID digits METRIKS_AFFILIATION_AWIN_PUBLISHER_ID optional
 api API_METRIKS_AWIN_API_TOKEN env METRIKS_AFFILIATION_AWIN_API_TOKEN optional
 api API_METRIKS_EFFILIATION_API_KEY env METRIKS_AFFILIATION_EFFILIATION_API_KEY optional
+api API_METRIKS_PSI_API_KEY env METRIKS_PSI_API_KEY optional
 api API_EFFILIATION_API_KEY env AFFILIATIONCONFIG_EFFILIATIONAPIKEY optional
 api API_VERTEX_API_JSON tree-sa gen-ai-config.google-api-json optional
 api API_VERTEX_BATCH_JSON tree-sa vertex.batch.credentials-json optional
@@ -193,6 +197,7 @@ ui O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
 ui O4G_CAPTCHA_SECRET tree captcha-secret optional
 ui O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 ui IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
+ui OPEN_DATA_REDIRECT_BASE_URL tree open-data-config.redirect-base-url optional
 front-api GOOGLE_SSO_CLIENT_ID env FRONT_SECURITY_GOOGLE_SSO_CLIENT_ID required
 front-api O4G_SBA_PASSWORD tree spring.boot.admin.client.password optional
 front-api O4G_SBA_PASSWORD tree o4g.actuator.monitor.password optional
@@ -205,6 +210,7 @@ front-api O4G_CAPTCHA_SECRET tree captcha.secret-key optional
 front-api FRONT_API_GITHUB_TOKEN tree feedback.github.access-token optional
 front-api O4G_ELASTICSEARCH_PASSWORD tree spring.elasticsearch.password source
 front-api IMPACTSCORE_METHODOLOGY_OVERRIDES tree impactscore.methodology-version-overrides optional
+front-api OPEN_DATA_PUBLIC_BASE_URL tree open-data-config.public-base-url optional
 admin O4G_SBA_PASSWORD tree spring.boot.admin.instance-auth.default-password optional
 admin O4G_SBA_PASSWORD tree o4g.sba.registration.password optional
 admin O4G_MAIL_PASSWORD tree spring.mail.password optional

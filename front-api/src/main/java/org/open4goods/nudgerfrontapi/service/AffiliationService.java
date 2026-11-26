@@ -39,13 +39,16 @@ public class AffiliationService {
     private final SerialisationService serialisationService;
     private final ContributionVoteRepository contributionVoteRepository;
     private final AffiliationClickRepository affiliationClickRepository;
+    private final AffiliationClickRefService affiliationClickRefService;
 
     public AffiliationService(SerialisationService serialisationService,
             ContributionVoteRepository contributionVoteRepository,
-            AffiliationClickRepository affiliationClickRepository) {
+            AffiliationClickRepository affiliationClickRepository,
+            AffiliationClickRefService affiliationClickRefService) {
         this.serialisationService = serialisationService;
         this.contributionVoteRepository = contributionVoteRepository;
         this.affiliationClickRepository = affiliationClickRepository;
+        this.affiliationClickRefService = affiliationClickRefService;
     }
 
     /**
@@ -117,13 +120,16 @@ public class AffiliationService {
      * <li>the legacy {@link ContributionVote} ({@code contribution-votes} index), kept for compatibility, without IP
      * nor user agent.</li>
      * </ul>
+     * The returned URL carries the {@link AffiliationClick} id in the reference parameter of its network when that
+     * network is enabled ({@link AffiliationClickRefService}), even when the click could not be saved; the legacy
+     * vote keeps the URL of the token.
      *
      * @param token      the encrypted contribution vote token
      * @param originPath  raw value of the {@code X-Affiliation-Origin} header, validated by
      *                    {@link #sanitiseOriginPath(String)}; {@code null} when absent
      * @param contentPath raw value of the {@code X-Affiliation-Content} header, validated by
      *                    {@link #sanitiseContentPath(String)}; {@code null} when absent
-     * @return the destination URL extracted from the token
+     * @return the destination URL extracted from the token, with the click reference of its network when enabled
      */
     public String trackRedirect(String token, String originPath, String contentPath) {
         ContributionVote vote = decryptAffiliationLink(token);
@@ -155,7 +161,7 @@ public class AffiliationService {
             LOGGER.error("Failed to persist affiliation redirect vote for datasource '{}' towards host '{}'",
                     vote.getDatasourceName(), click.getTargetHost(), exception);
         }
-        return vote.getUrl();
+        return affiliationClickRefService.withClickRef(vote.getUrl(), click.getId());
     }
 
     /**

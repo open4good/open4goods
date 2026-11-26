@@ -417,6 +417,17 @@ mockNuxtImport('useI18n', () => () => ({
   availableLocales: ['fr-FR', 'en-US'],
 }))
 
+const smAndDownMock = ref(false)
+
+vi.mock('vuetify', async importOriginal => {
+  const actual = await importOriginal<typeof import('vuetify')>()
+
+  return {
+    ...actual,
+    useDisplay: () => ({ ...actual.useDisplay(), smAndDown: smAndDownMock }),
+  }
+})
+
 mockNuxtImport('useRouter', () => () => ({
   push: routerPush,
   replace: routerReplace,
@@ -663,6 +674,7 @@ const mountHomePage = async () => {
         NuxtLink: NuxtLinkStub,
         HomeBlogCarousel: HomeBlogCarouselStub,
         HomeHeroSection: HomeHeroSectionStub,
+        HomeCrawlLinksSection: true,
       },
     },
   })
@@ -677,6 +689,7 @@ describe('Home page', () => {
     fetchSpy.mockClear()
     fetchCategoriesMock.mockClear()
     fetchArticlesMock.mockClear()
+    smAndDownMock.value = false
   })
 
   afterAll(() => {
@@ -696,39 +709,53 @@ describe('Home page', () => {
     )
   })
 
-  it('registers FAQ structured data in head tags', async () => {
+  // GOU-2458: the layout must not depend on the User-Agent, or hydration
+  // swaps the structure when the viewport disagrees with it (CLS 1.77).
+  it('switches the mobile landing and the desktop hero by CSS only', async () => {
+    const wrapper = await mountHomePage()
+
+    const desktopHero = wrapper.find('.home-page__desktop-hero')
+    expect(desktopHero.exists()).toBe(true)
+    expect(desktopHero.classes()).toEqual(
+      expect.arrayContaining(['d-none', 'd-md-block'])
+    )
+    expect(desktopHero.find('.home-hero').exists()).toBe(true)
+    // Already `display: none` on desktop, dropped after hydration.
+    expect(wrapper.find('.pwa-landing').exists()).toBe(false)
+  })
+
+  it('renders the mobile landing, hidden from md up, on small screens', async () => {
+    smAndDownMock.value = true
+
+    const wrapper = await mountHomePage()
+
+    const landing = wrapper.find('.pwa-landing')
+    expect(landing.exists()).toBe(true)
+    expect(landing.classes()).toContain('d-md-none')
+    expect(wrapper.find('.home-page__desktop-hero').exists()).toBe(true)
+    expect(wrapper.find('.home-hero').exists()).toBe(false)
+  })
+
+  it('does not register FAQ, SearchAction or breadcrumb structured data', async () => {
     await mountHomePage()
 
-    const headEntries = headSpy.mock.calls.map(([value]) => value)
-    const scriptEntry = headEntries
+    const keys = headSpy.mock.calls
+      .map(([value]) => value)
       .flatMap(entry =>
         entry && typeof entry === 'object' && 'script' in entry
-          ? (entry.script as unknown[])
+          ? (entry.script as Array<{ key?: string; innerHTML?: string }>)
           : []
       )
-      .find(
-        entry =>
-          entry &&
-          typeof entry === 'object' &&
-          'key' in entry &&
-          (entry as { key: string }).key === 'home-faq-jsonld'
-      ) as { innerHTML?: string } | undefined
 
-    expect(scriptEntry).toBeTruthy()
+    const scriptKeys = keys.map(entry => entry.key)
+    expect(scriptKeys).not.toContain('home-faq-jsonld')
+    expect(scriptKeys).not.toContain('home-breadcrumb-jsonld')
+    expect(scriptKeys).toContain('home-organization-jsonld')
 
-    const json = scriptEntry?.innerHTML
-      ? JSON.parse(scriptEntry.innerHTML)
-      : null
-
-    expect(json).toBeTruthy()
-    expect(json).toMatchObject({
-      '@type': 'FAQPage',
-    })
-    expect(Array.isArray(json?.mainEntity)).toBe(true)
-    expect(json?.mainEntity).toHaveLength(4)
-    expect(json?.mainEntity[0]).toMatchObject({
-      '@type': 'Question',
-      acceptedAnswer: { '@type': 'Answer' },
-    })
+    const serialized = keys.map(entry => entry.innerHTML ?? '').join('')
+    expect(serialized).not.toContain('SearchAction')
+    expect(serialized).not.toContain('FAQPage')
+    expect(serialized).not.toContain('BreadcrumbList')
+    expect(serialized).toContain('/#organization')
   })
 })

@@ -3,12 +3,21 @@ package org.open4goods.commons.services;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +84,16 @@ public class IcecatIndexServiceTest {
     @Test
     public void testSyncFromLoadersDoesNotThrowWhenEmpty() {
         assertDoesNotThrow(() -> indexService.syncFromLoaders());
+    }
+
+    @Test
+    public void testSyncFromLoadersNotifiesTheReimportListeners() {
+        Runnable listener = Mockito.mock(Runnable.class);
+        indexService.addReimportListener(listener);
+
+        indexService.syncFromLoaders();
+
+        Mockito.verify(listener).run();
     }
 
     @Test
@@ -176,5 +195,55 @@ public class IcecatIndexServiceTest {
     @Test
     public void testFeatureCacheSizeStartsEmpty() {
         assertEquals(0, indexService.featureCacheSize());
+    }
+
+    @Test
+    public void testFindFeaturesByNormalizedNameCachesTheLookup() {
+        IcecatFeatureDocument doc = new IcecatFeatureDocument();
+        doc.setId(46);
+        when(featureRepository.findByNormalizedNames("COULEUR")).thenReturn(List.of(doc));
+
+        assertEquals(List.of(doc), indexService.findFeaturesByNormalizedName("COULEUR"));
+        assertEquals(List.of(doc), indexService.findFeaturesByNormalizedName("COULEUR"));
+
+        verify(featureRepository, times(1)).findByNormalizedNames("COULEUR");
+        assertEquals(1, indexService.featureCacheSize());
+    }
+
+    /**
+     * GOU-2280: the Elasticsearch query of a cache miss runs outside the cache lock, so a slow lookup does not
+     * hold back the completion threads that look up other names.
+     */
+    @Test
+    public void testSlowLookupDoesNotBlockTheLookupOfAnotherName() throws Exception {
+        IcecatFeatureDocument colour = new IcecatFeatureDocument();
+        colour.setId(46);
+        IcecatFeatureDocument weight = new IcecatFeatureDocument();
+        weight.setId(94);
+        CountDownLatch slowLookupStarted = new CountDownLatch(1);
+        CountDownLatch otherLookupDone = new CountDownLatch(1);
+        when(featureRepository.findByNormalizedNames("COULEUR")).thenAnswer(invocation -> {
+            slowLookupStarted.countDown();
+            otherLookupDone.await(10, TimeUnit.SECONDS);
+            return List.of(colour);
+        });
+        when(featureRepository.findByNormalizedNames("POIDS")).thenReturn(List.of(weight));
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            Future<List<IcecatFeatureDocument>> slow = executor
+                    .submit(() -> indexService.findFeaturesByNormalizedName("COULEUR"));
+            assertTrue(slowLookupStarted.await(5, TimeUnit.SECONDS));
+
+            Future<List<IcecatFeatureDocument>> other = executor
+                    .submit(() -> indexService.findFeaturesByNormalizedName("POIDS"));
+
+            assertEquals(List.of(weight), other.get(5, TimeUnit.SECONDS));
+            otherLookupDone.countDown();
+            assertEquals(List.of(colour), slow.get(5, TimeUnit.SECONDS));
+        } finally {
+            otherLookupDone.countDown();
+            executor.shutdownNow();
+        }
     }
 }

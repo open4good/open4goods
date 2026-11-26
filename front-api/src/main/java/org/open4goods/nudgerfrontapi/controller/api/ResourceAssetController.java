@@ -83,7 +83,7 @@ public class ResourceAssetController {
 
     private ResponseEntity<byte[]> fetchImage(String imageUrl) {
         try {
-            File file = remoteFileCachingService.getResource(imageUrl, 1);
+            File file = remoteFileCachingService.getOptionalResource(imageUrl, 1);
             byte[] content = Files.readAllBytes(file.toPath());
             MediaType mediaType = parseMediaType(Files.probeContentType(file.toPath()));
             return ResponseEntity.ok().contentType(mediaType).body(content);

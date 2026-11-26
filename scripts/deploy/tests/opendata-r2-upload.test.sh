@@ -21,11 +21,14 @@ case "${cmd}" in
   copyto)
     if [ -n "${FAKE_SLOW:-}" ]; then sleep "${FAKE_SLOW}"; fi
     mkdir -p "${b}/.staging"; cp "$1" "${b}/$(key "$2")"
-    for a in "$@"; do case "${a}" in X-Amz-Meta-Sha256*) printf '%s' "${a#*: }" > "${b}/$(key "$2").sha"; esac; done ;;
+    for a in "$@"; do case "${a}" in
+      X-Amz-Meta-Sha256*) printf '%s' "${a#*: }" > "${b}/$(key "$2").sha" ;;
+      Content-Type*) printf '%s' "${a#*: }" > "${b}/$(key "$2").type" ;;
+    esac; done ;;
   cat) cat "${b}/$(key "$1")"; if [ -n "${FAKE_CORRUPT:-}" ]; then printf 'x'; fi ;;
-  moveto) mv "${b}/$(key "$1")" "${b}/$(key "$2")"; mv "${b}/$(key "$1").sha" "${b}/$(key "$2").sha" ;;
+  moveto) mv "${b}/$(key "$1")" "${b}/$(key "$2")"; mv "${b}/$(key "$1").sha" "${b}/$(key "$2").sha"; mv "${b}/$(key "$1").type" "${b}/$(key "$2").type" ;;
   deletefile) rm -f "${b}/$(key "$1")" ;;
-  lsjson) k="$(key "${@: -1}")"; echo "[{\"MimeType\":\"application/zip\",\"Metadata\":{\"sha256\":\"$(cat "${b}/${k}.sha")\"}}]" ;;
+  lsjson) k="$(key "${@: -1}")"; echo "[{\"MimeType\":\"$(cat "${b}/${k}.type")\",\"Metadata\":{\"sha256\":\"$(cat "${b}/${k}.sha")\"}}]" ;;
   lsl) exit 3 ;;
 esac
 FAKE
@@ -61,4 +64,13 @@ run "timeout" nz FAKE_SLOW=20 TOTAL_TIMEOUT_S=2 && {
   check "timeout: no moveto" '! grep -q "^moveto" "${T}/log"'
 }
 run "test mode" 0 MODE=test && check "test mode: writes nothing" '! grep -qE "^(copyto|moveto|deletefile)" "${T}/log"'
+# Impact branch: a zip and a JSON manifest, both with the 300 s cache and the right content type.
+printf 'impactzip' > "${T}/src/impact-tv.zip"
+printf '{"rows":1}' > "${T}/src/impact-tv-manifest.json"
+run "impact" 0 DATASET=impact && {
+  check "impact: zip sent" '[ "$(cat "${T}/bucket/impact-tv.zip")" = impactzip ]'
+  check "impact: manifest sent" '[ "$(cat "${T}/bucket/impact-tv-manifest.json")" = "{\"rows\":1}" ]'
+  check "impact: manifest content type json" 'grep "^copyto.*impact-tv-manifest.json" "${T}/log" | grep -q "Content-Type: application/json"'
+  check "impact: every upload max-age=300" '[ "$(grep -c "^copyto.*Cache-Control: public, max-age=300" "${T}/log")" = 2 ] && ! grep -q "max-age=86400" "${T}/log"'
+}
 exit "${fails}"
