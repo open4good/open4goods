@@ -184,6 +184,30 @@ Props:
 
 - `sectionId`, `page`, `label`
 
+### `web-vitals` (GOU-2703)
+
+Real-user Core Web Vitals, sent by `app/plugins/web-vitals.client.ts` with the
+`web-vitals` library (loaded after mount). One event per metric (LCP, INP, CLS,
+TTFB), reported once per page load by about 10 % of the loads: the decision is
+taken once per load with `runtimeConfig.public.webVitalsSampleRate`
+(`WEB_VITALS_SAMPLE_RATE`, 0 to 1, default 0.1; invalid values fall back to
+0.1). The events go through `trackEvent`, so the Plausible guard applies
+unchanged (Do Not Track, `/contrib/`, local referrer, automated browsers,
+`enabled`). Hard navigations only: the template is the landing page's.
+
+Props:
+
+- `metric`: `LCP`, `INP`, `CLS` or `TTFB`
+- `template`: `fiche`, `categorie`, `sous-categorie`, `blog`, `guide`,
+  `opendata` or `autre` (same rules as the Metriks Search Console templates,
+  `resolvePageTemplate` in `app/utils/web-vitals.ts`)
+- `rating`: `good`, `needs-improvement` or `poor` (web-vitals thresholds)
+- `value`: integer, milliseconds, or CLS x 1000
+
+Plausible setup: add the goal `web-vitals` and the custom properties `metric`,
+`template`, `rating`, `value`. Read the share of `poor` per `metric` and
+`template`; the median needs the `value` breakdown.
+
 ### `share-resolution-*`
 
 Tracks the web-share product resolution flow.
@@ -234,6 +258,7 @@ goal useful in the self-hosted UI:
 - `currency`
 - `condition`
 - `destinationHost`
+- `metric`, `template`, `rating`, `value` (`web-vitals` goal)
 
 Use `affiliate-click` as the canonical affiliation conversion goal. Keep
 `product-redirect` only for historical comparisons while dashboards migrate.

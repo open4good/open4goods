@@ -65,6 +65,7 @@
 # | api       | API_METRIKS_AWIN_PUBLISHER_ID   | digits  | METRIKS_AFFILIATION_AWIN_PUBLISHER_ID                                          | optional |
 # | api       | API_METRIKS_AWIN_API_TOKEN      | env     | METRIKS_AFFILIATION_AWIN_API_TOKEN                                             | optional |
 # | api       | API_METRIKS_EFFILIATION_API_KEY | env     | METRIKS_AFFILIATION_EFFILIATION_API_KEY                                        | optional |
+# | api       | API_METRIKS_PSI_API_KEY         | env     | METRIKS_PSI_API_KEY                                                            | optional |
 # | api       | API_EFFILIATION_API_KEY         | env     | AFFILIATIONCONFIG_EFFILIATIONAPIKEY (affiliation-config.effiliation-api-key)   | optional |
 # | api       | API_VERTEX_API_JSON             | tree-sa | gen-ai-config.google-api-json                                                  | optional |
 # | api       | API_VERTEX_BATCH_JSON           | tree-sa | vertex.batch.credentials-json                                                  | optional |
@@ -168,6 +169,7 @@ api API_GOOGLE_API_JSON path-sa GOOGLE_INDEXATION_SERVICE_ACCOUNT_PATH=/etc/open
 api API_METRIKS_AWIN_PUBLISHER_ID digits METRIKS_AFFILIATION_AWIN_PUBLISHER_ID optional
 api API_METRIKS_AWIN_API_TOKEN env METRIKS_AFFILIATION_AWIN_API_TOKEN optional
 api API_METRIKS_EFFILIATION_API_KEY env METRIKS_AFFILIATION_EFFILIATION_API_KEY optional
+api API_METRIKS_PSI_API_KEY env METRIKS_PSI_API_KEY optional
 api API_EFFILIATION_API_KEY env AFFILIATIONCONFIG_EFFILIATIONAPIKEY optional
 api API_VERTEX_API_JSON tree-sa gen-ai-config.google-api-json optional
 api API_VERTEX_BATCH_JSON tree-sa vertex.batch.credentials-json optional

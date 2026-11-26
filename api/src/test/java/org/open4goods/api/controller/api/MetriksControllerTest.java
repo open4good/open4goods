@@ -51,6 +51,44 @@ public class MetriksControllerTest {
     @MockitoBean
     private AffiliationMetriksService affiliationMetriksService;
 
+    @MockitoBean
+    private org.open4goods.api.services.metriks.PageSpeedInsightsService pageSpeedInsightsService;
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoTemplateMetricsRaisesTheAlert() throws Exception {
+        java.time.LocalDate end = java.time.LocalDate.of(2026, 9, 24);
+        java.util.List<org.open4goods.api.services.metriks.SeoTemplateAnalyzer.DatedPageRow> rows =
+                new java.util.ArrayList<>();
+        for (java.time.LocalDate day = end.minusDays(34); !day.isAfter(end); day = day.plusDays(1)) {
+            rows.add(new org.open4goods.api.services.metriks.SeoTemplateAnalyzer.DatedPageRow(day,
+                    "https://nudger.fr/blog/un-article", 1, day.isAfter(end.minusDays(7)) ? 0 : 100));
+        }
+        when(searchConsoleService.fetchTemplateReport()).thenReturn(
+                GoogleSearchConsoleService.Outcome.success(new GoogleSearchConsoleService.TemplateReport(
+                        org.open4goods.api.services.metriks.SeoTemplateAnalyzer.analyse(rows, end, java.util.List.of()),
+                        false)));
+
+        mockMvc.perform(get("/api/metriks/seo-templates"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events[?(@.id=='seo.gsc.template.alerts')].value").value(1))
+                .andExpect(jsonPath("$.events[?(@.id=='seo.gsc.template.alerts')].params.rows[0].template")
+                        .value("blog"))
+                .andExpect(jsonPath("$.events[?(@.id=='seo.gsc.templates.daily')].value").value(8 * 35));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void testGetSeoTemplateMetricsFailureIsReportedAsErrorEvents() throws Exception {
+        when(searchConsoleService.fetchTemplateReport())
+                .thenReturn(GoogleSearchConsoleService.Outcome.failure("boom"));
+
+        mockMvc.perform(get("/api/metriks/seo-templates"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.events[0].status").value("error"))
+                .andExpect(jsonPath("$.events[0].errorMessage").value("boom"));
+    }
+
     @Test
     @WithMockUser(roles = "ADMIN")
     public void testGetSystemMetrics() throws Exception {

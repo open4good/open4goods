@@ -635,6 +635,8 @@ export default defineNuxtConfig({
     // Public keys (exposed to the client side)
     public: {
       apiBase: process.env.PUBLIC_API_URL || 'http://localhost:8082',
+      // Share (0..1) of page loads reporting Core Web Vitals to Plausible (GOU-2703)
+      webVitalsSampleRate: process.env.WEB_VITALS_SAMPLE_RATE || '0.1',
       // Name of the cookie storing the JWT
       tokenCookieName: process.env.TOKEN_COOKIE_NAME || 'access_token',
       // Name of the cookie storing the refresh token

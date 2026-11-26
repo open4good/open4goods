@@ -17,7 +17,10 @@ import org.open4goods.api.services.metriks.GoogleSearchConsoleService;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Outcome;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Row;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.TopRows;
+import org.open4goods.api.services.metriks.GoogleSearchConsoleService.TemplateReport;
 import org.open4goods.api.services.metriks.GoogleSearchConsoleService.Totals;
+import org.open4goods.api.services.metriks.PageSpeedInsightsService;
+import org.open4goods.api.services.metriks.SeoTemplateAnalyzer;
 import org.open4goods.api.services.metriks.affiliation.AffiliationMetriksService;
 import org.open4goods.model.RolesConstants;
 import org.open4goods.services.feedservice.service.FeedService;
@@ -28,6 +31,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -62,17 +66,20 @@ public class MetriksController {
     private final ProductRepository productRepository;
     private final GoogleSearchConsoleService searchConsoleService;
     private final AffiliationMetriksService affiliationMetriksService;
+    private final PageSpeedInsightsService pageSpeedInsightsService;
 
     public MetriksController(FeedService feedService,
                              ElasticsearchOperations elasticsearchOperations,
                              ProductRepository productRepository,
                              GoogleSearchConsoleService searchConsoleService,
-                             AffiliationMetriksService affiliationMetriksService) {
+                             AffiliationMetriksService affiliationMetriksService,
+                             PageSpeedInsightsService pageSpeedInsightsService) {
         this.feedService = feedService;
         this.elasticsearchOperations = elasticsearchOperations;
         this.productRepository = productRepository;
         this.searchConsoleService = searchConsoleService;
         this.affiliationMetriksService = affiliationMetriksService;
+        this.pageSpeedInsightsService = pageSpeedInsightsService;
     }
 
     @GetMapping("/system")
@@ -159,6 +166,53 @@ public class MetriksController {
         events.addAll(measureSearchAnalytics());
 
         response.setEvents(events);
+        return response;
+    }
+
+    @GetMapping("/seo-templates")
+    @Operation(
+            summary = "Get Search Console impressions and clicks per page template, with a loss alert",
+            description = "Classifies the Search Console pages by URL pattern into templates (fiche, categorie, "
+                    + "sous-categorie, blog, guide, opendata, pdf, autre) over the last 35 days ending "
+                    + "'metriks.gsc.lag-days' days ago. Returns the daily series per template "
+                    + "(seo.gsc.templates.daily, 'params.rows' with date, template, clicks, impressions), for each "
+                    + "template its impressions and clicks over the last 7 days with the baseline (average of the 28 "
+                    + "days before, scaled to 7 days) as 'previousValue' (seo.gsc.template.<id>.impressions_7d and "
+                    + "clicks_7d), the site KPI over 28 days without the 'quelle taille de TV' blog post "
+                    + "(seo.gsc.site.clicks_excl_tv_post, seo.gsc.site.impressions_excl_tv_post) and the alert event "
+                    + "seo.gsc.template.alerts: value = number of templates that lost more than 50 % of their "
+                    + "impressions (0 = no alert), 'params.rows' = those templates. A failure is reported as an event "
+                    + "with status 'error'; the endpoint still answers 200.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing per-template SEO events")
+    public MetriksResponse getSeoTemplateMetrics() {
+        MetriksResponse response = newResponse();
+        response.setEvents(templateEvents(searchConsoleService.fetchTemplateReport()));
+        return response;
+    }
+
+    @GetMapping("/psi")
+    @Operation(
+            summary = "Get the latest weekly PageSpeed Insights snapshot",
+            description = "Returns the last PageSpeed Insights (mobile) snapshot of the representative URLs "
+                    + "(psi.<url-id>.performance, lcp, cls, tbt, one event per metric and URL; field data of the URL "
+                    + "when CrUX has some). One event with status 'error' when no snapshot exists yet or the API key "
+                    + "is missing. The snapshot is refreshed weekly by a schedule; it is not computed on this call.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing PSI events")
+    public MetriksResponse getPsiMetrics() {
+        MetriksResponse response = newResponse();
+        response.setEvents(pageSpeedInsightsService.latestEvents());
+        return response;
+    }
+
+    @PostMapping("/psi/refresh")
+    @Operation(
+            summary = "Run a PageSpeed Insights snapshot now",
+            description = "Runs the PSI measure of the representative URLs synchronously (about 20 s per URL) and "
+                    + "stores it as the latest snapshot. Used for the first snapshot and to replay a failed week.")
+    @ApiResponse(responseCode = "200", description = "MetriksResponse containing the new PSI events")
+    public MetriksResponse refreshPsiMetrics() {
+        MetriksResponse response = newResponse();
+        response.setEvents(pageSpeedInsightsService.refresh());
         return response;
     }
 
@@ -365,6 +419,112 @@ public class MetriksController {
         }
         event.setParams(params);
         return event;
+    }
+
+    private List<MetriksEvent> templateEvents(Outcome<TemplateReport> outcome) {
+        List<String> groups = List.of("seo");
+        List<String> tags = List.of("gsc", "google", "search-analytics", "template");
+        if (outcome.isFailure()) {
+            return List.of(
+                    templateError("seo.gsc.templates.daily", "Impressions et clics par gabarit (Search Console)",
+                            "count", outcome.error()),
+                    templateError("seo.gsc.template.alerts", "Gabarits en perte d'impressions (Search Console)",
+                            "count", outcome.error()),
+                    templateError("seo.gsc.site.impressions_excl_tv_post",
+                            "Impressions du site hors billet taille de TV (Search Console, 28 j)", "count",
+                            outcome.error()),
+                    templateError("seo.gsc.site.clicks_excl_tv_post",
+                            "Clics du site hors billet taille de TV (Search Console, 28 j)", "count",
+                            outcome.error()));
+        }
+        SeoTemplateAnalyzer.Report report = outcome.value().report();
+        boolean truncated = outcome.value().truncated();
+        List<MetriksEvent> events = new ArrayList<>();
+
+        List<Map<String, Object>> dailyRows = new ArrayList<>();
+        for (SeoTemplateAnalyzer.TemplateStat stat : report.templates()) {
+            for (SeoTemplateAnalyzer.DayStat day : stat.daily()) {
+                Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("date", day.date().toString());
+                entry.put("template", stat.template().id());
+                entry.put("clicks", day.clicks());
+                entry.put("impressions", day.impressions());
+                dailyRows.add(entry);
+            }
+        }
+        MetriksEvent daily = event("seo.gsc.templates.daily", "Impressions et clics par gabarit (Search Console, 35 j)",
+                dailyRows.size(), "count", groups, tags);
+        daily.setParams(templateParams(daily, report, truncated, Map.of("rows", dailyRows)));
+        events.add(daily);
+
+        List<Map<String, Object>> alertRows = new ArrayList<>();
+        for (SeoTemplateAnalyzer.TemplateStat stat : report.templates()) {
+            String id = stat.template().id();
+            Map<String, Object> extra = new LinkedHashMap<>();
+            extra.put("template", id);
+            extra.put("alert", stat.alert());
+            extra.put("lossRatio", stat.lossRatio() == null ? null : round2(stat.lossRatio()));
+            MetriksEvent impressions = event("seo.gsc.template." + id + ".impressions_7d",
+                    "Impressions " + id + " (Search Console, 7 j)", stat.recentImpressions(), "count", groups, tags);
+            Map<String, Object> impressionParams = templateParams(impressions, report, truncated, extra);
+            impressionParams.put("previousValue", round2(stat.baselineImpressions()));
+            impressions.setParams(impressionParams);
+            events.add(impressions);
+
+            MetriksEvent clicks = event("seo.gsc.template." + id + ".clicks_7d",
+                    "Clics " + id + " (Search Console, 7 j)", stat.recentClicks(), "count", groups, tags);
+            Map<String, Object> clickParams = templateParams(clicks, report, truncated, Map.of("template", id));
+            clickParams.put("previousValue", round2(stat.baselineClicks()));
+            clicks.setParams(clickParams);
+            events.add(clicks);
+
+            if (stat.alert()) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("template", id);
+                row.put("recentImpressions", stat.recentImpressions());
+                row.put("baselineImpressions", round2(stat.baselineImpressions()));
+                row.put("lossRatio", round2(stat.lossRatio()));
+                alertRows.add(row);
+            }
+        }
+
+        MetriksEvent siteImpressions = event("seo.gsc.site.impressions_excl_tv_post",
+                "Impressions du site hors billet taille de TV (Search Console, 28 j)", report.siteImpressions28d(),
+                "count", groups, tags);
+        siteImpressions.setParams(templateParams(siteImpressions, report, truncated,
+                Map.of("excludedImpressions", report.excludedImpressions28d())));
+        events.add(siteImpressions);
+        MetriksEvent siteClicks = event("seo.gsc.site.clicks_excl_tv_post",
+                "Clics du site hors billet taille de TV (Search Console, 28 j)", report.siteClicks28d(), "count",
+                groups, tags);
+        siteClicks.setParams(templateParams(siteClicks, report, truncated, Map.of()));
+        events.add(siteClicks);
+
+        MetriksEvent alerts = event("seo.gsc.template.alerts",
+                "Gabarits en perte de plus de 50 % d'impressions (7 j vs moyenne 28 j)", alertRows.size(), "count",
+                groups, List.of("gsc", "alert", "template"));
+        alerts.setParams(templateParams(alerts, report, truncated, Map.of("rows", alertRows)));
+        events.add(alerts);
+        return events;
+    }
+
+    private Map<String, Object> templateParams(MetriksEvent base, SeoTemplateAnalyzer.Report report,
+                                               boolean truncated, Map<String, Object> extra) {
+        Map<String, Object> params = new HashMap<>(base.getParams());
+        params.put("windowStartDate", report.start().toString());
+        params.put("windowEndDate", report.end().toString());
+        if (truncated) {
+            params.put("truncated", "true");
+        }
+        params.putAll(extra);
+        return params;
+    }
+
+    private MetriksEvent templateError(String id, String name, String unit, String message) {
+        MetriksEvent error = event(id, name, null, unit, List.of("seo"), List.of("gsc", "template"));
+        error.setStatus("error");
+        error.setErrorMessage(message);
+        return error;
     }
 
     private Map<String, Object> windowParams(Map<String, Object> base, GoogleSearchConsoleService.SeoMetrics metrics) {
