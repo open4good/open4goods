@@ -850,6 +850,14 @@
       "itemSubtitle": "Explorer cette sous-catégorie",
       "fallbackTitle": "Sélection associée"
     },
+    "hub": {
+      "defaultTitle": "{category} : l'essentiel pour bien choisir",
+      "previewNotice": "Aperçu : ce bloc n'est pas publié. Il n'est visible qu'en bêta ou en développement.",
+      "topTitle": "Top {count} Impact Score",
+      "rankingDate": "Classement calculé le {date}",
+      "faqTitle": "Questions fréquentes",
+      "linksTitle": "Pour aller plus loin"
+    },
     "readMore": {
       "showMore": "Lire plus",
       "showLess": "Réduire"

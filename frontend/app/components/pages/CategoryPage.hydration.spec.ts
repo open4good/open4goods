@@ -26,8 +26,14 @@ vi.mock('~/composables/categories/useCategories', () => ({
     selectCategoryBySlug: vi.fn(),
   }),
 }))
+// A hub without editorial file (GOU-2716) renders no block.
+const asyncData = (key: string) => {
+  if (key.startsWith('category-products')) return ssrProducts
+  if (key.startsWith('category-hub')) return null
+  return category
+}
 mockNuxtImport('useAsyncData', () => async (key: string) => ({
-  data: ref(key.startsWith('category-products') ? ssrProducts : category),
+  data: ref(asyncData(key)),
   error: ref(null),
 }))
 mockNuxtImport('useLazyAsyncData', () => (key: string) => ({
