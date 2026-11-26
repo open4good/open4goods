@@ -24,6 +24,7 @@ import {
 } from './shared/utils/localized-routes'
 import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
+import { stripHeavyChunkPreloads } from './config/manifest-preload'
 
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
@@ -276,6 +277,10 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: false,
     inlineRouteRules: true,
+    defaults: {
+      // Prefetch on interaction only: 24 product cards must not prefetch on visibility.
+      nuxtLink: { prefetchOn: { visibility: false, interaction: true } },
+    },
   },
 
   typescript: {
@@ -680,6 +685,8 @@ export default defineNuxtConfig({
     },
   },
   hooks: {
+    // ECharts and the PDF reader are loaded on demand: never preload them in the SSR head (GOU-2711).
+    'build:manifest': stripHeavyChunkPreloads,
     'pages:extend'(pages) {
       const normalizePath = (file?: string) => file?.split('\\').join('/')
 
