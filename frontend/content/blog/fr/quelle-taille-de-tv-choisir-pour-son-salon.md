@@ -69,6 +69,9 @@ La **distance de recul** est en fait l'espace entre votre canapé et votre tél�
 
 👉 Si votre canapé est à **2 mètres** du mur, une télé entre **50 et 65 pouces** est idéale. Vous cherchez un modèle ? Parcourez toutes les [télévisions comparées par Nudger](/televiseurs) et leur Impact Score.
 
+::tv-size-calculator{default-distance="3" default-resolution="4k"}
+::
+
 Pour un recul court (1,30 m à 1,60 m), les téléviseurs 43 pouces les mieux notés :
 
 ::guide-product-grid{vertical="tv" subcategory="tv_43_inches" top="3"}

@@ -14,6 +14,7 @@ import { buildBlogArticleJsonLd } from '~/utils/blog-jsonld'
 import { buildCanonicalUrl } from '~/utils/seo/canonical'
 
 import GuideProductGrid from '~/components/product/GuideProductGrid.vue'
+import TvSizeCalculator from '~/components/content/TvSizeCalculator.vue'
 import NudgeToolAssistantWizard from '~/components/nudge-tool/NudgeToolAssistantWizard.vue'
 
 interface BlogArticle extends BlogPostDto {
@@ -456,6 +457,11 @@ useHead(() => ({
             compact
           />
         </div>
+        <TvSizeCalculator
+          v-else-if="part.type === 'tv-size-calculator'"
+          :default-distance="part.calculator.distance"
+          :default-resolution="part.calculator.resolution"
+        />
         <GuideProductGrid
           v-else-if="part.type === 'product-widget'"
           :vertical="part.widget.vertical"

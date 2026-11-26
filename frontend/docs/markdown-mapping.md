@@ -188,6 +188,15 @@ be declared in the Plausible site settings.
 <GuideProductGrid top="3" sort="ecoscore" />
 ```
 
+### TV size calculator (blog)
+
+`::tv-size-calculator{default-distance="3" default-resolution="4k"}` (followed by `::`) in a
+blog article renders `TvSizeCalculator.vue` (SSR, same marker mechanism as `guide-product-grid`,
+see `shared/utils/blog-product-widget.ts`). Both attributes are optional: distance 1 to 6 m
+(default 3), resolution `4k` (default) or `full-hd`; an invalid value falls back to the default.
+The size → sub-category link table is `TV_SIZE_SUBCATEGORY` in `app/utils/tv-size.ts`.
+Plausible event: `calculateur_tv` (see `docs/analytics-events.md`).
+
 In a guide Markdown file:
 
 ```md

@@ -80,6 +80,24 @@
       "pageTitle": "{title} - Page {page}",
       "tagDescription": "Browse {tag} articles on Nudger's blog for sustainable, energy-efficient advice.",
       "tagTitle": "{tag} articles - Nudger Blog"
+    },
+    "tvSizeCalculator": {
+      "title": "Calculator: which TV size for your viewing distance?",
+      "distanceLabel": "Viewing distance (in meters)",
+      "distanceHint": "Between {min} and {max} m",
+      "resolutionLabel": "TV resolution",
+      "resolution": {
+        "4k": "4K (Ultra HD)",
+        "full-hd": "Full HD"
+      },
+      "range": "Recommended diagonal: {minInches} to {maxInches} inches ({minCm} to {maxCm} cm)",
+      "recommended": "Recommended size: {inches} inches",
+      "beyond": {
+        "above": "(your distance allows a screen larger than the usual sizes)",
+        "below": "(your distance is short for the usual sizes: pick the smallest one)"
+      },
+      "dimensions": "Width x height: {width} x {height} cm (16:9 screen)",
+      "link": "See TVs of this size"
     }
   },
   "home": {
@@ -171,7 +189,9 @@
         ],
         "partnerLinkLabel": "{formattedCount} partner | {formattedCount} partners",
         "partnerLinkFallback": "our partners",
-        "placeholders": ["Search a product (e.g. television, smartphone...)"]
+        "placeholders": [
+          "Search a product (e.g. television, smartphone...)"
+        ]
       },
       "highlights": [
         {

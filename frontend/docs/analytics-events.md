@@ -130,6 +130,18 @@ Props:
 - `selectedField`, `selectedGroup`, `sortOrder`
 - `defaultField`, `primaryOptions`, `advancedOptions`, `totalOptions`
 
+### `calculateur_tv`
+
+Tracks the viewing distance → TV size calculator of the blog article
+(`TvSizeCalculator.vue`, GOU-2713). Not sent at render: `calcul` is sent 800 ms
+after the user changes the distance or the resolution.
+
+Props:
+
+- `action` (`calcul`, `clic_sous_categorie`)
+- `taille` (recommended size, in inches)
+- `resolution` (`4k`, `full-hd`)
+
 ### `search`
 
 Tracks search submissions.
