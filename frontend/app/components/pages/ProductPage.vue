@@ -140,6 +140,13 @@
             <ProductLifeTimeline :timeline="product.timeline" />
           </section>
 
+          <ProductSizeGuide
+            v-if="categoryDetail"
+            class="product-page__section"
+            :vertical-id="categoryDetail.id"
+            :indexed-attributes="product.attributes?.indexedAttributes"
+          />
+
           <section
             v-if="showAlternativesSection"
             :id="sectionIds.alternatives"
@@ -272,6 +279,7 @@ import { buildProductMeta } from '~/utils/seo/product-meta'
 
 import ProductSummaryNavigation from '~/components/product/ProductSummaryNavigation.vue'
 import ProductHero from '~/components/product/ProductHero.vue'
+import ProductSizeGuide from '~/components/product/ProductSizeGuide.vue'
 import ProductVigilanceTeaser from '~/components/product/ProductVigilanceTeaser.vue'
 import ProductPriceSection from '~/components/product/ProductPriceSection.vue'
 import type { ProductHeroBreadcrumb } from '~/components/product/ProductHero.vue'

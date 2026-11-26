@@ -3981,5 +3981,14 @@
       "text": "A question about these rules?",
       "link": "Contact us"
     }
+  },
+  "verticalSizeGuide": {
+    "tv": {
+      "categoryLink": "Which TV size to choose for your living room?",
+      "productTitle": "Which size to choose?",
+      "productText": "The right screen size depends on your viewing distance and the room.",
+      "productTextWithDiagonal": "This TV has a {cm} cm diagonal: the right size depends on your viewing distance and the room.",
+      "productLink": "Which TV size to choose for your living room?"
+    }
   }
 }
