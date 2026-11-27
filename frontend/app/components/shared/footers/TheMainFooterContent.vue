@@ -21,6 +21,7 @@ import { useI18n } from 'vue-i18n'
 import { useCookie } from '#app'
 
 import { useFooterLogoAsset } from '~~/app/composables/useThemedAsset'
+import { useVerticalsLinks } from '~/composables/categories/useVerticalsLinks'
 import LatestReleaseBadge from '~/components/domains/releases/LatestReleaseBadge.vue'
 import { useVerticalsLinks } from '~/composables/categories/useVerticalsLinks'
 
