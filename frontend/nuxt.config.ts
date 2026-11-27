@@ -26,6 +26,18 @@ import { collectStaticPageRouteNames } from './scripts/static-main-page-routes'
 import { vuetifyPalettes } from './config/theme/palettes'
 import { stripHeavyChunkPreloads } from './config/manifest-preload'
 
+/** Hostname of the resource root, or none when the variable is unset or not a valid URL. */
+const resourceHostnames = (value?: string): string[] => {
+  if (!value) {
+    return []
+  }
+  try {
+    return [new URL(value).hostname]
+  } catch {
+    return []
+  }
+}
+
 const APP_PAGES_DIR = fileURLToPath(new URL('./app/pages', import.meta.url))
 const manifestFile = new URL('./app/public/site.webmanifest', import.meta.url)
 const nudgerManifest = JSON.parse(
@@ -558,6 +570,12 @@ export default defineNuxtConfig({
   },
   image: {
     dir: fileURLToPath(new URL('./app/public', import.meta.url)),
+    // Product images live on the static host (api.resource-root-path of front-api):
+    // IPX only resizes remote images from allowed hosts.
+    domains: [
+      'static.nudger.fr',
+      ...resourceHostnames(process.env.FRONT_RESOURCE_ROOT_PATH),
+    ],
     // The screen sizes predefined by `@nuxt/image`:
     screens: {
       xs: 320,

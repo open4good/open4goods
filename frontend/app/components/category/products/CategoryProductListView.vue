@@ -10,18 +10,20 @@
     >
       <template #prepend>
         <v-avatar size="88" rounded="lg">
-          <v-img
-            :src="resolveImage(product)"
+          <ProductImage
+            v-if="resolveImage(product)"
+            :src="resolveImage(product)!"
             :alt="
-              resolveListProductName(product) ||
-              $t('category.products.untitledProduct')
+              buildProductImageAlt(product, {
+                fallback: resolveListProductName(product),
+              }) || $t('category.products.untitledProduct')
             "
-            cover
-          >
-            <template #placeholder>
-              <v-skeleton-loader type="image" class="h-100" />
-            </template>
-          </v-img>
+            :width="88"
+            :height="88"
+            sizes="88px"
+            class="category-product-list__image"
+          />
+          <v-icon v-else :icon="mdiImageOffOutline" aria-hidden="true" />
         </v-avatar>
       </template>
 
@@ -136,6 +138,9 @@ import type {
   FieldMetadataDto,
   ProductDto,
 } from '~~/shared/api-client'
+import ProductImage from '~/components/product/ProductImage.vue'
+import { buildProductImageAlt } from '~/utils/images/product-image-alt'
+import { mdiImageOffOutline } from '@mdi/js'
 import ImpactScore from '~/components/shared/ui/ImpactScore.vue'
 import ProductPriceRows from '~/components/product/ProductPriceRows.vue'
 import CompareToggleButton from '~/components/shared/ui/CompareToggleButton.vue'

@@ -20,6 +20,7 @@
             v-if="heroMedia.type === 'image'"
             :src="heroMedia.previewUrl"
             :alt="heroMedia.alt"
+            sizes="(max-width: 960px) 100vw, 560px"
             format="webp"
             :width="heroMedia.width"
             :height="heroMedia.height"
@@ -149,6 +150,8 @@
                 <NuxtImg
                   :src="item.thumbnailUrl"
                   :alt="item.alt"
+                  sizes="96px"
+                  loading="lazy"
                   format="webp"
                   :width="item.thumbnailWidth"
                   :height="item.thumbnailHeight"
@@ -183,6 +186,7 @@
       <NuxtImg
         :src="heroFallbackImage"
         :alt="title"
+        sizes="(max-width: 960px) 100vw, 560px"
         format="webp"
         :width="960"
         :height="720"

@@ -84,6 +84,8 @@
             <NuxtImg
               :src="currentMedia.originalUrl"
               :alt="currentMedia.alt"
+              sizes="(max-width: 960px) 100vw, 900px"
+              format="webp"
               class="product-inline-gallery__media"
               @dragstart.prevent
             />
