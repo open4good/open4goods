@@ -9,6 +9,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -59,15 +60,15 @@ public class WebSecurityConfig {
 
 		if (config.getWebConfig().getWebAuthentication()) {
 			http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-				.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator", "/actuator/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers(HttpMethod.DELETE, "/favicon/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
 				.requestMatchers("/login/**", "/oauth2/**").permitAll()
 				.requestMatchers("/").denyAll()
 				.anyRequest().authenticated());
 		} else {
 			http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/actuator").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
-				.requestMatchers("/actuator/*").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers("/actuator", "/actuator/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
+				.requestMatchers(HttpMethod.DELETE, "/favicon/**").hasRole(RolesConstants.ACTUATOR_ADMIN_ROLE)
 				.requestMatchers("/").denyAll()
 				.anyRequest().permitAll());
 		}
